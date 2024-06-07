@@ -21,14 +21,14 @@ import { useTheme } from "next-themes";
 function Navbar() {
   const location = usePathname();
   const { setTheme } = useTheme();
+  const hideNav = ["/sign-in", "/sign-up", "/forgot-password", "/verify-code"];
 
   return (
     <div
       className={`md:px-4 md:py-6 p-3 sm:sticky fixed sm:top-0 left-0 sm:h-screen h-fit bottom-0 xl:col-span-2 md:col-span-3 sm:col-span-2 col-span-10 sm:min-h-[35rem] z-10 w-full min-w-max 
-      ${location === "/sign-up" ? "hidden" : ""} 
-      ${location === "/sign-in" ? "hidden" : ""}`}
+      ${hideNav.includes(location) ? "hidden" : ""} `}
     >
-      <div className="bg-stone-200/60 dark:bg-stone-800/60 backdrop-blur-sm h-full w-full sm:rounded-3xl rounded-2xl md:p-6 flex flex-col items-center justify-between">
+      <div className="bg-stone-200/60 dark:bg-stone-800/60 sm:bg-stone-100 sm:dark:bg-stone-800 backdrop-blur-sm h-full w-full sm:rounded-3xl rounded-2xl md:p-6 flex flex-col items-center justify-between">
         <Link href="/" className="sm:inline hidden w-full">
           <div className="text-3xl tracking-tighter font-extrabold flex items-center md:justify-start md:pt-0 pt-6 justify-center gap-2 w-full px-2">
             <Image src="/logo.svg" alt="" width={50} height={50} />

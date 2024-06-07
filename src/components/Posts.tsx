@@ -4,6 +4,7 @@ import {
   Heart,
   MessageCircle,
   MoreHorizontal,
+  SendHorizontal,
 } from "lucide-react";
 import Image from "next/image";
 import React from "react";
@@ -21,6 +22,8 @@ function Posts() {
 
       image:
         "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1715866646/cld-sample-4.jpg",
+        likes: 12,
+        comments: 2
     },
   ]);
   return (
@@ -29,10 +32,10 @@ function Posts() {
         return (
           <div
             key={index}
-            className="rounded-xl dark:bg-stone-800 p-4 w-full sm:w-[85%] mx-auto h-fit max-h- min-h-96 min-w-96"
+            className="rounded-xl bg-stone-100 dark:bg-stone-800 p-4 w-full sm:w-[85%] mx-auto h-fit max-h- min-h-96 min-w-96"
           >
             <div className="flex justify-between w-full">
-              <div className="flex items-center gap-3 w-full">
+              <div className="flex items-center gap-2 w-full">
                 <div className="w-8 h-8">
                   <Image
                     width={32}
@@ -43,7 +46,7 @@ function Posts() {
                   />
                 </div>
                 <div>
-                  <p className="font-semibold ">{post.user.fullName}</p>
+                  <p>{post.user.fullName}</p>
                   <p className="text-sm text-gray-500 leading-3">
                     @{post.user.username}
                   </p>
@@ -57,15 +60,16 @@ function Posts() {
                 height={320}
                 src={post.image}
                 alt=""
-                className="w-full dark:bg-stone-900"
+                className="w-full dark:bg-stone-900 rounded-sm"
               />
             </div>
             <div className="flex gap-3">
-              <Heart />
-              <MessageCircle />
-              <ArrowUpRight />
+              <Heart size="26" className="hover:opacity-80" />
+              <MessageCircle size="26" className="hover:opacity-80" />
+              <SendHorizontal size="26"  className="hover:opacity-80"/>
             </div>
-            <p className="py-3">{post.caption}</p>
+            <p className="text-sm text-stone-400 mt-1">{post.likes} likes & {post.comments} comments</p>
+            <p className="py-1 text-sm">{post.caption}</p>
           </div>
         );
       })}

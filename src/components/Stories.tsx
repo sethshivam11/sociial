@@ -8,7 +8,43 @@ function Stories() {
     {
       name: "Shivam",
       username: "sethshivam11",
-      avatar: "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+      avatar:
+        "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+    },
+    {
+      name: "Shivam",
+      username: "sethshivam11",
+      avatar: "https://github.com/shadcn.png",
+    },
+    {
+      name: "Shivam",
+      username: "sethshivam11",
+      avatar: "https://avatars.githubusercontent.com/u/130232913?v=4",
+    },
+    {
+      name: "Shivam",
+      username: "sethshivam11",
+      avatar: "https://avatars.githubusercontent.com/u/130232913?v=4",
+    },
+    {
+      name: "Shivam",
+      username: "sethshivam11",
+      avatar: "https://avatars.githubusercontent.com/u/130232913?v=4",
+    },
+    {
+      name: "Shivam",
+      username: "sethshivam11",
+      avatar: "https://avatars.githubusercontent.com/u/130232913?v=4",
+    },
+    {
+      name: "Shivam",
+      username: "sethshivam11",
+      avatar: "https://avatars.githubusercontent.com/u/130232913?v=4",
+    },
+    {
+      name: "Shivam",
+      username: "sethshivam11",
+      avatar: "https://avatars.githubusercontent.com/u/130232913?v=4",
     },
   ];
   const storyAvailable = false;
@@ -18,14 +54,14 @@ function Stories() {
         <div
           className={`w-20 h-20 rounded-full p-1 ${
             storyAvailable
-              ? "bg-gradient-to-tr from-blue-800  to-red-800 sm:hover:scale-105"
+              ? "bg-gradient-to-bl from-red-500 via-blue-500 to-green-500 sm:hover:scale-105"
               : ""
           }`}
         >
           <Image
             src={stories[0].avatar}
             alt=""
-            className="w-full h-full rounded-full ring-2 ring-white dark:ring-stone-900"
+            className="w-full h-full rounded-full ring-2 ring-white dark:ring-stone-900 bg-white dark:bg-black"
             height={96}
             width={96}
           />
@@ -43,13 +79,13 @@ function Stories() {
             key={index}
             className="flex flex-col items-center gap-1 sm:hover:scale-105 transition-transform"
           >
-            <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-[#0066FF] via-white to-[#FF5454] p-1">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-bl from-red-500 via-blue-500 to-green-500 p-1">
               <Image
                 src={story.avatar}
                 alt=""
-                className="w-full h-full rounded-full ring-2 ring-white dark:ring-stone-900 bg-stone-800"
-                height={96}
-                width={96}
+                className="w-full h-full object-contain rounded-full ring-2 ring-white dark:ring-stone-900 bg-white dark:bg-black"
+                height={80}
+                width={80}
               />
             </div>
           </Link>
