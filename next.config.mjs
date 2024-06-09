@@ -19,7 +19,7 @@ const nextConfig = {
         hostname: "avatars.githubusercontent.com",
         port: "",
         pathname: "/**"
-      }
+      },
     ],
   },
 };

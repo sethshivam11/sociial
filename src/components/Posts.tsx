@@ -1,14 +1,10 @@
 "use client";
-import {
-  ArrowUpRight,
-  Heart,
-  MessageCircle,
-  MoreHorizontal,
-  SendHorizontal,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Heart } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import Comment from "./Comment";
+import More from "./More";
+import Share from "./Share";
 
 function Posts() {
   const [posts, setPosts] = React.useState([
@@ -28,23 +24,25 @@ function Posts() {
             avatar:
               "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
           },
-          comment: "This is a comment",
+          comment: "This is a comment which is very long and I also don't know what to write in it. So, I am just writing anything that comes to my mind. I hope you are having a good day. Bye! 😊 ",
         },
       ],
 
-      image:
+      images: [
         "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1715866646/cld-sample-4.jpg",
+        "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1715866646/cld-sample-4.jpg",
+      ],
       likes: 12,
       commentsCount: 1,
     },
   ]);
   return (
-    <div className="flex flex-col py-2 px-4 gap-4 w-full pb-24">
+    <div className="flex flex-col py-2 sm:px-4 px-2 gap-4 w-full pb-24">
       {posts.map((post, index) => {
         return (
           <div
             key={index}
-            className="rounded-xl bg-stone-100 dark:bg-stone-800 p-4 w-full sm:w-[85%] mx-auto h-fit max-h- min-h-96 min-w-96"
+            className="rounded-xl bg-stone-100 dark:bg-stone-800 p-4 w-full sm:w-[85%] mx-auto h-fit max-h- min-h-64 min-w-64"
           >
             <div className="flex justify-between w-full">
               <div className="flex items-center gap-2 w-full">
@@ -64,21 +62,38 @@ function Posts() {
                   </p>
                 </div>
               </div>
-              <MoreHorizontal />
+              <More />
             </div>
-            <div className="py-2 mt-2">
-              <Image
-                width={400}
-                height={320}
-                src={post.image}
-                alt=""
-                className="w-full dark:bg-stone-900 rounded-sm"
-              />
+            <div className="py-2 mt-2 relative">
+              <button className="right-2 top-1/2 py-4 px-1 -translate-y-1/2 absolute">
+                <ChevronRight className="bg-transparent/30 text-white/90 rounded-full pl-1 p-0.5 w-6 h-6" />
+              </button>
+              <button className="left-2 top-1/2 py-4 px-1 -translate-y-1/2 absolute">
+                <ChevronLeft className="bg-transparent/30 text-white/90 rounded-full pr-1 p-0.5 w-6 h-6" />
+              </button>
+              <div className="w-full h-full rounded-sm overflow-x-auto flex flex-row no-scrollbar snap-x snap-mandatory">
+                {post.images.map((image, index) => {
+                  return (
+                    <Image
+                      key={index}
+                      width={400}
+                      height={320}
+                      src={image}
+                      alt=""
+                      className="w-full dark:bg-stone-900 snap-center"
+                    />
+                  );
+                })}
+              </div>
             </div>
             <div className="flex gap-3">
-              <Heart size="26" className="hover:opacity-60" />
-              <Comment comments={post.comments} user={post.user} commentsCount={post.commentsCount} />
-              <SendHorizontal size="26" className="hover:opacity-60" />
+              <Heart size="26" className="sm:hover:opacity-60" fill="" />
+              <Comment
+                comments={post.comments}
+                user={post.user}
+                commentsCount={post.commentsCount}
+              />
+              <Share />
             </div>
             <p className="text-sm text-stone-400 mt-1">
               {post.likes} likes & {post.commentsCount} comments

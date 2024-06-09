@@ -14,6 +14,10 @@ interface UserContext {
   setLoading: Function;
   followers: FollowUser[];
   following: followUser[];
+  unreadMessageCount: number;
+  setUnreadMessageCount: Function;
+  newNotifications: boolean;
+  setNewNotifications: Function;
   setFollowers: Function;
   setFollowing: Function;
   getProfile: Function;
@@ -77,6 +81,10 @@ const initialState = {
   getProfile: () => {},
   followers: [],
   following: [],
+  unreadMessageCount: 0,
+  setUnreadMessageCount: () => {},
+  newNotifications: false,
+  setNewNotifications: () => {},
   setFollowers: () => {},
   setFollowing: () => {},
   loading: false,
@@ -121,6 +129,8 @@ export default function UserProvider(props: React.PropsWithChildren<{}>) {
   const [following, setFollowing] = React.useState<FollowUser[]>([]);
   const [user, setUser] = React.useState<UserInterface>(initialState.user);
   const [profile, setProfile] = React.useState<Profile>(initialState.profile);
+  const [unreadMessageCount, setUnreadMessageCount] = React.useState(1);
+  const [newNotifications, setNewNotifications] = React.useState(true);
 
   function fetchUser() {
     setLoading(true);
@@ -724,6 +734,10 @@ export default function UserProvider(props: React.PropsWithChildren<{}>) {
         setProfile,
         followers,
         following,
+        unreadMessageCount,
+        setUnreadMessageCount,
+        newNotifications,
+        setNewNotifications,
         getProfile,
         setFollowers,
         setFollowing,

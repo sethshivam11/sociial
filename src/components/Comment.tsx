@@ -2,14 +2,11 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
-  DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Heart, MessageCircle, SendHorizonal, Smile } from "lucide-react";
+import { Heart, MessageSquareText, SendHorizonal, Smile } from "lucide-react";
 import Image from "next/image";
 
 interface Props {
@@ -33,12 +30,9 @@ export default function Comment({ comments, user, commentsCount }: Props) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <MessageCircle
-          size="26"
-          className="hover:opacity-60 sm:inline hidden"
-        />
+        <MessageSquareText size="26" className="sm:hover:opacity-60" />
       </DialogTrigger>
-      <DialogContent className="w-2/3 h-3/4 flex flex-col bg-stone-100 dark:bg-stone-900">
+      <DialogContent className="sm:w-2/3 w-full h-3/4 flex flex-col bg-stone-100 dark:bg-stone-900">
         <div className="flex justify-between">
           <div className="flex items-center gap-2 rounded-lg">
             <div className="w-8 h-8">
@@ -62,9 +56,12 @@ export default function Comment({ comments, user, commentsCount }: Props) {
         <div className="h-full">
           {comments.map((comment, index) => {
             return (
-              <div key={index} className="flex justify-between items-center">
-                <div className="flex items-center gap-2 p-2 rounded-lg">
-                  <div className="w-10 h-10">
+              <div
+                key={index}
+                className="flex flex-col items-start"
+              >
+                <div className="flex items-center gap-2 p-1 rounded-lg">
+                  <div className="w-6 h-6">
                     <Image
                       width={32}
                       height={32}
@@ -73,25 +70,25 @@ export default function Comment({ comments, user, commentsCount }: Props) {
                       className="w-full h-full rounded-full"
                     />
                   </div>
-                  <div className="mr-3">
-                    <p className="font-semibold">{comment.user.fullName}</p>
-                    <p className="text-xs text-stone-500">
+                  <div className="font-semibold">
+                    {comment.user.fullName}&nbsp;
+                    <span className="text-xs text-stone-500">
                       @{comment.user.username}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="">{comment.comment}</p>
-                    <div className="flex gap-3 text-xs text-stone-500 dark:text-stone-400">
-                      <p>
-                        {commentsCount === 1
-                          ? "1 like"
-                          : `${commentsCount} likes`}
-                      </p>
-                      <button>Reply</button>
-                    </div>
+                    </span>
                   </div>
                 </div>
-                <Heart size="16" className="mx-2" />
+                <div className="px-1">
+                  <p className="py-1.5 px-2">{comment.comment}</p>
+                  <div className="flex gap-3 text-xs text-stone-500 dark:text-stone-400">
+                    <p>
+                      <Heart size="16" className="mx-2 inline-block" />
+                      {commentsCount === 1
+                        ? "1 like"
+                        : `${commentsCount} likes`}
+                    </p>
+                    <button>Reply</button>
+                  </div>
+                </div>
               </div>
             );
           })}
