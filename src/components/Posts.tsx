@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import React from "react";
+import Comment from "./Comment";
 
 function Posts() {
   const [posts, setPosts] = React.useState([
@@ -19,11 +20,22 @@ function Posts() {
           "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
       },
       caption: "This is a caption",
+      comments: [
+        {
+          user: {
+            fullName: "Shad",
+            username: "shadcn",
+            avatar:
+              "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+          },
+          comment: "This is a comment",
+        },
+      ],
 
       image:
         "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1715866646/cld-sample-4.jpg",
-        likes: 12,
-        comments: 2
+      likes: 12,
+      commentsCount: 1,
     },
   ]);
   return (
@@ -64,11 +76,13 @@ function Posts() {
               />
             </div>
             <div className="flex gap-3">
-              <Heart size="26" className="hover:opacity-80" />
-              <MessageCircle size="26" className="hover:opacity-80" />
-              <SendHorizontal size="26"  className="hover:opacity-80"/>
+              <Heart size="26" className="hover:opacity-60" />
+              <Comment comments={post.comments} user={post.user} commentsCount={post.commentsCount} />
+              <SendHorizontal size="26" className="hover:opacity-60" />
             </div>
-            <p className="text-sm text-stone-400 mt-1">{post.likes} likes & {post.comments} comments</p>
+            <p className="text-sm text-stone-400 mt-1">
+              {post.likes} likes & {post.commentsCount} comments
+            </p>
             <p className="py-1 text-sm">{post.caption}</p>
           </div>
         );

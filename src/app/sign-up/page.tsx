@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import Link from "next/link";
@@ -15,6 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import CheckboxWithLabel from "@/components/CheckboxWithLabel";
+import Image from "next/image";
 
 interface FormInput {
   fullName: string;
@@ -23,7 +24,7 @@ interface FormInput {
   password: string;
 }
 
-function page() {
+function SignUpPage() {
   const form = useForm<FormInput>({
     defaultValues: {
       email: "",
@@ -90,17 +91,22 @@ function page() {
       return setPasswordsMatchMessage("Passwords do not match");
     }
     setPasswordsMatchMessage("");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [confirmPwd]);
 
   return (
     <div className="flex justify-center col-span-10 py-12 items-center min-h-screen dark:bg-zinc-800">
-      <img
-        src="/bg-doodle-2.jpg"
+      <Image
+        width="1920"
+        height="1080"
+        src="/bg-doodle-dark.jpg"
         alt=""
         className="fixed object-cover h-[60rem] w-full blur-sm hidden dark:block top-0"
       />
-      <img
-        src="/bg-doodle-white.jpg"
+      <Image
+        width="1920"
+        height="1080"
+        src="/bg-doodle-light.jpg"
         alt=""
         className="fixed object-cover h-[60rem] w-full blur-sm dark:hidden top-0"
       />
@@ -277,4 +283,4 @@ function page() {
   );
 }
 
-export default page;
+export default SignUpPage;

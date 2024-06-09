@@ -14,13 +14,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import Image from "next/image";
 
 interface FormInput {
   identifier: string;
   password: string;
 }
 
-function page() {
+function SignInPage() {
   const form = useForm<FormInput>({
     defaultValues: {
       identifier: "",
@@ -43,13 +44,17 @@ function page() {
   };
   return (
     <div className="flex justify-center col-span-10 py-12 items-center min-h-screen bg-white dark:bg-zinc-800">
-      <img
-        src="/bg-doodle-2.jpg"
+      <Image
+        width="1920"
+        height="1080"
+        src="/bg-doodle-dark.jpg"
         alt=""
         className="fixed object-cover h-full w-full blur-sm hidden dark:block"
       />
-      <img
-        src="/bg-doodle-white.jpg"
+      <Image
+        width="1920"
+        height="1080"
+        src="/bg-doodle-light.jpg"
         alt=""
         className="fixed object-cover h-full w-full blur-sm dark:hidden"
       />
@@ -120,7 +125,7 @@ function page() {
           </Link>
         </p>
         <p className="text-center mt-2">
-          Don't have an account?&nbsp;
+          Don&apos;t have an account?&nbsp;
           <Link href="/sign-up" className="text-blue-500 hover:opacity-80">
             Sign up
           </Link>
@@ -130,4 +135,4 @@ function page() {
   );
 }
 
-export default page;
+export default SignInPage;

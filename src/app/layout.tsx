@@ -5,6 +5,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import Navbar from "@/components/Navbar";
 import { ThemeProvider } from "@/context/ThemeProvider";
+import UserProvider from "@/context/UserProvider";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -67,13 +68,11 @@ export default function RootLayout({
           fontSans.variable
         )}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-        >
-          <Navbar />
-          {children}
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <UserProvider>
+            <Navbar />
+            {children}
+          </UserProvider>
         </ThemeProvider>
       </body>
     </html>

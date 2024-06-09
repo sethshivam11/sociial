@@ -34,7 +34,7 @@ interface Props {
   };
 }
 
-const VerifyCodePage = ({ searchParams }: Props) => {
+function VerifyCodePage({ searchParams }: Props) {
   const form = useForm<FormInput>({
     defaultValues: {
       username: "",
@@ -86,6 +86,7 @@ const VerifyCodePage = ({ searchParams }: Props) => {
     if (searchParams.code) {
       form.setValue("username", searchParams.username);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   React.useEffect(() => {
@@ -155,6 +156,6 @@ const VerifyCodePage = ({ searchParams }: Props) => {
       </form>
     </Form>
   );
-};
+}
 
 export default VerifyCodePage;
