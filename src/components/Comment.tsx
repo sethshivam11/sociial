@@ -8,6 +8,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Heart, MessageSquareText, SendHorizonal, Smile } from "lucide-react";
 import Image from "next/image";
+import React, { Dispatch, SetStateAction } from "react";
 
 interface Props {
   comments: {
@@ -16,7 +17,10 @@ interface Props {
       username: string;
       avatar: string;
     };
-    comment: string;
+    content: string;
+    _id: string;
+    liked: boolean;
+    likesCount: number;
   }[];
   user: {
     fullName: string;
@@ -24,9 +28,20 @@ interface Props {
     avatar: string;
   };
   commentsCount: number;
+  likeComment: Function;
+  addComment: Function;
+  comment: string;
+  setComment: Dispatch<SetStateAction<string>>;
 }
 
-export default function Comment({ comments, user, commentsCount }: Props) {
+export default function Comment({
+  comments,
+  user,
+  likeComment,
+  addComment,
+  comment,
+  setComment,
+}: Props) {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -56,10 +71,7 @@ export default function Comment({ comments, user, commentsCount }: Props) {
         <div className="h-full">
           {comments.map((comment, index) => {
             return (
-              <div
-                key={index}
-                className="flex flex-col items-start"
-              >
+              <div key={index} className="flex flex-col items-start mb-3">
                 <div className="flex items-center gap-2 p-1 rounded-lg">
                   <div className="w-6 h-6">
                     <Image
@@ -78,13 +90,22 @@ export default function Comment({ comments, user, commentsCount }: Props) {
                   </div>
                 </div>
                 <div className="px-1">
-                  <p className="py-1.5 px-2">{comment.comment}</p>
-                  <div className="flex gap-3 text-xs text-stone-500 dark:text-stone-400">
+                  <p className="py-1.5 px-2">{comment.content}</p>
+                  <div className="flex gap-3 text-xs text-stone-500 dark:text-stone-400 select-none">
                     <p>
-                      <Heart size="16" className="mx-2 inline-block" />
-                      {commentsCount === 1
+                      <Heart
+                        size="16"
+                        className={`${
+                          comment.liked
+                            ? "text-rose-500"
+                            : "sm:hover:opacity-60 active:scale-110"
+                        } mx-2 inline-block transition-transform`}
+                        fill={comment.liked ? "rgb(244 63 94)" : "none"}
+                        onClick={() => likeComment(comment._id)}
+                      />
+                      {comment.likesCount <= 1
                         ? "1 like"
-                        : `${commentsCount} likes`}
+                        : `${comment.likesCount} likes`}
                     </p>
                     <button>Reply</button>
                   </div>
@@ -104,8 +125,11 @@ export default function Comment({ comments, user, commentsCount }: Props) {
               inputMode="text"
               name="comment"
               placeholder="Add a comment..."
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              autoFocus
             />
-            <Button className="" size="sm">
+            <Button size="sm" onClick={() => addComment(comment)}>
               <SendHorizonal />
             </Button>
           </div>
