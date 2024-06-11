@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 import Navbar from "@/components/Navbar";
 import { ThemeProvider } from "@/context/ThemeProvider";
 import UserProvider from "@/context/UserProvider";
+import React from "react";
+import { Toaster } from "@/components/ui/toaster";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -72,6 +74,7 @@ export default function RootLayout({
           <UserProvider>
             <Navbar />
             {children}
+            <Toaster />
           </UserProvider>
         </ThemeProvider>
       </body>

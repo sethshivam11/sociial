@@ -50,7 +50,7 @@ function Suggestions() {
                   <Link href="/">
                     <div className="w-1/2 flex items-center gap-3">
                       <Avatar className="w-8 h-8">
-                        <AvatarImage src={user.avatar} alt="" />
+                        <AvatarImage src={user.avatar} alt="" className="pointer-events-none select-none" />
                         <AvatarFallback>SN</AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col gap-0 leading-3">

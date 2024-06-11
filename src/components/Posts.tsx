@@ -5,6 +5,13 @@ import React from "react";
 import Comment from "./Comment";
 import More from "./More";
 import Share from "./Share";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 function Posts() {
   const [posts, setPosts] = React.useState([
@@ -14,13 +21,13 @@ function Posts() {
         fullName: "Shivam",
         username: "sethshivam11",
         avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+          "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
       },
       caption: "This is a caption",
       liked: false,
       images: [
-        "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1715866646/cld-sample-4.jpg",
-        "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1715866646/cld-sample-4.jpg",
+        "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_90/v1715866646/cld-sample-4.jpg",
+        "https://images.pexels.com/photos/2449600/pexels-photo-2449600.png?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1",
       ],
       likesCount: 12,
       commentsCount: 1,
@@ -99,10 +106,10 @@ function Posts() {
   }
   return (
     <div className="flex flex-col py-2 sm:px-4 px-2 gap-4 w-full pb-24">
-      {posts.map((post, index) => {
+      {posts.map((post, postIndex) => {
         return (
           <div
-            key={index}
+            key={postIndex}
             className="rounded-xl bg-stone-100 dark:bg-stone-800 p-4 w-full sm:w-[85%] mx-auto h-fit max-h- min-h-64 min-w-64"
           >
             <div className="flex justify-between w-full">
@@ -112,7 +119,8 @@ function Posts() {
                     width={32}
                     height={32}
                     src={post.user.avatar}
-                    alt=""
+                    priority={postIndex < 10 ? true : false}
+                    alt={`Photo by ${post.user.fullName} with username ${post.user.username}`}
                     className="w-full h-full rounded-full select-none pointer-events-none"
                   />
                 </div>
@@ -123,38 +131,34 @@ function Posts() {
                   </p>
                 </div>
               </div>
-              <More />
+              <More user={post.user} postId={post._id} />
             </div>
-            <div className="py-2 mt-2 relative">
-              <button className="right-2 top-1/2 py-4 px-1 -translate-y-1/2 absolute">
-                <ChevronRight className="bg-transparent/30 text-white/90 rounded-full pl-1 p-0.5 w-6 h-6" />
-              </button>
-              <button className="left-2 top-1/2 py-4 px-1 -translate-y-1/2 absolute">
-                <ChevronLeft className="bg-transparent/30 text-white/90 rounded-full pr-1 p-0.5 w-6 h-6" />
-              </button>
-              <div className="w-full h-full rounded-sm overflow-x-auto flex flex-row no-scrollbar snap-x snap-mandatory">
+            <Carousel className="w-full my-2 mt-2">
+              <CarouselContent>
                 {post.images.map((image, index) => {
                   return (
-                    <Image
-                      key={index}
-                      width={400}
-                      height={320}
-                      src={image}
-                      alt=""
-                      className="w-full dark:bg-stone-900 snap-center select-none pointer-events-none"
-                    />
+                    <CarouselItem key={index}>
+                      <Image
+                        width={700}
+                        height={320}
+                        src={image}
+                        priority={index === 0 && postIndex < 10 ? true : false}
+                        alt=""
+                        className="object-cover select-none h-full"
+                      />
+                    </CarouselItem>
                   );
                 })}
-              </div>
-            </div>
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+            </Carousel>
             <div className="flex gap-3">
               <Heart
                 size="26"
                 className={`${
-                  post.liked
-                    ? "text-rose-500"
-                    : "sm:hover:opacity-60 active:scale-110"
-                } transition-transform`}
+                  post.liked ? "text-rose-500" : "sm:hover:opacity-60"
+                } transition-all active:scale-110`}
                 onClick={() => {
                   likePost(post._id);
                 }}
@@ -172,8 +176,8 @@ function Posts() {
               <Share />
             </div>
             <p className="text-sm text-stone-400 mt-1">
-              {post.likesCount <= 1 ? "1 like" : `${post.likesCount} likes`}&nbsp;
-              and&nbsp;
+              {post.likesCount <= 1 ? "1 like" : `${post.likesCount} likes`}
+              &nbsp; and&nbsp;
               {post.commentsCount <= 1
                 ? "1 comment"
                 : `${post.commentsCount} comments`}

@@ -56,7 +56,7 @@ export default function Comment({
                 height={32}
                 src={user.avatar}
                 alt=""
-                className="w-full h-full rounded-full"
+                className="w-full h-full rounded-full pointer-events-none select-none"
               />
             </div>
             <div>
@@ -79,7 +79,7 @@ export default function Comment({
                       height={32}
                       src={comment.user.avatar}
                       alt=""
-                      className="w-full h-full rounded-full"
+                      className="w-full h-full rounded-full pointer-events-none select-none"
                     />
                   </div>
                   <div className="font-semibold">
@@ -98,8 +98,8 @@ export default function Comment({
                         className={`${
                           comment.liked
                             ? "text-rose-500"
-                            : "sm:hover:opacity-60 active:scale-110"
-                        } mx-2 inline-block transition-transform`}
+                            : "sm:hover:opacity-60"
+                        } mx-2 inline-block transition-all active:scale-110`}
                         fill={comment.liked ? "rgb(244 63 94)" : "none"}
                         onClick={() => likeComment(comment._id)}
                       />
@@ -122,6 +122,7 @@ export default function Comment({
             </Button>
             <Input
               autoComplete="off"
+              type="text"
               inputMode="text"
               name="comment"
               placeholder="Add a comment..."

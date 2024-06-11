@@ -33,7 +33,15 @@ function Navbar() {
       <div className="bg-stone-200/60 dark:bg-stone-800/60 sm:bg-stone-100 sm:dark:bg-stone-800 backdrop-blur-sm h-full w-full sm:rounded-3xl rounded-2xl xl:p-6 sm:px-2 sm:py-4 sm:w-fit xl:w-full flex flex-col items-center justify-between">
         <Link href="/" className="sm:inline hidden w-full">
           <div className="text-3xl tracking-tighter font-extrabold flex items-center md:justify-start md:pt-0 justify-center gap-2 w-full px-2">
-            <Image src="/logo.svg" alt="" width="50" height="50" />
+            <Image
+              src="/logo.svg"
+              alt=""
+              width="50"
+              height="50"
+              className="pointer-events-none select-none"
+              priority={true}
+            />
+
             <span className="xl:inline hidden">Sociial</span>
           </div>
         </Link>
@@ -129,7 +137,9 @@ function Navbar() {
             <Avatar className="w-6 h-6 group-hover:scale-110">
               <AvatarImage
                 src="https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png"
+                loading="eager"
                 alt=""
+                className="pointer-events-none select-none"
               />
               <AvatarFallback>SS</AvatarFallback>
             </Avatar>

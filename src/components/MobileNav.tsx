@@ -13,7 +13,7 @@ function MobileNav({ unreadMessageCount }: Props) {
   return (
     <div className="bg-stone-200 dark:bg-stone-800 h-16 p-3 top-0 left-0 col-span-10 sm:static sticky w-full sm:hidden flex items-center justify-between z-20">
       <div className="flex items-center gap-2 text-2xl tracking-tighter font-extrabold">
-        <Image src="/logo.svg" alt="" height={40} width={40} />
+        <Image src="/logo.svg" alt="" height={40} width={40} className="pointer-events-none select-none" />
         Sociial
       </div>
       <Link href="/messages">

@@ -61,7 +61,8 @@ function Stories() {
           <Image
             src={stories[0].avatar}
             alt=""
-            className="w-full h-full rounded-full ring-2 ring-white dark:ring-stone-900 bg-white dark:bg-black"
+            loading="eager"
+            className="w-full h-full rounded-full ring-2 ring-white dark:ring-stone-900 bg-white dark:bg-black pointer-events-none select-none"
             height={96}
             width={96}
           />
@@ -83,7 +84,8 @@ function Stories() {
               <Image
                 src={story.avatar}
                 alt=""
-                className="w-full h-full object-contain rounded-full ring-2 ring-white dark:ring-stone-900 bg-white dark:bg-black"
+                loading={index < 10 ? "eager" : "lazy"}
+                className="w-full h-full object-contain rounded-full ring-2 ring-white dark:ring-stone-900 bg-white dark:bg-black pointer-events-none select-none"
                 height={80}
                 width={80}
               />
