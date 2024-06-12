@@ -9,6 +9,14 @@ import { Input } from "@/components/ui/input";
 import { Heart, MessageSquareText, SendHorizonal, Smile } from "lucide-react";
 import Image from "next/image";
 import React, { Dispatch, SetStateAction } from "react";
+import { useForm } from "react-hook-form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
 
 interface Props {
   comments: {
@@ -34,6 +42,10 @@ interface Props {
   setComment: Dispatch<SetStateAction<string>>;
 }
 
+interface FormInterface {
+  comment: string;
+}
+
 export default function Comment({
   comments,
   user,
@@ -42,10 +54,18 @@ export default function Comment({
   comment,
   setComment,
 }: Props) {
+  const form = useForm<FormInterface>({
+    defaultValues: {
+      comment: "",
+    },
+  });
+  function onSubmit(values: FormInterface) {
+    console.log(values);
+  }
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <MessageSquareText size="26" className="sm:hover:opacity-60" />
+        <MessageSquareText size="30" className="sm:hover:opacity-60" />
       </DialogTrigger>
       <DialogContent className="sm:w-2/3 w-full h-3/4 flex flex-col bg-stone-100 dark:bg-stone-900">
         <div className="flex justify-between">
@@ -116,24 +136,38 @@ export default function Comment({
         </div>
         <hr className="bg-stone-500" />
         <DialogFooter>
-          <div className="flex gap-2 w-full items-center">
-            <Button variant="secondary" size="sm">
-              <Smile />
-            </Button>
-            <Input
-              autoComplete="off"
-              type="text"
-              inputMode="text"
-              name="comment"
-              placeholder="Add a comment..."
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              autoFocus
-            />
-            <Button size="sm" onClick={() => addComment(comment)}>
-              <SendHorizonal />
-            </Button>
-          </div>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="flex gap-2 w-full items-center"
+            >
+              <Button variant="secondary" size="sm" type="button">
+                <Smile />
+              </Button>
+              <FormField
+                control={form.control}
+                name="comment"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="text"
+                        name="comment"
+                        inputMode="text"
+                        autoComplete="off"
+                        placeholder="Add a comment..."
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button size="sm" type="submit">
+                <SendHorizonal />
+              </Button>
+            </form>
+          </Form>
         </DialogFooter>
       </DialogContent>
     </Dialog>

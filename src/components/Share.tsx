@@ -5,11 +5,35 @@ import {
   DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
 import { Send, SendHorizonal } from "lucide-react";
 import Image from "next/image";
 import { Input } from "./ui/input";
+import { useForm } from "react-hook-form";
+import React from "react";
+
+interface FormInterface {
+  message: string;
+}
 
 export default function Share() {
+  const form = useForm<FormInterface>({
+    defaultValues: {
+      message: "",
+    },
+  });
+  
+  function onSubmit(values: FormInterface) {
+    console.log(values);
+  }
+  const [search, setSearch] = React.useState("");
+
   const followers = [
     {
       fullName: "John Doe",
@@ -47,14 +71,21 @@ export default function Share() {
       avatar: "https://github.com/shadcn.png",
     },
   ];
+
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Send size="26" className="sm:hover:opacity-60 rotate-12" />
+        <Send size="30" className="sm:hover:opacity-60 rotate-12" />
       </DialogTrigger>
       <DialogContent className="sm:w-2/3 w-full h-3/4 flex flex-col bg-stone-100 dark:bg-stone-900">
         <h1 className="text-xl">Share post</h1>
-        <Input inputMode="search" placeholder="Search for users" />
+        <Input
+          value={search}
+          autoFocus={false}
+          inputMode="search"
+          placeholder="Search for users"
+          onChange={(e) => setSearch(e.target.value)}
+        />
         <hr className="bg-stone-500 my-2" />
         <div className="flex flex-col justify-start items-start gap-4 overflow-y-auto h-full">
           {followers.map((follower, index) => {
@@ -80,18 +111,34 @@ export default function Share() {
           })}
         </div>
         <DialogFooter>
-          <div className="flex items-center justify-center w-full gap-2">
-            <Input
-              autoComplete="off"
-              type="text"
-              name="send"
-              inputMode="text"
-              placeholder="Add a message"
-            />
-            <Button size="sm">
-              <SendHorizonal />
-            </Button>
-          </div>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="w-full flex items-center justify-center gap-2"
+            >
+              <FormField
+                control={form.control}
+                name="message"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <FormControl>
+                      <Input
+                        {...field}
+                        autoComplete="off"
+                        type="text"
+                        inputMode="text"
+                        placeholder="Add a message"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button size="sm" type="submit">
+                <SendHorizonal />
+              </Button>
+            </form>
+          </Form>
         </DialogFooter>
       </DialogContent>
     </Dialog>
