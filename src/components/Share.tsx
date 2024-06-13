@@ -74,14 +74,15 @@ export default function Share() {
 
   return (
     <Dialog>
-      <DialogTrigger asChild>
+      <DialogTrigger asChild title="Share">
         <Send size="30" className="sm:hover:opacity-60 rotate-12" />
       </DialogTrigger>
-      <DialogContent className="sm:w-2/3 w-full h-3/4 flex flex-col bg-stone-100 dark:bg-stone-900">
+      <DialogContent className="sm:w-2/3 w-full h-3/4 flex flex-col bg-stone-100 dark:bg-stone-900"
+      onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <h1 className="text-xl">Share post</h1>
         <Input
           value={search}
-          autoFocus={false}
           inputMode="search"
           placeholder="Search for users"
           onChange={(e) => setSearch(e.target.value)}

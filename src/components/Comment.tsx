@@ -64,10 +64,13 @@ export default function Comment({
   }
   return (
     <Dialog>
-      <DialogTrigger asChild>
+      <DialogTrigger asChild title="Comment">
         <MessageSquareText size="30" className="sm:hover:opacity-60" />
       </DialogTrigger>
-      <DialogContent className="sm:w-2/3 w-full h-3/4 flex flex-col bg-stone-100 dark:bg-stone-900">
+      <DialogContent
+        className="sm:w-2/3 w-full h-3/4 flex flex-col bg-stone-100 dark:bg-stone-900"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <div className="flex justify-between">
           <div className="flex items-center gap-2 rounded-lg">
             <div className="w-8 h-8">

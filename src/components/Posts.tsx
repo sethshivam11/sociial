@@ -46,7 +46,7 @@ function Posts() {
       caption:
         "This is a caption which is very long and I don't know what to write in it so, i am just keep going to see the results. This is just a test caption to check the functionality of the app. I hope you are having a good day. Bye! 😊",
       liked: false,
-      images: ["/test-video.mp4"],
+      images: ["https://res.cloudinary.com/dv3qbj0bn/video/upload/v1718210710/sociial/videos/tnw4jy33z047bskwwhyt.mp4"],
       likesCount: 12,
       commentsCount: 1,
     },
@@ -60,8 +60,23 @@ function Posts() {
       },
       caption: "This is a caption",
       liked: false,
+      images: ["https://res.cloudinary.com/dv3qbj0bn/video/upload/v1709183844/samples/dance-2.mp4"],
+      likesCount: 12,
+      commentsCount: 1,
+    },
+    {
+      _id: "4",
+      user: {
+        fullName: "Shivam",
+        username: "sethshivam11",
+        avatar:
+          "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+      },
+      caption:
+        "This is a caption which is very long and I don't know what to write in it so, i am just keep going to see the results. This is just a test caption to check the functionality of the app. I hope you are having a good day. Bye! 😊",
+      liked: false,
       images: [
-        "https://res.cloudinary.com/dv3qbj0bn/video/upload/v1718210710/sociial/videos/tnw4jy33z047bskwwhyt.mp4",
+        "https://images.pexels.com/photos/2449600/pexels-photo-2449600.png?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1",
       ],
       likesCount: 12,
       commentsCount: 1,
@@ -140,21 +155,42 @@ function Posts() {
   }
 
   React.useEffect(() => {
-    const videos = document.querySelectorAll("video");
+    const videos = Array.from(document.querySelectorAll("video"));
     const observers: IntersectionObserver[] = [];
+    let topVideo: HTMLVideoElement | undefined = undefined;
+
+    const updateTopVideo = () => {
+      const sortedVideos = [...videos].sort(
+        (a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top
+      );
+      const newTopVideo = sortedVideos.find(
+        (video) => video.getBoundingClientRect().top >= 0
+      );
+
+      if (newTopVideo !== topVideo) {
+        if (topVideo) {
+          topVideo.pause();
+        }
+        topVideo = newTopVideo;
+        if (topVideo) {
+          topVideo.play();
+        }
+      }
+    };
+
     videos.forEach((video) => {
       const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              video.play();
-            } else {
-              video.pause();
+            if (entry.isIntersecting || video === topVideo) {
+              updateTopVideo();
             }
           });
         },
         {
-          threshold: 0.5,
+          threshold: 0.9,
+          root: null,
+          rootMargin: "100px",
         }
       );
       observer.observe(video);
@@ -169,7 +205,7 @@ function Posts() {
   }, []);
 
   return (
-    <div className="flex flex-col py-2 sm:px-4 px-2 gap-4 w-full pb-24">
+    <div className="flex flex-col py-2 sm:px-4 px-2 gap-4 w-full pb-4">
       {posts.map((post, postIndex) => {
         return (
           <div
@@ -185,7 +221,7 @@ function Posts() {
                     src={post.user.avatar}
                     priority={postIndex < 10 ? true : false}
                     alt={`Photo by ${post.user.fullName} with username ${post.user.username}`}
-                    className="w-full h-full rounded-full select-none pointer-events-none"
+                    className="w-full h-full rounded-full select-none pointer-events-none text-stone-500"
                   />
                 </div>
                 <div>
@@ -217,15 +253,15 @@ function Posts() {
                           priority={
                             index === 0 && postIndex < 10 ? true : false
                           }
-                          alt=""
-                          className="object-cover select-none h-full rounded-sm"
+                          alt={`Photo by ${post.user.fullName} with username ${post.user.username}`}
+                          className="object-cover select-none w-full h-full rounded-sm"
                         />
                       ) : (
                         <div className="w-full relative">
-                          <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 rounded-full bg-transparent/50 p-3">
-                            <Play size="40" fill="currentColor" className="" />
+                          <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 rounded-full text-white bg-transparent/20 dark:bg-transparent/35 p-3">
+                            <Play size="40" fill="currentColor" />
                           </div>
-                          <div className="absolute bottom-2 right-2 p-2 bg-transparent/50 z-10 rounded-full">
+                          <div className="absolute bottom-2 right-2 p-2 text-white bg-transparent/20 dark:bg-transparent/35 z-20 rounded-full">
                             {isMuted ? (
                               <VolumeX
                                 size="15"
@@ -287,16 +323,20 @@ function Posts() {
               <CarouselNext />
             </Carousel>
             <div className="flex gap-3">
-              <Heart
-                size="30"
-                className={`${
-                  post.liked ? "text-rose-500" : "sm:hover:opacity-60"
-                } transition-all active:scale-110`}
+              <button
+                title={post.liked ? "Unlike": "Like"}
                 onClick={() => {
                   likePost(post._id);
                 }}
-                fill={post.liked ? "rgb(244 63 94)" : "none"}
-              />
+              >
+                <Heart
+                  size="30"
+                  className={`${
+                    post.liked ? "text-rose-500" : "sm:hover:opacity-60"
+                  } transition-all active:scale-110`}
+                  fill={post.liked ? "rgb(244 63 94)" : "none"}
+                />
+              </button>
               <Comment
                 comments={comments}
                 user={post.user}
@@ -310,10 +350,6 @@ function Posts() {
             </div>
             <p className="text-sm text-stone-400 mt-1">
               {post.likesCount <= 1 ? "1 like" : `${post.likesCount} likes`}
-              &nbsp; and&nbsp;
-              {post.commentsCount <= 1
-                ? "1 comment"
-                : `${post.commentsCount} comments`}
             </p>
             <p className="py-1 text-sm">
               <span>{post.caption.slice(0, 30)}&nbsp;</span>
@@ -337,6 +373,10 @@ function Posts() {
           </div>
         );
       })}
+      <div className="text-center my-8 relative">
+        <span className="bg-white dark:bg-black px-2">No more posts</span>
+        <hr className="-mt-3 bg-stone-500 border-stone-500" />
+      </div>
     </div>
   );
 }

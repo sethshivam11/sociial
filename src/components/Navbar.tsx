@@ -31,7 +31,7 @@ function Navbar() {
       ${hideNav.includes(location) ? "hidden" : ""} `}
     >
       <div className="bg-stone-200/60 dark:bg-stone-800/60 sm:bg-stone-100 sm:dark:bg-stone-800 backdrop-blur-sm h-full w-full sm:rounded-3xl rounded-2xl xl:p-6 sm:px-2 sm:py-4 sm:w-fit xl:w-full flex flex-col items-center justify-between">
-        <Link href="/" className="sm:inline hidden w-full">
+        <Link href="/" className="sm:inline hidden w-full" title="Sociial">
           <div className="text-3xl tracking-tighter font-extrabold flex items-center md:justify-start md:pt-0 justify-center gap-2 w-full px-2">
             <Image
               src="/logo.svg"
@@ -53,6 +53,7 @@ function Navbar() {
                 ? "sm:bg-stone-300 sm:dark:bg-stone-700 sm:hover:ring-0"
                 : "sm:hover:ring-2"
             }`}
+            title="Home"
           >
             <Home className="inline group-hover:scale-110" />
             <span
@@ -70,6 +71,8 @@ function Navbar() {
                 ? "sm:bg-stone-300 sm:dark:bg-stone-700 sm:hover:ring-0"
                 : "sm:hover:ring-2"
             }`}
+            title="Search"
+
           >
             <Search
               className="inline group-hover:scale-110"
@@ -84,6 +87,7 @@ function Navbar() {
                 ? "sm:bg-stone-300 sm:dark:bg-stone-700 sm:hover:ring-0"
                 : "sm:hover:ring-2"
             }`}
+            title="Messages"
           >
             <span className="inline-block relative">
               <Mail className="inline group-hover:scale-110" />
@@ -104,6 +108,8 @@ function Navbar() {
           <Link
             href="/new-post"
             className="bg-stone-800 dark:bg-stone-100 text-white dark:text-black md:w-full w-fit sm:hidden flex items-center justify-start xl:pl-4 px-2 py-2 gap-3 group rounded-full hover:ring-stone-600 dark:hover:ring-stone-400 sm:hover:ring-2"
+            title="New post"
+
           >
             <Plus className="inline group-hover:scale-110" />
           </Link>
@@ -114,6 +120,7 @@ function Navbar() {
                 ? "sm:bg-stone-300 sm:dark:bg-stone-700 sm:hover:ring-0"
                 : "sm:hover:ring-2"
             }`}
+            title="Notifications"
           >
             <span className="inline-block relative">
               <Bell
@@ -133,6 +140,7 @@ function Navbar() {
                 ? "sm:bg-stone-300 sm:dark:bg-stone-700 sm:hover:ring-0"
                 : "sm:hover:ring-2"
             }`}
+            title="Profile"
           >
             <Avatar className="w-6 h-6 group-hover:scale-110">
               <AvatarImage
@@ -153,13 +161,15 @@ function Navbar() {
           </Link>
         </div>
         <div className="w-full text-center sm:flex hidden flex-col xl:items-start items-center gap-4  xl:p-3 sm:p-1">
-          <button className="bg-stone-800 dark:bg-stone-100 text-white dark:text-black xl:w-full w-fit flex items-center xl:justify-start xl:pl-4 sm:p-3 p-2 gap-3 rounded-2xl ring-stone-800 dark:hover:ring-stone-100 hover:ring-2 ">
+          <button className="bg-stone-800 dark:bg-stone-100 text-white dark:text-black xl:w-full w-fit flex items-center xl:justify-start xl:pl-4 sm:p-3 p-2 gap-3 rounded-2xl ring-stone-800 dark:hover:ring-stone-100 hover:ring-2" 
+            title="New post"
+          >
             <span className="text-center w-full xl:inline hidden">Create</span>
             <Plus className="xl:hidden inline" />
           </button>
           <Menubar className="w-full bg-transparent border-transparent xl:justify-start justify-center">
             <MenubarMenu>
-              <MenubarTrigger className="bg-tranparent xl:w-full w-fit ring-2 ring-stone-500 flex items-center xl:justify-start justify-center xl:pl-4 sm:p-3 p-2 gap-3 rounded-2xl hover:ring-stone-900 dark:hover:ring-stone-200">
+              <MenubarTrigger className="bg-tranparent xl:w-full w-fit ring-2 ring-stone-500 flex items-center xl:justify-start justify-center xl:pl-4 sm:p-3 p-2 gap-3 rounded-2xl hover:ring-stone-900 dark:hover:ring-stone-200" title="More">
                 <span className="text-center w-full xl:inline hidden">
                   More
                 </span>
