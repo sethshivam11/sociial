@@ -76,7 +76,7 @@ function Stories() {
       {stories.map((story, index) => {
         return (
           <Link
-            href="/"
+            href={`/story/${story.username}`}
             key={index}
             className="flex flex-col items-center gap-1 sm:hover:scale-105 transition-transform"
           >

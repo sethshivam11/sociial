@@ -12,76 +12,28 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import PostsLoading from "./PostsLoading";
+
+interface Post {
+  _id: string;
+  user: {
+    fullName: string;
+    username: string;
+    avatar: string;
+  };
+  caption: string;
+  liked: boolean;
+  images: string[];
+  likesCount: number;
+  commentsCount: number;
+}
 
 function Posts() {
+
   const [isMuted, setIsMuted] = React.useState(true);
 
-  const [posts, setPosts] = React.useState([
-    {
-      _id: "1",
-      user: {
-        fullName: "Shivam",
-        username: "sethshivam11",
-        avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
-      },
-      caption:
-        "This is a caption which is very long and I don't know what to write in it so, i am just keep going to see the results. This is just a test caption to check the functionality of the app. I hope you are having a good day. Bye! 😊",
-      liked: false,
-      images: [
-        "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_90/v1715866646/cld-sample-4.jpg",
-        "https://images.pexels.com/photos/2449600/pexels-photo-2449600.png?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1",
-      ],
-      likesCount: 12,
-      commentsCount: 1,
-    },
-    {
-      _id: "2",
-      user: {
-        fullName: "Shivam",
-        username: "sethshivam11",
-        avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
-      },
-      caption:
-        "This is a caption which is very long and I don't know what to write in it so, i am just keep going to see the results. This is just a test caption to check the functionality of the app. I hope you are having a good day. Bye! 😊",
-      liked: false,
-      images: ["https://res.cloudinary.com/dv3qbj0bn/video/upload/v1718210710/sociial/videos/tnw4jy33z047bskwwhyt.mp4"],
-      likesCount: 12,
-      commentsCount: 1,
-    },
-    {
-      _id: "3",
-      user: {
-        fullName: "Shivam",
-        username: "sethshivam11",
-        avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
-      },
-      caption: "This is a caption",
-      liked: false,
-      images: ["https://res.cloudinary.com/dv3qbj0bn/video/upload/v1709183844/samples/dance-2.mp4"],
-      likesCount: 12,
-      commentsCount: 1,
-    },
-    {
-      _id: "4",
-      user: {
-        fullName: "Shivam",
-        username: "sethshivam11",
-        avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
-      },
-      caption:
-        "This is a caption which is very long and I don't know what to write in it so, i am just keep going to see the results. This is just a test caption to check the functionality of the app. I hope you are having a good day. Bye! 😊",
-      liked: false,
-      images: [
-        "https://images.pexels.com/photos/2449600/pexels-photo-2449600.png?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1",
-      ],
-      likesCount: 12,
-      commentsCount: 1,
-    },
-  ]);
+  const [posts, setPosts] = React.useState<Post[]>([]);
+  const [loading, setLoading] = React.useState(false);
   const [comments, setComments] = React.useState([
     {
       _id: "12",
@@ -115,9 +67,9 @@ function Posts() {
       posts.map((post) =>
         post._id === postId
           ? {
-              ...post,
-              commentsCount: post.commentsCount + 1,
-            }
+            ...post,
+            commentsCount: post.commentsCount + 1,
+          }
           : post
       )
     );
@@ -128,12 +80,12 @@ function Posts() {
       posts.map((post) =>
         post._id === _id
           ? {
-              ...post,
-              liked: !post.liked,
-              likesCount: post.liked
-                ? post.likesCount - 1
-                : post.likesCount + 1,
-            }
+            ...post,
+            liked: !post.liked,
+            likesCount: post.liked
+              ? post.likesCount - 1
+              : post.likesCount + 1,
+          }
           : post
       )
     );
@@ -143,16 +95,90 @@ function Posts() {
       comments.map((comment) =>
         comment._id === _id
           ? {
-              ...comment,
-              liked: !comment.liked,
-              likesCount: comment.liked
-                ? comment.likesCount - 1
-                : comment.likesCount + 1,
-            }
+            ...comment,
+            liked: !comment.liked,
+            likesCount: comment.liked
+              ? comment.likesCount - 1
+              : comment.likesCount + 1,
+          }
           : comment
       )
     );
   }
+
+  React.useEffect(() => {
+    setLoading(true);
+    setTimeout(() => {
+      setPosts([
+        {
+          _id: "1",
+          user: {
+            fullName: "Shivam",
+            username: "sethshivam11",
+            avatar:
+              "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+          },
+          caption:
+            "This is a caption which is very long and I don't know what to write in it so, i am just keep going to see the results. This is just a test caption to check the functionality of the app. I hope you are having a good day. Bye! 😊",
+          liked: false,
+          images: [
+            "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_90/v1715866646/cld-sample-4.jpg",
+            "https://images.pexels.com/photos/2449600/pexels-photo-2449600.png?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1",
+          ],
+          likesCount: 12,
+          commentsCount: 1,
+        },
+        {
+          _id: "2",
+          user: {
+            fullName: "Shivam",
+            username: "sethshivam11",
+            avatar:
+              "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+          },
+          caption:
+            "This is a caption which is very long and I don't know what to write in it so, i am just keep going to see the results. This is just a test caption to check the functionality of the app. I hope you are having a good day. Bye! 😊",
+          liked: false,
+          images: ["https://res.cloudinary.com/dv3qbj0bn/video/upload/v1709183844/samples/dance-2.mp4"],
+          likesCount: 12,
+          commentsCount: 1,
+        },
+        {
+          _id: "3",
+          user: {
+            fullName: "Shivam",
+            username: "sethshivam11",
+            avatar:
+              "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+          },
+          caption: "This is a caption",
+          liked: false,
+          images: ["https://res.cloudinary.com/dv3qbj0bn/video/upload/v1718210710/sociial/videos/tnw4jy33z047bskwwhyt.mp4"],
+          likesCount: 12,
+          commentsCount: 1,
+        },
+        {
+          _id: "4",
+          user: {
+            fullName: "Shivam",
+            username: "sethshivam11",
+            avatar:
+              "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+          },
+          caption:
+            "This is a caption which is very long and I don't know what to write in it so, i am just keep going to see the results. This is just a test caption to check the functionality of the app. I hope you are having a good day. Bye! 😊",
+          liked: false,
+          images: [
+            "https://images.pexels.com/photos/2449600/pexels-photo-2449600.png?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1",
+          ],
+          likesCount: 12,
+          commentsCount: 1,
+        },
+
+      ])
+      setLoading(false);
+    }, 2000)
+  }, []);
 
   React.useEffect(() => {
     const videos = Array.from(document.querySelectorAll("video"));
@@ -202,15 +228,15 @@ function Posts() {
         observers[index].unobserve(video);
       });
     };
-  }, []);
+  }, [posts]);
 
   return (
     <div className="flex flex-col py-2 sm:px-4 px-2 gap-4 w-full pb-4">
-      {posts.map((post, postIndex) => {
+      {loading ? (<PostsLoading />) : posts.map((post, postIndex) => {
         return (
           <div
             key={postIndex}
-            className="rounded-xl bg-stone-100 dark:bg-stone-800 p-4 w-full sm:w-[85%] mx-auto h-fit max-h- min-h-64 min-w-64"
+            className="rounded-xl bg-stone-100 dark:bg-stone-800 p-4 w-full sm:w-[85%] mx-auto h-fit min-h-64 min-w-64"
           >
             <div className="flex justify-between w-full">
               <div className="flex items-center gap-2 w-full">
@@ -324,16 +350,15 @@ function Posts() {
             </Carousel>
             <div className="flex gap-3">
               <button
-                title={post.liked ? "Unlike": "Like"}
+                title={post.liked ? "Unlike" : "Like"}
                 onClick={() => {
                   likePost(post._id);
                 }}
               >
                 <Heart
                   size="30"
-                  className={`${
-                    post.liked ? "text-rose-500" : "sm:hover:opacity-60"
-                  } transition-all active:scale-110`}
+                  className={`${post.liked ? "text-rose-500" : "sm:hover:opacity-60"
+                    } transition-all active:scale-110`}
                   fill={post.liked ? "rgb(244 63 94)" : "none"}
                 />
               </button>

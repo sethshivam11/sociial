@@ -1,12 +1,9 @@
-// "use client";
 import MobileNav from "@/components/MobileNav";
 import Posts from "@/components/Posts";
 import Stories from "@/components/Stories";
 import Suggestions from "@/components/Suggestions";
-import { useUser } from "@/context/UserProvider";
 
 export default function Home() {
-  // const { unreadMessageCount } = useUser();
   const unreadMessageCount = 0;
   return (
     <>
