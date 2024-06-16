@@ -1,5 +1,5 @@
 "use client";
-import { Bell, Home, Mail, Menu, Plus, Search } from "lucide-react";
+import { Bell, Home, Mail, Menu, Plus, Search, Tv } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -27,7 +27,7 @@ function Navbar() {
 
   return (
     <nav
-      className={`xl:px-4 xl:py-6 p-3 sm:sticky fixed sm:top-0 left-0 sm:h-screen h-fit bottom-0 xl:col-span-2 sm:col-span-1 col-span-10 sm:min-h-[40rem] z-10 w-full min-w-max 
+      className={`xl:px-4 xl:py-6 p-3 sm:sticky fixed sm:top-0 left-0 sm:h-screen h-fit bottom-0 xl:col-span-2 sm:col-span-1 col-span-10 sm:min-h-[42rem] max-h-[55rem] z-10 w-full min-w-max 
       ${hideNav.map((path) => {
         if (location.includes(path) || location.startsWith(path)) return "hidden";
         else return "";
@@ -48,7 +48,7 @@ function Navbar() {
             <span className="xl:inline hidden">Sociial</span>
           </div>
         </Link>
-        <div className="flex sm:flex-col flex-row w-full md:items-start items-center sm:justify-start justify-evenly p-2 text-lg gap-4 h-3/5">
+        <div className="flex sm:flex-col flex-row w-full md:items-start items-center sm:justify-start justify-evenly p-2 text-lg gap-4 h-fit">
           <Link
             href="/"
             className={` md:w-full w-fit flex items-center xl:justify-start justify-center xl:pl-4 sm:p-3 p-2 gap-3 group rounded-2xl hover:ring-stone-600 dark:hover:ring-stone-400 transition-colors ${location === "/"
@@ -111,9 +111,21 @@ function Navbar() {
           >
             <Plus className="inline group-hover:scale-110" />
           </Link>
+          <Link href="/videos"
+            className={`md:w-full w-fit flex items-center xl:justify-start justify-center xl:pl-4 sm:p-3 p-2 gap-3 group rounded-2xl hover:ring-stone-600 dark:hover:ring-stone-400 transition-colors ${location === "/videos"
+              ? "sm:bg-stone-300 sm:dark:bg-stone-700 sm:hover:ring-0"
+              : "sm:hover:ring-2"
+              }`}
+            title="Videos">
+            <Tv className="inline group-hover:scale-110"
+              strokeWidth={location === "/videos" ? "2.5" : "2"}
+            />
+            <span className="xl:inline hidden">Videos</span>
+
+          </Link>    
           <Link
             href="/notifications"
-            className={`md:w-full w-fit flex items-center justify-start xl:pl-4 sm:p-3 p-2 gap-3 group rounded-2xl hover:ring-stone-600 dark:hover:ring-stone-400 sm:hover:ring-2 ${location === "/notifications"
+            className={`md:w-full w-fit sm:flex hidden items-center justify-start xl:pl-4 sm:p-3 p-2 gap-3 group rounded-2xl hover:ring-stone-600 dark:hover:ring-stone-400 sm:hover:ring-2 ${location === "/notifications"
               ? "sm:bg-stone-300 sm:dark:bg-stone-700 sm:hover:ring-0"
               : "sm:hover:ring-2"
               }`}
@@ -155,7 +167,7 @@ function Navbar() {
             </span>
           </Link>
         </div>
-        <div className="w-full text-center sm:flex hidden flex-col xl:items-start items-center gap-4  xl:p-3 sm:p-1">
+        <div className="w-full text-center sm:flex hidden flex-col xl:items-start items-center gap-4 sm:p-1">
           <button className="bg-stone-800 dark:bg-stone-100 text-white dark:text-black xl:w-full w-fit flex items-center xl:justify-start xl:pl-4 sm:p-3 p-2 gap-3 rounded-2xl ring-stone-800 dark:hover:ring-stone-100 hover:ring-2"
             title="New post"
           >
