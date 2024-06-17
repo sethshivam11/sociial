@@ -2,18 +2,12 @@
 import { MoreHorizontal } from "lucide-react";
 import React from "react";
 import {
-  Menubar,
-  MenubarContent,
-  MenubarItem,
-  MenubarMenu,
-  MenubarTrigger,
-} from "@/components/ui/menubar";
-import {
   Dialog,
   DialogClose,
   DialogContent,
   DialogFooter,
   DialogTitle,
+  DialogTrigger
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
@@ -33,7 +27,6 @@ import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { useToast } from "./ui/use-toast";
 import { useRouter } from "next/navigation";
-import { DialogTrigger } from "@radix-ui/react-dialog";
 
 interface Props {
   user: {
@@ -48,17 +41,12 @@ function More({ user, postId }: Props) {
   const { toast } = useToast();
   const router = useRouter();
 
-  const [unfollowOpen, setUnfollowOpen] = React.useState(false);
-  const [reportOpen, setReportOpen] = React.useState(false);
-
   function unfollow(username: string) {
     console.log(`Unfollowed user ${username}`);
-    setUnfollowOpen(false);
   }
 
   function report(postId: string, username: string) {
     console.log(`Reported post ${postId} by user ${user.username}`);
-    setReportOpen(false);
   }
 
   async function copyLink(username: string, postId: string) {
@@ -67,7 +55,6 @@ function More({ user, postId }: Props) {
     )}`;
     console.log(process.env.NEXT_PUBLIC_URL);
     await navigator.clipboard.writeText(link);
-    // console.log(link);
     toast({
       title: "Link copied to clipboard",
       description: "The link has been copied to your clipboard.",

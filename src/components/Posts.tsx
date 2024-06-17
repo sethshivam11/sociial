@@ -29,7 +29,43 @@ interface Post {
 }
 
 function Posts() {
-  const [posts, setPosts] = React.useState<Post[]>([]);
+  const [posts, setPosts] = React.useState<Post[]>([
+    {
+      _id: "1",
+      user: {
+        fullName: "Shivam",
+        username: "sethshivam11",
+        avatar:
+          "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+      },
+      caption:
+        "This is a caption which is very long and I don't know what to write in it so, i am just keep going to see the results. This is just a test caption to check the functionality of the app. I hope you are having a good day. Bye! 😊",
+      liked: false,
+      images: [
+        "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_90/v1715866646/cld-sample-4.jpg",
+        "https://images.pexels.com/photos/2449600/pexels-photo-2449600.png?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1",
+      ],
+      likesCount: 12,
+      commentsCount: 1,
+    },
+    {
+      _id: "4",
+      user: {
+        fullName: "Shivam",
+        username: "sethshivam11",
+        avatar:
+          "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+      },
+      caption:
+        "This is a caption which is very long and I don't know what to write in it so, i am just keep going to see the results. This is just a test caption to check the functionality of the app. I hope you are having a good day. Bye! 😊",
+      liked: false,
+      images: [
+        "https://images.pexels.com/photos/2449600/pexels-photo-2449600.png?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1",
+      ],
+      likesCount: 12,
+      commentsCount: 1,
+    },
+  ]);
   const [loading, setLoading] = React.useState(false);
   const [comments, setComments] = React.useState([
     {
@@ -102,51 +138,6 @@ function Posts() {
       )
     );
   }
-
-  React.useEffect(() => {
-    setLoading(true);
-    setTimeout(() => {
-      setPosts([
-        {
-          _id: "1",
-          user: {
-            fullName: "Shivam",
-            username: "sethshivam11",
-            avatar:
-              "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
-          },
-          caption:
-            "This is a caption which is very long and I don't know what to write in it so, i am just keep going to see the results. This is just a test caption to check the functionality of the app. I hope you are having a good day. Bye! 😊",
-          liked: false,
-          images: [
-            "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_90/v1715866646/cld-sample-4.jpg",
-            "https://images.pexels.com/photos/2449600/pexels-photo-2449600.png?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1",
-          ],
-          likesCount: 12,
-          commentsCount: 1,
-        },
-        {
-          _id: "4",
-          user: {
-            fullName: "Shivam",
-            username: "sethshivam11",
-            avatar:
-              "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
-          },
-          caption:
-            "This is a caption which is very long and I don't know what to write in it so, i am just keep going to see the results. This is just a test caption to check the functionality of the app. I hope you are having a good day. Bye! 😊",
-          liked: false,
-          images: [
-            "https://images.pexels.com/photos/2449600/pexels-photo-2449600.png?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1",
-          ],
-          likesCount: 12,
-          commentsCount: 1,
-        },
-
-      ])
-      setLoading(false);
-    }, 2000)
-  }, []);
 
   return (
     <div className="flex flex-col py-2 sm:px-4 px-2 gap-4 w-full pb-4">

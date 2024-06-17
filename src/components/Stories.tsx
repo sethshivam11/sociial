@@ -6,43 +6,18 @@ import React from "react";
 function Stories() {
   const stories = [
     {
-      name: "Shivam",
+      fullName: "Shivam",
       username: "sethshivam11",
       avatar:
         "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
     },
     {
-      name: "Shivam",
+      fullName: "Shivam",
       username: "sethshivam11",
       avatar: "https://github.com/shadcn.png",
     },
     {
-      name: "Shivam",
-      username: "sethshivam11",
-      avatar: "https://avatars.githubusercontent.com/u/130232913?v=4",
-    },
-    {
-      name: "Shivam",
-      username: "sethshivam11",
-      avatar: "https://avatars.githubusercontent.com/u/130232913?v=4",
-    },
-    {
-      name: "Shivam",
-      username: "sethshivam11",
-      avatar: "https://avatars.githubusercontent.com/u/130232913?v=4",
-    },
-    {
-      name: "Shivam",
-      username: "sethshivam11",
-      avatar: "https://avatars.githubusercontent.com/u/130232913?v=4",
-    },
-    {
-      name: "Shivam",
-      username: "sethshivam11",
-      avatar: "https://avatars.githubusercontent.com/u/130232913?v=4",
-    },
-    {
-      name: "Shivam",
+      fullName: "Shivam",
       username: "sethshivam11",
       avatar: "https://avatars.githubusercontent.com/u/130232913?v=4",
     },
@@ -52,11 +27,10 @@ function Stories() {
     <div className="h-30 flex overflow-x-auto w-full p-4 gap-4 no-scrollbar">
       <div className="flex flex-col items-center gap-1 relative">
         <div
-          className={`w-20 h-20 rounded-full p-1 ${
-            storyAvailable
+          className={`w-20 h-20 rounded-full p-1 ${storyAvailable
               ? "bg-gradient-to-bl from-red-500 via-blue-500 to-green-500 sm:hover:scale-105"
               : ""
-          }`}
+            }`}
         >
           <Image
             src={stories[0].avatar}
@@ -83,7 +57,7 @@ function Stories() {
             <div className="w-20 h-20 rounded-full bg-gradient-to-bl from-red-500 via-blue-500 to-green-500 p-1">
               <Image
                 src={story.avatar}
-                alt=""
+                alt={`Story by ${story.fullName} with username ${story.username}`}
                 loading={index < 10 ? "eager" : "lazy"}
                 className="w-full h-full object-contain rounded-full ring-2 ring-white dark:ring-stone-900 bg-white dark:bg-black pointer-events-none select-none"
                 height={80}
