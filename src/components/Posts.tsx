@@ -172,7 +172,10 @@ function Posts() {
               <CarouselContent>
                 {post.images.map((image, index) => {
                   return (
-                    <CarouselItem key={index}>
+                    <CarouselItem key={index} className="relative">
+                      <div className="absolute w-full h-full hidden items-center justify-center peer">
+                        <Heart size="150" strokeWidth="0" fill="rgb(244 63 94)" className="animate-like" />
+                      </div>
                       <Image
                         width={700}
                         height={320}
@@ -180,6 +183,15 @@ function Posts() {
                         priority={
                           index === 0 && postIndex < 10 ? true : false
                         }
+                        onDoubleClick={(e) => {
+                          likePost(post._id);
+                          const heart = (e.target as HTMLElement).parentElement?.childNodes[0] as HTMLElement;
+                          if (heart.classList.contains("hidden")) {
+                            heart.classList.remove("hidden");
+                          } else {
+                            heart.classList.add("hidden");
+                          }
+                        }}
                         alt={`Photo by ${post.user.fullName} with username ${post.user.username}`}
                         className="object-cover select-none w-full h-full rounded-sm"
                       />

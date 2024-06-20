@@ -28,7 +28,7 @@ function MobileNav({ unreadMessageCount, newNotifications }: Props) {
               size="26"
             />
             {newNotifications && (
-              <span className="absolute top-0 right-0 inline-block w-[10px] h-[10px] transform translate-x-1/5 translate-y-0.5 bg-red-600 rounded-full"></span>
+              <span className="absolute -top-1 right-4 inline-block w-[10px] h-[10px] transform translate-x-1/5 translate-y-0.5 bg-red-600 rounded-full"></span>
             )}
           </span>
         </Link>

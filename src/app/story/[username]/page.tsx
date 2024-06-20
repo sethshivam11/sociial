@@ -64,7 +64,6 @@ function Story({ params }: Props) {
   const nextRef = React.useRef<HTMLButtonElement>(null);
   const closeRef1 = React.useRef<HTMLButtonElement>(null);
   const closeRef2 = React.useRef<HTMLButtonElement>(null);
-  const progressRef = React.useRef<HTMLSpanElement>(null);
   const [index, setIndex] = React.useState(0);
   const [stories, setStories] = React.useState<Story[]>([
     {
@@ -113,21 +112,21 @@ function Story({ params }: Props) {
     console.log(data.reply);
   }
 
-  // React.useEffect(() => {
-  // console.log(
-  //   index >= currentStory.images.length - 1 &&
-  //   currentStory.index >= stories.length - 1
-  // );
-  // const interval = setInterval(() => {
-  //    {
-  //     // router.push("/");
-  //     return clearInterval(interval);
-  //   }
-  //   nextRef.current?.click();
-  // }, 1500);
+  React.useEffect(() => {
+  console.log(
+    index >= currentStory.images.length - 1 &&
+    currentStory.index >= stories.length - 1
+  );
+  const interval = setInterval(() => {
+    //  {
+    //   // router.push("/");
+    //   return clearInterval(interval);
+    // }
+    nextRef.current?.click();
+  }, 15000);
 
-  // return () => clearInterval(interval);
-  // }, [nextRef.current]);
+  return () => clearInterval(interval);
+  }, [nextRef.current]);
 
   React.useEffect(() => {
     if (videoRef) {
@@ -145,6 +144,7 @@ function Story({ params }: Props) {
         className="text-stone-100 p-2 absolute hidden sm:inline-block right-0 top-0"
         onClick={() => router.push("/")}
         ref={closeRef2}
+        title="Close"
       >
         <X size="40" />
       </button>
@@ -195,18 +195,17 @@ function Story({ params }: Props) {
       >
         <ChevronRight size="20" />
       </button>
-      <div className="ring-1 ring-stone-800 h-[95%] flex items-center my-2 rounded-sm bg-black min-w-96 w-fit relative">
+      <div className="ring-1 ring-stone-800 flex items-center my-2 rounded-sm bg-black min-w-72 sm:h-[50rem] max-h-full h-fit aspect-9/16 sm:w-fit w-full relative">
         <div className="w-full absolute flex items-center justify-between p-4 pt-2 top-0 left-0 bg-gradient-to-b from-transparent/40 via-transparent/20 to-transparent pb-4">
           <div className="w-full flex flex-col justify-start">
             <div className="flex gap-0.5">
               {currentStory.images.map((_, i) => (
                 <div
-                  className="h-0.5 bg-stone-500 rounded-lg w-full mb-2 relative"
+                  className="h-[3px] bg-stone-500 rounded-lg w-full mb-2 relative"
                   key={i}
                 >
                   <span
-                    className="h-0.5 bg-stone-100 w-0 inline-block absolute"
-                    ref={progressRef}
+                    className={`h-[3px] bg-stone-100 w-0 inline-block absolute ${index === i ? "animate-story": ""}`}
                   ></span>
                 </div>
               ))}
@@ -231,11 +230,12 @@ function Story({ params }: Props) {
                 <span className="text-stone-500 text-sm">&#183; 3h</span>
               </Link>
               <div className="flex items-center justify-center gap-2">
-                <button className={`${currentStory.images[index].isVideo ? "" : "hidden"}`} onClick={() => setIsMuted(!isMuted)}>
+                <button
+                  className={`${currentStory.images[index].isVideo ? "" : "hidden"}`} onClick={() => setIsMuted(!isMuted)} title={isMuted ? "Unmute" : "Mute"}>
                   {isMuted ?
                     <VolumeXIcon /> : <Volume2Icon />}
                 </button>
-                <button onClick={() => setIsPaused(!isPaused)}>
+                <button onClick={() => setIsPaused(!isPaused)} title={isPaused ? "Pause" : "Play"}>
                   {isPaused ? (
                     <Pause fill="currentColor" />
                   ) : (
@@ -300,6 +300,7 @@ function Story({ params }: Props) {
                   className="sm:hidden"
                   onClick={() => router.push("/")}
                   ref={closeRef1}
+                  title="Close"
                 >
                   <X />
                 </button>
@@ -311,8 +312,8 @@ function Story({ params }: Props) {
           <video src={currentStory.images[index].link} autoPlay muted={isMuted} ref={videoRef} /> :
           <img
             src={currentStory.images[index].link}
-            alt=""
-            className="min-h-96 object-contain max-h-full h-fit min-w-96 aspect-9/16 select-none pointer-events-none"
+            alt={`Story ${currentStory.index + 1} by ${currentStory.username}`}
+            className="max-h-full h-fit w-full object-contain select-none pointer-events-none"
           />
         }
         <Form {...form}>
