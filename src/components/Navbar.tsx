@@ -122,7 +122,7 @@ function Navbar() {
             />
             <span className="xl:inline hidden">Videos</span>
 
-          </Link>    
+          </Link>
           <Link
             href="/notifications"
             className={`md:w-full w-fit sm:flex hidden items-center justify-start xl:pl-4 sm:p-3 p-2 gap-3 group rounded-2xl hover:ring-stone-600 dark:hover:ring-stone-400 sm:hover:ring-2 ${location === "/notifications"
@@ -143,8 +143,8 @@ function Navbar() {
             <span className="xl:inline hidden">Notifications</span>
           </Link>
           <Link
-            href="/profile"
-            className={`md:w-full w-fit flex items-center xl:justify-start justify-center xl:pl-4 sm:p-3 p-2 gap-3 group rounded-2xl hover:ring-stone-600 dark:hover:ring-stone-400 transition-colors ${location === "/profile"
+            href="/profile/posts"
+            className={`md:w-full w-fit flex items-center xl:justify-start justify-center xl:pl-4 sm:p-3 p-2 gap-3 group rounded-2xl hover:ring-stone-600 dark:hover:ring-stone-400 transition-colors ${location.includes("/profile")
               ? "sm:bg-stone-300 sm:dark:bg-stone-700 sm:hover:ring-0"
               : "sm:hover:ring-2"
               }`}
@@ -160,7 +160,7 @@ function Navbar() {
               <AvatarFallback>SS</AvatarFallback>
             </Avatar>
             <span
-              className={`xl:inline hidden ${location === "/profile" ? "font-semibold" : ""
+              className={`xl:inline hidden ${location.includes("/profile") ? "font-semibold" : ""
                 }`}
             >
               Profile

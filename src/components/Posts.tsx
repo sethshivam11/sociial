@@ -1,5 +1,5 @@
 "use client";
-import { Heart, Play, Volume2, VolumeX } from "lucide-react";
+import { Bookmark, Heart, Play, Volume2, VolumeX } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import Comment from "./Comment";
@@ -173,7 +173,7 @@ function Posts() {
                 {post.images.map((image, index) => {
                   return (
                     <CarouselItem key={index} className="relative">
-                      <div className="absolute w-full h-full hidden items-center justify-center peer">
+                      <div className={`absolute w-full h-full items-center justify-center peer ${post.liked ? "flex" : "hidden"}`}>
                         <Heart size="150" strokeWidth="0" fill="rgb(244 63 94)" className="animate-like" />
                       </div>
                       <Image
@@ -185,12 +185,9 @@ function Posts() {
                         }
                         onDoubleClick={(e) => {
                           likePost(post._id);
-                          const heart = (e.target as HTMLElement).parentElement?.childNodes[0] as HTMLElement;
-                          if (heart.classList.contains("hidden")) {
-                            heart.classList.remove("hidden");
-                          } else {
-                            heart.classList.add("hidden");
-                          }
+                          const heartContainer = (e.target as HTMLElement).parentElement?.childNodes[0] as HTMLElement;
+                          heartContainer.classList.remove("hidden");
+                          setTimeout(() => heartContainer.classList.add("hidden"), 500);
                         }}
                         alt={`Photo by ${post.user.fullName} with username ${post.user.username}`}
                         className="object-cover select-none w-full h-full rounded-sm"
@@ -202,32 +199,44 @@ function Posts() {
               <CarouselPrevious />
               <CarouselNext />
             </Carousel>
-            <div className="flex gap-3">
-              <button
-                title={post.liked ? "Unlike" : "Like"}
-                onClick={() => {
-                  likePost(post._id);
-                }}
-              >
-                <Heart
-                  size="30"
-                  className={`${post.liked ? "text-rose-500" : "sm:hover:opacity-60"
-                    } transition-all active:scale-110`}
-                  fill={post.liked ? "rgb(244 63 94)" : "none"}
+            <div className="flex justify-between select-none">
+              <div className="flex gap-3">
+                <button
+                  title={post.liked ? "Unlike" : "Like"}
+                  onClick={() => {
+                    likePost(post._id);
+                  }}
+                >
+                  <Heart
+                    size="30"
+                    className={`${post.liked ? "text-rose-500" : "sm:hover:opacity-60"
+                      } transition-all active:scale-110`}
+                    fill={post.liked ? "rgb(244 63 94)" : "none"}
+                  />
+                </button>
+                <Comment
+                  comments={comments}
+                  user={post.user}
+                  commentsCount={post.commentsCount}
+                  likeComment={likeComment}
+                  addComment={addComment}
+                  comment={comment}
+                  setComment={setComment}
                 />
+                <Share />
+              </div>
+              <button className="mr-1" onClick={(e) => {
+                const icon = e.target as HTMLElement
+                if (icon.getAttribute("fill") === "currentColor") {
+                  icon.setAttribute("fill", "none")
+                } else {
+                  (e.target as HTMLElement).setAttribute("fill", "currentColor")
+                }
+              }}>
+                <Bookmark size="30" className="w-full h-full" />
               </button>
-              <Comment
-                comments={comments}
-                user={post.user}
-                commentsCount={post.commentsCount}
-                likeComment={likeComment}
-                addComment={addComment}
-                comment={comment}
-                setComment={setComment}
-              />
-              <Share />
             </div>
-            <p className="text-sm text-stone-400 mt-1">
+            <p className="text-sm text-stone-400 mt-1 select-none">
               {post.likesCount <= 1 ? "1 like" : `${post.likesCount} likes`}
             </p>
             <p className="py-1 text-sm">

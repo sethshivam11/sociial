@@ -83,16 +83,14 @@ const config = {
         like: {
           from: { transform: "scale(0.5)" },
           "50%": { transform: "scale(1.2)" },
-          "90%": { opacity: "0.5" },
-          "99%": { transform: "scale(1) ", display: "none" },
-          "100%": { opacity: "0", display: "none", },
+          "100%": { transform: "scale(1)" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         story: "story 15s linear 1",
-        like: "like 1s ease-in-out forwards",
+        like: "like 0.5s ease-in-out infinite",
       },
     },
   },
