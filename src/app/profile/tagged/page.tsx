@@ -22,21 +22,18 @@ function Page() {
             </div>
           )
         })
-        : (
-
-          posts.length ?
-            (posts.map((post, index) =>
-            (<div className="lg:w-1/4 w-1/3 aspect-square p-1" key={index}>
-              <Image src={post.link} width="300" height="300" className="w-full h-full object-cover rounded-sm" alt="" />
-            </div>))) :
-            (<div className="flex flex-col items-center justify-center w-full min-h-96 h-full">
-              <PostImage size="100" className="my-4" />
-              <span className="sm:text-3xl text-xl font-bold tracking-tight">Nothing Here</span>
-              <span className="sm:text-lg text-base text-stone-500">
-                Share your first post now
-              </span>
-            </div>)
-
+        : (posts.length ?
+          (posts.map((post, index) =>
+          (<div className="lg:w-1/4 w-1/3 aspect-square p-1" key={index}>
+            <Image src={post.link} width="300" height="300" className="w-full h-full object-cover rounded-sm" alt="" />
+          </div>))) :
+          (<div className="flex flex-col items-center justify-center w-full min-h-96 h-full">
+            <PostImage size="100" className="my-4" />
+            <span className="sm:text-3xl text-xl font-bold tracking-tight">Nothing Here</span>
+            <span className="sm:text-lg text-base text-stone-500">
+              Share your first post now
+            </span>
+          </div>)
         )}
     </div>
   )
