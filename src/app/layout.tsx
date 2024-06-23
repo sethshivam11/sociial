@@ -70,9 +70,9 @@ export default function RootLayout({
         )}
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <Navbar />
-            {children}
-            <Toaster />
+          <Navbar />
+          {children}
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

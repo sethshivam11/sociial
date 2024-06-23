@@ -3,6 +3,7 @@ import React from "react";
 import { Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import Link from "next/link";
+import { nameFallback } from "@/lib/helpers";
 
 function Suggestions() {
   const [users, setUsers] = React.useState([
@@ -37,7 +38,7 @@ function Suggestions() {
   ]);
   return (
     <div className="py-8 px-2 lg:flex hidden flex-col gap-4 lg:col-span-3">
-       <div className="bg-stone-100 dark:bg-stone-800 pt-4 p-6 rounded-2xl">
+      <div className="bg-stone-100 dark:bg-stone-800 pt-4 p-6 rounded-2xl">
         <h1 className="text-xl">Suggestions</h1>
         <div className="flex flex-col w-full p-1 mt-4 gap-5">
           {users.length ? (
@@ -50,8 +51,14 @@ function Suggestions() {
                   <Link href="/">
                     <div className="w-1/2 flex items-center gap-3">
                       <Avatar className="w-8 h-8">
-                        <AvatarImage src={user.avatar} alt="" className="pointer-events-none select-none" />
-                        <AvatarFallback>SN</AvatarFallback>
+                        <AvatarImage
+                          src={user.avatar}
+                          alt=""
+                          className="pointer-events-none select-none"
+                        />
+                        <AvatarFallback>
+                          {nameFallback(user.name)}
+                        </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col gap-0 leading-3">
                         <span className="text-md font-semibold">

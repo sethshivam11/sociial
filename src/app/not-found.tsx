@@ -19,7 +19,9 @@ function Custom404() {
         The page you are looking for was not found
       </span>
       <div className="flex items-center justify-evenly">
-        <Button onClick={() => router.push("/")} variant="link">Go to homepage</Button>
+        <Button onClick={() => router.push("/")} variant="link">
+          Go to homepage
+        </Button>
       </div>
     </div>
   );

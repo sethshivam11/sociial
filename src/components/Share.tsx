@@ -28,7 +28,7 @@ export default function Share() {
       message: "",
     },
   });
-  
+
   function onSubmit(values: FormInterface) {
     console.log(values);
   }
@@ -77,8 +77,9 @@ export default function Share() {
       <DialogTrigger asChild title="Share">
         <Send size="30" className="sm:hover:opacity-60 rotate-12" />
       </DialogTrigger>
-      <DialogContent className="sm:w-2/3 w-full h-3/4 flex flex-col bg-stone-100 dark:bg-stone-900"
-      onOpenAutoFocus={(e) => e.preventDefault()}
+      <DialogContent
+        className="sm:w-2/3 w-full h-3/4 flex flex-col bg-stone-100 dark:bg-stone-900"
+        onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <h1 className="text-xl">Share post</h1>
         <Input

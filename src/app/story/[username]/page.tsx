@@ -62,8 +62,10 @@ function Story({ params }: Props) {
   const { username } = params;
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const nextRef = React.useRef<HTMLButtonElement>(null);
+  const prevRef = React.useRef<HTMLButtonElement>(null);
   const closeRef1 = React.useRef<HTMLButtonElement>(null);
   const closeRef2 = React.useRef<HTMLButtonElement>(null);
+  const progressBarRef = React.useRef<HTMLSpanElement>(null);
   const [index, setIndex] = React.useState(0);
   const [stories, setStories] = React.useState<Story[]>([
     {
@@ -75,7 +77,7 @@ function Story({ params }: Props) {
         },
         {
           link: "https://images.pexels.com/photos/2449600/pexels-photo-2449600.png?auto=compress&cs=tinysrgb&w=500&h=1200&dpr=1",
-        }
+        },
       ],
       fullName: "John Doe",
       username: username,
@@ -89,9 +91,10 @@ function Story({ params }: Props) {
       images: [
         {
           link: "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_90/v1715866646/cld-sample-4.jpg",
-        }, {
+        },
+        {
           link: "https://images.pexels.com/photos/2449600/pexels-photo-2449600.png?auto=compress&cs=tinysrgb&w=500&h=1200&dpr=1",
-        }
+        },
       ],
       fullName: "John Doe",
       username: username,
@@ -103,6 +106,7 @@ function Story({ params }: Props) {
   const [currentStory, setCurrentStory] = React.useState<Story>(stories[0]);
   const [isMuted, setIsMuted] = React.useState(true);
   const [isPaused, setIsPaused] = React.useState(false);
+  const [timer, setTimer] = React.useState<Timer | null>(null);
 
   function report(storyId: string, username: string) {
     console.log(`Reported story ${storyId} by user ${username}`);
@@ -112,21 +116,46 @@ function Story({ params }: Props) {
     console.log(data.reply);
   }
 
-  React.useEffect(() => {
-  console.log(
-    index >= currentStory.images.length - 1 &&
-    currentStory.index >= stories.length - 1
-  );
-  const interval = setInterval(() => {
-    //  {
-    //   // router.push("/");
-    //   return clearInterval(interval);
-    // }
-    nextRef.current?.click();
-  }, 15000);
+  class Timer {
+    private timerId: NodeJS.Timeout | undefined;
+    private start: number;
+    private remaining: number;
+    private callback: () => void;
 
-  return () => clearInterval(interval);
-  }, [nextRef.current]);
+    constructor(callback: () => void, delay: number) {
+      this.remaining = delay;
+      this.callback = callback;
+      this.resume();
+      this.start = Date.now();
+      this.timerId = undefined;
+    }
+
+    pause() {
+      clearTimeout(this.timerId);
+      this.timerId = undefined;
+      this.remaining -= Date.now() - this.start;
+      console.log(this.remaining);
+    }
+
+    resume() {
+      if (this.timerId) {
+        return;
+      }
+
+      this.start = Date.now();
+      this.timerId = setTimeout(this.callback, this.remaining);
+      console.log(this.remaining);
+    }
+  }
+
+  React.useEffect(() => {
+    const timer: Timer = new Timer(function () {
+      nextRef.current?.click();
+    }, 15000);
+    setTimer(timer);
+
+    return () => timer.pause();
+  }, [currentStory]);
 
   React.useEffect(() => {
     if (videoRef) {
@@ -136,7 +165,16 @@ function Story({ params }: Props) {
         videoRef.current?.play();
       }
     }
-  }, [isPaused])
+    const animation = progressBarRef.current?.getAnimations()[0];
+    if (animation) {
+      isPaused ? animation.pause() : animation.play();
+    }
+    if (isPaused) {
+      timer?.pause();
+    } else {
+      timer?.resume();
+    }
+  }, [isPaused, timer]);
 
   return (
     <div className="w-full col-span-10 h-screen flex items-center justify-center bg-stone-900">
@@ -149,15 +187,16 @@ function Story({ params }: Props) {
         <X size="40" />
       </button>
       <button
-        className={`absolute top-1/2 left-2 -translate-y-1/2 p-1 bg-transparent/40 rounded-full ${index === 0 && currentStory.index === 0 ? "hidden" : ""
-          }`}
+        className={`absolute top-1/2 left-2 -translate-y-1/2 p-1 bg-transparent/40 rounded-full ${
+          index === 0 && currentStory.index === 0 ? "hidden" : ""
+        }`}
         onClick={() => {
           if (index === 0 && currentStory.index > 0) {
             setCurrentStory(
               stories[
-              currentStory.index > 0
-                ? currentStory.index - 1
-                : currentStory.index
+                currentStory.index > 0
+                  ? currentStory.index - 1
+                  : currentStory.index
               ]
             );
             setIndex(currentStory.images.length - 1);
@@ -165,15 +204,17 @@ function Story({ params }: Props) {
             setIndex(index - 1);
           }
         }}
+        ref={prevRef}
       >
         <ChevronLeft size="20" />
       </button>
       <button
-        className={`absolute top-1/2 right-2 -translate-y-1/2 p-1 bg-transparent/40 rounded-full ${index >= currentStory.images.length - 1 &&
+        className={`absolute top-1/2 right-2 -translate-y-1/2 p-1 bg-transparent/40 rounded-full ${
+          index >= currentStory.images.length - 1 &&
           currentStory.index >= stories.length - 1
-          ? "hidden"
-          : ""
-          }`}
+            ? "hidden"
+            : ""
+        }`}
         ref={nextRef}
         onClick={() => {
           if (
@@ -182,9 +223,9 @@ function Story({ params }: Props) {
           ) {
             setCurrentStory(
               stories[
-              currentStory.index < stories.length - 1
-                ? currentStory.index + 1
-                : currentStory.index
+                currentStory.index < stories.length - 1
+                  ? currentStory.index + 1
+                  : currentStory.index
               ]
             );
             setIndex(0);
@@ -205,12 +246,15 @@ function Story({ params }: Props) {
                   key={i}
                 >
                   <span
-                    className={`h-[3px] bg-stone-100 w-0 inline-block absolute ${index === i ? "animate-story": ""}`}
+                    className={`h-[3px] bg-stone-100 w-0 inline-block absolute ${
+                      index === i ? "animate-story" : ""
+                    } ${index > i ? "w-full" : "w-0"}`}
+                    ref={index === i ? progressBarRef : null}
                   ></span>
                 </div>
               ))}
             </div>
-            <div className="flex">
+            <div className="flex z-10">
               <Link
                 href={`/${currentStory.username}`}
                 className="w-full flex items-center justify-start"
@@ -231,11 +275,19 @@ function Story({ params }: Props) {
               </Link>
               <div className="flex items-center justify-center gap-2">
                 <button
-                  className={`${currentStory.images[index].isVideo ? "" : "hidden"}`} onClick={() => setIsMuted(!isMuted)} title={isMuted ? "Unmute" : "Mute"}>
-                  {isMuted ?
-                    <VolumeXIcon /> : <Volume2Icon />}
+                  className={`${
+                    currentStory.images[index].isVideo ? "" : "hidden"
+                  }`}
+                  onClick={() => setIsMuted(!isMuted)}
+                  title={isMuted ? "Unmute" : "Mute"}
+                >
+                  {isMuted ? <VolumeXIcon /> : <Volume2Icon />}
                 </button>
-                <button onClick={() => setIsPaused(!isPaused)} title={isPaused ? "Pause" : "Play"}>
+                <button
+                  onClick={() => setIsPaused(!isPaused)}
+                  title={isPaused ? "Play" : "Pause"}
+                  className="hidden sm:inline-block"
+                >
                   {isPaused ? (
                     <Pause fill="currentColor" />
                   ) : (
@@ -248,10 +300,8 @@ function Story({ params }: Props) {
                   </DialogTrigger>
                   <DialogContent className="w-full md:w-fit" hideCloseIcon>
                     <Dialog>
-                      <DialogTrigger>
-                        <button className="text-red-500 w-full md:px-20 py-1">
-                          Report
-                        </button>
+                      <DialogTrigger className="text-red-500 w-full md:px-20 py-1">
+                        Report
                       </DialogTrigger>
                       <DialogContent
                         className="sm:w-2/3 w-full h-fit flex flex-col bg-stone-100 dark:bg-stone-900"
@@ -283,7 +333,9 @@ function Story({ params }: Props) {
                         <DialogFooter className="flex gap-2">
                           <Button
                             variant="destructive"
-                            onClick={() => report(currentStory._id, currentStory.username)}
+                            onClick={() =>
+                              report(currentStory._id, currentStory.username)
+                            }
                           >
                             Report
                           </Button>
@@ -308,14 +360,33 @@ function Story({ params }: Props) {
             </div>
           </div>
         </div>
-        {currentStory.images[index].isVideo ?
-          <video src={currentStory.images[index].link} autoPlay muted={isMuted} ref={videoRef} /> :
+        {currentStory.images[index].isVideo ? (
+          <video
+            src={currentStory.images[index].link}
+            autoPlay
+            muted={isMuted}
+            ref={videoRef}
+          />
+        ) : (
           <img
             src={currentStory.images[index].link}
             alt={`Story ${currentStory.index + 1} by ${currentStory.username}`}
             className="max-h-full h-fit w-full object-contain select-none pointer-events-none"
           />
-        }
+        )}
+        <div
+          className="w-1/2 absolute left-0 bg-transparent h-full"
+          onClick={() => nextRef.current?.click()}
+          onMouseDown={() => setIsPaused(true)}
+          onMouseUp={() => setIsPaused(false)}
+        ></div>
+        <div
+          className="w-1/2 absolute right-0 bg-transparent h-full"
+          onClick={() => prevRef.current?.click()}
+          onMouseDown={() => setIsPaused(true)}
+          onMouseUp={() => setIsPaused(false)}
+        ></div>
+
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
@@ -350,8 +421,9 @@ function Story({ params }: Props) {
               <Heart
                 size="30"
                 fill={currentStory.liked ? "rgb(244 63 94)" : "none"}
-                className={`active:scale-110 transition-all  ${currentStory.liked ? "text-rose-500" : ""
-                  }`}
+                className={`active:scale-110 transition-all  ${
+                  currentStory.liked ? "text-rose-500" : ""
+                }`}
               />
             </Button>
             <Button

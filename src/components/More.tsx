@@ -7,7 +7,7 @@ import {
   DialogContent,
   DialogFooter,
   DialogTitle,
-  DialogTrigger
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
@@ -70,7 +70,9 @@ function More({ user, postId }: Props) {
         <DialogContent className="w-full md:w-fit" hideCloseIcon>
           <Dialog>
             <DialogTrigger>
-              <button className="text-red-500 w-full md:px-20 py-1">Report</button>
+              <button className="text-red-500 w-full md:px-20 py-1">
+                Report
+              </button>
             </DialogTrigger>
             <DialogContent
               className="sm:w-2/3 w-full h-fit flex flex-col bg-stone-100 dark:bg-stone-900"
@@ -146,18 +148,24 @@ function More({ user, postId }: Props) {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-          <button className="w-full md:px-20 py-1" onClick={() => copyLink(user.username, postId)}>
+          <button
+            className="w-full md:px-20 py-1"
+            onClick={() => copyLink(user.username, postId)}
+          >
             Copy link
           </button>
           <button
-          className="w-full md:px-20 py-1"
+            className="w-full md:px-20 py-1"
             onClick={() =>
               router.push(`/${user.username}/post/${btoa(postId)}`)
             }
           >
             Open post
           </button>
-          <button className="w-full md:px-20 py-1" onClick={() => router.push(`/${user.username}`)}>
+          <button
+            className="w-full md:px-20 py-1"
+            onClick={() => router.push(`/${user.username}`)}
+          >
             Go to Account
           </button>
           <DialogClose className="w-full md:px-20 py-1">Cancel</DialogClose>

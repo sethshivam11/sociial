@@ -1,11 +1,16 @@
+import { Mail } from "lucide-react";
 import React from "react";
 
-function Messages() {
+function Page() {
   return (
-    <div className="grid min-h-screen h-[200vh] xl:col-span-8 md:col-span-7 sm:col-span-8 col-span-10 sm:grid-cols-10">
-      Messages
+    <div className="sm:flex hidden flex-col items-center justify-center lg:col-span-7 md:col-span-6 col-span-10 gap-2">
+        <Mail size="80" />
+        <div>
+            <h1 className="text-2xl font-bold">Your Messages</h1>
+            <p className="text-stone-500">Start a conversation now! </p>
+        </div>
     </div>
   );
 }
 
-export default Messages;
+export default Page;
