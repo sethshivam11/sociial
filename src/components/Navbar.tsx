@@ -17,7 +17,6 @@ import {
   MenubarTrigger,
 } from "@/components/ui/menubar";
 import { useTheme } from "next-themes";
-import { useUser } from "@/context/UserProvider";
 import { nameFallback } from "@/lib/helpers";
 
 function Navbar() {
@@ -40,14 +39,14 @@ function Navbar() {
 
   return (
     <nav
-      className={`xl:px-4 xl:py-6 p-3 sm:sticky fixed sm:top-0 left-0 sm:h-screen h-fit bottom-0 xl:col-span-2 sm:col-span-1 col-span-10 sm:min-h-[42rem] max-h-[55rem] z-10 w-full min-w-max 
+      className={`xl:px-4 xl:py-6 p-3 sm:sticky fixed sm:top-0 left-0 sm:h-screen h-fit bottom-0 xl:col-span-2 sm:col-span-1 col-span-10 sm:min-h-[42rem] max-h-[55rem] z-10 w-full min-w-max sm:block 
       ${hideNav
         .map((path) => {
           if (location.includes(path) || location.startsWith(path))
             return "hidden";
           else return "";
         })
-        .join("")} `}
+        .join("")} ${location.includes("/messages/") ? "hidden": ""}`}
     >
       <div className="bg-stone-200/60 dark:bg-stone-800/60 sm:bg-stone-100 sm:dark:bg-stone-800 backdrop-blur-sm h-full w-full sm:rounded-3xl rounded-2xl xl:p-6 sm:px-2 sm:py-4 sm:w-fit xl:w-full flex flex-col items-center justify-between">
         <Link href="/" className="sm:inline hidden w-full" title="Sociial">

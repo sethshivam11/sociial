@@ -188,9 +188,9 @@ function Messages({ children }: { children: React.ReactNode }) {
   }, [search]);
 
   return (
-    <div className="grid min-h-screen xl:col-span-8 sm:col-span-9 col-span-10 sm:grid-cols-10 sm:container">
+    <div className="grid min-h-screen xl:col-span-8 sm:col-span-9 col-span-10 sm:grid-cols-10 sm:container max-md:pr-2 max-sm:pr-0">
       <div
-        className={`lg:col-span-3 md:col-span-4 col-span-10 md:flex flex-col items-start justify-start gap-2 py-6 h-full max-h-screen min-h-80 md:px-0 sm:px-4 px-5 ${
+        className={`lg:col-span-3 md:col-span-4 col-span-10 md:flex flex-col items-start justify-start gap-2 py-6 h-full max-h-screen sm:min-h-[42rem] md:px-0 sm:px-4 px-5 ${
           location === "/messages" ? "flex" : "hidden"
         }`}
       >

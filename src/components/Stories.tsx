@@ -35,7 +35,7 @@ function Stories() {
               : ""
           }`}
         >
-          <Avatar className="w-full h-full ring-2 ring-white dark:ring-black bg-black">
+          <Avatar className="w-full h-full ring-2 ring-white dark:ring-black bg-white dark:bg-black">
             <AvatarImage
               src={user.avatar}
               alt=""
@@ -58,7 +58,7 @@ function Stories() {
             className="flex flex-col items-center gap-1 sm:hover:scale-105 transition-transform"
           >
             <div className="w-20 h-20 rounded-full bg-gradient-to-bl from-red-500 via-blue-500 to-green-500 p-1">
-              <Avatar className="w-full h-full ring-2 ring-white dark:ring-black bg-black">
+              <Avatar className={`w-full h-full ring-2 ring-white dark:ring-black ${story.avatar.includes("tpfx0gzsk7ywiptsb6vl.png") ? "bg-[#cdd5d8]": "bg-white dark:bg-black"}`}>
                 <AvatarImage
                   src={story.avatar}
                   alt=""

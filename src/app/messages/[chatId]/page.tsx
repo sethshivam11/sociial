@@ -3,13 +3,32 @@ import { Input } from "@/components/ui/input";
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { nameFallback } from "@/lib/helpers";
-import { MoreHorizontal, Phone, Video } from "lucide-react";
-import { usePathname } from "next/navigation";
+import {
+  ArrowLeft,
+  MoreHorizontal,
+  Paperclip,
+  Phone,
+  SendHorizonal,
+  Smile,
+  Video,
+} from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
+import EmojiKeyboard from "@/components/EmojiKeyboard";
 
 function Page({ params }: { params: { chatId: string } }) {
   const location = usePathname();
+  const router = useRouter();
   const chatId = params.chatId;
+  const unreadMessageRef = React.useRef<HTMLDivElement>(null);
   const form = useForm({
     defaultValues: {
       message: "",
@@ -57,17 +76,52 @@ function Page({ params }: { params: { chatId: string } }) {
     { id: "29", content: "Will do. Catch up later?", type: "sent" },
     { id: "30", content: "Sure thing. Talk later.", type: "reply" },
   ]);
+  const [unreadMessages, setUnreadMessages] = React.useState<typeof messages>(
+    []
+  );
+  const message = form.watch("message");
+
+  function onSubmit({ message }: { message: string }) {
+    if (!message) return;
+    const savedMessage = {
+      id: String(messages.length + 1),
+      content: message,
+      type: "sent",
+    };
+    setMessages([...messages, savedMessage]);
+    form.setValue("message", "");
+    setUnreadMessages([...unreadMessages, savedMessage]);
+    console.log(unreadMessages[0]);
+    unreadMessageRef.current?.scrollIntoView({ behavior: "smooth" });
+  }
+
   React.useEffect(() => {
-    console.log(chatId);
-  }, [chatId]);
+    if (unreadMessageRef.current) {
+      unreadMessageRef.current.scrollIntoView();
+    } else {
+      // unreadMessageRef.current.scrollIntoView();
+    }
+  }, []);
+
   return (
     <div
-      className={`md:border-l-2 border-stone-200 dark:border-stone-800 md:ml-3 container min-h-screen md:flex flex flex-col items-start justify-start gap-1 relative sm:px-6 px-5 lg:col-span-7 md:col-span-6 col-span-10 ${
-        location !== "/messages" ? "" : "hidden"
-      } `}
+      className={`md:border-l-2 border-stone-200 dark:border-stone-800 md:ml-3 min-h-screen md:flex flex flex-col items-start justify-start gap-1 relative lg:col-span-7 md:col-span-6 col-span-10 max-h-screen 
+        overflow-y-auto overflow-x-clip sm:min-h-[42rem] ${
+          location !== "/messages" ? "" : "hidden"
+        } `}
     >
-      <div className="flex gap-2 items-center justify-between absolute top-0 left-0 w-full h-20 md:ml-3 border-b-2 border-stone-200 dark:border-stone-800 sm:px-0 px-3">
+      <div className="flex gap-2 items-center justify-between absolute top-0 left-0 w-full h-20 md:ml-3 border-b-2 border-stone-200 dark:border-stone-800 md:px-4 px-3">
         <div className="flex items-center justify-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className={`px-2 rounded-xl ${
+              location.includes("/messages/") ? "sm:hidden" : ""
+            }`}
+            onClick={() => router.push("/messages")}
+          >
+            <ArrowLeft />
+          </Button>
           <Avatar className="w-12 h-12">
             <AvatarImage
               src={recipent.avatar}
@@ -95,7 +149,71 @@ function Page({ params }: { params: { chatId: string } }) {
           </button>
         </div>
       </div>
-      <div className="absolute bottom-0 left-0 w-full sm:mb-6 mb-5 md:ml-3"></div>
+      <div className="max-h-full overflow-y-auto overflow-x-auto flex flex-col items-start justify-start w-full mt-20 mb-16 mr-0 py-2 gap-1 px-3">
+        {messages.map((message, index) => (
+          <div
+            key={index}
+            className={`py-2 px-4 rounded-full ${
+              message.type === "reply"
+                ? "bg-stone-200 text-black"
+                : "bg-stone-800 ml-auto max-w-3/4"
+            }`}
+            ref={
+              unreadMessages[index] ===
+              unreadMessages[0]
+                ? unreadMessageRef
+                : null
+            }
+          >
+            {message.content || ""}
+          </div>
+        ))}
+      </div>
+      <div className="absolute bottom-0 left-0 w-full px-2.5 flex items-center justify-center h-16 py-2">
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex items-center w-full justify-center gap-1"
+          >
+            <EmojiKeyboard
+              setMessage={(emoji: string): void =>
+                form.setValue("message", emoji)
+              }
+              message={message}
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="px-2 mr-1 rounded-xl"
+              type="button"
+            >
+              <Paperclip />
+            </Button>
+            <FormField
+              control={form.control}
+              name="message"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormControl>
+                    <Input
+                      placeholder="Type a message..."
+                      {...field}
+                      className="rounded-xl"
+                      autoComplete="off"
+                      inputMode="text"
+                      autoFocus
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit" className="ml-1 rounded-xl">
+              <SendHorizonal />
+            </Button>
+          </form>
+        </Form>
+      </div>
     </div>
   );
 }
