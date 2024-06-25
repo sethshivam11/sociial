@@ -100,7 +100,7 @@ function Navbar() {
           <Link
             href="/messages"
             className={`md:w-full w-fit sm:flex hidden items-center xl:justify-start justify-center xl:pl-4 sm:p-3 p-2 gap-3 group rounded-2xl hover:ring-stone-600 dark:hover:ring-stone-400 transition-colors ${
-              location === "/messages"
+              location.includes("/messages")
                 ? "sm:bg-stone-300 sm:dark:bg-stone-700 sm:hover:ring-0"
                 : "sm:hover:ring-2"
             }`}

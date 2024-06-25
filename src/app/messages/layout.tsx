@@ -216,7 +216,6 @@ function Messages({ children }: { children: React.ReactNode }) {
             placeholder="Search for messages"
             autoComplete="off"
             inputMode="text"
-            autoFocus
           />
           <button
             className={`${search ? "visible" : "invisible"}`}
@@ -228,11 +227,11 @@ function Messages({ children }: { children: React.ReactNode }) {
             <X size="20" />
           </button>
         </div>
-        <div className="space-y-1 py-3 w-full md:overflow-y-auto md:h-screen sm:pb-2 pb-20">
+        <div className="space-y-1 py-3 w-full md:overflow-y-auto md:h-screen sm:pb-2 pb-20 pr-2">
           {chats.length ? (
             chats.map((chat, index) => (
               <button
-                className="flex items-center justify-center rounded-md dark:hover:bg-stone-800 w-full gap-2 p-2"
+                className="flex items-center justify-center rounded-md hover:bg-stone-200 dark:hover:bg-stone-800 w-full gap-2 p-2"
                 key={index}
                 title={chat.username}
                 onClick={() => {

@@ -5,9 +5,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { nameFallback } from "@/lib/helpers";
 import {
   ArrowLeft,
+  Info,
   MoreHorizontal,
   Paperclip,
   Phone,
+  Reply,
   SendHorizonal,
   Smile,
   Video,
@@ -23,6 +25,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import EmojiKeyboard from "@/components/EmojiKeyboard";
+import MessageReacts from "@/components/MessageReacts";
 
 function Page({ params }: { params: { chatId: string } }) {
   const location = usePathname();
@@ -39,43 +42,255 @@ function Page({ params }: { params: { chatId: string } }) {
     username: "johndoe",
     avatar:
       "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+    followersCount: 24,
+    followingCount: 12,
+    postsCount: 4,
   });
   const [messages, setMessages] = React.useState([
-    { id: "1", content: "Hello, how are you?", type: "sent" },
-    { id: "2", content: "I'm good, thanks! And you?", type: "reply" },
-    { id: "3", content: "Great to hear! I'm doing well, too.", type: "sent" },
-    { id: "4", content: "What are you up to today?", type: "reply" },
-    { id: "5", content: "Just working on a project. You?", type: "sent" },
+    {
+      id: "1",
+      content: "Hello, how are you?",
+      type: "sent",
+      time: "10:00 AM",
+      reacts: [
+        {
+          id: "1",
+          emoji: "❤️",
+          username: "johndoe",
+          fullName: "John Doe",
+          avatar:
+            "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+        },
+        {
+          id: "2",
+          emoji: "🎉",
+          username: "johndoe",
+          fullName: "John Doe",
+          avatar:
+            "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+        },
+        {
+          id: "2",
+          emoji: "💯",
+          username: "johndoe",
+          fullName: "John Doe",
+          avatar:
+            "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+        },
+      ],
+    },
+    {
+      id: "2",
+      content: "I'm good, thanks! And you?",
+      type: "reply",
+      time: "10:05 AM",
+    },
+    {
+      id: "3",
+      content: "Great to hear! I'm doing well, too.",
+      type: "sent",
+      time: "10:10 AM",
+    },
+    {
+      id: "4",
+      content: "What are you up to today?",
+      type: "reply",
+      time: "10:15 AM",
+    },
+    {
+      id: "5",
+      content: "Just working on a project. You?",
+      type: "sent",
+      time: "10:20 AM",
+    },
     {
       id: "6",
       content: "Same here. Need to finish up some tasks.",
       type: "reply",
+      time: "10:25 AM",
     },
-    { id: "7", content: "Let's catch up later then.", type: "sent" },
-    { id: "8", content: "Sure, looking forward to it.", type: "reply" },
-    { id: "9", content: "See you!", type: "sent" },
-    { id: "10", content: "Bye!", type: "reply" },
-    { id: "11", content: "How's the project going?", type: "sent" },
-    { id: "12", content: "Making good progress, thanks!", type: "reply" },
-    { id: "13", content: "Need any help with it?", type: "sent" },
-    { id: "14", content: "I might, will let you know.", type: "reply" },
-    { id: "15", content: "What's for lunch?", type: "sent" },
-    { id: "16", content: "Thinking of ordering pizza.", type: "reply" },
-    { id: "17", content: "Count me in!", type: "sent" },
-    { id: "18", content: "Great, it's on the way.", type: "reply" },
-    { id: "19", content: "Thanks! Can't wait.", type: "sent" },
-    { id: "20", content: "Anytime, should be here soon.", type: "reply" },
-    { id: "21", content: "Started any new series lately?", type: "sent" },
-    { id: "22", content: "Yeah, watching a great one now.", type: "reply" },
-    { id: "23", content: "Oh, which one?", type: "sent" },
-    { id: "24", content: "It's called 'The Great Adventure'.", type: "reply" },
-    { id: "25", content: "Sounds interesting. Good so far?", type: "sent" },
-    { id: "26", content: "Really good. Highly recommend it.", type: "reply" },
-    { id: "27", content: "I'll check it out. Thanks!", type: "sent" },
-    { id: "28", content: "Let me know how you like it.", type: "reply" },
-    { id: "29", content: "Will do. Catch up later?", type: "sent" },
-    { id: "30", content: "Sure thing. Talk later.", type: "reply" },
+    {
+      id: "7",
+      content: "Let's catch up later then.",
+      type: "sent",
+      time: "10:30 AM",
+    },
+    {
+      id: "8",
+      content: "Sure, looking forward to it.",
+      type: "reply",
+      time: "10:35 AM",
+    },
+    { id: "9", content: "See you!", type: "sent", time: "10:40 AM" },
+    { id: "10", content: "Bye!", type: "reply", time: "10:45 AM" },
+    {
+      id: "11",
+      content: "How's the project going?",
+      type: "sent",
+      time: "10:50 AM",
+    },
+    {
+      id: "12",
+      content: "Making good progress, thanks!",
+      type: "reply",
+      time: "10:55 AM",
+    },
+    {
+      id: "13",
+      content: "Need any help with it?",
+      type: "sent",
+      time: "11:00 AM",
+    },
+    {
+      id: "14",
+      content: "I might, will let you know.",
+      type: "reply",
+      time: "11:05 AM",
+    },
+    { id: "15", content: "What's for lunch?", type: "sent", time: "11:10 AM" },
+    {
+      id: "16",
+      content: "Thinking of ordering pizza.",
+      type: "reply",
+      time: "11:15 AM",
+    },
+    { id: "17", content: "Count me in!", type: "sent", time: "11:20 AM" },
+    {
+      id: "18",
+      content: "Great, it's on the way.",
+      type: "reply",
+      time: "11:25 AM",
+    },
+    {
+      id: "19",
+      content: "Thanks! Can't wait.",
+      type: "sent",
+      time: "11:30 AM",
+    },
+    {
+      id: "20",
+      content: "Anytime, should be here soon.",
+      type: "reply",
+      time: "11:35 AM",
+    },
+    {
+      id: "21",
+      content: "Started any new series lately?",
+      type: "sent",
+      time: "11:40 AM",
+    },
+    {
+      id: "22",
+      content: "Yeah, watching a great one now.",
+      type: "reply",
+      time: "11:45 AM",
+    },
+    { id: "23", content: "Oh, which one?", type: "sent", time: "11:50 AM" },
+    {
+      id: "24",
+      content: "It's called 'The Great Adventure'.",
+      type: "reply",
+      time: "11:55 AM",
+    },
+    {
+      id: "25",
+      content: "Sounds interesting. Good so far?",
+      type: "sent",
+      time: "12:00 PM",
+    },
+    {
+      id: "26",
+      content: "Really good. Highly recommend it.",
+      type: "reply",
+      time: "12:05 PM",
+    },
+    {
+      id: "27",
+      content: "I'll check it out. Thanks!",
+      type: "sent",
+      time: "12:10 PM",
+    },
+    {
+      id: "28",
+      content: "Let me know how you like it.",
+      type: "reply",
+      time: "12:15 PM",
+    },
+    {
+      id: "29",
+      content: "Will do. Catch up later?",
+      type: "sent",
+      time: "12:20 PM",
+      reacts: [
+        {
+          id: "1",
+          emoji: "❤️",
+          username: "johndoe",
+          fullName: "John Doe",
+          avatar:
+            "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+        },
+      ],
+    },
+    {
+      id: "30",
+      content: "Sure thing. Talk later.",
+      type: "reply",
+      time: "12:25 PM",
+      reacts: [
+        {
+          id: "2",
+          emoji: "💯",
+          username: "johndoe",
+          fullName: "John Doe",
+          avatar:
+            "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+        },
+        {
+          id: "1",
+          emoji: "❤️",
+          username: "johndoe",
+          fullName: "John Doe",
+          avatar:
+            "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+        },
+      ],
+    },
+    {
+      id: "31",
+      content: "Sure thing. Talk later.",
+      type: "reply",
+      time: "12:30 PM",
+      reacts: [
+        {
+          id: "2",
+          emoji: "🎉",
+          username: "johndoe",
+          fullName: "John Doe",
+          avatar:
+            "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+        },
+        {
+          id: "3",
+          emoji: "💯",
+          username: "johndoe",
+          fullName: "John Doe",
+          avatar:
+            "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+        },
+        {
+          id: "1",
+          emoji: "❤️",
+          username: "johndoe",
+          fullName: "John Doe",
+          avatar:
+            "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+        },
+      ],
+    },
   ]);
+  const [isMobile, setIsMobile] = React.useState(false);
+  const [infoOpen, setInfoOpen] = React.useState(false);
   const [unreadMessages, setUnreadMessages] = React.useState<typeof messages>(
     []
   );
@@ -83,35 +298,59 @@ function Page({ params }: { params: { chatId: string } }) {
 
   function onSubmit({ message }: { message: string }) {
     if (!message) return;
+    const date = new Date();
     const savedMessage = {
       id: String(messages.length + 1),
       content: message,
       type: "sent",
+      time: `${date.getHours()}:${date.getMinutes()} ${
+        date.getHours() > 12 ? "PM" : "AM"
+      }`,
     };
     setMessages([...messages, savedMessage]);
     form.setValue("message", "");
-    setUnreadMessages([...unreadMessages, savedMessage]);
-    console.log(unreadMessages[0]);
-    unreadMessageRef.current?.scrollIntoView({ behavior: "smooth" });
+  }
+
+  function reactMessage(emoji: string) {
+    const date = new Date();
+    const savedMessage = {
+      id: String(messages.length + 1),
+      content: emoji,
+      type: "sent",
+      time: `${date.getHours()}:${date.getMinutes()} ${
+        date.getHours() > 12 ? "PM" : "AM"
+      }`,
+    };
+    setMessages([...messages, savedMessage]);
   }
 
   React.useEffect(() => {
+    setIsMobile(/Android|iPhone/i.test(navigator.userAgent));
     if (unreadMessageRef.current) {
-      unreadMessageRef.current.scrollIntoView();
-    } else {
-      // unreadMessageRef.current.scrollIntoView();
+      unreadMessageRef.current.scrollIntoView({ behavior: "instant" });
     }
+    const hideDiv = () => {
+      const divs = document.querySelectorAll(".reactions");
+      divs.forEach((div) => {
+        div.classList.add("invisible");
+        div.classList.remove("visible");
+      });
+    };
+
+    window.addEventListener("click", hideDiv);
+
+    return () => window.removeEventListener("click", hideDiv);
   }, []);
 
   return (
     <div
-      className={`md:border-l-2 border-stone-200 dark:border-stone-800 md:ml-3 min-h-screen md:flex flex flex-col items-start justify-start gap-1 relative lg:col-span-7 md:col-span-6 col-span-10 max-h-screen 
+      className={`md:border-l-2 border-stone-200 dark:border-stone-800 md:ml-3 md:flex flex flex-col items-start justify-start gap-1 relative lg:col-span-7 md:col-span-6 col-span-10 md:max-h-screen max-h-[100svh] h-100svh 
         overflow-y-auto overflow-x-clip sm:min-h-[42rem] ${
           location !== "/messages" ? "" : "hidden"
         } `}
     >
-      <div className="flex gap-2 items-center justify-between absolute top-0 left-0 w-full h-20 md:ml-3 border-b-2 border-stone-200 dark:border-stone-800 md:px-4 px-3">
-        <div className="flex items-center justify-center gap-2">
+      <div className="flex gap-2 items-center justify-between sm:absolute fixed top-0 bottom-auto left-0 w-full md:h-20 h-16 md:ml-3 border-b-2 border-stone-200 dark:border-stone-800 bg-white dark:bg-black md:px-4 pl-1 pr-0 z-10">
+        <div className="flex items-center justify-center">
           <Button
             variant="ghost"
             size="icon"
@@ -122,7 +361,7 @@ function Page({ params }: { params: { chatId: string } }) {
           >
             <ArrowLeft />
           </Button>
-          <Avatar className="w-12 h-12">
+          <Avatar className="w-12 h-12 ml-0.5 mr-2">
             <AvatarImage
               src={recipent.avatar}
               alt=""
@@ -138,42 +377,114 @@ function Page({ params }: { params: { chatId: string } }) {
           </div>
         </div>
         <div className="px-4 space-x-4">
-          <button>
+          <button
+            onClick={() => router.push(`/call/audio/${recipent.username}`)}
+          >
             <Phone size="20" />
           </button>
-          <button>
+          <button
+            onClick={() => router.push(`/call/video/${recipent.username}`)}
+          >
             <Video />
           </button>
-          <button>
-            <MoreHorizontal />
+          <button onClick={() => setInfoOpen(!infoOpen)}>
+            <Info strokeWidth={infoOpen ? "3": "2"} />
           </button>
         </div>
       </div>
-      <div className="max-h-full overflow-y-auto overflow-x-auto flex flex-col items-start justify-start w-full mt-20 mb-16 mr-0 py-2 gap-1 px-3">
-        {messages.map((message, index) => (
-          <div
-            key={index}
-            className={`py-2 px-4 rounded-full ${
-              message.type === "reply"
-                ? "bg-stone-200 text-black"
-                : "bg-stone-800 ml-auto max-w-3/4"
-            }`}
-            ref={
-              unreadMessages[index] ===
-              unreadMessages[0]
-                ? unreadMessageRef
-                : null
-            }
-          >
-            {message.content || ""}
+      <div
+        className={`max-h-full overflow-y-auto overflow-x-auto flex flex-col items-start justify-start w-full md:mt-20 mt-16 md:mb-16 mr-0 py-2 px-3 ${
+          isMobile ? "mb-0" : "mb-16"
+        }`}
+      >
+        <div className="flex flex-col items-center justify-center w-full py-2 gap-2 mb-8">
+          <Avatar className="w-28 h-28 select-none pointer-events-none">
+            <AvatarImage src={recipent.avatar} alt="" />
+            <AvatarFallback>{nameFallback(recipent.fullName)}</AvatarFallback>
+          </Avatar>
+          <div className="grid place-items-center">
+            <h1 className="text-2xl font-bold tracking-tight">
+              {recipent.fullName}
+            </h1>
+            <p className="text-sm text-stone-500">@{recipent.username}</p>
+            <p>
+              {recipent.followersCount}
+              &nbsp;Followers &#183; {recipent.postsCount}
+              &nbsp;Posts
+            </p>
           </div>
-        ))}
+          <Button
+            variant="outline"
+            className="my-2 rounded-xl"
+            onClick={() => router.push(`/${recipent.username}`)}
+          >
+            View profile
+          </Button>
+        </div>
+        {infoOpen ? (
+          <div className="flex flex-col items-center justify-center w-full h-full gap-2">
+            <Info size="40" />
+            <span className="text-2xl font-semibold tracking-tight">Info</span>
+            <span className="text-stone-500">This section is coming soon</span>
+          </div>
+        ) : (
+          messages.map((message, index) => (
+            <div
+              className={`group flex items-center justify-start w-full ${
+                message.type === "reply"
+                  ? "flex-row"
+                  : "flex-row-reverse ml-auto"
+              }`}
+              key={index}
+            >
+              <div
+                className={`py-2 px-4 rounded-[50px] relative ${
+                  message.type === "reply"
+                    ? "bg-stone-800 dark:bg-stone-300 text-white dark:text-black"
+                    : "bg-stone-300 dark:bg-stone-800 max-w-3/4"
+                } ${
+                  messages[index - 1]?.type === message.type ? "mb-1" : "mb-3"
+                }
+              ${message.reacts ? "mb-4" : "mb-1"}`}
+                ref={
+                  unreadMessages[index] === unreadMessages[0]
+                    ? unreadMessageRef
+                    : null
+                }
+              >
+                {message.content}
+                {message.reacts && (
+                  <MessageReacts reacts={message.reacts} type={message.type} />
+                )}
+              </div>
+              <div
+                className={`reactions flex group-hover:visible invisible w-fit gap-1 mb-2 mx-1 ${
+                  message.type === "reply" ? "flex-row" : "flex-row-reverse"
+                }`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  (e.currentTarget as HTMLDivElement).classList.remove(
+                    "invisible"
+                  );
+                  (e.currentTarget as HTMLDivElement).classList.add("visible");
+                }}
+              >
+                <EmojiKeyboard
+                  message=""
+                  setMessage={(emoji) => reactMessage(emoji)}
+                  react
+                />
+                <MoreHorizontal size="15" />
+              </div>
+            </div>
+          ))
+        )}
       </div>
-      <div className="absolute bottom-0 left-0 w-full px-2.5 flex items-center justify-center h-16 py-2">
+      <div className="sm:absolute fixed bg-white dark:bg-black bottom-0 left-0 w-full px-2.5 flex items-center justify-center h-16 py-2">
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="flex items-center w-full justify-center gap-1"
+            className="flex items-center w-full justify-center gap-2"
           >
             <EmojiKeyboard
               setMessage={(emoji: string): void =>
@@ -181,14 +492,6 @@ function Page({ params }: { params: { chatId: string } }) {
               }
               message={message}
             />
-            <Button
-              variant="ghost"
-              size="icon"
-              className="px-2 mr-1 rounded-xl"
-              type="button"
-            >
-              <Paperclip />
-            </Button>
             <FormField
               control={form.control}
               name="message"
@@ -201,14 +504,25 @@ function Page({ params }: { params: { chatId: string } }) {
                       className="rounded-xl"
                       autoComplete="off"
                       inputMode="text"
-                      autoFocus
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" className="ml-1 rounded-xl">
+            <Button
+              className="rounded-xl px-2"
+              type="button"
+              size="icon"
+              variant="ghost"
+            >
+              <Paperclip />
+            </Button>
+            <Button
+              type="submit"
+              disabled={!message.length}
+              className="rounded-xl"
+            >
               <SendHorizonal />
             </Button>
           </form>

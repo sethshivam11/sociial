@@ -62,116 +62,112 @@ function More({ user, postId }: Props) {
   }
 
   return (
-    <>
-      <Dialog>
-        <DialogTrigger className="w-fit" title="Options">
-          <MoreHorizontal />
-        </DialogTrigger>
-        <DialogContent className="w-full md:w-fit" hideCloseIcon>
-          <Dialog>
-            <DialogTrigger>
-              <button className="text-red-500 w-full md:px-20 py-1">
-                Report
-              </button>
-            </DialogTrigger>
-            <DialogContent
-              className="sm:w-2/3 w-full h-fit flex flex-col bg-stone-100 dark:bg-stone-900"
-              hideCloseIcon
-            >
-              <DialogTitle className="text-center text-2xl my-1 ">
-                Report Post
-              </DialogTitle>
-              <div className="space-y-3">
-                <div className="space-y-2">
-                  <Label htmlFor="report-title">Title</Label>
-                  <Input
-                    id="report-title"
-                    placeholder="Title for the issue"
-                    className="bg-stone-100 dark:bg-stone-900 sm:focus-within:ring-1"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="report-description">Description</Label>
-                  <Textarea
-                    id="report-description"
-                    placeholder="Detailed description of the issue"
-                    rows={5}
-                  />
-                </div>
+    <Dialog>
+      <DialogTrigger className="w-fit" title="Options">
+        <MoreHorizontal />
+      </DialogTrigger>
+      <DialogContent className="w-full md:w-fit" hideCloseIcon>
+        <Dialog>
+          <DialogTrigger>
+            <button className="text-red-500 w-full md:px-20 py-1">
+              Report
+            </button>
+          </DialogTrigger>
+          <DialogContent
+            className="sm:w-2/3 w-full h-fit flex flex-col bg-stone-100 dark:bg-stone-900"
+            hideCloseIcon
+          >
+            <DialogTitle className="text-center text-2xl my-1 ">
+              Report Post
+            </DialogTitle>
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <Label htmlFor="report-title">Title</Label>
+                <Input
+                  id="report-title"
+                  placeholder="Title for the issue"
+                  className="bg-stone-100 dark:bg-stone-900 sm:focus-within:ring-1"
+                />
               </div>
-              <DialogFooter className="flex gap-2">
-                <Button
-                  variant="destructive"
-                  onClick={() => report(postId, user.username)}
-                >
-                  Report
-                </Button>
-                <DialogClose>Cancel</DialogClose>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-          <AlertDialog>
-            <AlertDialogTrigger>
-              <button className="text-red-500 w-full md:px-20 py-1">
+              <div className="space-y-2">
+                <Label htmlFor="report-description">Description</Label>
+                <Textarea
+                  id="report-description"
+                  placeholder="Detailed description of the issue"
+                  rows={5}
+                />
+              </div>
+            </div>
+            <DialogFooter className="flex gap-2">
+              <Button
+                variant="destructive"
+                onClick={() => report(postId, user.username)}
+              >
+                Report
+              </Button>
+              <DialogClose>Cancel</DialogClose>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        <AlertDialog>
+          <AlertDialogTrigger>
+            <button className="text-red-500 w-full md:px-20 py-1">
+              Unfollow
+            </button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                <Image
+                  width="80"
+                  height="80"
+                  className="mx-auto select-none pointer-events-none"
+                  src={user.avatar}
+                  alt=""
+                />
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-center">
+                Unfollow&nbsp;
+                <span className="font-semibold text-stone-700 dark:text-stone-300">
+                  {user.fullName}
+                </span>
+                &nbsp;&#183; @{user.username}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="flex w-full sm:flex-col-reverse gap-2 sm:justify-center items-center sm:space-x-0">
+              <AlertDialogCancel autoFocus={false} className="w-full">
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                className="w-full bg-destructive text-white hover:bg-destructive/90"
+                onClick={() => unfollow(user.username)}
+              >
                 Unfollow
-              </button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>
-                  <Image
-                    width="80"
-                    height="80"
-                    className="mx-auto select-none pointer-events-none"
-                    src={user.avatar}
-                    alt=""
-                  />
-                </AlertDialogTitle>
-                <AlertDialogDescription className="text-center">
-                  Unfollow&nbsp;
-                  <span className="font-semibold text-stone-700 dark:text-stone-300">
-                    {user.fullName}
-                  </span>
-                  &nbsp;&#183; @{user.username}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter className="flex w-full sm:flex-col-reverse gap-2 sm:justify-center items-center sm:space-x-0">
-                <AlertDialogCancel autoFocus={false} className="w-full">
-                  Cancel
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  className="w-full bg-destructive text-white hover:bg-destructive/90"
-                  onClick={() => unfollow(user.username)}
-                >
-                  Unfollow
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-          <button
-            className="w-full md:px-20 py-1"
-            onClick={() => copyLink(user.username, postId)}
-          >
-            Copy link
-          </button>
-          <button
-            className="w-full md:px-20 py-1"
-            onClick={() =>
-              router.push(`/${user.username}/post/${btoa(postId)}`)
-            }
-          >
-            Open post
-          </button>
-          <button
-            className="w-full md:px-20 py-1"
-            onClick={() => router.push(`/${user.username}`)}
-          >
-            Go to Account
-          </button>
-          <DialogClose className="w-full md:px-20 py-1">Cancel</DialogClose>
-        </DialogContent>
-      </Dialog>
-    </>
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+        <button
+          className="w-full md:px-20 py-1"
+          onClick={() => copyLink(user.username, postId)}
+        >
+          Copy link
+        </button>
+        <button
+          className="w-full md:px-20 py-1"
+          onClick={() => router.push(`/${user.username}/post/${btoa(postId)}`)}
+        >
+          Open post
+        </button>
+        <button
+          className="w-full md:px-20 py-1"
+          onClick={() => router.push(`/${user.username}`)}
+        >
+          Go to Account
+        </button>
+        <DialogClose className="w-full md:px-20 py-1">Cancel</DialogClose>
+      </DialogContent>
+    </Dialog>
   );
 }
 

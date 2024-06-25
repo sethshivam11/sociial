@@ -103,7 +103,7 @@ function Search() {
   }, [search]);
 
   return (
-    <div className="container flex flex-col items-center justify-start min-h-screen xl:col-span-8 sm:col-span-9 col-span-10 py-10">
+    <div className="container flex flex-col items-center justify-start min-h-screen xl:col-span-8 sm:col-span-9 col-span-10 md:py-10 py-4">
       <div className="lg:w-1/2 md:w-3/5 sm:w-4/5 w-full ring-2 ring-stone-500 focus-within:dark:ring-stone-200 focus-within:ring-stone-800 rounded-lg px-2 py-0.5">
         <div className="w-full flex items-center justify-center rounded-lg space-y-0 gap-1">
           <SearchIcon />

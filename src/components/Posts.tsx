@@ -182,7 +182,7 @@ function Posts() {
                     return (
                       <CarouselItem key={index} className="relative">
                         <div
-                          className={`absolute w-full h-full items-center justify-center peer ${
+                          className={`absolute w-full h-full items-center justify-center ${
                             post.liked ? "flex" : "hidden"
                           }`}
                         >
@@ -203,10 +203,14 @@ function Posts() {
                           onDoubleClick={(e) => {
                             likePost(post._id);
                             const heartContainer = (e.target as HTMLElement)
-                              .parentElement?.childNodes[0] as HTMLElement;
-                            heartContainer.classList.remove("hidden");
+                              .parentElement?.parentElement?.childNodes;
                             setTimeout(
-                              () => heartContainer.classList.add("hidden"),
+                              () =>
+                                heartContainer?.forEach((child) => {
+                                  (
+                                    child.childNodes[0] as HTMLElement
+                                  ).classList.add("hidden");
+                                }),
                               500
                             );
                           }}
