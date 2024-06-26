@@ -19,10 +19,9 @@ import { useTheme } from "next-themes";
 interface Props {
   setMessage: (message: string) => void;
   message: string;
-  react?: boolean;
 }
 
-function EmojiKeyboard({ setMessage, message, react }: Props) {
+function EmojiKeyboard({ setMessage, message }: Props) {
   const { theme } = useTheme();
   return (
     <Popover>
@@ -30,9 +29,6 @@ function EmojiKeyboard({ setMessage, message, react }: Props) {
         <Tooltip>
           <TooltipTrigger asChild>
             <PopoverTrigger asChild>
-              {react ? (
-                <Smile size="15" />
-              ) : (
                 <Button
                   size="icon"
                   variant="ghost"
@@ -40,7 +36,6 @@ function EmojiKeyboard({ setMessage, message, react }: Props) {
                 >
                   <Smile />
                 </Button>
-              )}
             </PopoverTrigger>
           </TooltipTrigger>
           <TooltipContent>Emoji</TooltipContent>
@@ -51,7 +46,7 @@ function EmojiKeyboard({ setMessage, message, react }: Props) {
           data={data}
           theme={theme}
           onEmojiSelect={({ native }: { native: string }) =>
-            react ? setMessage(native) : setMessage(message.concat(native))
+            setMessage(message.concat(native))
           }
           previewPosition="none"
         />

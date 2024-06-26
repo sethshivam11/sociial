@@ -5,6 +5,7 @@ import React from "react";
 import { Heart, MessageSquareText, Image as PostImage } from "lucide-react";
 
 interface Post {
+  _id: string;
   link: string;
   likesCount: number;
   commentsCount: number;
@@ -12,7 +13,32 @@ interface Post {
 
 function Page() {
   const [loading, setLoading] = React.useState(false);
-  const [posts, setPosts] = React.useState<Post[]>([]);
+  const [posts, setPosts] = React.useState<Post[]>([
+    {
+      _id: "0",
+      link: "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_90/v1715866646/cld-sample-4.jpg",
+      likesCount: 3,
+      commentsCount: 5,
+    },
+    {
+      _id: "1",
+      link: "https://images.pexels.com/photos/2449600/pexels-photo-2449600.png?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1",
+      likesCount: 4,
+      commentsCount: 1,
+    },
+    {
+      _id: "2",
+      link: "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_90/v1715866646/cld-sample-4.jpg",
+      likesCount: 12,
+      commentsCount: 5,
+    },
+    {
+      _id: "3",
+      link: "https://images.pexels.com/photos/2449600/pexels-photo-2449600.png?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1",
+      likesCount: 20,
+      commentsCount: 10,
+    },
+  ]);
 
   return (
     <div className="flex items-center justify-start flex-wrap flex-row w-full">
@@ -37,20 +63,6 @@ function Page() {
               className="w-full h-full object-cover rounded-sm select-none pointer-events-none"
               alt=""
             />
-            <div className="flex items-center justify-start px-2 gap-1 absolute w-full h-8 bottom-0 bg-gradient-to-b from-transparent via-transparent/30 to-transparent/80 text-xs">
-              <span>
-                <Heart className="inline" fill="currentColor" size="12" />
-                &nbsp;{post.likesCount}
-              </span>
-              <span>
-                <MessageSquareText
-                  className="inline"
-                  fill="currentColor"
-                  size="12"
-                />
-                &nbsp;{post.commentsCount}
-              </span>
-            </div>
           </div>
         ))
       ) : (

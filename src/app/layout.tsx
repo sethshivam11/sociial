@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import { ThemeProvider } from "@/context/ThemeProvider";
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
+import UserProvider from "@/context/UserProvider";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -17,8 +18,8 @@ export const metadata: Metadata = {
   description:
     "Sociial is a vibrant community where you can connect, share, and grow. Join us and start your social journey today!",
   icons: {
-    apple: "apple-touch-icon.png",
-    icon: "favicon.ico",
+    apple: "/apple-touch-icon.png",
+    icon: "/favicon.ico",
   },
   metadataBase: new URL(process.env.PUBLIC_URL || ""),
   openGraph: {
@@ -69,9 +70,11 @@ export default function RootLayout({
         )}
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <Navbar />
-          {children}
-          <Toaster />
+          <UserProvider>
+            <Navbar />
+            {children}
+            <Toaster />
+          </UserProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -185,7 +185,7 @@ function Messages({ children }: { children: React.ReactNode }) {
     } else {
       setChats(savedChats);
     }
-  }, [search]);
+  }, [search, savedChats]);
 
   return (
     <div className="grid min-h-screen xl:col-span-8 sm:col-span-9 col-span-10 sm:grid-cols-10 sm:container max-md:pr-2 max-sm:pr-0">
@@ -196,7 +196,7 @@ function Messages({ children }: { children: React.ReactNode }) {
       >
         <div className="flex items-center justify-between w-full mb-4 pr-2">
           <h1 className="text-2xl tracking-tight font-bold text-left py-2.5">
-            Messages
+            Conversations
           </h1>
           <button className="">
             <Users />

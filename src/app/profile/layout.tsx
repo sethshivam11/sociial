@@ -95,12 +95,13 @@ function Profile({ children }: { children: React.ReactNode }) {
             onClick={() => router.push("/profile/saved")}
           >
             <Bookmark
+            strokeWidth="1"
               fill={location.includes("/saved") ? "currentColor" : "none"}
             />
             <span className="max-sm:hidden">Saved</span>
           </button>
         </div>
-        <hr className="my-2 sm:w-10/12 w-full mx-auto bg-stone-500 border-2 rounded-sm" />
+        <hr className="my-2 md:w-10/12 w-full mx-auto bg-stone-500 border-2 rounded-sm" />
         <div className="mx-auto md:w-4/5 w-full sm:pb-6 pb-20 sm:pt-0 mt-6">
           {children}
         </div>

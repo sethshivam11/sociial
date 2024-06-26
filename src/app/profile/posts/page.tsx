@@ -55,19 +55,21 @@ function Page() {
               className="w-full h-full object-cover rounded-sm select-none pointer-events-none"
               alt=""
             />
-            <div className="flex items-center justify-start px-2 gap-1 absolute w-full h-8 bottom-0 bg-gradient-to-b from-transparent via-transparent/30 to-transparent/80 text-xs">
-              <span>
-                <Heart className="inline" fill="currentColor" size="12" />{" "}
-                {post.likesCount}
-              </span>
-              <span>
-                <MessageSquareText
-                  className="inline"
-                  fill="currentColor"
-                  size="12"
-                />{" "}
-                {post.commentsCount}
-              </span>
+            <div className="p-1 absolute w-full h-8 bottom-0 left-0 text-xs text-white">
+              <div className="flex items-center md:justify-start gap-1 w-full h-full bg-gradient-to-b from-transparent rounded-sm via-transparent/30 to-transparent/80 px-2">
+                <span>
+                  <Heart className="inline" fill="currentColor" size="12" />
+                  &nbsp;{post.likesCount}
+                </span>
+                <span>
+                  <MessageSquareText
+                    className="inline"
+                    fill="currentColor"
+                    size="12"
+                  />
+                  &nbsp;{post.commentsCount}
+                </span>
+              </div>
             </div>
           </div>
         ))

@@ -49,10 +49,6 @@ function Search() {
   const [recentSearches, setRecentSearches] = React.useState<string[]>([]);
   const [searchResults, setSearchResults] = React.useState<Search[]>([]);
 
-  function onSubmit(data: { search: string }) {
-    console.log(data);
-  }
-
   function clearRecentSearches() {
     setRecentSearches([]);
     localStorage.removeItem("recentSearches");
@@ -64,21 +60,6 @@ function Search() {
       setRecentSearches(JSON.parse(savedRecentSearches));
     }
   }, []);
-
-  React.useEffect(() => {
-    const listener = function (e: WindowEventMap["keydown"]) {
-      if (e.key === "Enter" && search) {
-        recentSearches.length >= 10 ? recentSearches.pop() : recentSearches;
-        setRecentSearches([search, ...recentSearches]);
-        localStorage.setItem(
-          "recentSearches",
-          JSON.stringify([search, ...recentSearches])
-        );
-      }
-    };
-    window.addEventListener("keydown", listener);
-    return () => window.removeEventListener("keydown", listener);
-  }, [search]);
 
   React.useEffect(() => {
     if (!search) {
@@ -100,6 +81,19 @@ function Search() {
       });
       setSearchResults(matchedSearches);
     }
+
+    const listener = function (e: WindowEventMap["keydown"]) {
+      if (e.key === "Enter" && search) {
+        recentSearches.length >= 10 ? recentSearches.pop() : recentSearches;
+        setRecentSearches([search, ...recentSearches]);
+        localStorage.setItem(
+          "recentSearches",
+          JSON.stringify([search, ...recentSearches])
+        );
+      }
+    };
+    window.addEventListener("keydown", listener);
+    return () => window.removeEventListener("keydown", listener);
   }, [search]);
 
   return (

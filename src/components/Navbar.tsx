@@ -210,24 +210,24 @@ function Navbar() {
                 </span>
                 <Menu className="xl:hidden inline" />
               </MenubarTrigger>
-              <MenubarContent>
-                <MenubarItem>Settings</MenubarItem>
+              <MenubarContent className="rounded-xl">
+                <MenubarItem className="py-2.5 rounded-lg pl-2.5">Settings</MenubarItem>
                 <MenubarSub>
-                  <MenubarSubTrigger>Theme</MenubarSubTrigger>
+                  <MenubarSubTrigger className="py-2.5 rounded-lg pl-2.5">Theme</MenubarSubTrigger>
                   <MenubarSubContent>
-                    <MenubarItem onClick={() => setTheme("system")}>
+                    <MenubarItem className="py-2.5 rounded-lg pl-2.5" onClick={() => setTheme("system")}>
                       System
                     </MenubarItem>
-                    <MenubarItem onClick={() => setTheme("light")}>
+                    <MenubarItem className="py-2.5 rounded-lg pl-2.5" onClick={() => setTheme("light")}>
                       Light
                     </MenubarItem>
-                    <MenubarItem onClick={() => setTheme("dark")}>
+                    <MenubarItem className="py-2.5 rounded-lg pl-2.5" onClick={() => setTheme("dark")}>
                       Dark
                     </MenubarItem>
                   </MenubarSubContent>
                 </MenubarSub>
                 <MenubarSeparator />
-                <MenubarItem>Log Out</MenubarItem>
+                <MenubarItem className="py-2.5 rounded-lg pl-2.5">Log Out</MenubarItem>
               </MenubarContent>
             </MenubarMenu>
           </Menubar>

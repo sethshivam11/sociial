@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import Image from "next/image";
 
 interface Props {
   params: {
@@ -368,10 +369,11 @@ function Story({ params }: Props) {
             ref={videoRef}
           />
         ) : (
-          <img
+          <Image
             src={currentStory.images[index].link}
             alt={`Story ${currentStory.index + 1} by ${currentStory.username}`}
             className="max-h-full h-fit w-full object-contain select-none pointer-events-none"
+            fill
           />
         )}
         <div

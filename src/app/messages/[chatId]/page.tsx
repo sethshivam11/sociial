@@ -6,12 +6,9 @@ import { nameFallback } from "@/lib/helpers";
 import {
   ArrowLeft,
   Info,
-  MoreHorizontal,
   Paperclip,
   Phone,
-  Reply,
   SendHorizonal,
-  Smile,
   Video,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
@@ -26,6 +23,23 @@ import {
 } from "@/components/ui/form";
 import EmojiKeyboard from "@/components/EmojiKeyboard";
 import MessageReacts from "@/components/MessageReacts";
+import { Inter } from "next/font/google";
+import MessageOptions from "@/components/MessageOptions";
+import ChatInfo from "@/components/ChatInfo";
+
+interface Message {
+  id: string;
+  content: string;
+  type: string;
+  time: string;
+  reacts?: {
+    id: string;
+    emoji: string;
+    fullName: string;
+    username: string;
+    avatar: string;
+  }[];
+}
 
 function Page({ params }: { params: { chatId: string } }) {
   const location = usePathname();
@@ -38,6 +52,7 @@ function Page({ params }: { params: { chatId: string } }) {
     },
   });
   const [recipent, setRecipent] = React.useState({
+    id: "1",
     fullName: "John Doe",
     username: "johndoe",
     avatar:
@@ -46,7 +61,20 @@ function Page({ params }: { params: { chatId: string } }) {
     followingCount: 12,
     postsCount: 4,
   });
-  const [messages, setMessages] = React.useState([
+  const [user, setUser] = React.useState({
+    id: "2",
+    fullName: "John Doe",
+    username: "johndoe",
+    avatar:
+      "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+  });
+  const [theme, setTheme] = React.useState({
+    primary: "bg-rose-500",
+    secondary: "bg-stone-500",
+    primaryText: "text-black",
+    secondaryText: "text-white"
+  })
+  const [messages, setMessages] = React.useState<Message[]>([
     {
       id: "1",
       content: "Hello, how are you?",
@@ -290,7 +318,7 @@ function Page({ params }: { params: { chatId: string } }) {
     },
   ]);
   const [isMobile, setIsMobile] = React.useState(false);
-  const [infoOpen, setInfoOpen] = React.useState(false);
+  const [infoOpen, setInfoOpen] = React.useState(true);
   const [unreadMessages, setUnreadMessages] = React.useState<typeof messages>(
     []
   );
@@ -311,17 +339,23 @@ function Page({ params }: { params: { chatId: string } }) {
     form.setValue("message", "");
   }
 
-  function reactMessage(emoji: string) {
-    const date = new Date();
-    const savedMessage = {
-      id: String(messages.length + 1),
-      content: emoji,
-      type: "sent",
-      time: `${date.getHours()}:${date.getMinutes()} ${
-        date.getHours() > 12 ? "PM" : "AM"
-      }`,
+  function reactMessage(message: (typeof messages)[0], emoji: string) {
+    const savedReact = {
+      id: String(parseInt(message.id) + 1),
+      emoji,
+      fullName: user.fullName,
+      username: user.username,
+      avatar: user.avatar,
     };
-    setMessages([...messages, savedMessage]);
+    let messageReacts = message.reacts;
+    if (message.reacts) {
+      messageReacts = [...message.reacts, savedReact];
+    } else {
+      messageReacts = [savedReact];
+    }
+    const newMsg = { ...message, reacts: messageReacts };
+    setMessages(messages.filter((msg) => msg !== message).concat([newMsg]));
+    console.log(message.reacts);
   }
 
   React.useEffect(() => {
@@ -344,12 +378,11 @@ function Page({ params }: { params: { chatId: string } }) {
 
   return (
     <div
-      className={`md:border-l-2 border-stone-200 dark:border-stone-800 md:ml-3 md:flex flex flex-col items-start justify-start gap-1 relative lg:col-span-7 md:col-span-6 col-span-10 md:max-h-screen max-h-[100svh] h-100svh 
-        overflow-y-auto overflow-x-clip sm:min-h-[42rem] ${
+      className={`md:border-l-2 border-stone-200 dark:border-stone-800 md:ml-3 md:flex flex flex-col items-start justify-start gap-1 relative lg:col-span-7 md:col-span-6 col-span-10 h-full overflow-y-auto overflow-x-clip sm:min-h-[42rem] ${
           location !== "/messages" ? "" : "hidden"
         } `}
     >
-      <div className="flex gap-2 items-center justify-between sm:absolute fixed top-0 bottom-auto left-0 w-full md:h-20 h-16 md:ml-3 border-b-2 border-stone-200 dark:border-stone-800 bg-white dark:bg-black md:px-4 pl-1 pr-0 z-10">
+      <div className="flex gap-2 items-center justify-between sm:absolute fixed top-0 bottom-auto left-0 w-full md:h-20 h-16 md:ml-3 border-b-2 border-stone-200 dark:border-stone-800 bg-white dark:bg-black md:px-4 pl-1 pr-0 z-20">
         <div className="flex items-center justify-center">
           <Button
             variant="ghost"
@@ -361,7 +394,7 @@ function Page({ params }: { params: { chatId: string } }) {
           >
             <ArrowLeft />
           </Button>
-          <Avatar className="w-12 h-12 ml-0.5 mr-2">
+          <Avatar className="w-12 h-12 ml-0.5 mr-2" onClick={() => router.push(`/${recipent.username}`)}>
             <AvatarImage
               src={recipent.avatar}
               alt=""
@@ -369,12 +402,12 @@ function Page({ params }: { params: { chatId: string } }) {
             />
             <AvatarFallback>{nameFallback(recipent.fullName)}</AvatarFallback>
           </Avatar>
-          <div>
-            <h1 className="text-xl tracking-tight font-bold">
+          <button className="flex flex-col items-start justify-start">
+            <h1 className="text-xl tracking-tight font-bold leading-4">
               {recipent.fullName}
             </h1>
             <p className="text-stone-500 text-sm">@{recipent.username}</p>
-          </div>
+          </button>
         </div>
         <div className="px-4 space-x-4">
           <button
@@ -388,146 +421,156 @@ function Page({ params }: { params: { chatId: string } }) {
             <Video />
           </button>
           <button onClick={() => setInfoOpen(!infoOpen)}>
-            <Info strokeWidth={infoOpen ? "3": "2"} />
+            <Info strokeWidth={infoOpen ? "3" : "2"} />
           </button>
         </div>
       </div>
       <div
-        className={`max-h-full overflow-y-auto overflow-x-auto flex flex-col items-start justify-start w-full md:mt-20 mt-16 md:mb-16 mr-0 py-2 px-3 ${
-          isMobile ? "mb-0" : "mb-16"
-        }`}
-      >
-        <div className="flex flex-col items-center justify-center w-full py-2 gap-2 mb-8">
-          <Avatar className="w-28 h-28 select-none pointer-events-none">
-            <AvatarImage src={recipent.avatar} alt="" />
-            <AvatarFallback>{nameFallback(recipent.fullName)}</AvatarFallback>
-          </Avatar>
-          <div className="grid place-items-center">
-            <h1 className="text-2xl font-bold tracking-tight">
-              {recipent.fullName}
-            </h1>
-            <p className="text-sm text-stone-500">@{recipent.username}</p>
-            <p>
-              {recipent.followersCount}
-              &nbsp;Followers &#183; {recipent.postsCount}
-              &nbsp;Posts
-            </p>
-          </div>
-          <Button
-            variant="outline"
-            className="my-2 rounded-xl"
-            onClick={() => router.push(`/${recipent.username}`)}
-          >
-            View profile
-          </Button>
-        </div>
+          className={`max-h-full overflow-y-auto overflow-x-auto md:mt-20 mt-16 md:mb-16 flex flex-col items-start justify-start w-full mr-0 py-2 px-3 ${
+            isMobile ? "mb-0" : "mb-28"
+          }`}
+        >
         {infoOpen ? (
-          <div className="flex flex-col items-center justify-center w-full h-full gap-2">
-            <Info size="40" />
-            <span className="text-2xl font-semibold tracking-tight">Info</span>
-            <span className="text-stone-500">This section is coming soon</span>
-          </div>
+          <ChatInfo
+            recipents={[
+              { ...recipent, username: "shadcn", avatar: "https://github.com/shadcn.png" },
+            ]}
+            user={user}
+            chatId={chatId}
+          />
         ) : (
-          messages.map((message, index) => (
-            <div
-              className={`group flex items-center justify-start w-full ${
-                message.type === "reply"
-                  ? "flex-row"
-                  : "flex-row-reverse ml-auto"
-              }`}
-              key={index}
-            >
-              <div
-                className={`py-2 px-4 rounded-[50px] relative ${
-                  message.type === "reply"
-                    ? "bg-stone-800 dark:bg-stone-300 text-white dark:text-black"
-                    : "bg-stone-300 dark:bg-stone-800 max-w-3/4"
-                } ${
-                  messages[index - 1]?.type === message.type ? "mb-1" : "mb-3"
-                }
-              ${message.reacts ? "mb-4" : "mb-1"}`}
-                ref={
-                  unreadMessages[index] === unreadMessages[0]
-                    ? unreadMessageRef
-                    : null
-                }
-              >
-                {message.content}
-                {message.reacts && (
-                  <MessageReacts reacts={message.reacts} type={message.type} />
-                )}
+          <>
+            <div className="flex flex-col items-center justify-center w-full py-2 gap-2 mb-8">
+              <Avatar className="w-28 h-28 select-none pointer-events-none">
+                <AvatarImage src={recipent.avatar} alt="" />
+                <AvatarFallback>
+                  {nameFallback(recipent.fullName)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="grid place-items-center">
+                <h1 className="text-2xl font-bold tracking-tight">
+                  {recipent.fullName}
+                </h1>
+                <p className="text-sm text-stone-500">@{recipent.username}</p>
+                <p>
+                  {recipent.followersCount}
+                  &nbsp;Followers &#183; {recipent.postsCount}
+                  &nbsp;Posts
+                </p>
               </div>
-              <div
-                className={`reactions flex group-hover:visible invisible w-fit gap-1 mb-2 mx-1 ${
-                  message.type === "reply" ? "flex-row" : "flex-row-reverse"
-                }`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  (e.currentTarget as HTMLDivElement).classList.remove(
-                    "invisible"
-                  );
-                  (e.currentTarget as HTMLDivElement).classList.add("visible");
-                }}
+              <Button
+                variant="outline"
+                className="my-2 rounded-xl"
+                onClick={() => router.push(`/${recipent.username}`)}
               >
-                <EmojiKeyboard
-                  message=""
-                  setMessage={(emoji) => reactMessage(emoji)}
-                  react
-                />
-                <MoreHorizontal size="15" />
-              </div>
+                View profile
+              </Button>
             </div>
-          ))
+            {messages.map((message, index) => (
+              <div
+                className={`group flex items-center justify-start w-full ${
+                  message.type === "reply"
+                    ? "flex-row"
+                    : "flex-row-reverse ml-auto"
+                }`}
+                key={index}
+              >
+                <div
+                  className={`py-2 px-4 rounded-[50px] relative ${
+                    message.type === "reply"
+                      ? "bg-stone-800 dark:bg-stone-300 text-white dark:text-black"
+                      : "bg-stone-300 dark:bg-stone-800 max-w-3/4"
+                  } ${
+                    messages[index - 1]?.type === message.type ? "mb-1" : "mb-3"
+                  }
+              ${message.reacts ? "mb-4" : "mb-1"}`}
+                  ref={
+                    unreadMessages[index] === unreadMessages[0]
+                      ? unreadMessageRef
+                      : null
+                  }
+                >
+                  {message.content}
+                  {message.reacts && (
+                    <MessageReacts
+                      reacts={message.reacts}
+                      type={message.type}
+                    />
+                  )}
+                </div>
+                <div
+                  className={`reactions flex group-hover:visible invisible w-fit gap-2 mb-2 mx-1 ${
+                    message.type === "reply" ? "flex-row" : "flex-row-reverse"
+                  }`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    (e.currentTarget as HTMLDivElement).classList.remove(
+                      "invisible"
+                    );
+                    (e.currentTarget as HTMLDivElement).classList.add(
+                      "visible"
+                    );
+                  }}
+                >
+                  <MessageOptions />
+                </div>
+              </div>
+            ))}
+          </>
         )}
       </div>
-      <div className="sm:absolute fixed bg-white dark:bg-black bottom-0 left-0 w-full px-2.5 flex items-center justify-center h-16 py-2">
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="flex items-center w-full justify-center gap-2"
-          >
-            <EmojiKeyboard
-              setMessage={(emoji: string): void =>
-                form.setValue("message", emoji)
-              }
-              message={message}
-            />
-            <FormField
-              control={form.control}
-              name="message"
-              render={({ field }) => (
-                <FormItem className="w-full">
-                  <FormControl>
-                    <Input
-                      placeholder="Type a message..."
-                      {...field}
-                      className="rounded-xl"
-                      autoComplete="off"
-                      inputMode="text"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button
-              className="rounded-xl px-2"
-              type="button"
-              size="icon"
-              variant="ghost"
+      {infoOpen ? (
+        ""
+      ) : (
+        <div className="sm:absolute fixed bg-white dark:bg-black bottom-0 left-0 w-full px-2.5 flex items-center justify-center h-16 py-2 z-20">
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="flex items-center w-full justify-center gap-2"
             >
-              <Paperclip />
-            </Button>
-            <Button
-              type="submit"
-              disabled={!message.length}
-              className="rounded-xl"
-            >
-              <SendHorizonal />
-            </Button>
-          </form>
-        </Form>
-      </div>
+              <EmojiKeyboard
+                setMessage={(emoji: string): void =>
+                  form.setValue("message", emoji)
+                }
+                message={message}
+              />
+              <FormField
+                control={form.control}
+                name="message"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <FormControl>
+                      <Input
+                        placeholder="Type a message..."
+                        {...field}
+                        className="rounded-xl"
+                        autoComplete="off"
+                        inputMode="text"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button
+                className="rounded-xl px-2"
+                type="button"
+                size="icon"
+                variant="ghost"
+              >
+                <Paperclip />
+              </Button>
+              <Button
+                type="submit"
+                disabled={!message.length}
+                className="rounded-xl"
+              >
+                <SendHorizonal />
+              </Button>
+            </form>
+          </Form>
+        </div>
+      )}
     </div>
   );
 }

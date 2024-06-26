@@ -30,8 +30,8 @@ function MessageReacts({ reacts, type }: Props) {
         }`}
       >
         {reacts[0].emoji || ""}
-        {reacts[1]?.emoji || ""}
-        {reacts[2]?.emoji || ""}
+        {` ${reacts[1]?.emoji || ""}`}
+        {` ${reacts[2]?.emoji || ""}`}
         {reacts.length === 1 ? "" : reacts.length}
       </DialogTrigger>
       <DialogContent
@@ -40,7 +40,10 @@ function MessageReacts({ reacts, type }: Props) {
       >
         <h1 className="text-xl font-semibold tracking-tight">Reactions</h1>
         {reacts.map((react, index) => (
-          <div className="flex items-center space-x-1 justify-between w-full" key={index}>
+          <div
+            className="flex items-center space-x-1 justify-between w-full"
+            key={index}
+          >
             <div className="flex flex-row">
               <Avatar className="mx-2">
                 <AvatarImage src={react.avatar} />

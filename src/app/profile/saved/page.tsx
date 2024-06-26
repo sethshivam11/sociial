@@ -5,7 +5,7 @@ import React from "react";
 import { Heart, MessageSquareText, Image as PostImage } from "lucide-react";
 
 function Page() {
-  const [loading, setLoading] = React.useState(true);
+  const [loading, setLoading] = React.useState(false);
   const [posts, setPosts] = React.useState([
     {
       _id: "0",
@@ -44,7 +44,10 @@ function Page() {
         })
       ) : posts.length ? (
         posts.map((post, index) => (
-          <div className="lg:w-1/4 w-1/3 h-60 p-1 relative" key={index}>
+          <div
+            className="lg:w-1/4 w-1/3 aspect-square p-1 relative"
+            key={index}
+          >
             <Image
               src={post.link}
               width="300"
@@ -52,20 +55,6 @@ function Page() {
               className="w-full h-full object-cover rounded-sm select-none pointer-events-none"
               alt=""
             />
-            <div className="flex items-center justify-start px-2 gap-1 absolute w-full h-8 bottom-0 bg-gradient-to-b from-transparent via-transparent/30 to-transparent/80 text-xs">
-              <span>
-                <Heart className="inline" fill="currentColor" size="12" />{" "}
-                {post.likesCount}
-              </span>
-              <span>
-                <MessageSquareText
-                  className="inline"
-                  fill="currentColor"
-                  size="12"
-                />{" "}
-                {post.commentsCount}
-              </span>
-            </div>
           </div>
         ))
       ) : (
