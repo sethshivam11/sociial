@@ -2,12 +2,6 @@ import React from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { nameFallback } from "@/lib/helpers";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "./ui/tooltip";
 
 interface Props {
   reacts: {
@@ -20,18 +14,26 @@ interface Props {
 }
 
 function MessageReacts({ reacts, type }: Props) {
+  function getUniqueEmojis(reacts: Props["reacts"]): string {
+    let threeEmojis = new Set<string>();
+    reacts.map((react) => {
+      if (threeEmojis.size < 3) {
+        threeEmojis.add(react.emoji);
+      }
+    });
+    return Array.from(threeEmojis).join("");
+  }
+
   return (
     <Dialog>
       <DialogTrigger
-        className={`absolute rounded-full text-xs px-1 py-0.5 z-10 ring-1 -bottom-3 ring-white dark:ring-black ${
+        className={`absolute rounded-full text-xs px-1 py-0.5 z-10 ring-1 -bottom-3 ring-white dark:ring-black text-white dark:text-black ${
           reacts && type === "reply"
             ? "left-3 mr-auto bg-stone-800 dark:bg-stone-300"
             : "right-3 ml-auto bg-stone-300 dark:bg-stone-800"
         }`}
       >
-        {reacts[0].emoji || ""}
-        {` ${reacts[1]?.emoji || ""}`}
-        {` ${reacts[2]?.emoji || ""}`}
+        {getUniqueEmojis(reacts)}
         {reacts.length === 1 ? "" : reacts.length}
       </DialogTrigger>
       <DialogContent

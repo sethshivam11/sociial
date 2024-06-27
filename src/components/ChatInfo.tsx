@@ -8,7 +8,19 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { nameFallback } from "@/lib/helpers";
 import Link from "next/link";
 import { Button } from "./ui/button";
-import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogTrigger,
+} from "./ui/dialog";
+
+interface Theme {
+  name: string;
+  color: string;
+  text: string;
+}
 
 interface Props {
   recipents: {
@@ -27,9 +39,21 @@ interface Props {
     avatar: string;
   };
   chatId: string;
+  theme: Theme;
+  themes: Theme[];
+  setTheme: (theme: Theme) => void;
+  setInfoOpen: (open: boolean) => void;
 }
 
-function ChatInfo({ recipents, user, chatId }: Props) {
+function ChatInfo({
+  recipents,
+  user,
+  chatId,
+  themes,
+  setTheme,
+  theme,
+  setInfoOpen,
+}: Props) {
   const [switchLoading, setSwitchLoading] = React.useState(false);
   const form = useForm({
     defaultValues: {
@@ -51,17 +75,8 @@ function ChatInfo({ recipents, user, chatId }: Props) {
       });
     }, 1000);
   }
-  const themes = [
-    {
-      primary: "",
-      secondary: ""
-    }
-  ]
   return (
     <div className="flex flex-col items-start justify-start w-full max-h-[100svh] gap-2">
-      <h1 className="text-2xl font-semibold tracking-tight my-4 w-full h-full text-center">
-        Details
-      </h1>
       {recipents.length === 1 ? (
         <>
           <h3 className="text-lg mx-3">Members</h3>
@@ -111,9 +126,26 @@ function ChatInfo({ recipents, user, chatId }: Props) {
         </DialogTrigger>
         <DialogContent
           onOpenAutoFocus={(e) => e.preventDefault()}
+          className="rounded-xl"
         >
-          <div className="flex flex-col p-2 items-center justify-center">
-            
+          <div className="flex flex-col py-2 items-center justify-center">
+            <h1 className="text-xl tracking-tight font-semibold mt-2 mb-4">
+              Themes
+            </h1>
+            {themes.map((theme, index) => (
+              <DialogClose
+                className="px-4 py-3 hover:bg-stone-100 hover:dark:bg-stone-900 flex items-center justify-start w-full rounded-xl gap-2 capitalize"
+                onClick={() => {
+                  setTheme(theme);
+                  localStorage.setItem("message-theme", JSON.stringify(theme));
+                  setInfoOpen(false);
+                }}
+                key={index}
+              >
+                <div className={`rounded-full ${theme.color} w-8 h-8`} />
+                &nbsp;{theme.name}
+              </DialogClose>
+            ))}
           </div>
         </DialogContent>
       </Dialog>
@@ -176,9 +208,8 @@ function ChatInfo({ recipents, user, chatId }: Props) {
         </Dialog>
       )}
       <hr className="bg-stone-500 w-full" />
-
       <div
-        className="mt-24 p-2 w-full bg-transparent
+        className="p-2 w-full bg-transparent
        flex flex-col gap-2"
       >
         {recipents.length === 1 ? (

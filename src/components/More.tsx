@@ -50,13 +50,11 @@ function More({ user, postId }: Props) {
   }
 
   async function copyLink(username: string, postId: string) {
-    const link = `${process.env.PUBLIC_URL || ""}/${username}/post/${btoa(
-      "jklfjlksdj4589nljlk"
-    )}`;
-    console.log(process.env.NEXT_PUBLIC_URL);
+    const link = `${process.env.PUBLIC_URL || ""}/${username}/post/${postId}}`;
+    console.log(process.env.PUBLIC_URL);
     await navigator.clipboard.writeText(link);
     toast({
-      title: "Link copied to clipboard",
+      title: "Copied",
       description: "The link has been copied to your clipboard.",
     });
   }
@@ -68,10 +66,8 @@ function More({ user, postId }: Props) {
       </DialogTrigger>
       <DialogContent className="w-full md:w-fit" hideCloseIcon>
         <Dialog>
-          <DialogTrigger>
-            <button className="text-red-500 w-full md:px-20 py-1">
-              Report
-            </button>
+          <DialogTrigger className="text-red-500 w-full md:px-20 py-1">
+            Report
           </DialogTrigger>
           <DialogContent
             className="sm:w-2/3 w-full h-fit flex flex-col bg-stone-100 dark:bg-stone-900"
@@ -110,10 +106,8 @@ function More({ user, postId }: Props) {
           </DialogContent>
         </Dialog>
         <AlertDialog>
-          <AlertDialogTrigger>
-            <button className="text-red-500 w-full md:px-20 py-1">
+          <AlertDialogTrigger className="text-red-500 w-full md:px-20 py-1">
               Unfollow
-            </button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>

@@ -3,7 +3,7 @@ import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { nameFallback } from "@/lib/helpers";
 import { Input } from "@/components/ui/input";
-import { History, Search, SearchX, Users, X } from "lucide-react";
+import { Circle, History, Search, SearchX, Users, X } from "lucide-react";
 import { useDebounceCallback } from "usehooks-ts";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -17,6 +17,7 @@ function Messages({ children }: { children: React.ReactNode }) {
       username: "johndoe",
       message: "Hello",
       avatar: "https://github.com/shadcn.png",
+      unreadMessages: true,
     },
     {
       id: "2",
@@ -33,6 +34,7 @@ function Messages({ children }: { children: React.ReactNode }) {
       username: "alexjohnson",
       message: "Good day!",
       avatar: "https://github.com/shadcn.png",
+      unreadMessages: true,
     },
     {
       id: "4",
@@ -41,6 +43,7 @@ function Messages({ children }: { children: React.ReactNode }) {
       message: "How's it going?",
       avatar:
         "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+      unreadMessages: true,
     },
     {
       id: "5",
@@ -231,11 +234,15 @@ function Messages({ children }: { children: React.ReactNode }) {
           {chats.length ? (
             chats.map((chat, index) => (
               <button
-                className="flex items-center justify-center rounded-md hover:bg-stone-200 dark:hover:bg-stone-800 w-full gap-2 p-2"
+                className={`flex items-center justify-center rounded-md w-full gap-2 p-2 ${
+                  location === `/messages/${chat.username}`
+                    ? "bg-stone-200 dark:bg-stone-800 hover:bg-stone-100 hover:dark:bg-stone-900"
+                    : "hover:bg-stone-200 dark:hover:bg-stone-800"
+                }`}
                 key={index}
                 title={chat.username}
                 onClick={() => {
-                  router.push(`/messages/${chat.id}`);
+                  router.push(`/messages/${chat.username}`);
                 }}
               >
                 <Avatar className="w-10 h-10">
@@ -252,6 +259,16 @@ function Messages({ children }: { children: React.ReactNode }) {
                     {chat.message}
                   </p>
                 </div>
+                {chat.unreadMessages ? (
+                  <Circle
+                    fill="rgb(14 165 233)"
+                    color="rgb(14 165 233)"
+                    size="16"
+                    className="mr-2"
+                  />
+                ) : (
+                  ""
+                )}
               </button>
             ))
           ) : (

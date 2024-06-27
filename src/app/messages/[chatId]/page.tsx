@@ -23,7 +23,6 @@ import {
 } from "@/components/ui/form";
 import EmojiKeyboard from "@/components/EmojiKeyboard";
 import MessageReacts from "@/components/MessageReacts";
-import { Inter } from "next/font/google";
 import MessageOptions from "@/components/MessageOptions";
 import ChatInfo from "@/components/ChatInfo";
 
@@ -45,7 +44,8 @@ function Page({ params }: { params: { chatId: string } }) {
   const location = usePathname();
   const router = useRouter();
   const chatId = params.chatId;
-  const unreadMessageRef = React.useRef<HTMLDivElement>(null);
+  const messageScrollElement = React.useRef<HTMLDivElement>(null);
+  const lastMessageRef = React.useRef<HTMLDivElement>(null);
   const form = useForm({
     defaultValues: {
       message: "",
@@ -68,12 +68,44 @@ function Page({ params }: { params: { chatId: string } }) {
     avatar:
       "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
   });
-  const [theme, setTheme] = React.useState({
-    primary: "bg-rose-500",
-    secondary: "bg-stone-500",
-    primaryText: "text-black",
-    secondaryText: "text-white"
-  })
+  const themes = [
+    {
+      name: "default",
+      color: "bg-stone-800 dark:bg-stone-300",
+      text: "white dark:text-black",
+    },
+    {
+      name: "orange",
+      color: "bg-orange-500",
+      text: "white",
+    },
+    {
+      name: "rose",
+      color: "bg-rose-500",
+      text: "white",
+    },
+    {
+      name: "emerald",
+      color: "bg-emerald-500",
+      text: "black",
+    },
+    {
+      name: "sky",
+      color: "bg-sky-500",
+      text: "black",
+    },
+    {
+      name: "blue",
+      color: "bg-blue-500",
+      text: "black",
+    },
+    {
+      name: "purple",
+      color: "bg-purple-500",
+      text: "white",
+    },
+  ];
+  const [theme, setTheme] = React.useState(themes[0]);
   const [messages, setMessages] = React.useState<Message[]>([
     {
       id: "1",
@@ -317,11 +349,7 @@ function Page({ params }: { params: { chatId: string } }) {
       ],
     },
   ]);
-  const [isMobile, setIsMobile] = React.useState(false);
-  const [infoOpen, setInfoOpen] = React.useState(true);
-  const [unreadMessages, setUnreadMessages] = React.useState<typeof messages>(
-    []
-  );
+  const [infoOpen, setInfoOpen] = React.useState(false);
   const message = form.watch("message");
 
   function onSubmit({ message }: { message: string }) {
@@ -337,6 +365,10 @@ function Page({ params }: { params: { chatId: string } }) {
     };
     setMessages([...messages, savedMessage]);
     form.setValue("message", "");
+    setTimeout(
+      () => lastMessageRef.current?.scrollIntoView({ behavior: "smooth" }),
+      1
+    );
   }
 
   function reactMessage(message: (typeof messages)[0], emoji: string) {
@@ -353,34 +385,35 @@ function Page({ params }: { params: { chatId: string } }) {
     } else {
       messageReacts = [savedReact];
     }
-    const newMsg = { ...message, reacts: messageReacts };
-    setMessages(messages.filter((msg) => msg !== message).concat([newMsg]));
-    console.log(message.reacts);
+    setMessages(
+      messages.map((msg) =>
+        msg.id === message.id ? { ...msg, reacts: messageReacts } : msg
+      )
+    );
   }
 
   React.useEffect(() => {
-    setIsMobile(/Android|iPhone/i.test(navigator.userAgent));
-    if (unreadMessageRef.current) {
-      unreadMessageRef.current.scrollIntoView({ behavior: "instant" });
+    if (lastMessageRef.current) {
+      lastMessageRef.current.scrollIntoView({ behavior: "instant" });
     }
-    const hideDiv = () => {
-      const divs = document.querySelectorAll(".reactions");
-      divs.forEach((div) => {
-        div.classList.add("invisible");
-        div.classList.remove("visible");
-      });
-    };
+  }, [infoOpen]);
 
-    window.addEventListener("click", hideDiv);
-
-    return () => window.removeEventListener("click", hideDiv);
+  React.useEffect(() => {
+    const savedMessageTheme = JSON.parse(
+      localStorage.getItem("message-theme") || "{}"
+    );
+    if (savedMessageTheme.name) {
+      setTheme(savedMessageTheme as (typeof themes)[0]);
+    } else {
+      setTheme(themes[0]);
+    }
   }, []);
 
   return (
     <div
-      className={`md:border-l-2 border-stone-200 dark:border-stone-800 md:ml-3 md:flex flex flex-col items-start justify-start gap-1 relative lg:col-span-7 md:col-span-6 col-span-10 h-full overflow-y-auto overflow-x-clip sm:min-h-[42rem] ${
-          location !== "/messages" ? "" : "hidden"
-        } `}
+      className={`md:border-l-2 border-stone-200 dark:border-stone-800 md:ml-3 md:flex flex flex-col items-start justify-start gap-1 relative lg:col-span-7 md:col-span-6 col-span-10 overflow-y-auto overflow-x-clip sm:min-h-[42rem] max-h-[100dvh] ${
+        location !== "/messages" ? "" : "hidden"
+      } `}
     >
       <div className="flex gap-2 items-center justify-between sm:absolute fixed top-0 bottom-auto left-0 w-full md:h-20 h-16 md:ml-3 border-b-2 border-stone-200 dark:border-stone-800 bg-white dark:bg-black md:px-4 pl-1 pr-0 z-20">
         <div className="flex items-center justify-center">
@@ -394,7 +427,10 @@ function Page({ params }: { params: { chatId: string } }) {
           >
             <ArrowLeft />
           </Button>
-          <Avatar className="w-12 h-12 ml-0.5 mr-2" onClick={() => router.push(`/${recipent.username}`)}>
+          <Avatar
+            className="w-12 h-12 ml-0.5 mr-2"
+            onClick={() => router.push(`/${recipent.username}`)}
+          >
             <AvatarImage
               src={recipent.avatar}
               alt=""
@@ -426,17 +462,24 @@ function Page({ params }: { params: { chatId: string } }) {
         </div>
       </div>
       <div
-          className={`max-h-full overflow-y-auto overflow-x-auto md:mt-20 mt-16 md:mb-16 flex flex-col items-start justify-start w-full mr-0 py-2 px-3 ${
-            isMobile ? "mb-0" : "mb-28"
-          }`}
-        >
+        className="max-h-full overflow-y-auto overflow-x-auto md:mt-20 mt-16 md:mb-16 flex flex-col items-start justify-start w-full mr-0 py-2 px-3"
+        ref={messageScrollElement}
+      >
         {infoOpen ? (
           <ChatInfo
             recipents={[
-              { ...recipent, username: "shadcn", avatar: "https://github.com/shadcn.png" },
+              {
+                ...recipent,
+                username: "shadcn",
+                avatar: "https://github.com/shadcn.png",
+              },
             ]}
             user={user}
             chatId={chatId}
+            themes={themes}
+            theme={theme}
+            setTheme={(newTheme) => setTheme(newTheme)}
+            setInfoOpen={(open) => setInfoOpen(open)}
           />
         ) : (
           <>
@@ -478,15 +521,15 @@ function Page({ params }: { params: { chatId: string } }) {
                 <div
                   className={`py-2 px-4 rounded-[50px] relative ${
                     message.type === "reply"
-                      ? "bg-stone-800 dark:bg-stone-300 text-white dark:text-black"
+                      ? `${theme.color} text-${theme.text} max-w-3/4`
                       : "bg-stone-300 dark:bg-stone-800 max-w-3/4"
                   } ${
                     messages[index - 1]?.type === message.type ? "mb-1" : "mb-3"
                   }
               ${message.reacts ? "mb-4" : "mb-1"}`}
                   ref={
-                    unreadMessages[index] === unreadMessages[0]
-                      ? unreadMessageRef
+                    messages[messages.length - 1] === message
+                      ? lastMessageRef
                       : null
                   }
                 >
@@ -499,20 +542,16 @@ function Page({ params }: { params: { chatId: string } }) {
                   )}
                 </div>
                 <div
-                  className={`reactions flex group-hover:visible invisible w-fit gap-2 mb-2 mx-1 ${
+                  className={`reactions flex group-hover:visible invisible w-fit mb-2 mx-0.5 gap-0 ${
                     message.type === "reply" ? "flex-row" : "flex-row-reverse"
                   }`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    (e.currentTarget as HTMLDivElement).classList.remove(
-                      "invisible"
-                    );
-                    (e.currentTarget as HTMLDivElement).classList.add(
-                      "visible"
-                    );
-                  }}
                 >
-                  <MessageOptions />
+                  <MessageOptions
+                    message={message.content}
+                    type={message.type}
+                    id={message.id}
+                    reactMessage={(emoji) => reactMessage(message, emoji)}
+                  />
                 </div>
               </div>
             ))}

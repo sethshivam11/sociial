@@ -22,6 +22,7 @@ import { nameFallback } from "@/lib/helpers";
 function Navbar() {
   const location = usePathname();
   const { setTheme } = useTheme();
+  const [iosDevice, setIosDevice] = React.useState(false);
   const hideNav = [
     "/sign-in",
     "/sign-up",
@@ -37,16 +38,31 @@ function Navbar() {
     username: "sethshivam11",
   };
 
+  React.useEffect(() => {
+    const ifIos =
+      [
+        "iPad Simulator",
+        "iPhone Simulator",
+        "iPod Simulator",
+        "iPad",
+        "iPhone",
+        "iPod",
+      ].includes(navigator.platform) ||
+      // iPad on iOS 13 detection
+      (navigator.userAgent.includes("Mac") && "ontouchend" in document);
+      if(ifIos) setIosDevice(true);
+  }, []);
+
   return (
     <nav
-      className={`xl:px-4 xl:py-6 p-3 sm:sticky fixed sm:top-0 left-0 sm:h-screen h-fit bottom-0 xl:col-span-2 sm:col-span-1 col-span-10 sm:min-h-[42rem] max-h-[55rem] z-10 w-full min-w-max sm:block 
+      className={`xl:px-4 xl:py-6 p-3 sm:sticky fixed sm:top-0 left-0 sm:h-screen h-fit ${iosDevice ? "bottom-14": "bottom-0"} xl:col-span-2 sm:col-span-1 col-span-10 sm:min-h-[42rem] max-h-[55rem] z-10 w-full min-w-max sm:block 
       ${hideNav
         .map((path) => {
           if (location.includes(path) || location.startsWith(path))
             return "hidden";
           else return "";
         })
-        .join("")} ${location.includes("/messages/") ? "hidden": ""}`}
+        .join("")} ${location.includes("/messages/") ? "hidden" : ""}`}
     >
       <div className="bg-stone-200/60 dark:bg-stone-800/60 sm:bg-stone-100 sm:dark:bg-stone-800 backdrop-blur-sm h-full w-full sm:rounded-3xl rounded-2xl xl:p-6 sm:px-2 sm:py-4 sm:w-fit xl:w-full flex flex-col items-center justify-between">
         <Link href="/" className="sm:inline hidden w-full" title="Sociial">
@@ -211,23 +227,38 @@ function Navbar() {
                 <Menu className="xl:hidden inline" />
               </MenubarTrigger>
               <MenubarContent className="rounded-xl">
-                <MenubarItem className="py-2.5 rounded-lg pl-2.5">Settings</MenubarItem>
+                <MenubarItem className="py-2.5 rounded-lg pl-2.5">
+                  Settings
+                </MenubarItem>
                 <MenubarSub>
-                  <MenubarSubTrigger className="py-2.5 rounded-lg pl-2.5">Theme</MenubarSubTrigger>
+                  <MenubarSubTrigger className="py-2.5 rounded-lg pl-2.5">
+                    Theme
+                  </MenubarSubTrigger>
                   <MenubarSubContent>
-                    <MenubarItem className="py-2.5 rounded-lg pl-2.5" onClick={() => setTheme("system")}>
+                    <MenubarItem
+                      className="py-2.5 rounded-lg pl-2.5"
+                      onClick={() => setTheme("system")}
+                    >
                       System
                     </MenubarItem>
-                    <MenubarItem className="py-2.5 rounded-lg pl-2.5" onClick={() => setTheme("light")}>
+                    <MenubarItem
+                      className="py-2.5 rounded-lg pl-2.5"
+                      onClick={() => setTheme("light")}
+                    >
                       Light
                     </MenubarItem>
-                    <MenubarItem className="py-2.5 rounded-lg pl-2.5" onClick={() => setTheme("dark")}>
+                    <MenubarItem
+                      className="py-2.5 rounded-lg pl-2.5"
+                      onClick={() => setTheme("dark")}
+                    >
                       Dark
                     </MenubarItem>
                   </MenubarSubContent>
                 </MenubarSub>
                 <MenubarSeparator />
-                <MenubarItem className="py-2.5 rounded-lg pl-2.5">Log Out</MenubarItem>
+                <MenubarItem className="py-2.5 rounded-lg pl-2.5">
+                  Log Out
+                </MenubarItem>
               </MenubarContent>
             </MenubarMenu>
           </Menubar>

@@ -45,6 +45,7 @@ function EmojiKeyboard({ setMessage, message }: Props) {
         <Picker
           data={data}
           theme={theme}
+          navPosition="bottom"
           onEmojiSelect={({ native }: { native: string }) =>
             setMessage(message.concat(native))
           }

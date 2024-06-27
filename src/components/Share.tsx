@@ -84,6 +84,7 @@ export default function Share() {
         <h1 className="text-xl">Share post</h1>
         <Input
           value={search}
+          name="search"
           inputMode="search"
           placeholder="Search for users"
           onChange={(e) => setSearch(e.target.value)}
