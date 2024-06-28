@@ -15,7 +15,6 @@ import {
   CircleX,
   History,
   Search as SearchIcon,
-  SearchX,
   X,
 } from "lucide-react";
 import React from "react";
@@ -230,7 +229,7 @@ function Search() {
           ))
         ) : (
           <div className="flex flex-col items-center justify-center gap-4 text-center">
-            <SearchX size="80" />
+            <SearchIcon size="80" />
             <div>
               <h2 className="text-2xl tracking-tight font-bold">
                 Nothing found

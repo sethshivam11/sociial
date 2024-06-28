@@ -149,7 +149,7 @@ function More({ user, postId }: Props) {
         </button>
         <button
           className="w-full md:px-20 py-1"
-          onClick={() => router.push(`/${user.username}/post/${btoa(postId)}`)}
+          onClick={() => router.push(`/post/${postId}`)}
         >
           Open post
         </button>

@@ -1,7 +1,7 @@
 import React from "react";
 import { Skeleton } from "./ui/skeleton";
 
-function PostsLoading() {
+function PostsLoading({ length = 5 }: { length?: number }) {
   return Array.from({ length: 5 }).map((_, index) => (
     <div
       key={index}

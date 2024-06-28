@@ -5,16 +5,17 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Smile } from "lucide-react";
 import { Button } from "./ui/button";
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 import { useTheme } from "next-themes";
+import {
+  Menubar,
+  MenubarContent,
+  MenubarMenu,
+  MenubarTrigger,
+} from "./ui/menubar";
 
 interface Props {
   setMessage: (message: string) => void;
@@ -24,11 +25,12 @@ interface Props {
 function EmojiKeyboard({ setMessage, message }: Props) {
   const { theme } = useTheme();
   return (
-    <Popover>
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <PopoverTrigger asChild>
+    <Menubar className="p-0 border-transparent bg-transparent">
+      <MenubarMenu>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <MenubarTrigger asChild>
                 <Button
                   size="icon"
                   variant="ghost"
@@ -36,23 +38,24 @@ function EmojiKeyboard({ setMessage, message }: Props) {
                 >
                   <Smile />
                 </Button>
-            </PopoverTrigger>
-          </TooltipTrigger>
-          <TooltipContent>Emoji</TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-      <PopoverContent className="w-fit p-0">
-        <Picker
-          data={data}
-          theme={theme}
-          navPosition="bottom"
-          onEmojiSelect={({ native }: { native: string }) =>
-            setMessage(message.concat(native))
-          }
-          previewPosition="none"
-        />
-      </PopoverContent>
-    </Popover>
+              </MenubarTrigger>
+            </TooltipTrigger>
+            <TooltipContent side="right">Emoji</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <MenubarContent className="w-fit p-0 z-50">
+          <Picker
+            data={data}
+            theme={theme}
+            navPosition="bottom"
+            onEmojiSelect={({ native }: { native: string }) =>
+              setMessage(message.concat(native))
+            }
+            previewPosition="none"
+          />
+        </MenubarContent>
+      </MenubarMenu>
+    </Menubar>
   );
 }
 

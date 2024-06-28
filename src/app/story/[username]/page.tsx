@@ -30,6 +30,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
+import EmojiKeyboard from "@/components/EmojiKeyboard";
 
 interface Props {
   params: {
@@ -135,7 +136,6 @@ function Story({ params }: Props) {
       clearTimeout(this.timerId);
       this.timerId = undefined;
       this.remaining -= Date.now() - this.start;
-      console.log(this.remaining);
     }
 
     resume() {
@@ -145,7 +145,6 @@ function Story({ params }: Props) {
 
       this.start = Date.now();
       this.timerId = setTimeout(this.callback, this.remaining);
-      console.log(this.remaining);
     }
   }
 
@@ -394,6 +393,10 @@ function Story({ params }: Props) {
             onSubmit={form.handleSubmit(onSubmit)}
             className="w-full absolute flex items-center justify-center bottom-0 p-2 bg-gradient-to-b from-transparent via-transparent/40 to-transparent/50 pt-7"
           >
+            <EmojiKeyboard
+              message={form.watch("reply")}
+              setMessage={(emoji) => form.setValue("reply", emoji)}
+            />
             <FormField
               control={form.control}
               name="reply"

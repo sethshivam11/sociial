@@ -28,7 +28,6 @@ function Navbar() {
     "/sign-up",
     "/forgot-password",
     "/verify-code",
-    "/story",
   ];
   const [unreadMessageCount, newNotifications] = [0, false];
   const user = {
@@ -48,7 +47,6 @@ function Navbar() {
         "iPhone",
         "iPod",
       ].includes(navigator.platform) ||
-      // iPad on iOS 13 detection
       (navigator.userAgent.includes("Mac") && "ontouchend" in document);
       if(ifIos) setIosDevice(true);
   }, []);
@@ -62,9 +60,9 @@ function Navbar() {
             return "hidden";
           else return "";
         })
-        .join("")} ${location.includes("/messages/") ? "hidden" : ""}`}
+        .join("")} ${location.includes("/messages/") || location.includes("/story/") ? "sm:hidden hidden" : ""}`}
     >
-      <div className="bg-stone-200/60 dark:bg-stone-800/60 sm:bg-stone-100 sm:dark:bg-stone-800 backdrop-blur-sm h-full w-full sm:rounded-3xl rounded-2xl xl:p-6 sm:px-2 sm:py-4 sm:w-fit xl:w-full flex flex-col items-center justify-between">
+      <div className="bg-stone-100/50 dark:bg-stone-800/50 sm:bg-stone-100 sm:dark:bg-stone-800 backdrop-blur-sm h-full w-full sm:rounded-3xl rounded-2xl xl:p-6 sm:px-2 sm:py-4 sm:w-fit xl:w-full flex flex-col items-center justify-between">
         <Link href="/" className="sm:inline hidden w-full" title="Sociial">
           <div className="text-3xl tracking-tighter font-extrabold flex items-center md:justify-start md:pt-0 justify-center gap-2 w-full px-2">
             <Image

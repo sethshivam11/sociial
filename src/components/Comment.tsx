@@ -6,7 +6,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Heart, MessageSquareText, SendHorizonal, Smile } from "lucide-react";
+import { Heart, MessageSquareText, SendHorizonal } from "lucide-react";
 import Image from "next/image";
 import React, { Dispatch, SetStateAction } from "react";
 import { useForm } from "react-hook-form";
@@ -17,6 +17,7 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
+import EmojiKeyboard from "./EmojiKeyboard";
 
 interface Props {
   comments: {
@@ -144,9 +145,13 @@ export default function Comment({
               onSubmit={form.handleSubmit(onSubmit)}
               className="flex gap-2 w-full items-center"
             >
-              <Button variant="secondary" size="sm" type="button">
-                <Smile />
-              </Button>
+              <EmojiKeyboard
+                message={form.watch("comment")}
+                setMessage={(emoji: string): void => {
+                  form.setValue("comment", emoji);
+                  console.log(emoji);
+                }}
+              />
               <FormField
                 control={form.control}
                 name="comment"

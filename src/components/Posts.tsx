@@ -164,7 +164,6 @@ function Posts() {
                       <AvatarFallback>
                         {nameFallback(post.user.fullName)}
                       </AvatarFallback>
-                      ll
                     </Avatar>
                   </div>
                   <div>
