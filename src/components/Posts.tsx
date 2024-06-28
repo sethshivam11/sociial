@@ -84,8 +84,49 @@ function Posts() {
       liked: false,
       likesCount: 1,
     },
+    {
+      _id: "13",
+      postId: "1",
+      user: {
+        fullName: "Shad",
+        username: "shadcn",
+        avatar:
+          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+      },
+      content:
+        "This is a comment which is very long and I also don't know what to write in it. So, I am just writing anything that comes to my mind. I hope you are having a good day. Bye! 😊 ",
+      liked: false,
+      likesCount: 1,
+    },
+    {
+      _id: "12",
+      postId: "1",
+      user: {
+        fullName: "Shad",
+        username: "shadcn",
+        avatar:
+          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+      },
+      content:
+        "This is a comment which is very long and I also don't know what to write in it. So, I am just writing anything that comes to my mind. I hope you are having a good day. Bye! 😊 ",
+      liked: false,
+      likesCount: 1,
+    },
+    {
+      _id: "12",
+      postId: "1",
+      user: {
+        fullName: "Shad",
+        username: "shadcn",
+        avatar:
+          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+      },
+      content:
+        "This is a comment which is very long and I also don't know what to write in it. So, I am just writing anything that comes to my mind. I hope you are having a good day. Bye! 😊 ",
+      liked: false,
+      likesCount: 1,
+    },
   ]);
-  const [comment, setComment] = React.useState("");
   function addComment(content: string, postId: string) {
     setComments([
       ...comments,
@@ -108,7 +149,6 @@ function Posts() {
           : post
       )
     );
-    setComment("");
   }
   function likePost(_id: string) {
     setPosts(
@@ -245,8 +285,6 @@ function Posts() {
                     commentsCount={post.commentsCount}
                     likeComment={likeComment}
                     addComment={addComment}
-                    comment={comment}
-                    setComment={setComment}
                   />
                   <Share />
                 </div>

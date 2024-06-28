@@ -261,7 +261,7 @@ function Page() {
       },
     },
   ];
-  const [notifications, setNotifications] = React.useState<Notification[]>([]);
+  const [notifications, setNotifications] = React.useState<Notification[]>(savedNotifications);
   return (
     <div className="sm:container flex flex-col items-center justify-start max-h-[100dvh] min-h-[100dvh] xl:col-span-8 sm:col-span-9 col-span-10 sm:py-6">
       <div className="h-full lg:w-3/4 w-full rounded-xl sm:bg-stone-100 sm:dark:bg-stone-900 sm:pt-4 md:px-16 sm:px-6 px-0 pb-28">
@@ -307,7 +307,7 @@ function Page() {
                 </Link>
                 <div className="flex items-center justify-center bg-primary-500 text-white rounded-full w-fit h-full my-auto">
                   {notification.user.isFollow ? (
-                    <button className="bg-blue-500 w-16 h-7 text-center text-white rounded-full text-sm transition-colors hover:bg-blue-700 disabled:bg-blue-400">
+                    <button className="bg-blue-500 w-16 h-7 text-center text-white rounded-full text-sm transition-colors hover:bg-blue-700 disabled:bg-blue-400 ml-4">
                       Follow
                     </button>
                   ) : (

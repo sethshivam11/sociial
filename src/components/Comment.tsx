@@ -39,8 +39,6 @@ interface Props {
   commentsCount: number;
   likeComment: Function;
   addComment: Function;
-  comment: string;
-  setComment: Dispatch<SetStateAction<string>>;
 }
 
 interface FormInterface {
@@ -52,8 +50,6 @@ export default function Comment({
   user,
   likeComment,
   addComment,
-  comment,
-  setComment,
 }: Props) {
   const form = useForm<FormInterface>({
     defaultValues: {
@@ -61,7 +57,8 @@ export default function Comment({
     },
   });
   function onSubmit(values: FormInterface) {
-    console.log(values);
+    addComment(values.comment, "1");
+    form.setValue("comment", "");
   }
   return (
     <Dialog>
@@ -69,7 +66,7 @@ export default function Comment({
         <MessageSquareText size="30" className="sm:hover:opacity-60" />
       </DialogTrigger>
       <DialogContent
-        className="sm:w-2/3 w-full h-3/4 flex flex-col bg-stone-100 dark:bg-stone-900"
+        className="sm:w-4/5 max-w-[800px] w-full h-3/4 flex flex-col bg-stone-100 dark:bg-stone-900"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <div className="flex justify-between">
@@ -92,7 +89,7 @@ export default function Comment({
           </div>
         </div>
         <hr className="bg-stone-500" />
-        <div className="h-full">
+        <div className="h-full overflow-y-auto">
           {comments.map((comment, index) => {
             return (
               <div key={index} className="flex flex-col items-start mb-3">
@@ -116,7 +113,7 @@ export default function Comment({
                 <div className="px-1">
                   <p className="py-1.5 px-2">{comment.content}</p>
                   <div className="flex gap-3 text-xs text-stone-500 dark:text-stone-400 select-none">
-                    <p>
+                    <button onClick={() => likeComment(comment._id)}>
                       <Heart
                         size="16"
                         className={`${
@@ -125,13 +122,12 @@ export default function Comment({
                             : "sm:hover:opacity-60"
                         } mx-2 inline-block transition-all active:scale-110`}
                         fill={comment.liked ? "rgb(244 63 94)" : "none"}
-                        onClick={() => likeComment(comment._id)}
                       />
                       {comment.likesCount <= 1
                         ? "1 like"
                         : `${comment.likesCount} likes`}
-                    </p>
-                    <button>Reply</button>
+                    </button>
+                    <button onClick={() => form.setValue("comment", `@${user.username} `)}>Reply</button>
                   </div>
                 </div>
               </div>
@@ -149,7 +145,6 @@ export default function Comment({
                 message={form.watch("comment")}
                 setMessage={(emoji: string): void => {
                   form.setValue("comment", emoji);
-                  console.log(emoji);
                 }}
               />
               <FormField

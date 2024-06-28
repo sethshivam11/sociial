@@ -190,8 +190,6 @@ function Page() {
                 commentsCount={post.commentsCount}
                 likeComment={likeComment}
                 addComment={addComment}
-                comment={comment}
-                setComment={setComment}
               />
               <Share />
             </div>
