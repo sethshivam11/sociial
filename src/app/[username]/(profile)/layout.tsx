@@ -1,10 +1,11 @@
 "use client";
 import MobileNav from "@/components/MobileNav";
-import { Bookmark, Grid2X2, Tag } from "lucide-react";
+import { Bookmark, Grid2X2, Tag, MoreHorizontal } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { nameFallback } from "@/lib/helpers";
+import { Button } from "@/components/ui/button";
 
 function Profile({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -13,9 +14,9 @@ function Profile({ children }: { children: React.ReactNode }) {
     _id: "1",
     avatar:
       "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
-    fullName: "John Doe",
+    fullName: "Shivam Soni",
     email: "johndoe2gmail.com",
-    username: "johndoe",
+    username: "sethshivam11",
     bio: "Passionate storyteller, aspiring novelist, and dedicated coffee enthusiast ☕️ | Traveler at heart with a penchant for discovering hidden gems around the world 🌍 | Digital marketing expert by profession, helping brands tell their stories and connect with audiences in meaningful ways 💼",
     followersCount: 20,
     followingsCount: 12,
@@ -54,11 +55,17 @@ function Profile({ children }: { children: React.ReactNode }) {
               <span className="block lg:text-xl text-lg">Posts</span>
               <span className="lg:text-2xl text-lg">{user.postsCount}</span>
             </button>
-            <button className="flex flex-col items-center justify-center gap-2">
+            <button
+              className="flex flex-col items-center justify-center gap-2"
+              onClick={() => router.push(`/${user.username}/followers`)}
+            >
               <span className="block lg:text-xl text-lg">Followers</span>
               <span className="lg:text-2xl text-lg">{user.followersCount}</span>
             </button>
-            <button className="flex flex-col items-center justify-center gap-2">
+            <button
+              className="flex flex-col items-center justify-center gap-2"
+              onClick={() => router.push(`/${user.username}/following`)}
+            >
               <span className="block lg:text-xl text-lg">Followings</span>
               <span className="lg:text-2xl text-lg">
                 {user.followingsCount}
@@ -72,18 +79,22 @@ function Profile({ children }: { children: React.ReactNode }) {
         <div className="flex items-center justify-evenly max-md:justify-around mt-8 sm:text-md text-sm">
           <button
             className={`flex items-center justify-center gap-2 relative after:rounded-sm sm:after:w-28 after:w-16 after:absolute after:top-8 after:border-stone-800 after:dark:border-stone-200 ${
-              location.includes("/posts") ? "after:border-2" : "after:border-0"
+              location === `/${user.username}`
+                ? "after:border-2"
+                : "after:border-0"
             }`}
-            onClick={() => router.push("/profile/posts")}
+            onClick={() => router.push(`/${user.username}`)}
           >
-            <Grid2X2 strokeWidth={location.includes("/posts") ? "2.5" : "1"} />
+            <Grid2X2
+              strokeWidth={location === `/${user.username}` ? "2.5" : "1"}
+            />
             <span className="max-sm:hidden">Posts</span>
           </button>
           <button
             className={`flex items-center justify-center gap-2 relative after:rounded-sm sm:after:w-28 after:w-16 after:absolute after:top-8 after:border-stone-800 after:dark:border-stone-200 ${
               location.includes("/tagged") ? "after:border-2" : "after:border-0"
             }`}
-            onClick={() => router.push("/profile/tagged")}
+            onClick={() => router.push(`/${user.username}/tagged`)}
           >
             <Tag strokeWidth={location.includes("/tagged") ? "2.5" : "1"} />
             <span className="max-sm:hidden">Tagged</span>
@@ -92,10 +103,10 @@ function Profile({ children }: { children: React.ReactNode }) {
             className={`flex items-center justify-center gap-2 relative after:rounded-sm sm:after:w-28 after:w-16 after:absolute after:top-8 after:border-stone-800 after:dark:border-stone-200 ${
               location.includes("/saved") ? "after:border-2" : "after:border-0"
             }`}
-            onClick={() => router.push("/profile/saved")}
+            onClick={() => router.push(`/${user.username}/saved`)}
           >
             <Bookmark
-            strokeWidth="1"
+              strokeWidth="1"
               fill={location.includes("/saved") ? "currentColor" : "none"}
             />
             <span className="max-sm:hidden">Saved</span>

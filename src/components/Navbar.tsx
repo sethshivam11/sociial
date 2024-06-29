@@ -29,7 +29,7 @@ function Navbar() {
     "/forgot-password",
     "/verify-code",
     "/story/",
-    "/call"
+    "/call",
   ];
   const [unreadMessageCount, newNotifications] = [0, false];
   const user = {
@@ -65,11 +65,7 @@ function Navbar() {
             return "hidden";
           else return "";
         })
-        .join("")} ${
-        location.includes("/messages/")
-          ? "max-sm:hidden"
-          : ""
-      }`}
+        .join("")} ${location.includes("/messages/") ? "max-sm:hidden" : ""}`}
     >
       <div className="bg-stone-100/50 dark:bg-stone-800/50 sm:bg-stone-100 sm:dark:bg-stone-800 backdrop-blur-sm h-full w-full sm:rounded-3xl rounded-2xl xl:p-6 sm:px-2 sm:py-4 sm:w-fit xl:w-full flex flex-col items-center justify-between">
         <Link href="/" className="sm:inline hidden w-full" title="Sociial">
@@ -188,7 +184,7 @@ function Navbar() {
             <span className="xl:inline hidden">Notifications</span>
           </Link>
           <Link
-            href="/profile/posts"
+            href={`/${user.username}`}
             className={`md:w-full w-fit flex items-center xl:justify-start justify-center xl:pl-4 sm:p-3 p-2 gap-3 group rounded-2xl hover:ring-stone-600 dark:hover:ring-stone-400 transition-colors ${
               location.includes("/profile")
                 ? "sm:bg-stone-300 sm:dark:bg-stone-700 sm:hover:ring-0"
