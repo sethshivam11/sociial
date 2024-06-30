@@ -1,11 +1,23 @@
 "use client";
 import MobileNav from "@/components/MobileNav";
-import { Bookmark, Grid2X2, Tag, MoreHorizontal } from "lucide-react";
+import { Bookmark, Grid2X2, Tag, MoreHorizontal, Mail } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { nameFallback } from "@/lib/helpers";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/use-toast";
 
 function Profile({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -21,7 +33,21 @@ function Profile({ children }: { children: React.ReactNode }) {
     followersCount: 20,
     followingsCount: 12,
     postsCount: 4,
+    follow: true,
   });
+
+  function report(postId: string, username: string) {
+    console.log(`Reported post ${postId} by user ${user.username}`);
+  }
+
+  async function copyLink(username: string) {
+    const link = `${process.env.PUBLIC_URL || ""}/${username}}`;
+    await navigator.clipboard.writeText(link);
+    toast({
+      title: "Copied",
+      description: "The link has been copied to your clipboard.",
+    });
+  }
 
   return (
     <>
@@ -32,7 +58,7 @@ function Profile({ children }: { children: React.ReactNode }) {
       />
       <div className="min-h-screen xl:col-span-8 sm:col-span-9 col-span-10 container py-2 max-md:px-16 max-sm:px-2">
         <div className="flex md:flex-row flex-col md:items-center items-start justify-evenly w-full">
-          <div className="flex items-center justify-center gap-6 mt-4">
+          <div className="flex items-center justify-center max-sm:justify-start gap-6 mt-4 px-4 max-sm:w-full">
             <Avatar className="lg:w-[200px] sm:w-[150px] w-[100px] lg:h-[200px] sm:h-[150px] h-[100px]">
               <AvatarImage
                 src={user.avatar}
@@ -48,6 +74,110 @@ function Profile({ children }: { children: React.ReactNode }) {
               <p className="text-stone-500 lg:text-xl text-lg">
                 @{user.username}
               </p>
+              <div className="flex items-center justify-center gap-2 max-sm:gap-4">
+                {user.follow ? (
+                  <Button className="my-4 bg-blue-500 hover:bg-blue-700 py-1.5 h-fit w-fit px-3 rounded-full text-white">
+                    Follow
+                  </Button>
+                ) : (
+                  <Button className="my-4 bg-stone-500 hover:bg-stone-600 py-1.5 h-fit w-fit px-3 rounded-full text-white">
+                    Unfollow
+                  </Button>
+                )}
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="rounded-full"
+                  onClick={() => router.push(`/messages/${user._id}`)}
+                >
+                  <Mail />
+                </Button>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="rounded-full"
+                    >
+                      <MoreHorizontal />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent
+                    hideCloseIcon
+                    onOpenAutoFocus={(e) => e.preventDefault()}
+                  >
+                    <button className="w-full md:px-20 py-1">
+                      Share Profile
+                    </button>
+                    <button
+                      className="w-full md:px-20 py-1"
+                      onClick={() => copyLink(user.username)}
+                    >
+                      Copy link
+                    </button>
+                    <button className="w-full md:px-20 py-1 text-red-500">
+                      Block
+                    </button>
+                    <Dialog>
+                      <DialogTrigger className="text-red-500 w-full md:px-20 py-1">
+                        Report
+                      </DialogTrigger>
+                      <DialogContent
+                        className="sm:w-2/3 w-full h-fit flex flex-col bg-stone-100 dark:bg-stone-900"
+                        hideCloseIcon
+                      >
+                        <DialogTitle className="text-center text-2xl my-1 ">
+                          Report Post
+                        </DialogTitle>
+                        <div className="space-y-3">
+                          <div className="space-y-2">
+                            <Label htmlFor="report-title">Title</Label>
+                            <Input
+                              id="report-title"
+                              placeholder="Title for the issue"
+                              className="bg-stone-100 dark:bg-stone-900 sm:focus-within:ring-1"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="report-description">
+                              Description
+                            </Label>
+                            <Textarea
+                              id="report-description"
+                              placeholder="Detailed description of the issue"
+                              rows={5}
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="report-file">
+                            Image
+                            <span className="text-stone-500 text-sm">
+                              &nbsp;(Optional)
+                            </span>
+                          </Label>
+                          <Input
+                            type="file"
+                            id="report-file"
+                            accept="image/*"
+                            className="bg-stone-100 dark:bg-stone-900 sm:focus-within:ring-1 ring-stone-200"
+                          />
+                        </div>
+                        <DialogFooter className="flex gap-2">
+                          <Button
+                            variant="destructive"
+                            onClick={() => report(user._id, user.username)}
+                          >
+                            Report
+                          </Button>
+                          <DialogClose>Cancel</DialogClose>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                    <DialogClose>Cancel</DialogClose>
+                  </DialogContent>
+                </Dialog>
+              </div>
             </div>
           </div>
           <div className="lg:py-16 sm:py-10 py-4 text-center grid grid-cols-3 sm:gap-4 gap-3 md:w-1/3 w-full">

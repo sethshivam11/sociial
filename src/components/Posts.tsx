@@ -1,5 +1,5 @@
 "use client";
-import { Bookmark, Heart } from "lucide-react";
+import { Bookmark, Heart, User2 } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import Comment from "./Comment";
@@ -15,6 +15,7 @@ import {
 import PostsLoading from "./PostsLoading";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { nameFallback } from "@/lib/helpers";
+import Tags from "./Tags";
 
 interface Post {
   _id: string;
@@ -28,6 +29,7 @@ interface Post {
   images: string[];
   likesCount: number;
   commentsCount: number;
+  tags?: Post["user"][];
 }
 
 function Posts() {
@@ -47,6 +49,13 @@ function Posts() {
         "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_90/v1715866646/cld-sample-4.jpg",
         "https://images.pexels.com/photos/2449600/pexels-photo-2449600.png?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1",
       ],
+      tags: [
+        {
+          avatar: "https://github.com/shadcn.png",
+          fullName: "John Doe",
+          username: "johndoe",
+        },
+      ],
       likesCount: 12,
       commentsCount: 1,
     },
@@ -63,6 +72,13 @@ function Posts() {
       liked: false,
       images: [
         "https://images.pexels.com/photos/2449600/pexels-photo-2449600.png?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1",
+      ],
+      tags: [
+        {
+          avatar: "https://github.com/shadcn.png",
+          fullName: "John Doe",
+          username: "johndoe",
+        },
       ],
       likesCount: 12,
       commentsCount: 1,
@@ -220,6 +236,12 @@ function Posts() {
                   {post.images.map((image, index) => {
                     return (
                       <CarouselItem key={index} className="relative">
+                        <div className="absolute right-2 top-2 bg-transparent/60 px-2 py-0.5 rounded-2xl text-sm">
+                          {post.images.length > 1
+                            ? `${index + 1}/${post.images.length}`
+                            : ""}
+                        </div>
+                        <Tags tags={post.tags} />
                         <div
                           className={`absolute w-full h-full items-center justify-center ${
                             post.liked ? "flex" : "hidden"

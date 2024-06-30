@@ -261,11 +261,12 @@ function Page() {
       },
     },
   ];
-  const [notifications, setNotifications] = React.useState<Notification[]>(savedNotifications);
+  const [notifications, setNotifications] =
+    React.useState<Notification[]>(savedNotifications);
   return (
     <div className="sm:container flex flex-col items-center justify-start max-h-[100dvh] min-h-[100dvh] xl:col-span-8 sm:col-span-9 col-span-10 sm:py-6">
       <div className="h-full lg:w-3/4 w-full rounded-xl sm:bg-stone-100 sm:dark:bg-stone-900 sm:pt-4 md:px-16 sm:px-6 px-0 pb-28">
-        <div className="w-full flex justify-between items-center pt-3 max-sm:pb-4 max-sm:px-6 max-sm:bg-stone-100 max-sm:dark:bg-stone-800">
+        <div className="w-full flex justify-between items-center pt-3 max-sm:pb-4 max-sm:px-6 max-sm:bg-stone-200 max-sm:dark:bg-stone-800">
           <Button variant="ghost" size="icon" onClick={() => router.push("/")}>
             <ArrowLeft />
           </Button>
@@ -282,7 +283,7 @@ function Page() {
         </div>
         <hr className="w-full max-sm:hidden bg-stone-950 mb-8 mt-3" />
         {notifications.length ? (
-          <div className="flex flex-col gap-3 px-3 h-full mb-16 overflow-y-auto mt-4 max-sm:pb-16">
+          <div className="flex flex-col gap-3 px-3 h-full mb-16 overflow-y-auto mt-4">
             {notifications.map((notification, index) => (
               <div
                 className="flex items-start justify-start hover:bg-stone-200 hover:dark:bg-stone-800 rounded-lg p-2"

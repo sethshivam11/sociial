@@ -69,6 +69,7 @@ function Story({ params }: Props) {
   const closeRef2 = React.useRef<HTMLButtonElement>(null);
   const progressBarRef = React.useRef<HTMLSpanElement>(null);
   const [index, setIndex] = React.useState(0);
+  const [reportDialog, setReportDialog] = React.useState(false);
   const [stories, setStories] = React.useState<Story[]>([
     {
       _id: "1",
@@ -129,6 +130,7 @@ function Story({ params }: Props) {
       this.callback = callback;
       this.resume();
       this.start = Date.now();
+      this.clear();
       this.timerId = undefined;
     }
 
@@ -136,6 +138,12 @@ function Story({ params }: Props) {
       clearTimeout(this.timerId);
       this.timerId = undefined;
       this.remaining -= Date.now() - this.start;
+    }
+
+    clear() {
+      if (this.timerId) {
+        return clearTimeout(this.timerId);
+      }
     }
 
     resume() {
@@ -150,11 +158,10 @@ function Story({ params }: Props) {
 
   React.useEffect(() => {
     const timer: Timer = new Timer(function () {
+      console.log("new timer");
       nextRef.current?.click();
-    }, 15000);
+    }, 5000);
     setTimer(timer);
-
-    return () => timer.pause();
   }, [currentStory]);
 
   React.useEffect(() => {
@@ -175,6 +182,32 @@ function Story({ params }: Props) {
       timer?.resume();
     }
   }, [isPaused, timer]);
+
+  React.useEffect(() => {
+    progressBarRef.current?.parentNode?.parentElement?.children[
+      index - 1
+    ]?.children[0]
+      ?.getAnimations()[0]
+      ?.finish();
+    progressBarRef.current?.parentNode?.parentElement?.children[
+      index + 1
+    ]?.children[0]
+      ?.getAnimations()[0]
+      ?.finish();
+
+    const animation = progressBarRef.current?.getAnimations()[0];
+
+    if (
+      stories.length - 1 === index &&
+      currentStory.index === stories.length - 1
+    ) {
+      if (animation) {
+        animation.onfinish = () => {
+          router.push("/");
+        };
+      }
+    }
+  }, [index]);
 
   return (
     <div className="w-full col-span-10 h-screen flex items-center justify-center bg-stone-900">
@@ -217,6 +250,7 @@ function Story({ params }: Props) {
         }`}
         ref={nextRef}
         onClick={() => {
+          console.log("click");
           if (
             index === currentStory.images.length - 1 &&
             currentStory.index < stories.length - 1
@@ -259,7 +293,7 @@ function Story({ params }: Props) {
                 href={`/${currentStory.username}`}
                 className="w-full flex items-center justify-start"
               >
-                <Avatar className="ring-1 ring-stone-200">
+                <Avatar className="ring-1 ring-stone-200 hover:opacity-80 transition-opacity">
                   <AvatarImage src={currentStory.avatar} />
                   <AvatarFallback>SS</AvatarFallback>
                 </Avatar>
@@ -299,53 +333,56 @@ function Story({ params }: Props) {
                     <MoreHorizontal />
                   </DialogTrigger>
                   <DialogContent className="w-full md:w-fit" hideCloseIcon>
-                    <Dialog>
-                      <DialogTrigger className="text-red-500 w-full md:px-20 py-1">
-                        Report
-                      </DialogTrigger>
-                      <DialogContent
-                        className="sm:w-2/3 w-full h-fit flex flex-col bg-stone-100 dark:bg-stone-900"
-                        hideCloseIcon
-                      >
-                        <DialogTitle className="text-center text-2xl my-1 ">
-                          Report Story
-                        </DialogTitle>
-                        <div className="space-y-3">
-                          <div className="space-y-2">
-                            <Label htmlFor="report-title">Title</Label>
-                            <Input
-                              id="report-title"
-                              placeholder="Title for the issue"
-                              className="bg-stone-100 dark:bg-stone-900 sm:focus-within:ring-1"
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="report-description">
-                              Description
-                            </Label>
-                            <Textarea
-                              id="report-description"
-                              placeholder="Detailed description of the issue"
-                              rows={5}
-                            />
-                          </div>
-                        </div>
-                        <DialogFooter className="flex gap-2">
-                          <Button
-                            variant="destructive"
-                            onClick={() =>
-                              report(currentStory._id, currentStory.username)
-                            }
-                          >
-                            Report
-                          </Button>
-                          <DialogClose>Cancel</DialogClose>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
+                    <DialogClose
+                      className="text-red-500 w-full md:px-20 py-1"
+                      onClick={() => setReportDialog(true)}
+                    >
+                      Report
+                    </DialogClose>
                     <DialogClose className="w-full md:px-20 py-1">
                       Cancel
                     </DialogClose>
+                  </DialogContent>
+                </Dialog>
+                <Dialog open={reportDialog}>
+                  <DialogContent
+                    className="sm:w-2/3 w-full h-fit flex flex-col bg-stone-100 dark:bg-stone-900"
+                    hideCloseIcon
+                  >
+                    <DialogTitle className="text-center text-2xl my-1 ">
+                      Report Story
+                    </DialogTitle>
+                    <div className="space-y-3">
+                      <div className="space-y-2">
+                        <Label htmlFor="report-title">Title</Label>
+                        <Input
+                          id="report-title"
+                          placeholder="Title for the issue"
+                          className="bg-stone-100 dark:bg-stone-900 sm:focus-within:ring-1"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="report-description">Description</Label>
+                        <Textarea
+                          id="report-description"
+                          placeholder="Detailed description of the issue"
+                          rows={5}
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter className="flex gap-2">
+                      <Button
+                        variant="destructive"
+                        onClick={() =>
+                          report(currentStory._id, currentStory.username)
+                        }
+                      >
+                        Report
+                      </Button>
+                      <DialogClose onClick={() => setReportDialog(false)}>
+                        Cancel
+                      </DialogClose>
+                    </DialogFooter>
                   </DialogContent>
                 </Dialog>
                 <button
@@ -372,21 +409,22 @@ function Story({ params }: Props) {
             src={currentStory.images[index].link}
             alt={`Story ${currentStory.index + 1} by ${currentStory.username}`}
             className="max-h-full h-fit w-full object-contain select-none pointer-events-none"
-            fill
+            width="768"
+            height="1024"
           />
         )}
-        <div
+        <button
           className="w-1/2 absolute left-0 bg-transparent h-full"
           onClick={() => nextRef.current?.click()}
           onMouseDown={() => setIsPaused(true)}
           onMouseUp={() => setIsPaused(false)}
-        ></div>
-        <div
+        />
+        <button
           className="w-1/2 absolute right-0 bg-transparent h-full"
           onClick={() => prevRef.current?.click()}
           onMouseDown={() => setIsPaused(true)}
           onMouseUp={() => setIsPaused(false)}
-        ></div>
+        />
 
         <Form {...form}>
           <form

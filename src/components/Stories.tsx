@@ -16,6 +16,13 @@ function Stories() {
       fullName: "Shivam",
       username: "sethshivam11",
       avatar: "https://github.com/shadcn.png",
+      seen: true,
+    },
+    {
+      fullName: "Shivam",
+      username: "sethshivam11",
+      avatar: "https://github.com/shadcn.png",
+      seen: false,
     },
   ];
   const user = {
@@ -50,26 +57,50 @@ function Stories() {
           </Link>
         </div>
       </div>
-      {stories.map((story, index) => {
-        return (
-          <Link
-            href={`/story/${story.username}`}
-            key={index}
-            className="flex flex-col items-center gap-1 sm:hover:scale-105 transition-transform"
-          >
-            <div className="w-20 h-20 rounded-full bg-gradient-to-bl from-red-500 via-blue-500 to-green-500 p-1">
-              <Avatar className={`w-full h-full ring-2 ring-white dark:ring-black ${story.avatar.includes("tpfx0gzsk7ywiptsb6vl.png") ? "bg-[#cdd5d8]": "bg-white dark:bg-black"}`}>
-                <AvatarImage
-                  src={story.avatar}
-                  alt=""
-                  className="pointer-events-none select-none"
-                />
-                <AvatarFallback>{nameFallback(story.fullName)}</AvatarFallback>
-              </Avatar>
-            </div>
-          </Link>
-        );
-      })}
+      {stories
+        .sort((a, b) => {
+          const aSeen = a.seen || false;
+          const bSeen = b.seen || false;
+
+          if (aSeen === bSeen) return 0;
+          return aSeen ? 1 : -1;
+        })
+        .map((story, index) => {
+          return (
+            <Link
+              href={`/story/${story.username}`}
+              key={index}
+              className="flex flex-col items-center gap-1 sm:hover:scale-105 transition-transform"
+            >
+              <div
+                className={`w-20 h-20 rounded-full ${
+                  story.seen
+                    ? "bg-stone-500"
+                    : "bg-gradient-to-bl from-red-500 via-blue-500 to-green-500"
+                } p-1`}
+              >
+                <Avatar
+                  className={`w-full h-full ring-2 ring-white dark:ring-black ${
+                    story.avatar.includes("tpfx0gzsk7ywiptsb6vl.png")
+                      ? "bg-[#cdd5d8]"
+                      : "bg-white dark:bg-black"
+                  }`}
+                >
+                  <AvatarImage
+                    src={story.avatar}
+                    alt=""
+                    className={`pointer-events-none select-none ${
+                      story.seen ? "opacity-70" : ""
+                    }`}
+                  />
+                  <AvatarFallback>
+                    {nameFallback(story.fullName)}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+            </Link>
+          );
+        })}
     </div>
   );
 }

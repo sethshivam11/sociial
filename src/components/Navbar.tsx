@@ -1,10 +1,19 @@
 "use client";
-import { Bell, Home, Mail, Menu, Plus, Search, Tv } from "lucide-react";
+import {
+  Bell,
+  Home,
+  Mail,
+  Menu,
+  Plus,
+  Search,
+  Tv,
+  ImageIcon,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Menubar,
   MenubarContent,
@@ -18,11 +27,27 @@ import {
 } from "@/components/ui/menubar";
 import { useTheme } from "next-themes";
 import { nameFallback } from "@/lib/helpers";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
+import { Label } from "./ui/label";
+import { Input } from "./ui/input";
+import { Textarea } from "./ui/textarea";
+import { Button } from "./ui/button";
 
 function Navbar() {
   const location = usePathname();
+  const router = useRouter();
   const { setTheme } = useTheme();
+  const dialogRef = React.useRef<HTMLDivElement>(null);
+  const [reportDialog, setReportDialog] = React.useState(false);
   const [iosDevice, setIosDevice] = React.useState(false);
+  const [newPost, setNewPost] = React.useState<FileList | null>(null);
   const hideNav = [
     "/sign-in",
     "/sign-up",
@@ -52,7 +77,6 @@ function Navbar() {
       (navigator.userAgent.includes("Mac") && "ontouchend" in document);
     if (ifIos) setIosDevice(true);
   }, []);
-  console.log(location.includes("/messages/") ? "hidden" : "");
 
   return (
     <nav
@@ -65,9 +89,22 @@ function Navbar() {
             return "hidden";
           else return "";
         })
-        .join("")} ${location.includes("/messages/") ? "max-sm:hidden" : ""}`}
+        .join("")} ${
+        location.includes("/messages/") ||
+        location.includes("/following") ||
+        location.includes("/followers") ||
+        location.includes("/notifications")
+          ? "max-sm:hidden"
+          : ""
+      }`}
     >
-      <div className="bg-stone-100/50 dark:bg-stone-800/50 sm:bg-stone-100 sm:dark:bg-stone-800 backdrop-blur-sm h-full w-full sm:rounded-3xl rounded-2xl xl:p-6 sm:px-2 sm:py-4 sm:w-fit xl:w-full flex flex-col items-center justify-between">
+      <div
+        className={`sm:bg-stone-100 sm:dark:bg-stone-800 backdrop-blur-sm h-full w-full sm:rounded-3xl rounded-2xl xl:p-6 sm:px-2 sm:py-4 sm:w-fit xl:w-full flex flex-col items-center justify-between ${
+          iosDevice
+            ? "bg-stone-100/90 dark:bg-stone-800/90"
+            : "bg-stone-100/50 dark:bg-stone-800/50"
+        }`}
+      >
         <Link href="/" className="sm:inline hidden w-full" title="Sociial">
           <div className="text-3xl tracking-tighter font-extrabold flex items-center md:justify-start md:pt-0 justify-center gap-2 w-full px-2">
             <Image
@@ -211,13 +248,75 @@ function Navbar() {
           </Link>
         </div>
         <div className="w-full text-center sm:flex hidden flex-col xl:items-start items-center gap-4 sm:p-1">
-          <button
-            className="bg-stone-800 dark:bg-stone-100 text-white dark:text-black xl:w-full w-fit flex items-center xl:justify-start xl:pl-4 sm:p-3 p-2 gap-3 rounded-2xl ring-stone-800 dark:hover:ring-stone-100 hover:ring-2"
-            title="New post"
-          >
-            <span className="text-center w-full xl:inline hidden">Create</span>
-            <Plus className="xl:hidden inline" />
-          </button>
+          <Dialog>
+            <DialogTrigger
+              className="bg-stone-800 dark:bg-stone-100 text-white dark:text-black xl:w-full w-fit flex items-center xl:justify-start xl:pl-4 sm:p-3 p-2 gap-3 rounded-2xl ring-stone-800 dark:hover:ring-stone-100 hover:ring-2"
+              title="New post"
+            >
+              <span className="text-center w-full xl:inline hidden">
+                Create
+              </span>
+              <Plus className="xl:hidden inline" />
+            </DialogTrigger>
+            <DialogContent
+              className="h-3/4 flex flex-col items-center justify-start"
+              onOpenAutoFocus={(e) => e.preventDefault()}
+            >
+              <h1 className="text-2xl h-fit tracking-tight text-bold text-center">
+                Create new post
+              </h1>
+              <hr className="w-full" />
+              <div
+                className="h-full w-full flex flex-col items-center justify-center"
+                ref={dialogRef}
+                onDrop={() => dialogRef.current?.focus()}
+                onDragEnter={() =>
+                  dialogRef.current?.classList.add(
+                    "ring-2",
+                    "ring-stone-200",
+                    "dark:ring-stone-800"
+                  )
+                }
+                onDragLeave={() =>
+                  dialogRef.current?.classList.remove(
+                    "ring-2",
+                    "ring-stone-200",
+                    "dark:ring-stone-800"
+                  )
+                }
+                onDragOver={(e) => e.preventDefault()}
+              >
+                {newPost ? (
+                  <canvas></canvas>
+                ) : (
+                  <div className="flex flex-col items-center justify-center gap-3">
+                    <ImageIcon size="80" />
+                    <div className="flex flex-col items-center gap-2">
+                      <span className="text-stone-500 text-sm">
+                        Drag and Drop Photos and Images here
+                      </span>
+                      <Button className="w-fit h-fit p-0 rounded-lg">
+                        <Label
+                          htmlFor="new-post"
+                          className="w-full text-center text-semibold text-lg cursor-pointer px-3 py-2 rounded-xl"
+                        >
+                          Select files
+                        </Label>
+                      </Button>
+                      <Input
+                        type="file"
+                        id="new-post"
+                        accept="image/*,video/*"
+                        onChange={(e) => setNewPost(e.target.files)}
+                        className="placeholder:text-black file:text-background text-background w-0 h-0 p-0 border-0"
+                        multiple
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
           <Menubar className="w-full bg-transparent border-transparent xl:justify-start justify-center">
             <MenubarMenu>
               <MenubarTrigger
@@ -230,7 +329,10 @@ function Navbar() {
                 <Menu className="xl:hidden inline" />
               </MenubarTrigger>
               <MenubarContent className="rounded-xl">
-                <MenubarItem className="py-2.5 rounded-lg pl-2.5">
+                <MenubarItem
+                  className="py-2.5 rounded-lg pl-2.5"
+                  onClick={() => router.push("/settings")}
+                >
                   Settings
                 </MenubarItem>
                 <MenubarSub>
@@ -259,12 +361,71 @@ function Navbar() {
                   </MenubarSubContent>
                 </MenubarSub>
                 <MenubarSeparator />
-                <MenubarItem className="py-2.5 rounded-lg pl-2.5">
+                <MenubarItem
+                  className="py-2.5 rounded-lg pl-2.5 text-red-600 focus:text-red-600"
+                  onClick={() => setReportDialog(true)}
+                >
+                  Report problem
+                </MenubarItem>
+                <MenubarItem className="py-2.5 rounded-lg pl-2.5 text-red-600 focus:text-red-600">
                   Log Out
                 </MenubarItem>
               </MenubarContent>
             </MenubarMenu>
           </Menubar>
+          <Dialog open={reportDialog}>
+            <DialogContent
+              className="sm:w-2/3 w-full h-fit flex flex-col bg-stone-100 dark:bg-stone-900"
+              hideCloseIcon
+            >
+              <DialogTitle className="text-center text-2xl my-1">
+                Report Post
+              </DialogTitle>
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <Label htmlFor="report-title">Title</Label>
+                  <Input
+                    id="report-title"
+                    placeholder="Title for the issue"
+                    className="bg-stone-100 dark:bg-stone-900 sm:focus-within:ring-1"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="report-description">Description</Label>
+                  <Textarea
+                    id="report-description"
+                    placeholder="Detailed description of the issue"
+                    rows={5}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="report-file">
+                    Image
+                    <span className="text-stone-500 text-sm">
+                      &nbsp;(Optional)
+                    </span>
+                  </Label>
+                  <Input
+                    type="file"
+                    id="report-file"
+                    accept="image/*"
+                    className="bg-stone-100 dark:bg-stone-900 sm:focus-within:ring-1 ring-stone-200"
+                  />
+                </div>
+              </div>
+              <DialogFooter className="flex gap-2">
+                <Button
+                  variant="destructive"
+                  onClick={() => console.log(user.username)}
+                >
+                  Report
+                </Button>
+                <DialogClose onClick={() => setReportDialog(false)}>
+                  Cancel
+                </DialogClose>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     </nav>
