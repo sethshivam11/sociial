@@ -110,7 +110,7 @@ function SignInPage() {
               setChecked={setShowPwd}
             />
             <div>
-              <Button type="submit" disabled={loading}>
+              <Button type="submit" disabled={loading} className="w-full">
                 {loading ? <Loader2 className="animate-spin" /> : "Sign in"}
               </Button>
             </div>

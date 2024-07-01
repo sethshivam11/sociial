@@ -236,7 +236,7 @@ function Posts() {
                   {post.images.map((image, index) => {
                     return (
                       <CarouselItem key={index} className="relative">
-                        <div className="absolute right-2 top-2 bg-transparent/60 px-2 py-0.5 rounded-2xl text-sm">
+                        <div className="absolute right-2 top-2 bg-transparent/60 text-white px-2 py-0.5 rounded-2xl text-sm">
                           {post.images.length > 1
                             ? `${index + 1}/${post.images.length}`
                             : ""}

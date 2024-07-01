@@ -1,9 +1,9 @@
 "use client";
-import { Bell, Mail, Tv } from "lucide-react";
+import { Bell, Mail, Settings, Tv } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import React from "react";
-import { useUser } from "@/context/UserProvider";
 
 interface Props {
   unreadMessageCount: number;
@@ -16,6 +16,8 @@ function MobileNav({
   newNotifications,
   hideButtons,
 }: Props) {
+  const location = usePathname();
+  const username = "sethshivam11";
   return (
     <div className="bg-stone-200 dark:bg-stone-800 h-16 p-3 top-0 left-0 col-span-10 sm:static sticky w-full sm:hidden flex items-center justify-between z-20">
       <div className="flex items-center gap-2 text-2xl tracking-tighter font-extrabold">
@@ -48,6 +50,13 @@ function MobileNav({
           </span>
         </Link>
       </div>
+      <Link
+        href="/settings"
+        title="Settings"
+        className={location === `/${username}` ? "mr-2" : "hidden"}
+      >
+        <Settings />
+      </Link>
     </div>
   );
 }

@@ -101,7 +101,7 @@ function Navbar() {
       <div
         className={`sm:bg-stone-100 sm:dark:bg-stone-800 backdrop-blur-sm h-full w-full sm:rounded-3xl rounded-2xl xl:p-6 sm:px-2 sm:py-4 sm:w-fit xl:w-full flex flex-col items-center justify-between ${
           iosDevice
-            ? "bg-stone-100/90 dark:bg-stone-800/90"
+            ? "bg-stone-100 dark:bg-stone-800"
             : "bg-stone-100/50 dark:bg-stone-800/50"
         }`}
       >

@@ -187,7 +187,7 @@ const ForgotPasswordPage = () => {
                   resendVerificationCode(form.getValues("identifier"))
                 }
               >
-                {timer > 0 ? timer : "Send Code"}
+                {timer > 0 ? timer : "Get Code"}
               </Button>
             </div>
             <FormField
@@ -231,7 +231,7 @@ const ForgotPasswordPage = () => {
                 : ""}
             </span>
           </CardContent>
-          <CardFooter className="flex justify-start gap-2">
+          <CardFooter className="flex flex-col justify-start gap-2">
             <Button
               type="submit"
               disabled={
@@ -240,12 +240,17 @@ const ForgotPasswordPage = () => {
                 form.getValues("password").length < 6 ||
                 confirmPwd !== form.getValues("password")
               }
+              className="w-full"
             >
               {loading ? <Loader2 className="animate-spin" /> : "Verify"}
             </Button>
-            <Link href="/sign-in">
-              <Button variant="outline">Cancel</Button>
-            </Link>
+            <Button
+              variant="outline"
+              onClick={() => router.push("/sign-in")}
+              className="w-full"
+            >
+              Cancel
+            </Button>
           </CardFooter>
         </Card>
       </form>

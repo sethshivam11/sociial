@@ -94,7 +94,7 @@ function VerifyCodePage({ searchParams }: Props) {
       const runningTimer = setInterval(() => {
         setTimer((timer) => (timer -= 1));
       }, 1000);
-      () => clearInterval(runningTimer);
+      return () => clearInterval(runningTimer);
     }
   }, [timer]);
 
@@ -148,7 +148,7 @@ function VerifyCodePage({ searchParams }: Props) {
             </p>
           </CardContent>
           <CardFooter>
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading} className="w-full">
               {loading ? <Loader2 className="animate-spin" /> : "Verify"}
             </Button>
           </CardFooter>

@@ -1,10 +1,8 @@
-"use client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { nameFallback } from "@/lib/helpers";
 import { ArrowLeft, BellRing, Circle, Wrench } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import React from "react";
 
 interface Notification {
@@ -24,8 +22,7 @@ interface Notification {
 }
 
 function Page() {
-  const router = useRouter();
-  const savedNotifications: Notification[] = [
+  const notifications: Notification[] = [
     {
       id: 1,
       message: "New message from John Doe",
@@ -261,25 +258,24 @@ function Page() {
       },
     },
   ];
-  const [notifications, setNotifications] =
-    React.useState<Notification[]>(savedNotifications);
+  
   return (
     <div className="sm:container flex flex-col items-center justify-start max-h-[100dvh] min-h-[100dvh] xl:col-span-8 sm:col-span-9 col-span-10 sm:py-6">
       <div className="h-full lg:w-3/4 w-full rounded-xl sm:bg-stone-100 sm:dark:bg-stone-900 sm:pt-4 md:px-16 sm:px-6 px-0 pb-28">
         <div className="w-full flex justify-between items-center pt-3 max-sm:pb-4 max-sm:px-6 max-sm:bg-stone-200 max-sm:dark:bg-stone-800">
-          <Button variant="ghost" size="icon" onClick={() => router.push("/")}>
-            <ArrowLeft />
-          </Button>
+          <Link href="/">
+            <Button variant="ghost" size="icon" className="rounded-xl">
+              <ArrowLeft />
+            </Button>
+          </Link>
           <h1 className="text-2xl tracking-tight font-bold w-full text-center">
             Notifications
           </h1>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.push("/settings")}
-          >
-            <Wrench />
-          </Button>
+          <Link href="/settings">
+            <Button variant="ghost" size="icon" className="rounded-xl">
+              <Wrench />
+            </Button>
+          </Link>
         </div>
         <hr className="w-full max-sm:hidden bg-stone-950 mb-8 mt-3" />
         {notifications.length ? (

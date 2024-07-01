@@ -263,7 +263,7 @@ function SignUpPage() {
               checked={showPwd}
               setChecked={setShowPwd}
             />
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading} className="w-full">
               {loading ? <Loader2 className="animate-spin" /> : "Sign up"}
             </Button>
           </form>
