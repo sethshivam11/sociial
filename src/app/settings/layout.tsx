@@ -5,7 +5,9 @@ import {
   BadgeCheck,
   Ban,
   Bell,
+  KeySquare,
   Lock,
+  Palette,
   Shield,
   UserCircle2,
 } from "lucide-react";
@@ -24,11 +26,11 @@ function Page({ children }: React.PropsWithChildren) {
           location === "/settings" ? "block" : "max-md:hidden"
         }`}
       >
-        <h1 className="sm:text-3xl text-2xl tracking-tighter font-bold text-center w-full sm:py-6 py-4 max-sm:dark:bg-stone-800 max-sm:bg-stone-200 relative">
+        <h1 className="sm:text-3xl text-xl tracking-tighter font-bold text-center w-full sm:py-6 py-4 flex items-center">
           <Button
             variant="ghost"
             size="icon"
-            className="absolute left-3 sm:hidden"
+            className="sm:hidden mx-4"
             onClick={() => router.push(`/${username}`)}
           >
             <ArrowLeft />
@@ -70,12 +72,32 @@ function Page({ children }: React.PropsWithChildren) {
           <Link
             href="/settings/security"
             className={`flex items-center justify-start gap-2 py-2 px-3 hover:bg-stone-200 hover:dark:bg-stone-800 rounded-lg ${
+              location === "/settings/privacy"
+                ? "bg-stone-100 dark:bg-stone-900"
+                : ""
+            }`}
+          >
+            <Lock size="30" strokeWidth="1.5" /> Privacy
+          </Link>
+          <Link
+            href="/settings/security"
+            className={`flex items-center justify-start gap-2 py-2 px-3 hover:bg-stone-200 hover:dark:bg-stone-800 rounded-lg ${
               location === "/settings/security"
                 ? "bg-stone-100 dark:bg-stone-900"
                 : ""
             }`}
           >
-            <Lock size="30" strokeWidth="1.5" /> Security
+            <KeySquare size="30" strokeWidth="1.5" /> Security
+          </Link>
+          <Link
+            href="/settings/theme"
+            className={`flex items-center justify-start gap-2 py-2 px-3 hover:bg-stone-200 hover:dark:bg-stone-800 rounded-lg ${
+              location === "/settings/theme"
+                ? "bg-stone-100 dark:bg-stone-900"
+                : ""
+            }`}
+          >
+            <Palette size="30" strokeWidth="1.5" /> Theme
           </Link>
           <Link
             href="/premium"

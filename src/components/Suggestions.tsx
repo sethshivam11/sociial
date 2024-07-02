@@ -1,12 +1,12 @@
-"use client";
 import React from "react";
-import { Loader2 } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import Link from "next/link";
 import { nameFallback } from "@/lib/helpers";
+import { Button } from "./ui/button";
 
 function Suggestions() {
-  const [users, setUsers] = React.useState([
+  const users = [
     {
       name: "Shad",
       username: "shadcn",
@@ -35,11 +35,11 @@ function Suggestions() {
         "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
       loading: false,
     },
-  ]);
+  ];
   return (
-    <div className="py-8 px-2 lg:flex hidden flex-col gap-4 lg:col-span-3">
-      <div className="bg-stone-100 dark:bg-stone-800 pt-4 p-6 rounded-2xl">
-        <h1 className="text-xl">Suggestions</h1>
+    <div className="py-4 px-2 lg:flex hidden flex-col gap-4 lg:col-span-3">
+      <div className="bg-stone-100 dark:bg-stone-900 pt-4 p-6 rounded-2xl">
+        <h1 className="font-semibold text-xl">Suggestions</h1>
         <div className="flex flex-col w-full p-1 mt-4 gap-5">
           {users.length ? (
             users.map((user, index) => {
@@ -90,6 +90,35 @@ function Suggestions() {
           )}
         </div>
       </div>
+      <div className="bg-stone-100 dark:bg-stone-900 pt-4 p-6 rounded-2xl">
+        <h1 className="font-semibold text-xl">
+          Premium
+        </h1>
+        <p className="text-stone-500 my-2 text-sm">
+          Subscribe to get access to premium features
+        </p>
+        <p className="flex items-center justify-start gap-2 my-1">
+          <Check color="green" /> Verified Badge
+        </p>
+        <p className="flex items-center justify-start gap-2 my-1">
+          <Check color="green" /> Message Themes
+        </p>
+        <p className="flex items-center justify-start gap-2 my-1">
+          <Check color="green" /> Save Posts
+        </p>
+        <p className="flex items-center justify-start gap-2 my-1">
+          <Check color="green" /> Private Account
+        </p>
+        <Link href="/premium" className="w-full">
+          <Button
+            className="w-full rounded-xl mt-4 bg-blue-500 text-white hover:bg-blue-600"
+            size="lg"
+          >
+            Subscribe
+          </Button>
+        </Link>
+      </div>
+      
     </div>
   );
 }

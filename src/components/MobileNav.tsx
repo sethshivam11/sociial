@@ -19,7 +19,7 @@ function MobileNav({
   const location = usePathname();
   const username = "sethshivam11";
   return (
-    <div className="bg-stone-200 dark:bg-stone-800 h-16 p-3 top-0 left-0 col-span-10 sm:static sticky w-full sm:hidden flex items-center justify-between z-20">
+    <div className="bg-stone-100 dark:bg-stone-900 h-16 p-3 top-0 left-0 col-span-10 sm:static sticky w-full sm:hidden flex items-center justify-between z-20">
       <div className="flex items-center gap-2 text-2xl tracking-tighter font-extrabold">
         <Image
           src="/logo.svg"

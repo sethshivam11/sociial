@@ -206,7 +206,7 @@ function Posts() {
           return (
             <div
               key={postIndex}
-              className="rounded-xl bg-stone-100 dark:bg-stone-800 p-4 w-full sm:w-[85%] mx-auto h-fit min-h-64 min-w-64"
+              className="rounded-xl bg-stone-100 dark:bg-stone-900 p-4 w-full sm:w-[85%] mx-auto h-fit min-h-64 min-w-64"
             >
               <div className="flex justify-between w-full">
                 <div className="flex items-center gap-2 w-full">

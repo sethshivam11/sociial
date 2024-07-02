@@ -70,7 +70,7 @@ function Page() {
 
   return (
     <div className="flex flex-col items-center justify-start">
-      <h1 className="text-xl tracking-tight font-semibold w-full text-left my-4 flex items-center gap-4 sm:hidden">
+      <h1 className="text-lg tracking-tight font-semibold w-full text-left sm:my-4 my-2 flex items-center gap-4 sm:hidden">
         <Button variant="ghost" size="icon" className="ml-4 rounded-xl" onClick={() => router.push("/settings")}>
           <ArrowLeft />
         </Button>

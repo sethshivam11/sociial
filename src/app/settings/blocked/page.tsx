@@ -46,21 +46,19 @@ function Page() {
   ]);
   return (
     <div className="flex flex-col items-center justify-start overflow-y-auto max-h-[100dvh] h-full xl:col-span-8 sm:col-span-9 col-span-10 w-full max-sm:pb-10">
-      <h1 className="sm:w-2/3 text-xl font-semibold pt-5 max-sm:pb-4 pb-8 flex items-center gap-3 w-full max-sm:px-6">
+      <h1 className="text-lg tracking-tight font-semibold sm:w-2/3 w-full text-left sm:my-4 my-2 flex items-center gap-4 ">
         <Link href="/settings/notifications" className="sm:hidden">
-          <Button variant="ghost" size="icon" className="rounded-xl">
+          <Button variant="ghost" size="icon" className="rounded-xl ml-4">
             <ArrowLeft />
           </Button>
         </Link>
         Blocked accounts
       </h1>
-      <div className="sm:w-2/3 w-full max-sm:px-10 space-y-2">
+      <div className="sm:w-2/3 w-full max-sm:px-6 space-y-2 max-sm:mt-3">
         {blocked.length
           ? blocked.map((account, index) => (
               <div className="flex items-center gap-2" key={index}>
-                <div
-                  className="flex items-center justify-start gap-3 w-full px-2 py-1.5 rounded-xl"
-                >
+                <div className="flex items-center justify-start gap-3 w-full px-2 py-1.5 rounded-xl">
                   <Avatar>
                     <AvatarImage src={account.avatar} />
                     <AvatarFallback>

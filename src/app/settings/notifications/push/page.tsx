@@ -23,21 +23,17 @@ function Page() {
 
   return (
     <div className="flex flex-col items-center justify-start overflow-y-auto max-h-[100dvh] h-full xl:col-span-8 sm:col-span-9 col-span-10 w-full max-sm:pb-10">
-        <h1 className="sm:w-2/3 text-xl font-semibold pt-5 max-sm:pb-4 pb-8 flex items-center gap-3 w-full max-sm:px-6">
-          <Link href="/settings/notifications" className="sm:hidden">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-xl"
-            >
-              <ArrowLeft />
-            </Button>
-          </Link>
-          Push Notifications
-        </h1>
-      <div className="sm:w-2/3 w-full max-sm:px-10 sm:space-y-8 space-y-5">
+      <h1 className="text-lg tracking-tight font-semibold sm:w-2/3 w-full text-left sm:my-2 my-2 flex items-center gap-4">
+        <Link href="/settings/notifications" className="sm:hidden">
+          <Button variant="ghost" size="icon" className="rounded-xl ml-4">
+            <ArrowLeft />
+          </Button>
+        </Link>
+        Push Notifications
+      </h1>
+      <div className="sm:w-2/3 w-full max-sm:px-10 sm:space-y-8 space-y-5 mt-6">
         <div className="w-full flex flex-col items-center justify-start gap-4">
-          <h2 className="text-lg w-full mb-2">Likes</h2>
+          <h2 className="w-full mb-2">Likes</h2>
           <Label
             htmlFor="likes-off"
             className="font-light cursor-pointer flex gap-2 items-center justify-start w-full"
@@ -53,7 +49,7 @@ function Page() {
                   likes: e.target.checked ? false : true,
                 })
               }
-              className="w-6 h-6 accent-white"
+              className="w-6 h-6 accent-black dark:accent-white"
             />
             Off
           </Label>
@@ -72,14 +68,14 @@ function Page() {
                   likes: e.target.checked ? true : false,
                 })
               }
-              className="w-6 h-6 accent-white"
+              className="w-6 h-6 accent-black dark:accent-white"
             />
             On
           </Label>
         </div>
         <hr className="w-full bg-stone-500" />
         <div className="w-full flex flex-col items-center justify-start gap-4">
-          <h2 className="text-lg w-full mb-2">Comments</h2>
+          <h2 className="w-full mb-2">Comments</h2>
           <Label
             htmlFor="comments-off"
             className="flex gap-2 items-center justify-start font-light cursor-pointer w-full"
@@ -95,7 +91,7 @@ function Page() {
                   comments: e.target.checked ? false : true,
                 })
               }
-              className="w-6 h-6 accent-white"
+              className="w-6 h-6 accent-black dark:accent-white"
             />
             Off
           </Label>
@@ -114,14 +110,14 @@ function Page() {
                   comments: e.target.checked ? true : false,
                 })
               }
-              className="w-6 h-6 accent-white"
+              className="w-6 h-6 accent-black dark:accent-white"
             />
             On
           </Label>
         </div>
         <hr className="w-full bg-stone-500" />
         <div className="w-full flex flex-col items-center justify-start gap-4">
-          <h2 className="text-lg w-full mb-2">Comment Likes</h2>
+          <h2 className="w-full mb-2">Comment Likes</h2>
           <Label
             htmlFor="comment-likes-off"
             className="flex gap-2 items-center justify-start font-light cursor-pointer w-full"
@@ -137,7 +133,7 @@ function Page() {
                   commentLikes: e.target.checked ? false : true,
                 })
               }
-              className="w-6 h-6 accent-white"
+              className="w-6 h-6 accent-black dark:accent-white"
             />
             Off
           </Label>
@@ -156,14 +152,14 @@ function Page() {
                   commentLikes: e.target.checked ? true : false,
                 })
               }
-              className="w-6 h-6 accent-white"
+              className="w-6 h-6 accent-black dark:accent-white"
             />
             On
           </Label>
         </div>
         <hr className="w-full bg-stone-500" />
         <div className="w-full flex flex-col items-center justify-start gap-4">
-          <h2 className="text-lg w-full mb-2">Story Likes</h2>
+          <h2 className="w-full mb-2">Story Likes</h2>
           <Label
             htmlFor="story-likes-off"
             className="flex gap-2 items-center justify-start font-light cursor-pointer w-full"
@@ -179,7 +175,7 @@ function Page() {
                   storyLikes: e.target.checked ? false : true,
                 })
               }
-              className="w-6 h-6 accent-white"
+              className="w-6 h-6 accent-black dark:accent-white"
             />
             Off
           </Label>
@@ -198,14 +194,14 @@ function Page() {
                   storyLikes: e.target.checked ? true : false,
                 })
               }
-              className="w-6 h-6 accent-white"
+              className="w-6 h-6 accent-black dark:accent-white"
             />
             On
           </Label>
         </div>
         <hr className="w-full bg-stone-500" />
         <div className="w-full flex flex-col items-center justify-start gap-4">
-          <h2 className="text-lg w-full mb-2">New Followers</h2>
+          <h2 className="w-full mb-2">New Followers</h2>
           <Label
             htmlFor="new-followers-off"
             className="flex gap-2 items-center justify-start font-light cursor-pointer w-full"
@@ -221,7 +217,7 @@ function Page() {
                   newFollowers: e.target.checked ? false : true,
                 })
               }
-              className="w-6 h-6 accent-white"
+              className="w-6 h-6 accent-black dark:accent-white"
             />
             Off
           </Label>
@@ -240,14 +236,14 @@ function Page() {
                   newFollowers: e.target.checked ? true : false,
                 })
               }
-              className="w-6 h-6 accent-white"
+              className="w-6 h-6 accent-black dark:accent-white"
             />
             On
           </Label>
         </div>
         <hr className="w-full bg-stone-500" />
         <div className="w-full flex flex-col items-center justify-start gap-4">
-          <h2 className="text-lg w-full mb-2">New Messages</h2>
+          <h2 className="w-full mb-2">New Messages</h2>
           <Label
             htmlFor="messages-off"
             className="flex gap-2 items-center justify-start font-light cursor-pointer w-full"
@@ -263,7 +259,7 @@ function Page() {
                   messages: e.target.checked ? false : true,
                 })
               }
-              className="w-6 h-6 accent-white"
+              className="w-6 h-6 accent-black dark:accent-white"
             />
             Off
           </Label>
@@ -282,13 +278,13 @@ function Page() {
                   messages: e.target.checked ? true : false,
                 })
               }
-              className="w-6 h-6 accent-white"
+              className="w-6 h-6 accent-black dark:accent-white"
             />
             On
           </Label>
         </div>
         <div className="w-full flex flex-col items-center justify-start gap-4">
-          <h2 className="text-lg w-full mb-2">New Tags</h2>
+          <h2 className="w-full mb-2">New Tags</h2>
           <Label
             htmlFor="tags-off"
             className="flex gap-2 items-center justify-start font-light cursor-pointer w-full"
@@ -304,7 +300,7 @@ function Page() {
                   tags: e.target.checked ? false : true,
                 })
               }
-              className="w-6 h-6 accent-white"
+              className="w-6 h-6 accent-black dark:accent-white"
             />
             Off
           </Label>
@@ -323,13 +319,13 @@ function Page() {
                   tags: e.target.checked ? true : false,
                 })
               }
-              className="w-6 h-6 accent-white"
+              className="w-6 h-6 accent-black dark:accent-white"
             />
             On
           </Label>
         </div>
         <div className="w-full flex flex-col items-center justify-start gap-4">
-          <h2 className="text-lg w-full mb-2">New Groups</h2>
+          <h2 className="w-full mb-2">New Groups</h2>
           <Label
             htmlFor="group-off"
             className="flex gap-2 items-center justify-start font-light cursor-pointer w-full"
@@ -345,7 +341,7 @@ function Page() {
                   group: e.target.checked ? false : true,
                 })
               }
-              className="w-6 h-6 accent-white"
+              className="w-6 h-6 accent-black dark:accent-white"
             />
             Off
           </Label>
@@ -364,7 +360,7 @@ function Page() {
                   group: e.target.checked ? true : false,
                 })
               }
-              className="w-6 h-6 accent-white"
+              className="w-6 h-6 accent-black dark:accent-white"
             />
             On
           </Label>

@@ -1,6 +1,13 @@
 "use client";
 import MobileNav from "@/components/MobileNav";
-import { Bookmark, Grid2X2, Tag, MoreHorizontal, Mail } from "lucide-react";
+import {
+  Bookmark,
+  Grid2X2,
+  Tag,
+  MoreHorizontal,
+  Mail,
+  QrCode,
+} from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -18,10 +25,21 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
+import QRCode from "qrcode";
+import Image from "next/image";
 
-function Profile({ children }: { children: React.ReactNode }) {
+function Profile({
+  children,
+  params,
+}: {
+  children: React.ReactNode;
+  params: { username: string };
+}) {
+  const baseUrl = process.env.NEXT_PUBLIC_LINK || "";
   const router = useRouter();
   const location = usePathname();
+  const [QR, setQR] = React.useState("");
+  const [reportOpen, setReportOpen] = React.useState(false);
   const [user, setUser] = React.useState({
     _id: "1",
     avatar:
@@ -35,19 +53,28 @@ function Profile({ children }: { children: React.ReactNode }) {
     postsCount: 4,
     follow: true,
   });
+  const username = params.username;
 
   function report(postId: string, username: string) {
     console.log(`Reported post ${postId} by user ${user.username}`);
   }
 
   async function copyLink(username: string) {
-    const link = `${process.env.PUBLIC_URL || ""}/${username}}`;
+    const link = `${baseUrl}/${username}}`;
     await navigator.clipboard.writeText(link);
     toast({
       title: "Copied",
       description: "The link has been copied to your clipboard.",
     });
   }
+
+  const generateQR = async (text: string) => {
+    try {
+      setQR(await QRCode.toDataURL(`${baseUrl}/${text}`));
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <>
@@ -62,7 +89,6 @@ function Profile({ children }: { children: React.ReactNode }) {
             <Avatar className="lg:w-[200px] sm:w-[150px] w-[100px] lg:h-[200px] sm:h-[150px] h-[100px]">
               <AvatarImage
                 src={user.avatar}
-                alt=""
                 className="pointer-events-none select-none"
               />
               <AvatarFallback>{nameFallback(user.fullName)}</AvatarFallback>
@@ -75,23 +101,79 @@ function Profile({ children }: { children: React.ReactNode }) {
                 @{user.username}
               </p>
               <div className="flex items-center justify-center gap-2 max-sm:gap-4">
-                {user.follow ? (
-                  <Button className="my-4 bg-blue-500 hover:bg-blue-700 py-1.5 h-fit w-fit px-3 rounded-full text-white">
-                    Follow
+                {user.username === username ? (
+                  <Button
+                    className="my-4 py-1.5 h-fit w-fit px-3 rounded-full"
+                    onClick={() => router.push("/settings/edit-profile")}
+                  >
+                    Edit Profile
                   </Button>
-                ) : (
-                  <Button className="my-4 bg-stone-500 hover:bg-stone-600 py-1.5 h-fit w-fit px-3 rounded-full text-white">
+                ) : user.follow ? (
+                  <Button
+                    className="my-4 bg-stone-500 hover:bg-stone-600 py-1.5 h-fit w-fit px-3 rounded-full text-white"
+                    onClick={() => setUser({ ...user, follow: false })}
+                  >
                     Unfollow
                   </Button>
+                ) : (
+                  <Button
+                    className="my-4 bg-blue-500 hover:bg-blue-700 py-1.5 h-fit w-fit px-3 rounded-full text-white"
+                    onClick={() => setUser({ ...user, follow: true })}
+                  >
+                    Follow
+                  </Button>
                 )}
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="rounded-full"
-                  onClick={() => router.push(`/messages/${user._id}`)}
-                >
-                  <Mail />
-                </Button>
+                {user.username === username ? (
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="rounded-full"
+                        onClick={() => generateQR(user.username)}
+                      >
+                        <QrCode />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent
+                      hideCloseIcon
+                      onOpenAutoFocus={(e) => e.preventDefault()}
+                    >
+                      <DialogTitle className="text-center text-2xl my-1">
+                        QR Code
+                      </DialogTitle>
+                      <Image
+                        src={QR}
+                        alt="QR Code"
+                        width="500"
+                        height="500"
+                        className="w-96 object-contain mx-auto"
+                      />
+                      <Button
+                        onClick={(e) => {
+                          const link = document.createElement("a");
+                          link.href = QR;
+                          link.download = `${user.fullName} QR`;
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                        }}
+                      >
+                        Download
+                      </Button>
+                      <DialogClose>Cancel</DialogClose>
+                    </DialogContent>
+                  </Dialog>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="rounded-full"
+                    onClick={() => router.push(`/messages/${user._id}`)}
+                  >
+                    <Mail />
+                  </Button>
+                )}
                 <Dialog>
                   <DialogTrigger asChild>
                     <Button
@@ -106,75 +188,78 @@ function Profile({ children }: { children: React.ReactNode }) {
                     hideCloseIcon
                     onOpenAutoFocus={(e) => e.preventDefault()}
                   >
-                    <button className="w-full md:px-20 py-1">
+                    <DialogClose className="w-full md:px-20 py-1">
                       Share Profile
-                    </button>
-                    <button
+                    </DialogClose>
+                    <DialogClose
                       className="w-full md:px-20 py-1"
                       onClick={() => copyLink(user.username)}
                     >
                       Copy link
-                    </button>
-                    <button className="w-full md:px-20 py-1 text-red-500">
+                    </DialogClose>
+                    <DialogClose className="w-full md:px-20 py-1 text-red-500">
                       Block
-                    </button>
-                    <Dialog>
-                      <DialogTrigger className="text-red-500 w-full md:px-20 py-1">
-                        Report
-                      </DialogTrigger>
-                      <DialogContent
-                        className="sm:w-2/3 w-full h-fit flex flex-col bg-stone-100 dark:bg-stone-900"
-                        hideCloseIcon
-                      >
-                        <DialogTitle className="text-center text-2xl my-1 ">
-                          Report Post
-                        </DialogTitle>
-                        <div className="space-y-3">
-                          <div className="space-y-2">
-                            <Label htmlFor="report-title">Title</Label>
-                            <Input
-                              id="report-title"
-                              placeholder="Title for the issue"
-                              className="bg-stone-100 dark:bg-stone-900 sm:focus-within:ring-1"
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="report-description">
-                              Description
-                            </Label>
-                            <Textarea
-                              id="report-description"
-                              placeholder="Detailed description of the issue"
-                              rows={5}
-                            />
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="report-file">
-                            Image
-                            <span className="text-stone-500 text-sm">
-                              &nbsp;(Optional)
-                            </span>
-                          </Label>
-                          <Input
-                            type="file"
-                            id="report-file"
-                            accept="image/*"
-                            className="bg-stone-100 dark:bg-stone-900 sm:focus-within:ring-1 ring-stone-200"
-                          />
-                        </div>
-                        <DialogFooter className="flex gap-2">
-                          <Button
-                            variant="destructive"
-                            onClick={() => report(user._id, user.username)}
-                          >
-                            Report
-                          </Button>
-                          <DialogClose>Cancel</DialogClose>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
+                    </DialogClose>
+                    <DialogClose
+                      className="text-red-500 w-full md:px-20 py-1"
+                      onClick={() => setReportOpen(true)}
+                    >
+                      Report
+                    </DialogClose>
                     <DialogClose>Cancel</DialogClose>
+                  </DialogContent>
+                </Dialog>
+                <Dialog open={reportOpen}>
+                  <DialogContent
+                    className="sm:w-2/3 w-full h-fit flex flex-col bg-stone-100 dark:bg-stone-900"
+                    hideCloseIcon
+                  >
+                    <DialogTitle className="text-center text-2xl my-1 ">
+                      Report Post
+                    </DialogTitle>
+                    <div className="space-y-3">
+                      <div className="space-y-2">
+                        <Label htmlFor="report-title">Title</Label>
+                        <Input
+                          id="report-title"
+                          placeholder="Title for the issue"
+                          className="bg-stone-100 dark:bg-stone-900 sm:focus-within:ring-1"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="report-description">Description</Label>
+                        <Textarea
+                          id="report-description"
+                          placeholder="Detailed description of the issue"
+                          rows={5}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="report-file">
+                        Image
+                        <span className="text-stone-500 text-sm">
+                          &nbsp;(Optional)
+                        </span>
+                      </Label>
+                      <Input
+                        type="file"
+                        id="report-file"
+                        accept="image/*"
+                        className="bg-stone-100 dark:bg-stone-900 sm:focus-within:ring-1 ring-stone-200"
+                      />
+                    </div>
+                    <DialogFooter className="flex gap-2">
+                      <Button
+                        variant="destructive"
+                        onClick={() => report(user._id, user.username)}
+                      >
+                        Report
+                      </Button>
+                      <DialogClose onClick={() => setReportOpen(false)}>
+                        Cancel
+                      </DialogClose>
+                    </DialogFooter>
                   </DialogContent>
                 </Dialog>
               </div>

@@ -55,9 +55,13 @@ function Page() {
     console.log(data);
   }
 
+  function sendMail(email: string) {
+    console.log(email);
+  }
+
   return (
     <div className="flex flex-col items-center justify-start">
-      <h1 className="sm:w-2/3 text-xl tracking-tight font-semibold w-full text-left my-4 flex items-center gap-4">
+      <h1 className="sm:w-2/3 text-lg tracking-tight font-semibold w-full text-left my-4 flex items-center gap-4">
         <Button
           variant="ghost"
           size="icon"
@@ -71,7 +75,7 @@ function Page() {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="sm:w-2/3 w-3/4 space-y-8 mt-8"
+          className="sm:w-2/3 w-3/4 space-y-5 mt-3"
         >
           <FormField
             control={form.control}
@@ -88,7 +92,13 @@ function Page() {
                       {...field}
                     />
                   </FormControl>
-                  <Button variant="secondary" type="button">Get OTP</Button>
+                  <Button
+                    variant="secondary"
+                    type="button"
+                    onClick={() => sendMail(form.getValues("email"))}
+                  >
+                    Get OTP
+                  </Button>
                 </div>
                 <FormMessage />
               </FormItem>

@@ -160,7 +160,7 @@ function Story({ params }: Props) {
     const timer: Timer = new Timer(function () {
       console.log("new timer");
       nextRef.current?.click();
-    }, 5000);
+    }, 15000);
     setTimer(timer);
   }, [currentStory]);
 
@@ -210,7 +210,7 @@ function Story({ params }: Props) {
   }, [index]);
 
   return (
-    <div className="w-full col-span-10 h-screen flex items-center justify-center bg-stone-900">
+    <div className="w-full col-span-10 h-[100dvh] flex items-center justify-center bg-stone-900">
       <button
         className="text-stone-100 p-2 absolute hidden sm:inline-block right-0 top-0"
         onClick={() => router.push("/")}

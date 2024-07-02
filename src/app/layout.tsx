@@ -13,6 +13,8 @@ const fontSans = FontSans({
   variable: "--font-sans",
 });
 
+const baseUrl = process.env.NEXT_PUBLIC_LINK || "";
+
 export const metadata: Metadata = {
   title: "Sociial",
   description:
@@ -21,17 +23,17 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
     icon: "/favicon.ico",
   },
-  metadataBase: new URL(process.env.PUBLIC_URL || ""),
+  metadataBase: new URL(baseUrl),
   openGraph: {
     type: "website",
-    url: process.env.PUBLIC_URL || "",
+    url: baseUrl,
     title: "Sociial",
     description:
       "Sociial is a vibrant community where you can connect, share, and grow. Join us and start your social journey today!",
     siteName: "Shivam",
     images: [
       {
-        url: `${process.env.PUBLIC_URL}/opengraph-image.jpg`,
+        url: `${baseUrl}/opengraph-image.jpg`,
         type: "image/jpg",
         width: 1200,
         height: 630,
@@ -47,7 +49,7 @@ export const metadata: Metadata = {
     siteId: "765045797750706176",
     images: [
       {
-        url: `${process.env.PUBLIC_URL}/opengraph-image.jpg`,
+        url: `${baseUrl}/opengraph-image.jpg`,
         type: "image/jpg",
         width: 1200,
         height: 630,
