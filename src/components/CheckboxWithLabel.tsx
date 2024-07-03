@@ -16,6 +16,7 @@ function CheckboxWithLabel({
       <Checkbox
         id={text.split(" ")[0] || text}
         checked={checked}
+        name={text}
         onCheckedChange={(value: boolean) => setChecked(value)}
       />
       <Label htmlFor={text.split(" ")[0] || text}>{text}</Label>

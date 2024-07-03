@@ -15,14 +15,31 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
-
-interface FormInput {
-  identifier: string;
-  password: string;
-}
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 function SignInPage() {
-  const form = useForm<FormInput>({
+  const formSchema = z.object({
+    identifier: z
+      .string()
+      .regex(/^[a-z_1-9.]+$/)
+      .min(2, {
+        message: "Username must be more than 2 characters",
+      })
+      .max(20, {
+        message: "Username must be less than 20 characters",
+      }),
+    password: z
+      .string()
+      .min(6, {
+        message: "Password must be more than 6 characters",
+      })
+      .max(50, {
+        message: "Password must be less than 50 characters",
+      }),
+  });
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       identifier: "",
       password: "",
@@ -30,7 +47,7 @@ function SignInPage() {
   });
   const [loading, setLoading] = React.useState(false);
   const [showPwd, setShowPwd] = React.useState(false);
-  const onSubmit: SubmitHandler<FormInput> = async (data) => {
+  function onSubmit(data: z.infer<typeof formSchema>) {
     let username = "";
     if (!(data.identifier.includes("@") || data.identifier.includes("."))) {
       username = data.identifier;
@@ -41,7 +58,7 @@ function SignInPage() {
       email: data.identifier,
       password: data.password,
     });
-  };
+  }
   return (
     <div className="flex justify-center col-span-10 py-12 items-center min-h-screen bg-white dark:bg-zinc-800">
       <Image

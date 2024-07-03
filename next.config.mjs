@@ -6,27 +6,35 @@ const nextConfig = {
         protocol: "https",
         hostname: "res.cloudinary.com",
         port: "",
-        pathname: "/dv3qbj0bn/**"
+        pathname: "/dv3qbj0bn/**",
       },
       {
         protocol: "https",
         hostname: "github.com",
         port: "",
-        pathname: "/**"
-      }, 
+        pathname: "/**",
+      },
       {
         protocol: "https",
         hostname: "avatars.githubusercontent.com",
         port: "",
-        pathname: "/**"
+        pathname: "/**",
       },
       {
         protocol: "https",
         hostname: "images.pexels.com",
         port: "",
-        pathname: "/**"
+        pathname: "/**",
       },
     ],
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${process.env.BACKEND_URL}/api/:path*`,
+      },
+    ];
   },
 };
 

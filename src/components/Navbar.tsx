@@ -55,7 +55,7 @@ function Navbar() {
     "/story/",
     "/premium",
     "/call",
-    "/new-post"
+    "/new-post",
   ];
   const [unreadMessageCount, newNotifications] = [0, false];
   const user = {
@@ -142,9 +142,7 @@ function Navbar() {
             }`}
             title="Search"
           >
-            <Search
-              className="inline"
-            />
+            <Search className="inline" />
             <span className="xl:inline hidden">Search</span>
           </Link>
           <Link
@@ -182,9 +180,7 @@ function Navbar() {
             }`}
             title="Videos"
           >
-            <Tv
-              className="inline"
-            />
+            <Tv className="inline" />
             <span className="xl:inline hidden">Videos</span>
           </Link>
           <Link
@@ -197,9 +193,7 @@ function Navbar() {
             title="Notifications"
           >
             <span className="inline-block relative">
-              <Bell
-                className="inline"
-              />
+              <Bell className="inline" />
               {newNotifications && (
                 <span className="absolute top-0 right-0 inline-block w-[10px] h-[10px] transform translate-x-1/5 translate-y-0.5 bg-red-600 rounded-full"></span>
               )}
@@ -229,7 +223,7 @@ function Navbar() {
         </div>
         <div className="w-full text-center sm:flex hidden flex-col xl:items-start items-center gap-4 sm:p-1">
           <Link
-            href="new-post"
+            href="/new-post"
             className="bg-stone-800 dark:bg-stone-100 text-white dark:text-black xl:w-full w-fit flex items-center xl:justify-start xl:pl-4 sm:p-3 p-2 gap-3 rounded-2xl ring-stone-800 dark:hover:ring-stone-100 hover:ring-2"
             title="New post"
           >
@@ -286,7 +280,13 @@ function Navbar() {
                 >
                   Report problem
                 </MenubarItem>
-                <MenubarItem className="py-2.5 rounded-lg pl-2.5 text-red-600 focus:text-red-600">
+                <MenubarItem
+                  className="py-2.5 rounded-lg pl-2.5 text-red-600 focus:text-red-600"
+                  onClick={() => {
+                    localStorage.clear();
+                    router.push("/sign-in");
+                  }}
+                >
                   Log Out
                 </MenubarItem>
               </MenubarContent>

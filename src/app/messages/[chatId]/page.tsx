@@ -25,6 +25,7 @@ import EmojiKeyboard from "@/components/EmojiKeyboard";
 import MessageReacts from "@/components/MessageReacts";
 import MessageOptions from "@/components/MessageOptions";
 import ChatInfo from "@/components/ChatInfo";
+import Image from "next/image";
 
 interface Message {
   id: string;
@@ -60,6 +61,7 @@ function Page({ params }: { params: { chatId: string } }) {
     followersCount: 24,
     followingCount: 12,
     postsCount: 4,
+    isPremium: true,
   });
   const [user, setUser] = React.useState({
     id: "2",
@@ -416,7 +418,7 @@ function Page({ params }: { params: { chatId: string } }) {
       } `}
     >
       <div className="flex gap-2 items-center justify-between sm:absolute fixed top-0 bottom-auto left-0 w-full md:h-20 h-16 md:ml-3 border-b-2 border-stone-200 dark:border-stone-800 bg-white dark:bg-black md:px-4 pl-1 pr-0 z-20">
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center group">
           <Button
             variant="ghost"
             size="icon"
@@ -439,8 +441,21 @@ function Page({ params }: { params: { chatId: string } }) {
             <AvatarFallback>{nameFallback(recipent.fullName)}</AvatarFallback>
           </Avatar>
           <button className="flex flex-col items-start justify-start">
-            <h1 className="text-xl tracking-tight font-bold leading-4">
-              {recipent.fullName}
+            <h1 className="text-xl tracking-tight font-bold leading-4 flex items-center justify-start gap-1">
+              <span className="group-hover:underline underline-offset-2">
+                {recipent.fullName}
+              </span>
+              {recipent.isPremium ? (
+                <Image
+                  src="/icons/premium.svg"
+                  width="20"
+                  height="20"
+                  alt=""
+                  className="w-5"
+                />
+              ) : (
+                ""
+              )}
             </h1>
             <p className="text-stone-500 text-sm">@{recipent.username}</p>
           </button>
@@ -491,8 +506,19 @@ function Page({ params }: { params: { chatId: string } }) {
                 </AvatarFallback>
               </Avatar>
               <div className="grid place-items-center">
-                <h1 className="text-2xl font-bold tracking-tight">
+                <h1 className="text-2xl font-bold tracking-tight flex items-center justify-start gap-1">
                   {recipent.fullName}
+                  {recipent.isPremium ? (
+                        <Image
+                          src="/icons/premium.svg"
+                          width="20"
+                          height="20"
+                          alt=""
+                          className="w-5"
+                        />
+                      ) : (
+                        ""
+                      )}
                 </h1>
                 <p className="text-sm text-stone-500">@{recipent.username}</p>
                 <p>

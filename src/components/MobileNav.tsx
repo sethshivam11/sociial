@@ -6,16 +6,14 @@ import { usePathname } from "next/navigation";
 import React from "react";
 
 interface Props {
-  unreadMessageCount: number;
-  newNotifications: boolean;
   hideButtons?: boolean;
 }
 
 function MobileNav({
-  unreadMessageCount,
-  newNotifications,
   hideButtons,
 }: Props) {
+  const unreadMessageCount = 0;
+  const newNotifications = false;
   const location = usePathname();
   const username = "sethshivam11";
   return (

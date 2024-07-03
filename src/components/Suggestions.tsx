@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import Link from "next/link";
 import { nameFallback } from "@/lib/helpers";
 import { Button } from "./ui/button";
+import Image from "next/image";
 
 function Suggestions() {
   const users = [
@@ -20,6 +21,7 @@ function Suggestions() {
       avatar:
         "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
       loading: false,
+      isPremium: true,
     },
     {
       name: "Shad",
@@ -61,8 +63,21 @@ function Suggestions() {
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col gap-0 leading-3">
-                        <span className="text-md font-semibold">
-                          {user.name}
+                        <span className="text-md font-semibold flex items-center justify-start gap-1 group">
+                          <span className="group-hover:underline underline-offset-2">
+                            {user.name}
+                          </span>
+                          {user.isPremium ? (
+                            <Image
+                              src="/icons/premium.svg"
+                              width="20"
+                              height="20"
+                              alt=""
+                              className="w-5"
+                            />
+                          ) : (
+                            ""
+                          )}
                         </span>
                         <span className="text-sm text-stone-400">
                           @{user.username}
@@ -91,9 +106,7 @@ function Suggestions() {
         </div>
       </div>
       <div className="bg-stone-100 dark:bg-stone-900 pt-4 p-6 rounded-2xl">
-        <h1 className="font-semibold text-xl">
-          Premium
-        </h1>
+        <h1 className="font-semibold text-xl">Premium</h1>
         <p className="text-stone-500 my-2 text-sm">
           Subscribe to get access to premium features
         </p>
@@ -102,9 +115,6 @@ function Suggestions() {
         </p>
         <p className="flex items-center justify-start gap-2 my-1">
           <Check color="green" /> Message Themes
-        </p>
-        <p className="flex items-center justify-start gap-2 my-1">
-          <Check color="green" /> Save Posts
         </p>
         <p className="flex items-center justify-start gap-2 my-1">
           <Check color="green" /> Private Account
@@ -118,7 +128,6 @@ function Suggestions() {
           </Button>
         </Link>
       </div>
-      
     </div>
   );
 }

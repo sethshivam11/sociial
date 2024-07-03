@@ -1,8 +1,10 @@
 "use client";
 import Comment from "@/components/Comment";
+import MobileNav from "@/components/MobileNav";
 import More from "@/components/More";
 import PostsLoading from "@/components/PostsLoading";
 import Share from "@/components/Share";
+import Suggestions from "@/components/Suggestions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Carousel,
@@ -14,16 +16,21 @@ import {
 import { nameFallback } from "@/lib/helpers";
 import { Bookmark, Heart } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import React from "react";
 
 function Page() {
+  const router = useRouter();
   const [post, setPost] = React.useState({
     _id: "1",
     user: {
-      fullName: "Shivam",
+      fullName: "Shivam Soni",
       username: "sethshivam11",
       avatar:
         "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+      postsCount: 12,
+      followingsCount: 10,
+      followersCount: 14,
     },
     caption:
       "This is a caption which is very long and I don't know what to write in it so, i am just keep going to see the results. This is just a test caption to check the functionality of the app. I hope you are having a good day. Bye! 😊",
@@ -94,147 +101,215 @@ function Page() {
     );
   }
   return (
-    <main className="min-h-screen h-max xl:col-span-8 sm:col-span-9 col-span-10">
-      {loading ? (
-        <PostsLoading length={1} />
-      ) : (
-        <div className="rounded-xl bg-stone-100 dark:bg-stone-800 p-4 w-full sm:w-1/2 my-16 mx-auto h-fit min-h-64 min-w-64">
-          <div className="flex justify-between w-full">
-            <div className="flex items-center gap-2 w-full">
-              <div className="w-8 h-8">
-                <Avatar className="w-8 h-8">
-                  <AvatarImage
-                    src={post.user.avatar}
-                    alt=""
-                    className="pointer-events-none select-none"
-                  />
-                  <AvatarFallback>
-                    {nameFallback(post.user.fullName)}
-                  </AvatarFallback>
-                </Avatar>
-              </div>
-              <div>
-                <p>{post.user.fullName}</p>
-                <p className="text-sm text-gray-500 leading-3">
-                  @{post.user.username}
-                </p>
-              </div>
-            </div>
-            <More user={post.user} postId={post._id} />
-          </div>
-          <Carousel className="w-full my-2 mt-2">
-            <CarouselContent>
-              {post.images.map((image, index) => {
-                return (
-                  <CarouselItem key={index} className="relative">
-                    <div
-                      className={`absolute w-full h-full items-center justify-center ${
-                        post.liked ? "flex" : "hidden"
-                      }`}
-                    >
-                      <Heart
-                        size="150"
-                        strokeWidth="0"
-                        fill="rgb(244 63 94)"
-                        className="animate-like"
-                      />
-                    </div>
-                    <Image
-                      width={700}
-                      height={320}
-                      src={image}
-                      priority={index === 0 ? true : false}
-                      onDoubleClick={(e) => {
-                        likePost(post._id);
-                        const heartContainer = (e.target as HTMLElement)
-                          .parentElement?.parentElement?.childNodes;
-                        setTimeout(
-                          () =>
-                            heartContainer?.forEach((child) => {
-                              (
-                                child.childNodes[0] as HTMLElement
-                              ).classList.add("hidden");
-                            }),
-                          500
-                        );
-                      }}
-                      alt={`Photo by ${post.user.fullName} with username ${post.user.username}`}
-                      className="object-cover select-none w-full h-full rounded-sm"
+    <>
+      <MobileNav />
+      <div className="min-h-screen h-max xl:col-span-8 sm:col-span-9 col-span-10 flex max-lg:flex-col items-start justify-center px-4">
+        {loading ? (
+          <PostsLoading length={1} />
+        ) : (
+          <main className="rounded-xl bg-stone-100 dark:bg-stone-900 p-4 lg:w-1/2 md:w-2/3 sm:w-5/6 w-full mt-6 sm:mx-auto h-fit min-h-64 min-w-64">
+            <div className="flex justify-between w-full">
+              <div className="flex items-center gap-2 w-full">
+                <div className="w-8 h-8">
+                  <Avatar className="w-8 h-8">
+                    <AvatarImage
+                      src={post.user.avatar}
+                      alt=""
+                      className="pointer-events-none select-none"
                     />
-                  </CarouselItem>
-                );
-              })}
-            </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
-          </Carousel>
-          <div className="flex justify-between select-none">
-            <div className="flex gap-3">
+                    <AvatarFallback>
+                      {nameFallback(post.user.fullName)}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+                <div>
+                  <p>{post.user.fullName}</p>
+                  <p className="text-sm text-gray-500 leading-3">
+                    @{post.user.username}
+                  </p>
+                </div>
+              </div>
+              <More user={post.user} postId={post._id} />
+            </div>
+            <Carousel className="w-full my-2 mt-2">
+              <CarouselContent>
+                {post.images.map((image, index) => {
+                  return (
+                    <CarouselItem key={index} className="relative">
+                      <div
+                        className={`absolute w-full h-full items-center justify-center ${
+                          post.liked ? "flex" : "hidden"
+                        }`}
+                      >
+                        <Heart
+                          size="150"
+                          strokeWidth="0"
+                          fill="rgb(244 63 94)"
+                          className="animate-like"
+                        />
+                      </div>
+                      <Image
+                        width={700}
+                        height={320}
+                        src={image}
+                        priority={index === 0 ? true : false}
+                        onDoubleClick={(e) => {
+                          likePost(post._id);
+                          const heartContainer = (e.target as HTMLElement)
+                            .parentElement?.parentElement?.childNodes;
+                          setTimeout(
+                            () =>
+                              heartContainer?.forEach((child) => {
+                                (
+                                  child.childNodes[0] as HTMLElement
+                                ).classList.add("hidden");
+                              }),
+                            500
+                          );
+                        }}
+                        alt={`Photo by ${post.user.fullName} with username ${post.user.username}`}
+                        className="object-cover select-none w-full h-full rounded-sm"
+                      />
+                    </CarouselItem>
+                  );
+                })}
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+            </Carousel>
+            <div className="flex justify-between select-none">
+              <div className="flex gap-3">
+                <button
+                  title={post.liked ? "Unlike" : "Like"}
+                  onClick={() => {
+                    likePost(post._id);
+                  }}
+                >
+                  <Heart
+                    size="30"
+                    className={`${
+                      post.liked ? "text-rose-500" : "sm:hover:opacity-60"
+                    } transition-all active:scale-110`}
+                    fill={post.liked ? "rgb(244 63 94)" : "none"}
+                  />
+                </button>
+                <Comment
+                  comments={comments}
+                  user={post.user}
+                  commentsCount={post.commentsCount}
+                  likeComment={likeComment}
+                  addComment={addComment}
+                />
+                <Share />
+              </div>
               <button
-                title={post.liked ? "Unlike" : "Like"}
-                onClick={() => {
-                  likePost(post._id);
+                className="mr-1"
+                onClick={(e) => {
+                  const icon = e.target as HTMLElement;
+                  if (icon.getAttribute("fill") === "currentColor") {
+                    icon.setAttribute("fill", "none");
+                  } else {
+                    (e.target as HTMLElement).setAttribute(
+                      "fill",
+                      "currentColor"
+                    );
+                  }
                 }}
               >
-                <Heart
-                  size="30"
-                  className={`${
-                    post.liked ? "text-rose-500" : "sm:hover:opacity-60"
-                  } transition-all active:scale-110`}
-                  fill={post.liked ? "rgb(244 63 94)" : "none"}
-                />
+                <Bookmark size="30" className="w-full h-full" />
               </button>
-              <Comment
-                comments={comments}
-                user={post.user}
-                commentsCount={post.commentsCount}
-                likeComment={likeComment}
-                addComment={addComment}
-              />
-              <Share />
             </div>
-            <button
-              className="mr-1"
-              onClick={(e) => {
-                const icon = e.target as HTMLElement;
-                if (icon.getAttribute("fill") === "currentColor") {
-                  icon.setAttribute("fill", "none");
-                } else {
-                  (e.target as HTMLElement).setAttribute(
-                    "fill",
-                    "currentColor"
-                  );
-                }
-              }}
-            >
-              <Bookmark size="30" className="w-full h-full" />
-            </button>
+            <p className="text-sm text-stone-400 mt-1 select-none">
+              {post.likesCount <= 1 ? "1 like" : `${post.likesCount} likes`}
+            </p>
+            <p className="py-1 text-sm">
+              <span>{post.caption}</span>
+            </p>
+          </main>
+        )}
+        <div className="flex flex-col gap-4 lg:w-1/3 md:w-2/3 sm:w-5/6 w-full sm:mx-auto lg:mx-4">
+          <div className="lg:flex hidden flex-col items-center justify-start h-full mt-16 w-full bg-stone-100 dark:bg-stone-900 mx-1 rounded-xl -mb-4">
+            <Avatar className="w-40 h-40 -mt-12 select-none pointer-events-none">
+              <AvatarImage src={post.user.avatar} />
+              <AvatarFallback>
+                {nameFallback(post.user.fullName)}
+              </AvatarFallback>
+            </Avatar>
+            <h1 className="text-2xl tracking-tight font-bold mt-4">
+              {post.user.fullName}
+            </h1>
+            <p className="text-stone-500">@{post.user.username}</p>
+            <div className="py-4 text-center grid grid-cols-3 gap-1 w-full">
+              <button className="flex flex-col items-center justify-center gap-2">
+                <span className="text-lg">Posts</span>
+                <span>{post.user.postsCount}</span>
+              </button>
+              <button
+                className="flex flex-col items-center justify-center gap-2"
+                onClick={() => router.push(`/${post.user.username}/followers`)}
+              >
+                <span className="text-lg">Followers</span>
+                <span>{post.user.followersCount}</span>
+              </button>
+              <button
+                className="flex flex-col items-center justify-center gap-2"
+                onClick={() => router.push(`/${post.user.username}/following`)}
+              >
+                <span className="text-lg">Followings</span>
+                <span>{post.user.followingsCount}</span>
+              </button>
+            </div>
           </div>
-          <p className="text-sm text-stone-400 mt-1 select-none">
-            {post.likesCount <= 1 ? "1 like" : `${post.likesCount} likes`}
-          </p>
-          <p className="py-1 text-sm">
-            <span>{post.caption.slice(0, 30)}&nbsp;</span>
-            <button
-              className="text-stone-500"
-              onClick={(e) => {
-                const btn = e.target as HTMLButtonElement;
-                const span = btn.parentElement?.childNodes[0] as HTMLElement;
-                if (span.innerHTML !== post.caption) {
-                  span.innerHTML = post.caption;
-                  btn.innerHTML = "&nbsp;less";
-                } else {
-                  span.innerHTML = post.caption.slice(0, 30);
-                  btn.innerHTML = "&nbsp;more";
-                }
-              }}
-            >
-              more
-            </button>
-          </p>
+          <div className="grid grid-cols-2 gap-3 bg-stone-100 dark:bg-stone-900 rounded-xl mt-4 max-md:mb-4 p-4">
+            <h1 className="col-span-2 text-stone-500 mt-2 mb-4">
+              More posts from @{post.user.username}
+            </h1>
+            <Image
+              src={post.images[0]}
+              alt=""
+              width={300}
+              height={300}
+              className="rounded-xl aspect-square object-cover"
+            />
+            <Image
+              src={post.images[1]}
+              alt=""
+              width={300}
+              height={300}
+              className="rounded-xl aspect-square object-cover"
+            />
+            <Image
+              src={post.images[1]}
+              alt=""
+              width={300}
+              height={300}
+              className="rounded-xl aspect-square object-cover"
+            />
+            <Image
+              src={post.images[0]}
+              alt=""
+              width={300}
+              height={300}
+              className="rounded-xl aspect-square object-cover"
+            />
+            <Image
+              src={post.images[0]}
+              alt=""
+              width={300}
+              height={300}
+              className="rounded-xl aspect-square object-cover lg:hidden flex"
+            />
+            <Image
+              src={post.images[1]}
+              alt=""
+              width={300}
+              height={300}
+              className="rounded-xl aspect-square object-cover lg:hidden flex"
+            />
+          </div>
         </div>
-      )}
-    </main>
+      </div>
+    </>
   );
 }
 

@@ -15,6 +15,7 @@ import {
   DialogFooter,
   DialogTrigger,
 } from "./ui/dialog";
+import Image from "next/image";
 
 interface Theme {
   name: string;
@@ -31,6 +32,7 @@ interface Props {
     followersCount: number;
     postsCount: number;
     followingCount: number;
+    isPremium?: boolean;
   }[];
   user: {
     id: string;
@@ -91,8 +93,19 @@ function ChatInfo({
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col items-start justify-start gap-0">
-              <span className="text-lg font-medium leading-4">
+              <span className="text-lg font-medium leading-4 flex items-center justify-start gap-1">
                 {recipents[0].fullName}
+                {recipents[0].isPremium ? (
+                  <Image
+                    src="/icons/premium.svg"
+                    width="20"
+                    height="20"
+                    alt=""
+                    className="w-5"
+                  />
+                ) : (
+                  ""
+                )}
               </span>
               <span className="text-sm text-stone-500">
                 @{recipents[0].username}

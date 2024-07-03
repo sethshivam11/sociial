@@ -271,7 +271,7 @@ function Page() {
           <h1 className="text-2xl tracking-tight font-bold w-full text-center">
             Notifications
           </h1>
-          <Link href="/settings">
+          <Link href="/settings/notifications">
             <Button variant="ghost" size="icon" className="rounded-xl">
               <Wrench />
             </Button>

@@ -7,6 +7,7 @@ import {
   MoreHorizontal,
   Mail,
   QrCode,
+  CalendarDays,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import React from "react";
@@ -27,6 +28,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 import QRCode from "qrcode";
 import Image from "next/image";
+import {
+  Menubar,
+  MenubarContent,
+  MenubarMenu,
+  MenubarTrigger,
+} from "@/components/ui/menubar";
 
 function Profile({
   children,
@@ -52,15 +59,16 @@ function Profile({
     followingsCount: 12,
     postsCount: 4,
     follow: true,
+    isPremium: true,
   });
   const username = params.username;
 
   function report(postId: string, username: string) {
-    console.log(`Reported post ${postId} by user ${user.username}`);
+    console.log(`Reported post ${postId} by user ${username}`);
   }
 
   async function copyLink(username: string) {
-    const link = `${baseUrl}/${username}}`;
+    const link = `${baseUrl}/${username}`;
     await navigator.clipboard.writeText(link);
     toast({
       title: "Copied",
@@ -78,11 +86,7 @@ function Profile({
 
   return (
     <>
-      <MobileNav
-        unreadMessageCount={2}
-        newNotifications={true}
-        hideButtons={true}
-      />
+      <MobileNav />
       <div className="min-h-screen xl:col-span-8 sm:col-span-9 col-span-10 container py-2 max-md:px-16 max-sm:px-2">
         <div className="flex md:flex-row flex-col md:items-center items-start justify-evenly w-full">
           <div className="flex items-center justify-center max-sm:justify-start gap-6 mt-4 px-4 max-sm:w-full">
@@ -97,8 +101,46 @@ function Profile({
               <p className="lg:text-4xl text-2xl tracking-tight font-extrabold w-full">
                 {user.fullName}
               </p>
-              <p className="text-stone-500 lg:text-xl text-lg">
-                @{user.username}
+              <p className="text-stone-500 lg:text-xl text-lg flex items-center justify-center">
+                {user.isPremium ? (
+                  <Menubar className="border-0 h-fit w-fit">
+                    <MenubarMenu>
+                      <MenubarTrigger className="p-0 ">
+                        <Image
+                          src="/icons/premium.svg"
+                          width="20"
+                          height="20"
+                          alt=""
+                          className="w-5"
+                        />
+                      </MenubarTrigger>
+                      <MenubarContent className="px-6 py-4 drop-shadow-sm rounded-xl" align="center">
+                        <h1 className="text-xl tracking-tight font-bold">
+                          Verified Account
+                        </h1>
+                        <p className="text-stone-500 text-sm flex items-center justify-start gap-1 my-3">
+                          <Image
+                            src="/icons/premium.svg"
+                            width="20"
+                            height="20"
+                            alt=""
+                            className="w-5"
+                          />
+                          This is a premium account
+                        </p>
+                        <p className="text-stone-500 text-sm flex items-center justify-start gap-1 my-3">
+                          <CalendarDays /> Verified since {}
+                        </p>
+                        <Button className="w-full rounded-xl">
+                          Upgrade to Premium
+                        </Button>
+                      </MenubarContent>
+                    </MenubarMenu>
+                  </Menubar>
+                ) : (
+                  ""
+                )}
+                &nbsp;@{user.username}
               </p>
               <div className="flex items-center justify-center gap-2 max-sm:gap-4">
                 {user.username === username ? (

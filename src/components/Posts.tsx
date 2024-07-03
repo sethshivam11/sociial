@@ -16,6 +16,7 @@ import PostsLoading from "./PostsLoading";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { nameFallback } from "@/lib/helpers";
 import Tags from "./Tags";
+import Link from "next/link";
 
 interface Post {
   _id: string;
@@ -23,6 +24,7 @@ interface Post {
     fullName: string;
     username: string;
     avatar: string;
+    isPremium?: boolean;
   };
   caption: string;
   liked: boolean;
@@ -41,6 +43,7 @@ function Posts() {
         username: "sethshivam11",
         avatar:
           "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+        isPremium: true,
       },
       caption:
         "This is a caption which is very long and I don't know what to write in it so, i am just keep going to see the results. This is just a test caption to check the functionality of the app. I hope you are having a good day. Bye! 😊",
@@ -209,7 +212,10 @@ function Posts() {
               className="rounded-xl bg-stone-100 dark:bg-stone-900 p-4 w-full sm:w-[85%] mx-auto h-fit min-h-64 min-w-64"
             >
               <div className="flex justify-between w-full">
-                <div className="flex items-center gap-2 w-full">
+                <Link
+                  href={`/${post.user.username}`}
+                  className="flex items-center gap-2 w-full group"
+                >
                   <div className="w-8 h-8">
                     <Avatar className="w-8 h-8">
                       <AvatarImage
@@ -223,12 +229,27 @@ function Posts() {
                     </Avatar>
                   </div>
                   <div>
-                    <p>{post.user.fullName}</p>
+                    <p className="flex items-center justify-start gap-2">
+                      <span className="group-hover:underline underline-offset-2">
+                        {post.user.fullName}
+                      </span>
+                      {post.user.isPremium ? (
+                        <Image
+                          src="/icons/premium.svg"
+                          width="20"
+                          height="20"
+                          alt=""
+                          className="w-5"
+                        />
+                      ) : (
+                        ""
+                      )}
+                    </p>
                     <p className="text-sm text-gray-500 leading-3">
                       @{post.user.username}
                     </p>
                   </div>
-                </div>
+                </Link>
                 <More user={post.user} postId={post._id} />
               </div>
               <Carousel className="w-full my-2 mt-2">

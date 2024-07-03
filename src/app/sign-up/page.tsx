@@ -16,45 +16,81 @@ import {
 } from "@/components/ui/form";
 import CheckboxWithLabel from "@/components/CheckboxWithLabel";
 import Image from "next/image";
-
-interface FormInput {
-  fullName: string;
-  username: string;
-  email: string;
-  password: string;
-}
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 function SignUpPage() {
-  const form = useForm<FormInput>({
+  const formSchema = z
+    .object({
+      email: z
+        .string()
+        .email()
+        .min(6, {
+          message: "Email must be more than 6 characters",
+        })
+        .max(50, {
+          message: "Email must be less than 50 characters",
+        }),
+      fullName: z
+        .string()
+        .min(2, {
+          message: "Name must be more than 2 characters",
+        })
+        .max(20, {
+          message: "Name must be less than 20 characters",
+        }),
+      username: z
+        .string()
+        .regex(/^[a-z_1-9.]+$/)
+        .min(2, {
+          message: "Username must be more than 2 characters",
+        })
+        .max(20, {
+          message: "Username must be less than 20 characters",
+        }),
+      password: z
+        .string()
+        .min(6, {
+          message: "Password must be more than 6 characters",
+        })
+        .max(50, {
+          message: "Password must be less than 50 characters",
+        }),
+      confirmPassword: z.string(),
+    })
+    .refine(
+      (values) => {
+        return values.password === values.confirmPassword;
+      },
+      {
+        message: "Passwords must match!",
+        path: ["confirmPassword"],
+      }
+    );
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
       fullName: "",
       username: "",
       password: "",
+      confirmPassword: "",
     },
   });
 
   const [loading, setLoading] = React.useState(false);
-  const { getValues } = form;
   const [showPwd, setShowPwd] = React.useState(false);
   const [username, setUsername] = React.useState("");
-  const [passwordsMatchMessage, setPasswordsMatchMessage] = React.useState("");
-  const [confirmPwd, setConfirmPwd] = React.useState("");
   const [avatar, setAvatar] = React.useState<FileList | null>(null);
   const debounced = useDebounceCallback(setUsername, 500);
   const [isFetchingUsername, setIsFetchingUsername] = React.useState(false);
   const [usernameMessage, setUsernameMessage] = React.useState("");
 
-  const onSubmit: SubmitHandler<FormInput> = async ({
-    fullName,
-    email,
-    username,
-    password,
-  }) => {
-    if (password !== confirmPwd) {
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    if (data.password !== data.confirmPassword) {
       return console.log("Passwords do not match");
     }
-    console.log({ fullName, email, username, password, avatar });
+    console.log(data);
   };
 
   function isUsernameAvailable(username: string) {
@@ -85,14 +121,6 @@ function SignUpPage() {
       setUsernameMessage("");
     }
   }, [username]);
-
-  React.useEffect(() => {
-    if (confirmPwd !== getValues("password")) {
-      return setPasswordsMatchMessage("Passwords do not match");
-    }
-    setPasswordsMatchMessage("");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [confirmPwd]);
 
   return (
     <div className="flex justify-center col-span-10 py-12 items-center min-h-screen dark:bg-zinc-800">
@@ -131,7 +159,6 @@ function SignUpPage() {
                       inputMode="text"
                       placeholder="name"
                       autoFocus
-                      required
                       {...field}
                     />
                   </FormControl>
@@ -148,10 +175,9 @@ function SignUpPage() {
                   <FormControl>
                     <Input
                       placeholder="email"
-                      type="email"
+                      type="text"
                       autoComplete="email"
                       inputMode="email"
-                      required
                       {...field}
                     />
                   </FormControl>
@@ -168,11 +194,10 @@ function SignUpPage() {
                   <FormControl>
                     <Input
                       placeholder="username"
-                      type="username"
+                      type="text"
                       max={30}
                       autoComplete="username"
                       inputMode="text"
-                      required
                       {...field}
                       onChange={(e) => {
                         field.onChange(e);
@@ -210,7 +235,6 @@ function SignUpPage() {
                       type={showPwd ? "text" : "password"}
                       autoComplete="new-password"
                       inputMode="text"
-                      required
                       {...field}
                     />
                   </FormControl>
@@ -219,24 +243,20 @@ function SignUpPage() {
               )}
             />
             <FormField
+              control={form.control}
               name="confirmPassword"
-              render={() => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Confirm Password</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="confirm password"
-                      value={confirmPwd}
                       type={showPwd ? "text" : "password"}
                       autoComplete="new-password webauthn"
                       inputMode="text"
-                      required
-                      onChange={(e) => setConfirmPwd(e.target.value)}
+                      {...field}
                     />
                   </FormControl>
-                  <span className="text-sm text-red-400">
-                    {passwordsMatchMessage ?? ""}
-                  </span>
                   <FormMessage />
                 </FormItem>
               )}
@@ -245,7 +265,7 @@ function SignUpPage() {
               name="avatar"
               render={() => (
                 <FormItem>
-                  <FormLabel>Profile picture</FormLabel>
+                  <FormLabel>Profile picture (Optional)</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="profile pic"

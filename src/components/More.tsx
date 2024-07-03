@@ -52,7 +52,7 @@ function More({ user, postId }: Props) {
   }
 
   async function copyLink(username: string, postId: string) {
-    const link = `${process.env.NEXT_PUBLIC_LINK || ""}/${username}/post/${postId}}`;
+    const link = `${process.env.NEXT_PUBLIC_LINK || ""}/post/${postId}`;
     await navigator.clipboard.writeText(link);
     toast({
       title: "Copied",

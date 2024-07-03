@@ -11,21 +11,18 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
-import {
-  CircleX,
-  History,
-  Search as SearchIcon,
-  X,
-} from "lucide-react";
+import { CircleX, History, Search as SearchIcon, X } from "lucide-react";
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { nameFallback } from "@/lib/helpers";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 interface Search {
   fullName: string;
   username: string;
   avatar: string;
+  isPremium?: boolean;
 }
 
 function Search() {
@@ -41,6 +38,7 @@ function Search() {
       username: "johndoe",
       avatar:
         "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+      isPremium: true,
     },
   ];
   const router = useRouter();
@@ -222,7 +220,20 @@ function Search() {
                 <AvatarFallback>{nameFallback(user.fullName)}</AvatarFallback>
               </Avatar>
               <div className="flex flex-col items-start">
-                <h3>{user.fullName}</h3>
+                <h3 className="flex items-center justify-start gap-1">
+                  {user.fullName}
+                  {user.isPremium ? (
+                    <Image
+                      src="/icons/premium.svg"
+                      width="20"
+                      height="20"
+                      alt=""
+                      className="w-5"
+                    />
+                  ) : (
+                    ""
+                  )}
+                </h3>
                 <p className="text-stone-500 text-xs">@{user.username}</p>
               </div>
             </button>
