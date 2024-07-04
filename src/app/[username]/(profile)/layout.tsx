@@ -107,7 +107,7 @@ function Profile({
                     <MenubarMenu>
                       <MenubarTrigger className="p-0 ">
                         <Image
-                          src="/icons/premium.svg"
+                          src="/icons/verified.svg"
                           width="20"
                           height="20"
                           alt=""
@@ -264,7 +264,7 @@ function Profile({
                         <Label htmlFor="report-title">Title</Label>
                         <Input
                           id="report-title"
-                          placeholder="Title for the issue"
+                          placeholder="What is the issue?"
                           className="bg-stone-100 dark:bg-stone-900 sm:focus-within:ring-1"
                         />
                       </div>
@@ -272,7 +272,7 @@ function Profile({
                         <Label htmlFor="report-description">Description</Label>
                         <Textarea
                           id="report-description"
-                          placeholder="Detailed description of the issue"
+                          placeholder="Describe the issue in detail."
                           rows={5}
                         />
                       </div>

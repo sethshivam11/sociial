@@ -1,92 +1,113 @@
-"use client"
-import React from 'react'
+"use client";
+import React from "react";
 
 function Videos() {
   const [isMuted, setIsMuted] = React.useState(true);
 
-    const [videos, setVideos] = React.useState([
-        {
-            _id: "2",
-            user: {
-                fullName: "Shivam",
-                username: "sethshivam11",
-                avatar:
-                    "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
-            },
-            caption:
-                "This is a caption which is very long and I don't know what to write in it so, i am just keep going to see the results. This is just a test caption to check the functionality of the app. I hope you are having a good day. Bye! 😊",
-            liked: false,
-            images: ["https://res.cloudinary.com/dv3qbj0bn/video/upload/v1709183844/samples/dance-2.mp4"],
-            likesCount: 12,
-            commentsCount: 1,
-        },
-        {
-            _id: "3",
-            user: {
-                fullName: "Shivam",
-                username: "sethshivam11",
-                avatar:
-                    "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
-            },
-            caption: "This is a caption",
-            liked: false,
-            images: ["https://res.cloudinary.com/dv3qbj0bn/video/upload/v1718210710/sociial/videos/tnw4jy33z047bskwwhyt.mp4"],
-            likesCount: 12,
-            commentsCount: 1,
-        },
-    ]);
+  const [videos, setVideos] = React.useState([
+    {
+      _id: "2",
+      user: {
+        fullName: "Shivam",
+        username: "sethshivam11",
+        avatar:
+          "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+      },
+      caption:
+        "This is a caption which is very long and I don't know what to write in it so, i am just keep going to see the results. This is just a test caption to check the functionality of the app. I hope you are having a good day. Bye! 😊",
+      liked: false,
+      images: [
+        "https://res.cloudinary.com/dv3qbj0bn/video/upload/v1709183844/samples/dance-2.mp4",
+      ],
+      likesCount: 12,
+      commentsCount: 1,
+    },
+    {
+      _id: "3",
+      user: {
+        fullName: "Shivam",
+        username: "sethshivam11",
+        avatar:
+          "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+      },
+      caption: "This is a caption",
+      liked: false,
+      images: [
+        "https://res.cloudinary.com/dv3qbj0bn/video/upload/v1718210710/sociial/videos/tnw4jy33z047bskwwhyt.mp4",
+      ],
+      likesCount: 12,
+      commentsCount: 1,
+    },
+  ]);
+  const [buffering, setBuffering] = React.useState(false);
 
-    // React.useEffect(() => {
-    //     const videos = Array.from(document.querySelectorAll("video"));
-    //     const observers: IntersectionObserver[] = [];
-    //     let topVideo: HTMLVideoElement | undefined = undefined;
+  return (
+    <main className="min-h-screen xl:col-span-8 sm:col-span-9 col-span-10 snap-y snap-mandatory flex flex-col overflow-y-auto">
+      <section className="flex items-center justify-center bg-red-500 snap-always snap-start w-full h-screen">
+        Learn React
+      </section>
+      <section className="flex items-center justify-center bg-blue-500 snap-always snap-start w-full h-screen">
+        Learn Vue
+      </section>
+      <section className="flex items-center justify-center bg-orange-500 snap-always snap-start w-full h-screen">
+        Learn Angular
+      </section>
+    </main>
+  );
+}
 
-    //     const updateTopVideo = () => {
-    //         const sortedVideos = [...videos].sort(
-    //             (a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top
-    //         );
-    //         const newTopVideo = sortedVideos.find(
-    //             (video) => video.getBoundingClientRect().top >= 0
-    //         );
+export default Videos;
 
-    //         if (newTopVideo !== topVideo) {
-    //             if (topVideo) {
-    //                 topVideo.pause();
-    //             }
-    //             topVideo = newTopVideo;
-    //             if (topVideo) {
-    //                 topVideo.play();
-    //             }
-    //         }
-    //     };
+/* React.useEffect(() => {
+        const videos = Array.from(document.querySelectorAll("video"));
+        const observers: IntersectionObserver[] = [];
+        let topVideo: HTMLVideoElement | undefined = undefined;
 
-    //     videos.forEach((video) => {
-    //         const observer = new IntersectionObserver(
-    //             (entries) => {
-    //                 entries.forEach((entry) => {
-    //                     if (entry.isIntersecting || video === topVideo) {
-    //                         updateTopVideo();
-    //                     }
-    //                 });
-    //             },
-    //             {
-    //                 threshold: 0.9,
-    //                 root: null,
-    //                 rootMargin: "100px",
-    //             }
-    //         );
-    //         observer.observe(video);
-    //         observers.push(observer);
-    //     });
+        const updateTopVideo = () => {
+            const sortedVideos = [...videos].sort(
+                (a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top
+            );
+            const newTopVideo = sortedVideos.find(
+                (video) => video.getBoundingClientRect().top >= 0
+            );
 
-    //     return () => {
-    //         videos.forEach((video, index) => {
-    //             observers[index].unobserve(video);
-    //         });
-    //     };
-    // }, [videos]);
+            if (newTopVideo !== topVideo) {
+                if (topVideo) {
+                    topVideo.pause();
+                }
+                topVideo = newTopVideo;
+                if (topVideo) {
+                    topVideo.play();
+                }
+            }
+        };
 
-    /*
+        videos.forEach((video) => {
+            const observer = new IntersectionObserver(
+                (entries) => {
+                    entries.forEach((entry) => {
+                        if (entry.isIntersecting || video === topVideo) {
+                            updateTopVideo();
+                        }
+                    });
+                },
+                {
+                    threshold: 0.9,
+                    root: null,
+                    rootMargin: "100px",
+                }
+            );
+            observer.observe(video);
+            observers.push(observer);
+        });
+
+        return () => {
+            videos.forEach((video, index) => {
+                observers[index].unobserve(video);
+            });
+        };
+    }, [videos]);
+
     <div className="w-full relative">
                           <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 rounded-full text-white bg-transparent/20 dark:bg-transparent/35 p-3">
                             <Play size="40" fill="currentColor" />
@@ -145,10 +166,3 @@ function Videos() {
                           />
                         </div>
      */
-
-    return (
-        <div>Videos</div>
-    )
-}
-
-export default Videos

@@ -25,7 +25,7 @@ import React from "react";
 import Cropper, { Area } from "react-easy-crop";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
 import {
   Form,
   FormControl,
@@ -63,9 +63,13 @@ function Page() {
       caption: "",
     },
   });
-  const [files, setFiles] = React.useState<string[]>([]);
-  const [selectedFile, setSelectedFile] = React.useState<string>("");
-  const [posts, setPosts] = React.useState<Area[]>([]);
+  const [videoFile, setVideoFile] = React.useState<{
+    video: string;
+    area: Area;
+  }>({
+    video: "",
+    area: { x: 0, y: 0, width: 0, height: 0 },
+  });
   const [aspect, setAspect] = React.useState(1 / 1);
   const [crop, setCrop] = React.useState({ x: 0, y: 0 });
   const [zoom, setZoom] = React.useState(1);
@@ -73,7 +77,7 @@ function Page() {
   const dragContainer = React.useRef<HTMLDivElement>(null);
 
   const onCropComplete = (croppedArea: Area, _: Area) => {
-    setPosts([...posts, croppedArea]);
+    setVideoFile((prev) => ({ ...prev, area: croppedArea }));
   };
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -105,39 +109,25 @@ function Page() {
       }}
       onDrop={(e) => {
         e.preventDefault();
-        const droppedFiles = e.dataTransfer.files;
-        if (droppedFiles.length > 5) {
+        const droppedFile = e.dataTransfer.files[0];
+        if (!droppedFile.type.includes("video")) {
           return toast({
             title: "Warning",
-            description: "You can only upload 5 files at a time",
+            description: "Only video files are allowed",
             variant: "destructive",
           });
         }
-        for (let i = 0; i < droppedFiles.length; i++) {
-          const file = droppedFiles.item(i);
-          if (file?.type.includes("image")) {
-            const img = new Image();
-            img.src = URL.createObjectURL(file);
-            if (droppedFiles.length >= 5) {
-              const removedfirstItem = files.shift();
-              if (removedfirstItem) {
-                setFiles((prevFiles) => [...prevFiles, img.src]);
-              } else {
-                setFiles([img.src]);
-              }
-            } else {
-              setFiles((prevFiles) => [...prevFiles, img.src]);
-            }
-            setSelectedFile(img.src);
-          } else {
-            toast({
-              title: "Error",
-              description:
-                "Only images are allowed, click the link below to upload videos",
-              variant: "destructive",
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const video = event.target?.result;
+          if (video) {
+            setVideoFile({
+              video: video.toString(),
+              area: { x: 0, y: 0, width: 0, height: 0 },
             });
           }
-        }
+        };
+        reader.readAsDataURL(droppedFile);
       }}
       onDragOver={(event) => event.preventDefault()}
     >
@@ -164,14 +154,14 @@ function Page() {
       </AlertDialog>
       <div className="h-full lg:w-3/4 w-full rounded-xl sm:pt-4 md:px-16 sm:px-6 px-0 pb-28">
         <h1 className="font-bold text-2xl tracking-tight w-full text-center mb-6">
-          Create New Post
+          Create Video Post
         </h1>
-        {files.length ? (
+        {videoFile.video.length ? (
           <div className="flex flex-col items-center justify-center w-full h-full gap-3">
             <div className="w-full h-full flex max-sm:flex-col items-center justify-center gap-3">
               <div className="w-full h-full relative rounded-xl">
                 <Cropper
-                  image={selectedFile}
+                  video={videoFile.video}
                   crop={crop}
                   zoom={zoom}
                   aspect={aspect}
@@ -186,46 +176,6 @@ function Page() {
                       "hover:cursor-grab active:cursor-grabbing rounded-xl dark:bg-white",
                   }}
                 />
-              </div>
-              <div className="flex sm:flex-col items-center justify-start gap-2 h-full w-fit">
-                {files.map((file, index) => (
-                  <div
-                    key={index}
-                    className="w-20 h-20 relative bg-transparent/50 rounded-lg p-1 flex items-center justify-center"
-                  >
-                    <button onClick={() => setSelectedFile(file)}>
-                      <NImage.default
-                        src={file}
-                        alt=""
-                        width="100"
-                        height="100"
-                        className="object-cover w-full h-full pointer-events-none select-none cursor-pointer"
-                      />
-                    </button>
-                    <button
-                      className="absolute top-1 right-1 bg-transparent/50 text-white rounded-full p-0.5"
-                      onClick={() => {
-                        setFiles((files) =>
-                          files.filter((_, i) => i !== index)
-                        );
-                        setSelectedFile(files[0]);
-                      }}
-                    >
-                      <X size="16" />
-                    </button>
-                  </div>
-                ))}
-                <Button
-                  className={`rounded-xl mx-2 w-fit h-fit p-2 ${
-                    files.length >= 5 ? "hidden" : ""
-                  }`}
-                  variant="ghost"
-                  size="icon"
-                >
-                  <Label htmlFor="new-post">
-                    <CirclePlus size="50" />
-                  </Label>
-                </Button>
               </div>
             </div>
             <div className="flex items-center justify-evenly">
@@ -286,7 +236,7 @@ function Page() {
                         <FormLabel>Caption</FormLabel>
                         <FormControl>
                           <Textarea
-                            placeholder="Enter a caption to image"
+                            placeholder="Enter a caption to video"
                             className="w-full"
                             {...field}
                           />
@@ -335,9 +285,9 @@ function Page() {
                     Select files
                   </Label>
                 </Button>
-                <Link href="/upload-video" className="p-2">
+                <Link href="/new-post" className="p-2">
                   <Button variant="link" className="text-lg text-blue-500">
-                    Upload Videos
+                    Upload Photos
                   </Button>
                 </Link>
               </div>
@@ -349,43 +299,26 @@ function Page() {
           onChange={(e) => {
             const inputFiles = e.target.files;
             if (inputFiles === null) return;
-            if (inputFiles.length > 5) {
-              return toast({
-                title: "Warning",
-                description: "You can only upload 5 files at a time",
-                variant: "destructive",
-              });
-            }
-            for (let i = 0; i < inputFiles.length; i++) {
-              const file = inputFiles.item(i);
-              if (file?.type.includes("image")) {
-                const img = new Image();
-                img.src = URL.createObjectURL(file);
-                if (inputFiles.length >= 5) {
-                  const removedfirstItem = files.shift();
-                  if (removedfirstItem) {
-                    setFiles((prevFiles) => [...prevFiles, img.src]);
-                  } else {
-                    setFiles([img.src]);
-                  }
-                } else {
-                  setFiles((prevFiles) => [...prevFiles, img.src]);
+            const file = inputFiles[0];
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              const video = event.target?.result;
+              if (video) {
+                const videoElement = document.getElementById("videoElement");
+                if (videoElement) {
+                  videoElement.setAttribute("src", video.toString());
                 }
-                setSelectedFile(img.src);
-              } else {
-                toast({
-                  title: "Error",
-                  description:
-                    "Only images are allowed, click the link below to upload videos",
-                  variant: "destructive",
+                setVideoFile({
+                  video: video.toString(),
+                  area: { x: 0, y: 0, width: 0, height: 0 },
                 });
               }
-            }
+            };
+            reader.readAsDataURL(file);
           }}
           id="new-post"
-          accept="image/*"
+          accept="video/*"
           className="w-0 h-0 p-0 border-0 invisible"
-          multiple
         />
       </div>
     </div>

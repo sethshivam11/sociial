@@ -50,7 +50,7 @@ function Suggestions() {
                   className="flex items-center justify-between gap-3"
                   key={index}
                 >
-                  <Link href="/">
+                  <Link href={`/${user.username}`}>
                     <div className="w-1/2 flex items-center gap-3">
                       <Avatar className="w-8 h-8">
                         <AvatarImage

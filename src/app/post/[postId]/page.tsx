@@ -4,7 +4,6 @@ import MobileNav from "@/components/MobileNav";
 import More from "@/components/More";
 import PostsLoading from "@/components/PostsLoading";
 import Share from "@/components/Share";
-import Suggestions from "@/components/Suggestions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Carousel,
@@ -16,6 +15,7 @@ import {
 import { nameFallback } from "@/lib/helpers";
 import { Bookmark, Heart } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
 
@@ -42,6 +42,38 @@ function Page() {
     likesCount: 12,
     commentsCount: 1,
   });
+  const morePosts = [
+    {
+      _id: "2",
+      image:
+        "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_90/v1715866646/cld-sample-4.jpg",
+    },
+    {
+      _id: "3",
+      image:
+        "https://images.pexels.com/photos/2449600/pexels-photo-2449600.png?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1",
+    },
+    {
+      _id: "4",
+      image:
+        "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_90/v1715866646/cld-sample-4.jpg",
+    },
+    {
+      _id: "5",
+      image:
+        "https://images.pexels.com/photos/2449600/pexels-photo-2449600.png?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1",
+    },
+    {
+      _id: "6",
+      image:
+        "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_90/v1715866646/cld-sample-4.jpg",
+    },
+    {
+      _id: "7",
+      image:
+        "https://images.pexels.com/photos/2449600/pexels-photo-2449600.png?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1",
+    },
+  ];
   const [comments, setComments] = React.useState([
     {
       _id: "12",
@@ -264,48 +296,19 @@ function Page() {
             <h1 className="col-span-2 text-stone-500 mt-2 mb-4">
               More posts from @{post.user.username}
             </h1>
-            <Image
-              src={post.images[0]}
-              alt=""
-              width={300}
-              height={300}
-              className="rounded-xl aspect-square object-cover"
-            />
-            <Image
-              src={post.images[1]}
-              alt=""
-              width={300}
-              height={300}
-              className="rounded-xl aspect-square object-cover"
-            />
-            <Image
-              src={post.images[1]}
-              alt=""
-              width={300}
-              height={300}
-              className="rounded-xl aspect-square object-cover"
-            />
-            <Image
-              src={post.images[0]}
-              alt=""
-              width={300}
-              height={300}
-              className="rounded-xl aspect-square object-cover"
-            />
-            <Image
-              src={post.images[0]}
-              alt=""
-              width={300}
-              height={300}
-              className="rounded-xl aspect-square object-cover lg:hidden flex"
-            />
-            <Image
-              src={post.images[1]}
-              alt=""
-              width={300}
-              height={300}
-              className="rounded-xl aspect-square object-cover lg:hidden flex"
-            />
+            {morePosts.map((post, index) => (
+              <Link href={`/post/${post._id}`} key={index}>
+                <Image
+                  src={post.image}
+                  alt=""
+                  width={300}
+                  height={300}
+                  className={`rounded-xl aspect-square object-cover ${
+                    index > 3 ? "lg:hidden" : ""
+                  }`}
+                />
+              </Link>
+            ))}
           </div>
         </div>
       </div>

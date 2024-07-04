@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Link from "next/link";
+import Image from "next/image";
 
 function Page() {
   const annualFeatures = [
@@ -31,10 +32,6 @@ function Page() {
     {
       title: "Custom Message Themes",
       description: "Personalize your messaging interface with unique themes.",
-    },
-    {
-      title: "Save Posts",
-      description: "Save and organize your favorite posts for later viewing.",
     },
     {
       title: "Private Account",
@@ -62,10 +59,6 @@ function Page() {
       description: "Personalize your messaging interface with unique themes.",
     },
     {
-      title: "Save Posts",
-      description: "Save and organize your favorite posts for later viewing.",
-    },
-    {
       title: "Private Account",
       description:
         "Control who can see your content by switching to a private account.",
@@ -90,7 +83,7 @@ function Page() {
             <CardTitle>Monthly Premium Plan</CardTitle>
             <CardDescription>Get Verified and Shine!</CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-4 h-[750px]">
+          <CardContent className="grid gap-4 h-[570px]">
             <p>
               <span className="text-3xl tracking-tighter font-extrabold">
                 ₹49&nbsp;
@@ -105,7 +98,20 @@ function Page() {
                 <span className="flex h-2 w-2 translate-y-1 rounded-full bg-sky-500" />
                 <div className="space-y-1">
                   <p className="text-sm font-medium leading-none">
-                    {feature.title}
+                    {feature.title === "Verified Badge" ? (
+                      <div className="flex items-center justify-start gap-0.5">
+                        {feature.title}
+                        <Image
+                          src="/icons/premium.svg"
+                          alt=""
+                          width="20"
+                          height="20"
+                          className="w-5"
+                        />
+                      </div>
+                    ) : (
+                      feature.title
+                    )}
                   </p>
                   <p className="text-sm text-muted-foreground">
                     {feature.description}
@@ -123,13 +129,15 @@ function Page() {
             <CardTitle>Annual Premium Plan</CardTitle>
             <CardDescription>Get Verified and Stand Out!</CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-4 h-[750px]">
+          <CardContent className="grid gap-4 h-[570px]">
             <p>
               <span className="text-3xl tracking-tighter font-extrabold">
                 ₹499&nbsp;
               </span>
               <span className="text-stone-500">/year</span>
-              <span className="inline-block bg-green-500 text-background rounded-full px-2 py-0.5 ml-4 text-sm">Save 15%</span>
+              <span className="inline-block bg-green-500 text-background rounded-full px-2 py-0.5 ml-4 text-sm">
+                Save 15%
+              </span>
             </p>
             {annualFeatures.map((feature, index) => (
               <div
@@ -139,7 +147,20 @@ function Page() {
                 <span className="flex h-2 w-2 translate-y-1 rounded-full bg-sky-500" />
                 <div className="space-y-1">
                   <p className="text-sm font-medium leading-none">
-                    {feature.title}
+                    {feature.title === "Verified Badge" ? (
+                      <div className="flex items-center justify-start gap-0.x5">
+                        {feature.title}
+                        <Image
+                          src="/icons/premium.svg"
+                          alt=""
+                          width="20"
+                          height="20"
+                          className="w-5"
+                        />
+                      </div>
+                    ) : (
+                      feature.title
+                    )}
                   </p>
                   <p className="text-sm text-muted-foreground">
                     {feature.description}

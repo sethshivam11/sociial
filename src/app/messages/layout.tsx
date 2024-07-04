@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Circle, History, Search, SearchX, Users, X } from "lucide-react";
 import { useDebounceCallback } from "usehooks-ts";
 import { usePathname, useRouter } from "next/navigation";
+import Image from "next/image";
 
 function Messages({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -18,6 +19,7 @@ function Messages({ children }: { children: React.ReactNode }) {
       message: "Hello",
       avatar: "https://github.com/shadcn.png",
       unreadMessages: true,
+      isPremium: true,
     },
     {
       id: "2",
@@ -51,6 +53,7 @@ function Messages({ children }: { children: React.ReactNode }) {
       username: "emilywhite",
       message: "Cheers!",
       avatar: "https://github.com/shadcn.png",
+      isPremium: true,
     },
     {
       id: "6",
@@ -254,7 +257,20 @@ function Messages({ children }: { children: React.ReactNode }) {
                   <AvatarFallback>{nameFallback(chat.fullName)}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col items-start justify-center w-full">
-                  <p className="">{chat.fullName}</p>
+                  <p className="flex items-center justify-start gap-0.5">
+                    {chat.fullName}
+                    {chat.isPremium ? (
+                      <Image
+                        src="/icons/premium.svg"
+                        alt=""
+                        width="20"
+                        height="20"
+                        className="w-5"
+                      />
+                    ) : (
+                      ""
+                    )}
+                  </p>
                   <p className="text-sm md:w-40 sm:w-80 w-40 text-left text-stone-500 text-ellipsis whitespace-nowrap overflow-x-hidden">
                     {chat.message}
                   </p>

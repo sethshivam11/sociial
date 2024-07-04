@@ -4,6 +4,7 @@ import {
   DialogClose,
   DialogContent,
   DialogFooter,
+  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
@@ -20,22 +21,20 @@ import { useForm } from "react-hook-form";
 import React from "react";
 import { Checkbox } from "./ui/checkbox";
 import { Label } from "./ui/label";
-
-interface FormInterface {
-  message: string;
-}
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 export default function Share() {
-  const form = useForm<FormInterface>({
+  const formSchema = z.object({
+    message: z.string().optional(),
+  });
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       message: "",
     },
   });
 
-  function onSubmit(values: FormInterface) {
-    console.log(values);
-    console.log(shareToPeople);
-  }
   const [search, setSearch] = React.useState("");
 
   const followers = [
@@ -80,6 +79,11 @@ export default function Share() {
     []
   );
 
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log(values);
+    console.log(shareToPeople);
+  }
+
   return (
     <Dialog>
       <DialogTrigger asChild title="Share">
@@ -89,7 +93,7 @@ export default function Share() {
         className="sm:w-2/3 w-full h-3/4 flex flex-col bg-stone-100 dark:bg-stone-900"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <h1 className="text-xl">Share post</h1>
+        <DialogTitle className="text-xl">Share post</DialogTitle>
         <Input
           value={search}
           name="search"

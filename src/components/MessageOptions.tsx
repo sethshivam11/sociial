@@ -13,13 +13,22 @@ import Picker from "@emoji-mart/react";
 import { useTheme } from "next-themes";
 
 interface Props {
+  username: string;
+  setReply: (reply: { username: string; content: string }) => void;
   message: string;
   id: string;
   type: string;
   reactMessage: (emoji: string) => void;
 }
 
-function MessageOptions({ message, id, reactMessage, type }: Props) {
+function MessageOptions({
+  message,
+  id,
+  reactMessage,
+  type,
+  username,
+  setReply,
+}: Props) {
   const { theme } = useTheme();
   function copyMessage(message: string) {
     if (navigator.clipboard) {
@@ -55,11 +64,21 @@ function MessageOptions({ message, id, reactMessage, type }: Props) {
       </Menubar>
       <Menubar className="bg-transparent border-transparent xl:justify-start justify-center w-fit p-0">
         <MenubarMenu>
-          <MenubarTrigger className="px-1.5 rounded-lg" onClick={() => {}}>
+          <MenubarTrigger className="px-1.5 rounded-lg">
             <MoreHorizontal size="15" />
           </MenubarTrigger>
           <MenubarContent className="rounded-xl">
-            <MenubarItem className=" rounded-lg py-2.5">Reply</MenubarItem>
+            <MenubarItem
+              className=" rounded-lg py-2.5"
+              onClick={() =>
+                setReply({
+                  username,
+                  content: message,
+                })
+              }
+            >
+              Reply
+            </MenubarItem>
             <MenubarItem
               className=" rounded-lg py-2.5"
               onClick={() => copyMessage(message)}

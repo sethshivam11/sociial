@@ -6,7 +6,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Heart, MessageSquareText, SendHorizonal } from "lucide-react";
+import {
+  Heart,
+  MessageSquareText,
+  MoreHorizontal,
+  SendHorizonal,
+} from "lucide-react";
 import Image from "next/image";
 import React, { Dispatch, SetStateAction } from "react";
 import { useForm } from "react-hook-form";
@@ -18,6 +23,17 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import EmojiKeyboard from "./EmojiKeyboard";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Menubar,
+  MenubarContent,
+  MenubarItem,
+  MenubarMenu,
+  MenubarTrigger,
+} from "./ui/menubar";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { nameFallback } from "@/lib/helpers";
 
 interface Props {
   comments: {
@@ -41,22 +57,30 @@ interface Props {
   addComment: Function;
 }
 
-interface FormInterface {
-  comment: string;
-}
-
 export default function Comment({
   comments,
   user,
   likeComment,
   addComment,
 }: Props) {
-  const form = useForm<FormInterface>({
+  const formSchema = z.object({
+    comment: z
+      .string()
+      .min(1, {
+        message: "Comment cannot be empty",
+      })
+      .max(1000, {
+        message: "Comment cannot be more than 1000 characters",
+      }),
+  });
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       comment: "",
     },
   });
-  function onSubmit(values: FormInterface) {
+  function onSubmit(values: z.infer<typeof formSchema>) {
     addComment(values.comment, "1");
     form.setValue("comment", "");
   }
@@ -92,42 +116,61 @@ export default function Comment({
         <div className="h-full overflow-y-auto">
           {comments.map((comment, index) => {
             return (
-              <div key={index} className="flex flex-col items-start mb-3">
-                <div className="flex items-center gap-2 p-1 rounded-lg">
-                  <div className="w-6 h-6">
-                    <Image
-                      width={32}
-                      height={32}
-                      src={comment.user.avatar}
-                      alt=""
-                      className="w-full h-full rounded-full pointer-events-none select-none"
-                    />
+              <div key={index} className="flex flex-col items-start mb-3 group">
+                <div className="flex items-start gap-2 p-1 rounded-lg">
+                  <div className="w-8 h-w-8">
+                    <Avatar>
+                      <AvatarImage src={comment.user.avatar} />
+                      <AvatarFallback>
+                        {nameFallback(comment.user.fullName)}
+                      </AvatarFallback>
+                    </Avatar>
                   </div>
-                  <div className="font-semibold">
-                    {comment.user.fullName}&nbsp;
-                    <span className="text-xs text-stone-500">
-                      @{comment.user.username}
+                  <div className="px-2">
+                    <span className="text-sm font-light">
+                      <span className="font-semibold">
+                        {comment.user.username}&nbsp;
+                      </span>
+                      {comment.content}
                     </span>
-                  </div>
-                </div>
-                <div className="px-1">
-                  <p className="py-1.5 px-2">{comment.content}</p>
-                  <div className="flex gap-3 text-xs text-stone-500 dark:text-stone-400 select-none">
-                    <button onClick={() => likeComment(comment._id)}>
-                      <Heart
-                        size="16"
-                        className={`${
-                          comment.liked
-                            ? "text-rose-500"
-                            : "sm:hover:opacity-60"
-                        } mx-2 inline-block transition-all active:scale-110`}
-                        fill={comment.liked ? "rgb(244 63 94)" : "none"}
-                      />
-                      {comment.likesCount <= 1
-                        ? "1 like"
-                        : `${comment.likesCount} likes`}
-                    </button>
-                    <button onClick={() => form.setValue("comment", `@${user.username} `)}>Reply</button>
+                    <div className="flex gap-3 items-center text-xs mt-1 text-stone-500 dark:text-stone-400 select-none">
+                      <button onClick={() => likeComment(comment._id)}>
+                        <Heart
+                          size="16"
+                          className={`${
+                            comment.liked
+                              ? "text-rose-500"
+                              : "sm:hover:opacity-60"
+                          } mr-1 inline-block transition-all active:scale-110`}
+                          fill={comment.liked ? "rgb(244 63 94)" : "none"}
+                        />
+                        {comment.likesCount <= 1
+                          ? "1 like"
+                          : `${comment.likesCount} likes`}
+                      </button>
+                      <button
+                        onClick={() =>
+                          form.setValue("comment", `@${user.username} `)
+                        }
+                      >
+                        Reply
+                      </button>
+                      <Menubar className="border-0 p-0 h-0 rounded-xl">
+                        <MenubarMenu>
+                          <MenubarTrigger className="w-fit h-fit py-0.5 px-2 rounded-md invisible group-hover:visible">
+                            <MoreHorizontal size="16" />
+                          </MenubarTrigger>
+                          <MenubarContent className="rounded-xl">
+                            <MenubarItem className="rounded-lg py-2 text-red-600 focus:text-red-600">
+                              Delete
+                            </MenubarItem>
+                            <MenubarItem className="rounded-lg py-2 text-red-600 focus:text-red-600">
+                              Report
+                            </MenubarItem>
+                          </MenubarContent>
+                        </MenubarMenu>
+                      </Menubar>
+                    </div>
                   </div>
                 </div>
               </div>

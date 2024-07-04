@@ -5,11 +5,20 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { nameFallback } from "@/lib/helpers";
 import {
   ArrowLeft,
+  CameraIcon,
+  DownloadIcon,
+  FileIcon,
+  ImageIcon,
   Info,
+  MapPin,
+  Mic,
+  MicIcon,
   Paperclip,
   Phone,
   SendHorizonal,
   Video,
+  VideoIcon,
+  X,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -26,12 +35,32 @@ import MessageReacts from "@/components/MessageReacts";
 import MessageOptions from "@/components/MessageOptions";
 import ChatInfo from "@/components/ChatInfo";
 import Image from "next/image";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Menubar,
+  MenubarContent,
+  MenubarItem,
+  MenubarMenu,
+  MenubarTrigger,
+} from "@/components/ui/menubar";
+import { toast } from "@/components/ui/use-toast";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 interface Message {
   id: string;
   content: string;
   type: string;
   time: string;
+  reply?: {
+    username: string;
+    content: string;
+  };
   reacts?: {
     id: string;
     emoji: string;
@@ -42,12 +71,17 @@ interface Message {
 }
 
 function Page({ params }: { params: { chatId: string } }) {
+  const formSchema = z.object({
+    message: z.string(),
+  });
   const location = usePathname();
   const router = useRouter();
   const chatId = params.chatId;
   const messageScrollElement = React.useRef<HTMLDivElement>(null);
   const lastMessageRef = React.useRef<HTMLDivElement>(null);
-  const form = useForm({
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       message: "",
     },
@@ -323,6 +357,11 @@ function Page({ params }: { params: { chatId: string } }) {
       content: "Sure thing. Talk later.",
       type: "reply",
       time: "12:30 PM",
+      reply: {
+        username: recipent.username,
+        content:
+          "This is a very long reply and I also don't know what I am writing so this is to test the UI. Go test it and make it fast as soon as possible",
+      },
       reacts: [
         {
           id: "2",
@@ -351,10 +390,14 @@ function Page({ params }: { params: { chatId: string } }) {
       ],
     },
   ]);
+  const [reply, setReply] = React.useState({
+    username: "",
+    content: "",
+  });
   const [infoOpen, setInfoOpen] = React.useState(false);
   const message = form.watch("message");
 
-  function onSubmit({ message }: { message: string }) {
+  function onSubmit({ message }: z.infer<typeof formSchema>) {
     if (!message) return;
     const date = new Date();
     const savedMessage = {
@@ -364,9 +407,15 @@ function Page({ params }: { params: { chatId: string } }) {
       time: `${date.getHours()}:${date.getMinutes()} ${
         date.getHours() > 12 ? "PM" : "AM"
       }`,
+      reply,
     };
+    console.log(reply);
     setMessages([...messages, savedMessage]);
     form.setValue("message", "");
+    setReply({
+      username: "",
+      content: "",
+    });
     setTimeout(
       () => lastMessageRef.current?.scrollIntoView({ behavior: "smooth" }),
       1
@@ -394,6 +443,91 @@ function Page({ params }: { params: { chatId: string } }) {
     );
   }
 
+  function shareLocation() {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        console.log(position);
+        form.setValue(
+          "message",
+          `https://google.com/maps?q=${position.coords.latitude},${position.coords.longitude}`
+        );
+      },
+      (err) => {
+        console.log(err);
+        const description =
+          err.message === "User denied Geolocation"
+            ? "Please provide location permisions"
+            : "Something went wrong, while fetching location";
+        toast({
+          title: "Error",
+          description,
+          variant: "destructive",
+        });
+      }
+    );
+  }
+
+  function checkForAssets(message: string): string {
+    if (message.includes("res.cloudinary.com")) {
+      if (message.includes("/image")) {
+        return "ImageAsset@sociial.vercel.app";
+      } else if (message.includes("/video")) {
+        return "VideoAsset@sociial.vercel.app";
+      } else if (message.includes("/audio")) {
+        return "AudioAsset@sociial.vercel.app";
+      } else {
+        return "DocumentAsset@sociial.vercel.app";
+      }
+    } else if (message.includes("https://google.com/maps?q=")) {
+      return "LocationAsset@sociial.vercel.app";
+    } else {
+      return message;
+    }
+  }
+
+  function giveAssets(reply: string): React.ReactNode {
+    if (message.includes("res.cloudinary.com")) {
+      if (message.includes("ImageAsset@sociial.vercel.app")) {
+        return (
+          <>
+            <ImageIcon size="10" />
+            &nbsp;Image
+          </>
+        );
+      } else if ("VideoAsset@sociial.vercel.app") {
+        return (
+          <>
+            <VideoIcon />
+            &nbsp;Video
+          </>
+        );
+      } else if ("AudioAsset@sociial.vercel.app") {
+        return (
+          <>
+            <Mic size="10" />
+            &nbsp;Audio
+          </>
+        );
+      } else {
+        return (
+          <>
+            <FileIcon size="10" />
+            &nbsp;Document
+          </>
+        );
+      }
+    } else if ("LocationAsset@sociial.vercel.app") {
+      return (
+        <>
+          <MapPin />
+          &nbsp;Location
+        </>
+      );
+    } else {
+      return <>{message}</>;
+    }
+  }
+
   React.useEffect(() => {
     if (lastMessageRef.current) {
       lastMessageRef.current.scrollIntoView({ behavior: "instant" });
@@ -418,7 +552,7 @@ function Page({ params }: { params: { chatId: string } }) {
       } `}
     >
       <div className="flex gap-2 items-center justify-between sm:absolute fixed top-0 bottom-auto left-0 w-full md:h-20 h-16 md:ml-3 border-b-2 border-stone-200 dark:border-stone-800 bg-white dark:bg-black md:px-4 pl-1 pr-0 z-20">
-        <div className="flex items-center justify-center group">
+        <div className="flex items-center justify-center">
           <Button
             variant="ghost"
             size="icon"
@@ -430,7 +564,7 @@ function Page({ params }: { params: { chatId: string } }) {
             <ArrowLeft />
           </Button>
           <Avatar
-            className="w-12 h-12 ml-0.5 mr-2"
+            className="w-12 h-12 ml-0.5 mr-2 cursor-pointer"
             onClick={() => router.push(`/${recipent.username}`)}
           >
             <AvatarImage
@@ -440,7 +574,10 @@ function Page({ params }: { params: { chatId: string } }) {
             />
             <AvatarFallback>{nameFallback(recipent.fullName)}</AvatarFallback>
           </Avatar>
-          <button className="flex flex-col items-start justify-start">
+          <button
+            className="flex flex-col items-start justify-start group"
+            onClick={() => router.push(`/${recipent.username}`)}
+          >
             <h1 className="text-xl tracking-tight font-bold leading-4 flex items-center justify-start gap-1">
               <span className="group-hover:underline underline-offset-2">
                 {recipent.fullName}
@@ -509,16 +646,16 @@ function Page({ params }: { params: { chatId: string } }) {
                 <h1 className="text-2xl font-bold tracking-tight flex items-center justify-start gap-1">
                   {recipent.fullName}
                   {recipent.isPremium ? (
-                        <Image
-                          src="/icons/premium.svg"
-                          width="20"
-                          height="20"
-                          alt=""
-                          className="w-5"
-                        />
-                      ) : (
-                        ""
-                      )}
+                    <Image
+                      src="/icons/premium.svg"
+                      width="20"
+                      height="20"
+                      alt=""
+                      className="w-5"
+                    />
+                  ) : (
+                    ""
+                  )}
                 </h1>
                 <p className="text-sm text-stone-500">@{recipent.username}</p>
                 <p>
@@ -543,29 +680,100 @@ function Page({ params }: { params: { chatId: string } }) {
                     : "flex-row-reverse ml-auto"
                 }`}
                 key={index}
+                onDoubleClick={() => {
+                  setReply({
+                    username: recipent.username,
+                    content: message.content,
+                  });
+                  inputRef.current?.focus();
+                }}
               >
                 <div
-                  className={`py-2 px-4 rounded-[50px] relative ${
-                    message.type === "reply"
-                      ? `${theme.color} text-${theme.text} max-w-3/4`
-                      : "bg-stone-300 dark:bg-stone-800 max-w-3/4"
-                  } ${
-                    messages[index - 1]?.type === message.type ? "mb-1" : "mb-3"
-                  }
-              ${message.reacts ? "mb-4" : "mb-1"}`}
-                  ref={
-                    messages[messages.length - 1] === message
-                      ? lastMessageRef
-                      : null
-                  }
+                  className={`flex flex-col gap-0 ${
+                    message.type === "reply" ? "items-start" : "items-end"
+                  }`}
                 >
-                  {message.content}
-                  {message.reacts && (
-                    <MessageReacts
-                      reacts={message.reacts}
-                      type={message.type}
-                    />
-                  )}
+                  <span
+                    className={` rounded-[50px] py-1 -mb-0.5 px-3 opacity-75 ${
+                      message.type === "sent"
+                        ? `${theme.color} text-${theme.text}`
+                        : "bg-stone-300 dark:bg-stone-800"
+                    } ${
+                      message.reply && message.reply.content ? "" : "hidden"
+                    }`}
+                  >
+                    {message.reply && message.reply.content
+                      ? message.reply.content.length > 100
+                        ? `${message.reply.content.slice(0, 100)}...`
+                        : message.reply.content
+                      : ""}
+                  </span>
+                  <div
+                    className={`py-2 px-4 rounded-[50px] w-fit relative ${
+                      message.type === "reply"
+                        ? `${theme.color} text-${theme.text} max-w-3/4`
+                        : "bg-stone-300 dark:bg-stone-800 max-w-3/4"
+                    } ${
+                      messages[index - 1]?.type === message.type
+                        ? "mb-1"
+                        : "mb-3"
+                    }
+                  ${message.reacts ? "mb-4" : "mb-1"}`}
+                    ref={
+                      messages[messages.length - 1] === message
+                        ? lastMessageRef
+                        : null
+                    }
+                  >
+                    {message.content.includes("res.cloudinary.com") ? (
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <button className="w-40 h-40 rounded-sm">
+                            <Image
+                              src={message.content}
+                              alt=""
+                              width="160"
+                              height="160"
+                              className="w-full h-full"
+                            />
+                          </button>
+                        </DialogTrigger>
+                        <DialogContent
+                          className="bg-black h-full w-screen max-w-screen"
+                          hideCloseIcon
+                        >
+                          <Image
+                            src={message.content}
+                            width="160"
+                            height="160"
+                            alt=""
+                            className="h-full w-full max-h-screen object-contain"
+                            onError={() => (
+                              <span className="text-black dark:text-white">
+                                Something went wrong
+                              </span>
+                            )}
+                          />
+                          <div className="flex items-center justify-between gap-5 absolute top-3 right-3">
+                            <DialogClose>
+                              <DownloadIcon size="40" />
+                            </DialogClose>
+                            <DialogClose>
+                              <X size="40" />
+                            </DialogClose>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    ) : (
+                      message.content
+                    )}
+                    {message.reacts && (
+                      <MessageReacts
+                        reacts={message.reacts}
+                        type={message.type}
+                      />
+                    )}
+                  </div>
                 </div>
                 <div
                   className={`reactions flex group-hover:visible invisible w-fit mb-2 mx-0.5 gap-0 ${
@@ -573,6 +781,16 @@ function Page({ params }: { params: { chatId: string } }) {
                   }`}
                 >
                   <MessageOptions
+                    username={recipent.username}
+                    setReply={(reply) => {
+                      const filteredReply = checkForAssets(reply.content);
+                      console.log(filteredReply);
+                      setReply({
+                        username: reply.username,
+                        content: filteredReply,
+                      });
+                      inputRef.current?.focus();
+                    }}
                     message={message.content}
                     type={message.type}
                     id={message.id}
@@ -603,7 +821,32 @@ function Page({ params }: { params: { chatId: string } }) {
                 control={form.control}
                 name="message"
                 render={({ field }) => (
-                  <FormItem className="w-full">
+                  <FormItem className="w-full relative flex flex-col bg-white dark:bg-black">
+                    <div
+                      className={`flex flex-col gap-0 px-3 py-1 rounded-xl absolute bottom-12 w-full bg-stone-200 dark:bg-stone-800 ring-4 ring-white dark:ring-black leading-5 overflow-hidden ${
+                        reply.content ? "" : "hidden"
+                      }`}
+                    >
+                      <div
+                        className={`absolute left-0 ${theme.color} w-1 h-full`}
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute top-1 right-1 h-fit w-fit hover:bg-stone-200 hover:dark:bg-stone-800"
+                        onClick={() =>
+                          setReply({
+                            username: "",
+                            content: "",
+                          })
+                        }
+                      >
+                        <X size="16" />
+                      </Button>
+                      {reply.username}
+                      <span className="text-stone-500">{reply.content}</span>
+                    </div>
+
                     <FormControl>
                       <Input
                         placeholder="Type a message..."
@@ -611,24 +854,57 @@ function Page({ params }: { params: { chatId: string } }) {
                         className="rounded-xl"
                         autoComplete="off"
                         inputMode="text"
+                        ref={inputRef}
                       />
                     </FormControl>
+
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button
-                className="rounded-xl px-2"
-                type="button"
-                size="icon"
-                variant="ghost"
-              >
-                <Paperclip />
-              </Button>
+              <Menubar className="border-0 p-0">
+                <MenubarMenu>
+                  <MenubarTrigger asChild>
+                    <Button
+                      className="rounded-xl px-2"
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                    >
+                      <Paperclip />
+                    </Button>
+                  </MenubarTrigger>
+                  <MenubarContent align="center" className="rounded-xl">
+                    <MenubarItem className="rounded-lg py-2">
+                      <ImageIcon />
+                      &nbsp;Photos & Videos
+                    </MenubarItem>
+                    <MenubarItem className="rounded-lg py-2">
+                      <CameraIcon />
+                      &nbsp;Camera
+                    </MenubarItem>
+                    <MenubarItem className="rounded-lg py-2">
+                      <MicIcon />
+                      &nbsp;Audio
+                    </MenubarItem>
+                    <MenubarItem className="rounded-lg py-2">
+                      <FileIcon />
+                      &nbsp;Document
+                    </MenubarItem>
+                    <MenubarItem
+                      className="rounded-lg py-2"
+                      onClick={shareLocation}
+                    >
+                      <MapPin />
+                      &nbsp;Location
+                    </MenubarItem>
+                  </MenubarContent>
+                </MenubarMenu>
+              </Menubar>
               <Button
                 type="submit"
                 disabled={!message.length}
-                className="rounded-xl"
+                className={`rounded-xl ${theme.color} hover:${theme.color} hover:opacity-80 transition-opacity text-${theme.text}`}
               >
                 <SendHorizonal />
               </Button>

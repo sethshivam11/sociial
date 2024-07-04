@@ -56,6 +56,7 @@ function Navbar() {
     "/premium",
     "/call",
     "/new-post",
+    "/upload-video"
   ];
   const [unreadMessageCount, newNotifications] = [0, false];
   const user = {
@@ -305,7 +306,7 @@ function Navbar() {
                   <Label htmlFor="report-title">Title</Label>
                   <Input
                     id="report-title"
-                    placeholder="Title for the issue"
+                    placeholder="What is the issue?"
                     className="bg-stone-100 dark:bg-stone-900 sm:focus-within:ring-1"
                   />
                 </div>
@@ -313,7 +314,7 @@ function Navbar() {
                   <Label htmlFor="report-description">Description</Label>
                   <Textarea
                     id="report-description"
-                    placeholder="Detailed description of the issue"
+                    placeholder="Describe the issue in detail."
                     rows={5}
                   />
                 </div>

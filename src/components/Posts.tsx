@@ -148,7 +148,6 @@ function Posts() {
   ]);
   function addComment(content: string, postId: string) {
     setComments([
-      ...comments,
       {
         _id: `${Math.floor(Math.random() * 100)}`,
         postId: comments[0].postId,
@@ -157,6 +156,7 @@ function Posts() {
         liked: false,
         likesCount: 0,
       },
+      ...comments,
     ]);
     setPosts(
       posts.map((post) =>
@@ -229,7 +229,7 @@ function Posts() {
                     </Avatar>
                   </div>
                   <div>
-                    <p className="flex items-center justify-start gap-2">
+                    <p className="flex items-center justify-start gap-0.5">
                       <span className="group-hover:underline underline-offset-2">
                         {post.user.fullName}
                       </span>
