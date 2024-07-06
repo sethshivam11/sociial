@@ -36,7 +36,11 @@ interface UserContext {
   blockUser: Function;
   unblockUser: Function;
   renewAccessToken: Function;
-
+  isSendingMail: boolean;
+  setIsSendingMail: Function;
+  isOffline: boolean;
+  setIsOffline: Function;
+  resendVerificationCode: Function;
   isLoggedIn: boolean;
   setIsLoggedIn: Function;
   follow: Function;
@@ -77,6 +81,8 @@ const initialState = {
     accessToken: "",
     refreshToken: "",
   },
+  isOffline: false,
+  setIsOffline: () => {},
   setProfile: () => {},
   getProfile: () => {},
   followers: [],
@@ -90,6 +96,9 @@ const initialState = {
   loading: false,
   setLoading: () => {},
   isLoggedIn: false,
+  isSendingMail: false,
+  resendVerificationCode: () => {},
+  setIsSendingMail: () => {},
   setIsLoggedIn: () => {},
   fetchUser: () => {},
   registerUser: () => {},
@@ -131,8 +140,10 @@ export default function UserProvider(props: React.PropsWithChildren<{}>) {
   const [profile, setProfile] = React.useState<Profile>(initialState.profile);
   const [unreadMessageCount, setUnreadMessageCount] = React.useState(1);
   const [newNotifications, setNewNotifications] = React.useState(true);
+  const [isOffline, setIsOffline] = React.useState(false);
+  const [isSendingMail, setIsSendingMail] = React.useState(false);
 
-  function fetchUser() {
+  const fetchUser = React.useCallback(() => {
     setLoading(true);
     fetch("/api/v1/users/get", {
       headers: {
@@ -148,11 +159,11 @@ export default function UserProvider(props: React.PropsWithChildren<{}>) {
       .catch(async (err) => {
         console.error(err);
         if (err.message === "Token expired!") {
-          await renewAccessToken();
+          renewAccessToken();
         }
       })
       .finally(() => setLoading(false));
-  }
+  }, []);
 
   function registerUser(creds: {
     fullName: string;
@@ -307,6 +318,36 @@ export default function UserProvider(props: React.PropsWithChildren<{}>) {
         });
       })
       .finally(() => setLoading(false));
+  }
+
+  function resendVerificationCode(username: string) {
+    if (!username) return;
+    setIsSendingMail(true);
+    fetch(`/api/v1/users/resendMail?username=${username}`)
+      .then((parsed) => parsed.json())
+      .then((response) => {
+        if (response.success) {
+          toast({
+            title: "Success",
+            description: response.message,
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: response.message || "Something went wrong!",
+            variant: "destructive",
+          });
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        toast({
+          title: "Error",
+          description: err.message || "Something went wrong!",
+          variant: "destructive",
+        });
+      })
+      .finally(() => setIsSendingMail(false));
   }
 
   function updatePassword(oldPassword: string, newPassword: string) {
@@ -712,6 +753,24 @@ export default function UserProvider(props: React.PropsWithChildren<{}>) {
   }
 
   React.useEffect(() => {
+    function checkNetwork(e: Event) {
+      if (e.type === "offline") {
+        setIsOffline(true);
+        toast({
+          title: "Network Error",
+          description: "Looks like you are not connected",
+          variant: "destructive",
+        });
+      } else {
+        setIsOffline(false);
+        toast({
+          title: "Connected",
+          description: "You are now connected",
+        });
+      }
+    }
+    window.addEventListener("offline", checkNetwork);
+    window.addEventListener("online", checkNetwork);
     if (localStorage.getItem(storage.accessToken)) {
       setIsLoggedIn(true);
       window.document.cookie = `accessToken=${localStorage.getItem(
@@ -722,12 +781,19 @@ export default function UserProvider(props: React.PropsWithChildren<{}>) {
       )};`;
       fetchUser();
     }
+    return () => {
+      window.addEventListener("online", checkNetwork);
+      return window.removeEventListener("offline", checkNetwork);
+    };
   }, []);
 
   return (
     <UserContext.Provider
       value={{
+        isSendingMail,
+        setIsSendingMail,
         fetchUser,
+        resendVerificationCode,
         user,
         profile,
         storage,
@@ -744,6 +810,8 @@ export default function UserProvider(props: React.PropsWithChildren<{}>) {
         loading,
         setLoading,
         isLoggedIn,
+        isOffline,
+        setIsOffline,
         setIsLoggedIn,
         registerUser,
         loginUser,

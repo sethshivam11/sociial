@@ -20,60 +20,67 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-
-interface FormInput {
-  identifier: string;
-  password: string;
-  code: string;
-}
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  emailSchema,
+  passwordSchema,
+  usernameSchema,
+  verificationCodeSchema,
+} from "@/schemas/userSchema";
+import { useUser } from "@/context/UserProvider";
 
 const ForgotPasswordPage = () => {
-  const [isSendingMail, setIsSendingMail] = React.useState(false);
+  const { isSendingMail } = useUser();
+  const formSchema = z
+    .object({
+      identifier: emailSchema.or(usernameSchema),
+      password: passwordSchema,
+      confirmPassword: z.string(),
+      code: verificationCodeSchema,
+    })
+    .refine(
+      (values) => {
+        return values.password === values.confirmPassword;
+      },
+      {
+        message: "Passwords must match!",
+        path: ["confirmPassword"],
+      }
+    );
   const [timer, setTimer] = React.useState(0);
-  const [confirmPwd, setConfirmPwd] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const router = useRouter();
-  const form = useForm<FormInput>({
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       identifier: "",
       password: "",
-      code: "",
+      confirmPassword: "",
+      code: 0,
     },
   });
 
-  function resendVerificationCode(username: string) {
-    setIsSendingMail(true);
-    fetch(`/api/v1/users/resendMail?username=${username}`)
-      .then((parsed) => parsed.json())
-      .then((response) => {
-        if (response.success) {
-          toast({
-            title: "Success",
-            description: response.message,
-          });
-          setTimer(30);
-        } else {
-          toast({
-            title: "Error",
-            description: response.message || "Something went wrong!",
-            variant: "destructive",
-          });
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        toast({
-          title: "Error",
-          description: err.message || "Something went wrong!",
-          variant: "destructive",
-        });
-      })
-      .finally(() => setIsSendingMail(false));
+  function handleGetCode() {
+    try {
+      z.object({
+        identifier: emailSchema.or(usernameSchema),
+      }).parse({ identifier: form.watch("identifier") });
+      form.clearErrors();
+      // resendVerificationCode(form.watch("identifier"));
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        form.setError("identifier", { message: error.errors[0].message });
+      }
+    }
   }
 
-  function onSubmit({ identifier, password, code }: FormInput) {
+  function onSubmit({
+    identifier,
+    password,
+    code,
+  }: z.infer<typeof formSchema>) {
     const email =
       identifier.includes("@") && identifier.includes(".") ? identifier : "";
     if (!password) {
@@ -156,7 +163,7 @@ const ForgotPasswordPage = () => {
               )}
             />
 
-            <div className="flex items-end justify-center w-full gap-2 my-2">
+            <div className="flex items-end justify-start w-full gap-2 my-2">
               <FormField
                 control={form.control}
                 name="code"
@@ -167,8 +174,12 @@ const ForgotPasswordPage = () => {
                       <Input
                         placeholder="verification code"
                         autoComplete="one-time-code"
+                        type="number"
                         inputMode="numeric"
                         {...field}
+                        value={
+                          form.watch("code") === 0 ? "" : form.watch("code")
+                        }
                       />
                     </FormControl>
                     <FormMessage />
@@ -183,9 +194,7 @@ const ForgotPasswordPage = () => {
                   isSendingMail ||
                   timer > 0
                 }
-                onClick={() =>
-                  resendVerificationCode(form.getValues("identifier"))
-                }
+                onClick={handleGetCode}
               >
                 {timer > 0 ? timer : "Get Code"}
               </Button>
@@ -209,8 +218,9 @@ const ForgotPasswordPage = () => {
               )}
             />
             <FormField
-              name="confirm-password"
-              render={() => (
+              control={form.control}
+              name="confirmPassword"
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Confirm New Password</FormLabel>
                   <FormControl>
@@ -218,30 +228,16 @@ const ForgotPasswordPage = () => {
                       placeholder="confirm new password"
                       autoComplete="new-password webauthn"
                       inputMode="text"
-                      onChange={(e) => setConfirmPwd(e.target.value)}
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <span className="text-red-400 text-sm">
-              {confirmPwd && confirmPwd !== form.getValues("password")
-                ? "Passwords do not match"
-                : ""}
-            </span>
           </CardContent>
           <CardFooter className="flex flex-col justify-start gap-2">
-            <Button
-              type="submit"
-              disabled={
-                loading ||
-                form.getValues("code").length !== 6 ||
-                form.getValues("password").length < 6 ||
-                confirmPwd !== form.getValues("password")
-              }
-              className="w-full"
-            >
+            <Button type="submit" disabled={loading} className="w-full">
               {loading ? <Loader2 className="animate-spin" /> : "Verify"}
             </Button>
             <Button

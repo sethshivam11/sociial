@@ -20,12 +20,11 @@ import {
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { Loader2 } from "lucide-react";
+import { useUser } from "@/context/UserProvider";
+import { z } from "zod";
+import { usernameSchema, verificationCodeSchema } from "@/schemas/userSchema";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@/components/ui/use-toast";
-
-interface FormInput {
-  code: string;
-  username: string;
-}
 
 interface Props {
   searchParams: {
@@ -35,56 +34,49 @@ interface Props {
 }
 
 function VerifyCodePage({ searchParams }: Props) {
-  const form = useForm<FormInput>({
+  const { isSendingMail, loading, resendVerificationCode } = useUser();
+  const formSchema = z.object({
+    username: z.string(),
+    code: verificationCodeSchema,
+  });
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       username: "",
-      code: "",
+      code: 0,
     },
   });
 
-  const [loading, setLoading] = React.useState(false);
-  const [timer, setTimer] = React.useState(30);
-  const [isSendingMail, setIsSendingMail] = React.useState(false);
+  const [timer, setTimer] = React.useState(0);
 
-  function resendVerificationCode(username: string) {
-    setIsSendingMail(true);
-    fetch(`/api/v1/users/resendMail?username=${username}`)
-      .then((parsed) => parsed.json())
-      .then((response) => {
-        if (response.success) {
-          toast({
-            title: "Success",
-            description: response.message,
-          });
-        } else {
-          toast({
-            title: "Error",
-            description: response.message || "Something went wrong!",
-            variant: "destructive",
-          });
-        }
-      })
-      .catch((err) => {
-        console.error(err);
+  function onSubmit(data: z.infer<typeof formSchema>) {
+    try {
+      usernameSchema.parse(data.username);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
         toast({
-          title: "Error",
-          description: err.message || "Something went wrong!",
+          title: "Invalid username",
+          description: error.errors[0].message || "",
           variant: "destructive",
         });
-      })
-      .finally(() => setIsSendingMail(false));
-  }
-
-  function onSubmit(data: FormInput) {
+      } else {
+        console.log(error);
+      }
+    }
     console.log(data);
   }
 
   React.useEffect(() => {
-    if (searchParams.code) {
-      form.setValue("code", searchParams.code);
-    }
-    if (searchParams.code) {
-      form.setValue("username", searchParams.username);
+    try {
+      if (searchParams.username) {
+        form.setValue("username", searchParams.username);
+      }
+      if (searchParams.code) {
+        verificationCodeSchema.parse(searchParams.code);
+        form.setValue("code", parseInt(searchParams.code));
+      }
+    } catch (error) {
+      console.error(error);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
@@ -122,11 +114,13 @@ function VerifyCodePage({ searchParams }: Props) {
                   <FormLabel>Code</FormLabel>
                   <FormControl>
                     <Input
+                      type="number"
                       placeholder="verification code"
                       inputMode="numeric"
                       autoComplete="one-time-code"
                       autoFocus
                       {...field}
+                      value={form.watch("code") === 0 ? "" : form.watch("code")}
                     />
                   </FormControl>
                   <FormMessage />
@@ -138,9 +132,10 @@ function VerifyCodePage({ searchParams }: Props) {
               <button
                 className="text-blue-500 disabled:opacity-80 mt-2"
                 disabled={timer > 0 || isSendingMail}
-                onClick={() =>
-                  resendVerificationCode(form.getValues("username"))
-                }
+                onClick={() => {
+                  setTimer(30);
+                  resendVerificationCode(form.watch("username"));
+                }}
                 type="button"
               >
                 &nbsp;{timer > 0 ? timer : "Resend"}
@@ -148,7 +143,11 @@ function VerifyCodePage({ searchParams }: Props) {
             </p>
           </CardContent>
           <CardFooter>
-            <Button type="submit" disabled={loading} className="w-full">
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full"
+            >
               {loading ? <Loader2 className="animate-spin" /> : "Verify"}
             </Button>
           </CardFooter>

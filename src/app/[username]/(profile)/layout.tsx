@@ -86,7 +86,7 @@ function Profile({
 
   return (
     <>
-      <MobileNav />
+      <MobileNav hideButtons />
       <div className="min-h-screen xl:col-span-8 sm:col-span-9 col-span-10 container py-2 max-md:px-16 max-sm:px-2">
         <div className="flex md:flex-row flex-col md:items-center items-start justify-evenly w-full">
           <div className="flex items-center justify-center max-sm:justify-start gap-6 mt-4 px-4 max-sm:w-full">

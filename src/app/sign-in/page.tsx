@@ -17,26 +17,12 @@ import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { emailSchema, passwordSchema, usernameSchema } from "@/schemas/userSchema";
 
 function SignInPage() {
   const formSchema = z.object({
-    identifier: z
-      .string()
-      .regex(/^[a-z_1-9.]+$/)
-      .min(2, {
-        message: "Username must be more than 2 characters",
-      })
-      .max(20, {
-        message: "Username must be less than 20 characters",
-      }),
-    password: z
-      .string()
-      .min(6, {
-        message: "Password must be more than 6 characters",
-      })
-      .max(50, {
-        message: "Password must be less than 50 characters",
-      }),
+    identifier: emailSchema.or(usernameSchema),
+    password: passwordSchema,
   });
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

@@ -18,44 +18,21 @@ import CheckboxWithLabel from "@/components/CheckboxWithLabel";
 import Image from "next/image";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "@/components/ui/use-toast";
+import {
+  emailSchema,
+  fullNameSchema,
+  passwordSchema,
+  usernameSchema,
+} from "@/schemas/userSchema";
 
 function SignUpPage() {
   const formSchema = z
     .object({
-      email: z
-        .string()
-        .email()
-        .min(6, {
-          message: "Email must be more than 6 characters",
-        })
-        .max(50, {
-          message: "Email must be less than 50 characters",
-        }),
-      fullName: z
-        .string()
-        .min(2, {
-          message: "Name must be more than 2 characters",
-        })
-        .max(20, {
-          message: "Name must be less than 20 characters",
-        }),
-      username: z
-        .string()
-        .regex(/^[a-z_1-9.]+$/)
-        .min(2, {
-          message: "Username must be more than 2 characters",
-        })
-        .max(20, {
-          message: "Username must be less than 20 characters",
-        }),
-      password: z
-        .string()
-        .min(6, {
-          message: "Password must be more than 6 characters",
-        })
-        .max(50, {
-          message: "Password must be less than 50 characters",
-        }),
+      email: emailSchema,
+      fullName: fullNameSchema,
+      username: usernameSchema,
+      password: passwordSchema,
       confirmPassword: z.string(),
     })
     .refine(
@@ -81,7 +58,7 @@ function SignUpPage() {
   const [loading, setLoading] = React.useState(false);
   const [showPwd, setShowPwd] = React.useState(false);
   const [username, setUsername] = React.useState("");
-  const [avatar, setAvatar] = React.useState<FileList | null>(null);
+  const [avatar, setAvatar] = React.useState<File | null>(null);
   const debounced = useDebounceCallback(setUsername, 500);
   const [isFetchingUsername, setIsFetchingUsername] = React.useState(false);
   const [usernameMessage, setUsernameMessage] = React.useState("");
@@ -90,7 +67,7 @@ function SignUpPage() {
     if (data.password !== data.confirmPassword) {
       return console.log("Passwords do not match");
     }
-    console.log(data);
+    console.log(data, avatar);
   };
 
   function isUsernameAvailable(username: string) {
@@ -105,20 +82,25 @@ function SignUpPage() {
       })
       .catch((err) => {
         console.error(err);
-        setUsernameMessage(err.message || "Error checking username");
+        setUsernameMessage("Something went wrong");
       })
       .finally(() => setIsFetchingUsername(false));
   }
 
   React.useEffect(() => {
-    if (username.startsWith(".")) {
-      setUsernameMessage("Username cannot start with .");
-    } else if (username && /^[a-z]._+$/.test(username)) {
-      setUsernameMessage("Username must contain only lowercase, ., _");
-    } else if (username.trim()) {
-      isUsernameAvailable(username);
-    } else {
-      setUsernameMessage("");
+    try {
+      if (username) {
+        usernameSchema.parse(username);
+        isUsernameAvailable(username);
+      } else {
+        setUsernameMessage("");
+      }
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        setUsernameMessage(error.errors[0].message);
+      } else {
+        console.log(error);
+      }
     }
   }, [username]);
 
@@ -270,8 +252,27 @@ function SignUpPage() {
                     <Input
                       placeholder="profile pic"
                       type="file"
+                      accept="image/jpg,image/png,image/jpeg"
                       autoComplete="off"
-                      onChange={(e) => setAvatar(e.target.files)}
+                      onChange={(e) => {
+                        const imageFiles = e.target.files;
+                        if (!imageFiles) return;
+                        if (
+                          imageFiles[0].type === "image/jpeg" ||
+                          imageFiles[0].type === "image/jpg" ||
+                          imageFiles[0].type === "image/png"
+                        ) {
+                          setAvatar(imageFiles[0]);
+                        } else {
+                          toast({
+                            title: "Warning",
+                            description:
+                              "Unsupported file format, Please provide jpg, jpeg or png image",
+                            variant: "destructive",
+                          });
+                          e.currentTarget.value = "";
+                        }
+                      }}
                     />
                   </FormControl>
                   <FormMessage />

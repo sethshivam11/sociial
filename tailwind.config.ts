@@ -21,6 +21,7 @@ const config = {
     extend: {
       aspectRatio: {
         "9/16": "9 / 16",
+        "4/5": "4 / 5",
       },
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],
@@ -76,12 +77,12 @@ const config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        story: {
+        "story": {
           from: { width: "0%" },
           to: { width: "100%" },
         },
-        like: {
-          from: { transform: "scale(0.5)" },
+        "like": {
+          "from": { transform: "scale(0.5)" },
           "50%": { transform: "scale(1.2)" },
           "100%": { transform: "scale(1)", display: "none" },
         },
@@ -89,8 +90,8 @@ const config = {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        story: "story 15s linear 1",
-        like: "like 0.5s ease-in-out forwards",
+        "story": "story 15s linear 1",
+        "like": "like 0.5s ease-in-out forwards",
       },
     },
   },

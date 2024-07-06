@@ -80,6 +80,7 @@ function Page({ params }: { params: { chatId: string } }) {
   const messageScrollElement = React.useRef<HTMLDivElement>(null);
   const lastMessageRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const [isTyping, setIsTyping] = React.useState(true);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -409,17 +410,15 @@ function Page({ params }: { params: { chatId: string } }) {
       }`,
       reply,
     };
-    console.log(reply);
     setMessages([...messages, savedMessage]);
     form.setValue("message", "");
-    setReply({
-      username: "",
-      content: "",
-    });
-    setTimeout(
-      () => lastMessageRef.current?.scrollIntoView({ behavior: "smooth" }),
-      1
-    );
+    setTimeout(() => {
+      lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
+      setReply({
+        username: "",
+        content: "",
+      });
+    }, 1);
   }
 
   function reactMessage(message: (typeof messages)[0], emoji: string) {
@@ -694,7 +693,7 @@ function Page({ params }: { params: { chatId: string } }) {
                   }`}
                 >
                   <span
-                    className={` rounded-[50px] py-1 -mb-0.5 px-3 opacity-75 ${
+                    className={` rounded-[50px] py-1 -mb-0.5 px-3 opacity-70 ${
                       message.type === "sent"
                         ? `${theme.color} text-${theme.text}`
                         : "bg-stone-300 dark:bg-stone-800"
@@ -833,6 +832,7 @@ function Page({ params }: { params: { chatId: string } }) {
                       <Button
                         variant="ghost"
                         size="icon"
+                        type="button"
                         className="absolute top-1 right-1 h-fit w-fit hover:bg-stone-200 hover:dark:bg-stone-800"
                         onClick={() =>
                           setReply({

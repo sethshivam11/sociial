@@ -82,7 +82,7 @@ function Search() {
     const listener = function (e: WindowEventMap["keydown"]) {
       if (e.key === "Enter" && search) {
         recentSearches.length >= 10 ? recentSearches.pop() : recentSearches;
-        setRecentSearches([search, ...recentSearches]);
+        setRecentSearches((recentSearches) => [search, ...recentSearches]);
         localStorage.setItem(
           "recentSearches",
           JSON.stringify([search, ...recentSearches])

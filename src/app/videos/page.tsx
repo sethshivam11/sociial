@@ -1,10 +1,22 @@
 "use client";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import { nameFallback } from "@/lib/helpers";
+import {
+  Loader2,
+  MoreVertical,
+  Pause,
+  Play,
+  Volume2Icon,
+  VolumeXIcon,
+} from "lucide-react";
 import React from "react";
 
 function Videos() {
   const [isMuted, setIsMuted] = React.useState(true);
-
-  const [videos, setVideos] = React.useState([
+  const [isPaused, setIsPaused] = React.useState(true);
+  const [posts, setPosts] = React.useState([
     {
       _id: "2",
       user: {
@@ -16,9 +28,8 @@ function Videos() {
       caption:
         "This is a caption which is very long and I don't know what to write in it so, i am just keep going to see the results. This is just a test caption to check the functionality of the app. I hope you are having a good day. Bye! 😊",
       liked: false,
-      images: [
-        "https://res.cloudinary.com/dv3qbj0bn/video/upload/v1709183844/samples/dance-2.mp4",
-      ],
+      isPremium: true,
+      video: "/test-1.mp4",
       likesCount: 12,
       commentsCount: 1,
     },
@@ -32,26 +43,98 @@ function Videos() {
       },
       caption: "This is a caption",
       liked: false,
-      images: [
-        "https://res.cloudinary.com/dv3qbj0bn/video/upload/v1718210710/sociial/videos/tnw4jy33z047bskwwhyt.mp4",
-      ],
+      video: "/test-2.mp4",
       likesCount: 12,
       commentsCount: 1,
     },
   ]);
-  const [buffering, setBuffering] = React.useState(false);
+  const [buffering, setBuffering] = React.useState(true);
+
+  React.useEffect(() => {
+    setTimeout(() => {
+      setBuffering(false);
+    }, 2000);
+  });
 
   return (
-    <main className="min-h-screen xl:col-span-8 sm:col-span-9 col-span-10 snap-y snap-mandatory flex flex-col overflow-y-auto">
-      <section className="flex items-center justify-center bg-red-500 snap-always snap-start w-full h-screen">
-        Learn React
-      </section>
-      <section className="flex items-center justify-center bg-blue-500 snap-always snap-start w-full h-screen">
-        Learn Vue
-      </section>
-      <section className="flex items-center justify-center bg-orange-500 snap-always snap-start w-full h-screen">
-        Learn Angular
-      </section>
+    <main className="min-h-screen xl:col-span-8 sm:col-span-9 col-span-10 snap-y snap-mandatory overflow-auto pt-6">
+      {posts.map((post, index) => (
+        <section
+          className="flex items-center justify-center snap-always snap-start w-full h-full py-4 scroll-pb-2"
+          key={index}
+        >
+          <div className="h-full aspect-9/16 bg-stone-200 dark:bg-stone-800 rounded-md relative">
+            <div className="flex items-center justify-start px-3 absolute top-0 left-0 w-full h-16 bg-gradient-to-b from-transparent/60 via-transparent/50 to-transparent">
+              <Avatar>
+                <AvatarImage src={post.user.avatar} />
+                <AvatarFallback>
+                  {nameFallback(post.user.fullName)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col items-start justify-center gap-0 mx-2">
+                <h1 className="text-xl tracking-tight font-semibold leading-4">
+                  {post.user.fullName}
+                </h1>
+                <p className="text-stone-500 text-sm">@{post.user.username}</p>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-3 right-1 p-1 rounded-full"
+              >
+                <MoreVertical size="25" />
+              </Button>
+            </div>
+            {buffering ? (
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-transparent/50 p-4 rounded-full">
+                <Loader2 className="animate-spin" size="50" />
+              </div>
+            ) : (
+              ""
+            )}
+            <div className="flex items-center justify-start px-3 absolute bottom-0 left-0 w-full h-20 bg-gradient-to-b from-transparent via-transparent/50 to-transparent/60">
+              <Button variant="ghost" size="icon" className="rounded-full p-1">
+                {isPaused ? (
+                  <Pause
+                    size="30"
+                    strokeWidth="0"
+                    fill="currentColor"
+                    onClick={() => setIsPaused(!isPaused)}
+                  />
+                ) : (
+                  <Play
+                    size="30"
+                    strokeWidth="0"
+                    fill="currentColor"
+                    onClick={() => setIsPaused(!isPaused)}
+                  />
+                )}
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full p-1"
+                onClick={() => setIsMuted(!isMuted)}
+              >
+                {isMuted ? (
+                  <Volume2Icon size="30" strokeWidth="1.2" />
+                ) : (
+                  <VolumeXIcon size="30" strokeWidth="1.2" />
+                )}
+              </Button>
+              <div className="mx-3 w-full">
+                <Slider
+                  defaultValue={[0]}
+                  min={1}
+                  max={100}
+                  step={1}
+                  className="w-full"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+      ))}
     </main>
   );
 }

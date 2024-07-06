@@ -97,7 +97,7 @@ function Page() {
               >
                 <span className="flex h-2 w-2 translate-y-1 rounded-full bg-sky-500" />
                 <div className="space-y-1">
-                  <p className="text-sm font-medium leading-none">
+                  <div className="text-sm font-medium leading-none">
                     {feature.title === "Verified Badge" ? (
                       <div className="flex items-center justify-start gap-0.5">
                         {feature.title}
@@ -112,7 +112,7 @@ function Page() {
                     ) : (
                       feature.title
                     )}
-                  </p>
+                  </div>
                   <p className="text-sm text-muted-foreground">
                     {feature.description}
                   </p>
@@ -146,7 +146,7 @@ function Page() {
               >
                 <span className="flex h-2 w-2 translate-y-1 rounded-full bg-sky-500" />
                 <div className="space-y-1">
-                  <p className="text-sm font-medium leading-none">
+                  <div className="text-sm font-medium leading-none">
                     {feature.title === "Verified Badge" ? (
                       <div className="flex items-center justify-start gap-0.x5">
                         {feature.title}
@@ -161,7 +161,7 @@ function Page() {
                     ) : (
                       feature.title
                     )}
-                  </p>
+                  </div>
                   <p className="text-sm text-muted-foreground">
                     {feature.description}
                   </p>

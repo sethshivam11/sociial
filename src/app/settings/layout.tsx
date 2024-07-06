@@ -33,7 +33,7 @@ function Page({ children }: React.PropsWithChildren) {
     if (location === "/settings") {
       checkScreenWidthAndRedirect();
     }
-  }, [router]);
+  }, [router, location]);
 
   return (
     <div className="sm:container flex items-start justify-start max-h-[100dvh] min-h-[100dvh] xl:col-span-8 sm:col-span-9 col-span-10 sm:py-6">

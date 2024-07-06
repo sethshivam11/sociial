@@ -411,6 +411,7 @@ function Story({ params }: Props) {
             className="max-h-full h-fit w-full object-contain select-none pointer-events-none"
             width="768"
             height="1024"
+            priority={true}
           />
         )}
         <button
