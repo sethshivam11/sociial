@@ -232,7 +232,7 @@ function Page() {
                   likeComment={likeComment}
                   addComment={addComment}
                 />
-                <Share />
+                <Share _id={post._id} />
               </div>
               <button
                 className="mr-1"

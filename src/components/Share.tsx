@@ -14,7 +14,7 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { Send, SendHorizonal } from "lucide-react";
+import { Send, SendHorizonal, ShareIcon } from "lucide-react";
 import Image from "next/image";
 import { Input } from "./ui/input";
 import { useForm } from "react-hook-form";
@@ -23,8 +23,14 @@ import { Checkbox } from "./ui/checkbox";
 import { Label } from "./ui/label";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "./ui/use-toast";
 
-export default function Share() {
+interface Props {
+  isVideo?: boolean;
+  _id: string;
+}
+
+export default function Share({ isVideo, _id }: Props) {
   const formSchema = z.object({
     message: z.string().optional(),
   });
@@ -84,13 +90,39 @@ export default function Share() {
     console.log(shareToPeople);
   }
 
+  function sharePost(postId: string) {
+    if (navigator.share === undefined) {
+      console.log("WebShare API not available");
+      return toast({
+        title: "Error",
+        description: "An error occurred while sharing the post.",
+        variant: "destructive",
+      });
+    }
+    const textToShare = {
+      title: "Sociial",
+      description: "Check out this post on Sociial",
+      url: `${process.env.NEXT_PUBLIC_LINK}/${
+        isVideo ? "video" : "post"
+      }/${postId}`,
+    };
+    navigator.share(textToShare).catch((error) => {
+      console.log(error);
+      toast({
+        title: "Error",
+        description: "An error occurred while sharing the post.",
+        variant: "destructive",
+      });
+    });
+  }
+
   return (
     <Dialog>
       <DialogTrigger asChild title="Share">
         <Send size="30" className="sm:hover:opacity-60 rotate-12" />
       </DialogTrigger>
       <DialogContent
-        className="sm:w-2/3 w-full h-3/4 flex flex-col bg-stone-100 dark:bg-stone-900"
+        className="sm:w-2/3 w-full sm:h-5/6 h-full flex flex-col bg-stone-100 dark:bg-stone-900"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <DialogTitle className="text-xl">Share post</DialogTitle>
@@ -147,12 +179,21 @@ export default function Share() {
             );
           })}
         </div>
+
         <DialogFooter>
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="w-full flex items-center justify-center gap-2"
+              className="w-full flex items-center justify-center sm:gap-2 gap-1"
             >
+              <Button
+                variant="ghost"
+                size="icon"
+                className="px-2"
+                onClick={() => sharePost(_id)}
+              >
+                <ShareIcon />
+              </Button>
               <FormField
                 control={form.control}
                 name="message"

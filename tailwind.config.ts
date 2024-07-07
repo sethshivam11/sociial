@@ -21,6 +21,7 @@ const config = {
     extend: {
       aspectRatio: {
         "9/16": "9 / 16",
+        "16/9": "16 / 9",
         "4/5": "4 / 5",
       },
       fontFamily: {

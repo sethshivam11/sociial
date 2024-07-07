@@ -13,7 +13,7 @@ import {
   SendHorizonal,
 } from "lucide-react";
 import Image from "next/image";
-import React, { Dispatch, SetStateAction } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import {
   Form,
@@ -55,6 +55,7 @@ interface Props {
   commentsCount: number;
   likeComment: Function;
   addComment: Function;
+  isVideo?: boolean;
 }
 
 export default function Comment({
@@ -62,6 +63,8 @@ export default function Comment({
   user,
   likeComment,
   addComment,
+  commentsCount,
+  isVideo,
 }: Props) {
   const formSchema = z.object({
     comment: z
@@ -87,10 +90,15 @@ export default function Comment({
   return (
     <Dialog>
       <DialogTrigger asChild title="Comment">
-        <MessageSquareText size="30" className="sm:hover:opacity-60" />
+        <div className="flex flex-col items-center justify-center">
+          <MessageSquareText size="30" className="sm:hover:opacity-60" />
+          <span className={`text-sm ${isVideo ? "" : "hidden"}`}>
+            {commentsCount}
+          </span>
+        </div>
       </DialogTrigger>
       <DialogContent
-        className="sm:w-4/5 max-w-[800px] w-full h-3/4 flex flex-col bg-stone-100 dark:bg-stone-900"
+        className="sm:w-4/5 max-w-[800px] w-full sm:h-3/4 h-full flex flex-col bg-stone-100 dark:bg-stone-900 focus:ring-0 focus:border-0"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <div className="flex justify-between">
@@ -182,7 +190,7 @@ export default function Comment({
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="flex gap-2 w-full items-center"
+              className="flex sm:gap-2 gap-1 w-full items-center"
             >
               <EmojiKeyboard
                 message={form.watch("comment")}

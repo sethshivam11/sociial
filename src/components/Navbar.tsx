@@ -56,7 +56,7 @@ function Navbar() {
     "/premium",
     "/call",
     "/new-post",
-    "/upload-video"
+    "/upload-video",
   ];
   const [unreadMessageCount, newNotifications] = [0, false];
   const user = {
@@ -95,6 +95,7 @@ function Navbar() {
         location.includes("/messages/") ||
         location.includes("/following") ||
         location.includes("/followers") ||
+        location.includes("/video") ||
         location === "/notifications"
           ? "max-sm:hidden"
           : ""
