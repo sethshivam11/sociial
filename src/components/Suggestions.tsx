@@ -110,18 +110,19 @@ function Suggestions() {
         <p className="text-stone-500 my-2 text-sm">
           Subscribe to get access to premium features
         </p>
-        <p className="flex items-center justify-start gap-2 my-1">
-          <Check color="green" /> Verified Badge
+        <p className="flex items-center justify-start gap-0.5 my-1">
+          <Image
+            src="/icons/premium.svg"
+            width="20"
+            height="20"
+            alt=""
+            className="w-5"
+          />
+          Verified Badge
         </p>
-        <p className="flex items-center justify-start gap-2 my-1">
-          <Check color="green" /> Message Themes
-        </p>
-        <p className="flex items-center justify-start gap-2 my-1">
-          <Check color="green" /> Private Account
-        </p>
-        <Link href="/premium" className="w-full">
+        <Link href="/get-premium" className="w-full">
           <Button
-            className="w-full rounded-xl mt-4 bg-blue-500 text-white hover:bg-blue-600"
+            className="w-full rounded-full mt-4 bg-blue-500 text-white hover:bg-blue-600"
             size="lg"
           >
             Subscribe

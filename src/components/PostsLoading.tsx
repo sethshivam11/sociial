@@ -2,7 +2,7 @@ import React from "react";
 import { Skeleton } from "./ui/skeleton";
 
 function PostsLoading({ length = 5 }: { length?: number }) {
-  return Array.from({ length: 5 }).map((_, index) => (
+  return Array.from({ length }).map((_, index) => (
     <div
       key={index}
       className="dark:bg-stone-900 p-4 bg-stone-100 rounded-sm min-h-64 w-full sm:w-[85%] min-w-64 mx-auto flex flex-col gap-2"

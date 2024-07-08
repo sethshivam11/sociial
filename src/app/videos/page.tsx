@@ -32,8 +32,6 @@ import {
   ArrowLeft,
   Heart,
   Loader2,
-  MessageCircle,
-  MoreVertical,
   MoreVerticalIcon,
   Pause,
   Play,
@@ -44,10 +42,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
+import { useDebounceCallback } from "usehooks-ts";
 
 function Videos() {
   const router = useRouter();
-  const [isMuted, setIsMuted] = React.useState(false);
+  const [videoRef, setVideoRef] = React.useState<HTMLVideoElement | null>(null);
+  const [isMuted, setIsMuted] = React.useState(true);
   const [isPaused, setIsPaused] = React.useState(false);
   const [posts, setPosts] = React.useState([
     {
@@ -62,7 +62,8 @@ function Videos() {
       caption:
         "This is a caption which is very long and I don't know what to write in it so, i am just keep going to see the results. This is just a test caption to check the functionality of the app. I hope you are having a good day. Bye! 😊",
       liked: false,
-      video: "/test-1.mp4", // https://res.cloudinary.com/dv3qbj0bn/video/upload/f_auto:video,q_auto/v1/samples/dance-2
+      video:
+        "https://res.cloudinary.com/dv3qbj0bn/video/upload/f_auto:video,q_auto/v1/samples/dance-2",
       likesCount: 12,
       commentsCount: 1,
     },
@@ -77,7 +78,8 @@ function Videos() {
       caption:
         "In the vibrant world of social media, where every moment is captured and shared, we find ourselves scrolling through an endless feed of memories and stories. Among these, a post catches our eye, a video accompanied by a caption that reads: \"This is a caption which is very long and I don't know what to write in it so, I am just keep going to see the results. This is just a test caption to check the functionality of the app. I hope you are having a good day. Bye! 😊\". It's a simple yet heartfelt message from a user named Shivam, known among his followers for his engaging content and genuine interactions. His avatar, a familiar face to many, signals another piece of content ready to spark joy and provoke thought. As we delve deeper, we encounter another post, this one succinct with the words: \"This is a caption\". It's a stark contrast to the previous one, yet it holds its own charm and simplicity. Each post, with its unique caption, video, and engagement metrics, tells a story, invites interaction, and builds connections. In this digital age, where every second is documented and shared, these posts are more than just content; they are windows into the lives of others, offering glimpses of their world, their thoughts, and their moments of vulnerability and joy. As we continue to scroll, we're reminded of the power of sharing, the beauty of connection, and the endless possibilities that come with opening up to the world.",
       liked: false,
-      video: "/test-2.mp4", // https://res.cloudinary.com/dv3qbj0bn/video/upload/f_auto:video,q_auto/v1/sociial/videos/tnw4jy33z047bskwwhyt
+      video:
+        "https://res.cloudinary.com/dv3qbj0bn/video/upload/f_auto:video,q_auto/v1/sociial/videos/tnw4jy33z047bskwwhyt",
       likesCount: 12,
       commentsCount: 1,
     },
@@ -143,6 +145,7 @@ function Videos() {
   ]);
   const [unfollowDialog, setUnfollowDialog] = React.useState(false);
   const [reportDialog, setReportDialog] = React.useState(false);
+  const [sliderValue, setSliderValue] = React.useState(0);
 
   function unfollow(username: string) {
     console.log(`Unfollowed user ${username}`);
@@ -221,70 +224,74 @@ function Videos() {
     );
   }
 
-  // React.useEffect(() => {
-  //   const videos = Array.from(document.querySelectorAll("video"));
-  //   const observers: IntersectionObserver[] = [];
-  //   let topVideo: HTMLVideoElement | undefined = undefined;
+  const debounce = useDebounceCallback((entry: IntersectionObserverEntry) => {
+    const videoElement = entry.target as HTMLVideoElement;
+    videoElement.play().then(() => {
+      setIsPaused(false);
+      if (!videoElement.paused && !entry.isIntersecting) {
+        videoElement.pause();
+      }
+    });
+  }, 300);
 
-  //   const updateTopVideo = () => {
-  //     const sortedVideos = [...videos].sort(
-  //       (a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top
-  //     );
-  //     const newTopVideo = sortedVideos.find(
-  //       (video) => video.getBoundingClientRect().top >= 0
-  //     );
+  React.useEffect(() => {
+    const videos = document.querySelectorAll("video");
+    const observers: IntersectionObserver[] = [];
 
-  //     if (newTopVideo !== topVideo) {
-  //       if (topVideo) {
-  //         topVideo.pause();
-  //       }
-  //       topVideo = newTopVideo;
-  //       if (topVideo) {
-  //         topVideo.play();
-  //       }
-  //     }
-  //   };
+    videos.forEach((video) => {
+      if (video) {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              debounce(entry);
+            });
+          },
+          {
+            threshold: 0.9,
+            root: null,
+            rootMargin: "100px",
+          }
+        );
+        observer.observe(video);
+        observers.push(observer);
+      }
+    });
 
-  //   videos.forEach((video) => {
-  //     const observer = new IntersectionObserver(
-  //       (entries) => {
-  //         entries.forEach((entry) => {
-  //           if (entry.isIntersecting || video === topVideo) {
-  //             updateTopVideo();
-  //           }
-  //         });
-  //       },
-  //       {
-  //         threshold: 0.9,
-  //         root: null,
-  //         rootMargin: "100px",
-  //       }
-  //     );
-  //     observer.observe(video);
-  //     observers.push(observer);
-  //   });
+    return () => {
+      observers.forEach((observer) => observer.disconnect());
+    };
+  }, [posts]);
 
-  //   return () => {
-  //     videos.forEach((video, index) => {
-  //       observers[index].unobserve(video);
-  //     });
-  //   };
-  // }, []);
+  React.useEffect(() => {
+    if (isPaused) {
+      videoRef?.pause();
+    } else {
+      videoRef?.play();
+    }
+  }, [isPaused]);
 
   return (
-    <div className="max-h-[100dvh] xl:col-span-8 sm:col-span-9 col-span-10 snap-y snap-mandatory overflow-auto relative no-scrollbar">
+    <div className="max-h-[100dvh] h-[100dvh] xl:col-span-8 sm:col-span-9 col-span-10 snap-y snap-mandatory overflow-auto relative no-scrollbar">
       {posts.map((post, index) => (
         <section
           className="flex items-center justify-center snap-always snap-end w-full h-full py-2 max-sm:bg-stone-950"
           key={index}
         >
-          <div className="flex items-center justify-center h-full sm:aspect-9/16 bg-stone-950 text-white sm:border relative">
+          <div className="flex items-center justify-center h-full max-sm:w-full sm:aspect-9/16 bg-stone-950 text-white sm:border relative">
             <video
-              className="w-full aspect-square"
-              muted={isMuted}
+              className="w-full object-contain aspect-square videoPlayer"
               preload="auto"
+              muted={isMuted}
               onClick={() => setIsPaused(!isPaused)}
-              // autoPlay={!isPaused}
+              onWaiting={() => setBuffering(true)}
+              onTimeUpdate={() =>
+                setSliderValue(Math.ceil(videoRef?.currentTime || 0))
+              }
+              onPlaying={(e) => {
+                setVideoRef(e.currentTarget);
+                setBuffering(false);
+              }}
+              onEnded={() => setIsPaused(true)}
               playsInline
             >
               <source src={post.video} />
@@ -337,7 +344,11 @@ function Videos() {
               >
                 <MoreVerticalIcon />
               </DialogTrigger>
-              <DialogContent className="w-full md:w-fit" hideCloseIcon>
+              <DialogContent
+                className="w-full md:w-fit"
+                hideCloseIcon
+                onOpenAutoFocus={(e) => e.preventDefault()}
+              >
                 <DialogClose
                   className="text-red-500 w-full md:px-20 py-1"
                   onClick={() => setReportDialog(true)}
@@ -464,7 +475,7 @@ function Videos() {
               </DialogContent>
             </Dialog>
             {buffering ? (
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-transparent/50 p-4 rounded-full">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-transparent/50 p-4 rounded-full animate-visible">
                 <Loader2 className="animate-spin" size="50" />
               </div>
             ) : (
@@ -522,14 +533,14 @@ function Videos() {
                     className="rounded-full p-1"
                   >
                     {isPaused ? (
-                      <Pause
+                      <Play
                         size="30"
                         strokeWidth="0"
                         fill="currentColor"
                         onClick={() => setIsPaused(!isPaused)}
                       />
                     ) : (
-                      <Play
+                      <Pause
                         size="30"
                         strokeWidth="0"
                         fill="currentColor"
@@ -544,17 +555,22 @@ function Videos() {
                     onClick={() => setIsMuted(!isMuted)}
                   >
                     {isMuted ? (
-                      <Volume2Icon size="30" />
-                    ) : (
                       <VolumeXIcon size="30" />
+                    ) : (
+                      <Volume2Icon size="30" />
                     )}
                   </Button>
                   <div className="mx-3 w-full">
                     <Slider
-                      defaultValue={[0]}
-                      min={1}
-                      max={100}
+                      value={[sliderValue]}
+                      min={0}
+                      max={videoRef?.duration || 15}
                       step={1}
+                      onValueChange={(value) => {
+                        if (videoRef) {
+                          videoRef.currentTime = value[0] || 0;
+                        }
+                      }}
                       className="w-full"
                     />
                   </div>

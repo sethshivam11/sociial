@@ -8,21 +8,15 @@ function Stories() {
   const stories = [
     {
       fullName: "Shivam soni",
-      username: "sethshivam11",
+      username: "johndoe",
       avatar:
         "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
     },
     {
       fullName: "Shivam",
-      username: "sethshivam11",
+      username: "sethshivam",
       avatar: "https://github.com/shadcn.png",
       seen: true,
-    },
-    {
-      fullName: "Shivam",
-      username: "sethshivam11",
-      avatar: "https://github.com/shadcn.png",
-      seen: false,
     },
   ];
   const user = {

@@ -1,5 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
+import { useUser } from "@/context/UserProvider";
 import {
   ArrowLeft,
   BadgeCheck,
@@ -16,6 +17,7 @@ import { usePathname, useRouter } from "next/navigation";
 import React from "react";
 
 function Page({ children }: React.PropsWithChildren) {
+  const { user } = useUser();
   const location = usePathname();
   const router = useRouter();
   const username = "sethshivam11";
@@ -86,16 +88,6 @@ function Page({ children }: React.PropsWithChildren) {
             <Ban size="30" strokeWidth="1.5" /> Blocked
           </Link>
           <Link
-            href="/settings/privacy"
-            className={`flex items-center justify-start gap-2 py-2 px-3 hover:bg-stone-200 hover:dark:bg-stone-800 rounded-lg ${
-              location === "/settings/privacy"
-                ? "bg-stone-100 dark:bg-stone-900"
-                : ""
-            }`}
-          >
-            <Lock size="30" strokeWidth="1.5" /> Privacy
-          </Link>
-          <Link
             href="/settings/security"
             className={`flex items-center justify-start gap-2 py-2 px-3 hover:bg-stone-200 hover:dark:bg-stone-800 rounded-lg ${
               location === "/settings/security"
@@ -116,7 +108,7 @@ function Page({ children }: React.PropsWithChildren) {
             <Palette size="30" strokeWidth="1.5" /> Theme
           </Link>
           <Link
-            href="/premium"
+            href={user.isPremium ? "/settings/premium" : "/get-premium"}
             className="flex items-center justify-start gap-2 py-2 px-3 hover:bg-stone-200 hover:dark:bg-stone-800 rounded-lg"
           >
             <BadgeCheck size="30" strokeWidth="1.5" /> Premium

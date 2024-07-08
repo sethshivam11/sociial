@@ -53,7 +53,7 @@ function Navbar() {
     "/forgot-password",
     "/verify-code",
     "/story/",
-    "/premium",
+    "/get-premium",
     "/call",
     "/new-post",
     "/upload-video",

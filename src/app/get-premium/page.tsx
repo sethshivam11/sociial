@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import React from "react";
@@ -11,6 +12,15 @@ import {
 } from "@/components/ui/card";
 import Link from "next/link";
 import Image from "next/image";
+import {
+  AlertDialog,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogCancel,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogFooter,
+} from "@/components/ui/alert-dialog";
 
 function Page() {
   const annualFeatures = [
@@ -30,13 +40,9 @@ function Page() {
         "Your plan will not automatically renew, giving you full control.",
     },
     {
-      title: "Custom Message Themes",
-      description: "Personalize your messaging interface with unique themes.",
-    },
-    {
-      title: "Private Account",
+      title: "Support us",
       description:
-        "Control who can see your content by switching to a private account.",
+        "Your small denomination can help us build and maintain this software",
     },
   ];
 
@@ -55,15 +61,14 @@ function Page() {
       description: "Flexibility to renew or cancel anytime.",
     },
     {
-      title: "Custom Message Themes",
-      description: "Personalize your messaging interface with unique themes.",
-    },
-    {
-      title: "Private Account",
+      title: "Support us",
       description:
-        "Control who can see your content by switching to a private account.",
+        "Your small denomination can help us build and maintain this software",
     },
   ];
+
+  const [plan, setPlan] = React.useState("monthly");
+  const [alertOpen, setAlertOpen] = React.useState(false);
 
   return (
     <div className="col-span-10 flex flex-col items-center justify-start relative bg-gradient-to-br from-sky-200 via-stone-100 to-white dark:from-sky-950 dark:via-stone-950 dark:to-black min-h-[100dvh] h-fit pb-4">
@@ -121,7 +126,15 @@ function Page() {
             ))}
           </CardContent>
           <CardFooter>
-            <Button className="w-full">Subscribe</Button>
+            <Button
+              className="w-full rounded-full"
+              onClick={() => {
+                setPlan("monthly");
+                setAlertOpen(true);
+              }}
+            >
+              Subscribe
+            </Button>
           </CardFooter>
         </Card>
         <Card className="md:w-[380px] sm:w-80 max-sm:mx-4 rounded-2xl">
@@ -148,7 +161,7 @@ function Page() {
                 <div className="space-y-1">
                   <div className="text-sm font-medium leading-none">
                     {feature.title === "Verified Badge" ? (
-                      <div className="flex items-center justify-start gap-0.x5">
+                      <div className="flex items-center justify-start gap-0.5">
                         {feature.title}
                         <Image
                           src="/icons/premium.svg"
@@ -170,10 +183,54 @@ function Page() {
             ))}
           </CardContent>
           <CardFooter>
-            <Button className="w-full">Subscribe</Button>
+            <Button
+              className="w-full rounded-full"
+              onClick={() => {
+                setPlan("yearly");
+                setAlertOpen(true);
+              }}
+            >
+              Subscribe
+            </Button>
           </CardFooter>
         </Card>
       </div>
+      <AlertDialog open={alertOpen}>
+        <AlertDialogContent className="p-8 rounded-lg">
+          <AlertDialogTitle>
+            <span className="capitalize">{plan}&nbsp;</span>
+            Premium Plan
+          </AlertDialogTitle>
+          <p>
+            <span className="text-3xl tracking-tighter font-extrabold">
+              {plan === "monthly" ? "₹49" : "₹499"}&nbsp;
+            </span>
+            <span className="text-stone-500">
+              /{plan === "monthly" ? "month" : "year"}
+            </span>
+          </p>
+          <AlertDialogDescription className="text-sm border p-2 rounded-lg">
+            By clicking &apos;Confirm & Pay&apos;, you&apos;ll proceed to the payment page
+            where you can complete your payment and subscribe to premium for
+            just {plan === "monthly" ? "₹49/month" : "₹499/year"}.
+            <br />
+            Please note, this is a one-time payment for a&nbsp;
+            {plan === "monthly" ? "month" : "year"} without any automatic
+            renewal.
+          </AlertDialogDescription>
+          <AlertDialogFooter className="max-sm:flex-col">
+            <AlertDialogAction className="w-full rounded-full">
+              Confirm & Pay
+            </AlertDialogAction>
+            <AlertDialogCancel
+              className="w-full rounded-full"
+              onClick={() => setAlertOpen(false)}
+            >
+              Cancel
+            </AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

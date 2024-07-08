@@ -2,54 +2,12 @@
 import React from "react";
 import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
-import { followUser, FollowUser, Profile, UserInterface } from "@/types/types";
-
-interface UserContext {
-  user: UserInterface;
-  loading: boolean;
-  storage: {
-    accessToken: string;
-    refreshToken: string;
-  };
-  setLoading: Function;
-  followers: FollowUser[];
-  following: followUser[];
-  unreadMessageCount: number;
-  setUnreadMessageCount: Function;
-  newNotifications: boolean;
-  setNewNotifications: Function;
-  setFollowers: Function;
-  setFollowing: Function;
-  getProfile: Function;
-  profile: Profile;
-  setProfile: Function;
-  fetchUser: Function;
-  registerUser: Function;
-  loginUser: Function;
-  logoutUser: Function;
-  verifyMail: Function;
-  updatePassword: Function;
-  updateAvatar: Function;
-  removeAvatar: Function;
-  updateDetails: Function;
-  updateBlueTick: Function;
-  blockUser: Function;
-  unblockUser: Function;
-  renewAccessToken: Function;
-  isSendingMail: boolean;
-  setIsSendingMail: Function;
-  isOffline: boolean;
-  setIsOffline: Function;
-  resendVerificationCode: Function;
-  isLoggedIn: boolean;
-  setIsLoggedIn: Function;
-  follow: Function;
-  unfollow: Function;
-  getFollowers: Function;
-  getFollowing: Function;
-  setPage: React.Dispatch<React.SetStateAction<number>>;
-  page: number;
-}
+import {
+  FollowUser,
+  Profile,
+  UserInterface,
+  UserContext as UserContextInterface,
+} from "@/types/types";
 
 const initialState = {
   user: {
@@ -63,7 +21,7 @@ const initialState = {
     followingCount: 0,
     followersCount: 0,
     postsCount: 0,
-    isBlueTick: false,
+    isPremium: false,
     isMailVerified: false,
   },
   profile: {
@@ -75,7 +33,7 @@ const initialState = {
     followers: 0,
     following: 0,
     postsCount: 0,
-    isBlueTick: false,
+    isPremium: false,
   },
   storage: {
     accessToken: "",
@@ -121,7 +79,7 @@ const initialState = {
   setPage: () => {},
 };
 
-const UserContext = React.createContext<UserContext>(initialState);
+const UserContext = React.createContext<UserContextInterface>(initialState);
 
 export default function UserProvider(props: React.PropsWithChildren<{}>) {
   const router = useRouter();
@@ -516,7 +474,7 @@ export default function UserProvider(props: React.PropsWithChildren<{}>) {
           });
           setUser({
             ...user,
-            isBlueTick: response.data.isBlueTick,
+            isPremium: response.data.isPremium,
           });
         }
       })
