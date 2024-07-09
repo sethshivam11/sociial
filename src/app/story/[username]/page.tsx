@@ -31,6 +31,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
 import EmojiKeyboard from "@/components/EmojiKeyboard";
+import { stories } from "@/lib/storiesData";
 
 interface Props {
   params: {
@@ -40,7 +41,6 @@ interface Props {
 
 interface Story {
   _id: string;
-  index: number;
   images: {
     link: string;
     isVideo?: boolean;
@@ -62,7 +62,6 @@ function Story({ params }: Props) {
   });
   const router = useRouter();
   const { username } = params;
-  const videoRef = React.useRef<HTMLVideoElement>(null);
   const nextRef = React.useRef<HTMLButtonElement>(null);
   const prevRef = React.useRef<HTMLButtonElement>(null);
   const closeRef1 = React.useRef<HTMLButtonElement>(null);
@@ -70,44 +69,18 @@ function Story({ params }: Props) {
   const progressBarRef = React.useRef<HTMLSpanElement>(null);
   const [index, setIndex] = React.useState(0);
   const [reportDialog, setReportDialog] = React.useState(false);
-  const [stories, setStories] = React.useState<Story[]>([
-    {
-      _id: "1",
-      index: 0,
-      images: [
-        {
-          link: "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_90/v1715866646/cld-sample-4.jpg",
-        },
-        {
-          link: "https://images.pexels.com/photos/2449600/pexels-photo-2449600.png?auto=compress&cs=tinysrgb&w=500&h=1200&dpr=1",
-        },
-      ],
-      fullName: "John Doe",
-      username: username,
-      avatar:
-        "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
-      liked: false,
-    },
-    {
-      _id: "2",
-      index: 1,
-      images: [
-        {
-          link: "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_90/v1715866646/cld-sample-4.jpg",
-        },
-        {
-          link: "https://images.pexels.com/photos/2449600/pexels-photo-2449600.png?auto=compress&cs=tinysrgb&w=500&h=1200&dpr=1",
-        },
-      ],
-      fullName: "John Doe",
-      username: username,
-      avatar:
-        "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
-      liked: false,
-    },
-  ]);
-  const [currentStory, setCurrentStory] = React.useState<Story>(stories[0]);
-  const [isMuted, setIsMuted] = React.useState(true);
+  const [currentStory, setCurrentStory] = React.useState<Story>({
+    _id: "",
+    images: [],
+    fullName: "",
+    username: "",
+    avatar: "",
+    liked: false,
+  });
+  const [linkedStories, setLinkedStories] = React.useState({
+    prevStory: "",
+    nextStory: "",
+  });
   const [isPaused, setIsPaused] = React.useState(false);
   const [timer, setTimer] = React.useState<Timer | null>(null);
 
@@ -158,20 +131,23 @@ function Story({ params }: Props) {
 
   React.useEffect(() => {
     const timer: Timer = new Timer(function () {
-      console.log("new timer");
-      nextRef.current?.click();
-    }, 15000);
+      if (index <= stories.length - 1) {
+        setIndex(index + 1);
+      } else {
+        if (linkedStories.nextStory) {
+          router.push(`/story/${linkedStories.nextStory}`);
+        } else {
+          router.push("/");
+        }
+      }
+    }, 5000);
     setTimer(timer);
-  }, [currentStory]);
+    return () => {
+      timer.clear();
+    };
+  }, [index]);
 
   React.useEffect(() => {
-    if (videoRef) {
-      if (isPaused) {
-        videoRef.current?.pause();
-      } else {
-        videoRef.current?.play();
-      }
-    }
     const animation = progressBarRef.current?.getAnimations()[0];
     if (animation) {
       isPaused ? animation.pause() : animation.play();
@@ -195,12 +171,11 @@ function Story({ params }: Props) {
       ?.getAnimations()[0]
       ?.finish();
 
-    const animation = progressBarRef.current?.getAnimations()[0];
-
     if (
-      stories.length - 1 === index &&
-      currentStory.index === stories.length - 1
+      currentStory === stories[stories.length - 1] &&
+      index === currentStory.images.length - 1
     ) {
+      const animation = progressBarRef.current?.getAnimations()[0];
       if (animation) {
         animation.onfinish = () => {
           router.push("/");
@@ -208,6 +183,31 @@ function Story({ params }: Props) {
       }
     }
   }, [index]);
+
+  React.useEffect(() => {
+    let storyFound = {
+      found: false,
+    };
+    function getStory() {
+      stories.map((story) => {
+        if (username === story.username) {
+          setCurrentStory(story);
+          storyFound.found = true;
+        }
+      });
+    }
+    if (!currentStory.images.length) {
+      getStory();
+    }
+  }, []);
+
+  React.useEffect(() => {
+    const storyIndex = stories.indexOf(currentStory);
+    const nextStory = stories[storyIndex + 1]?.username;
+    const prevStory = stories[storyIndex - 1]?.username;
+    setLinkedStories({ prevStory, nextStory });
+    console.log(prevStory, nextStory);
+  }, [currentStory]);
 
   return (
     <div className="w-full col-span-10 h-[100dvh] flex items-center justify-center bg-stone-900">
@@ -221,56 +221,21 @@ function Story({ params }: Props) {
       </button>
       <button
         className={`absolute top-1/2 left-2 -translate-y-1/2 p-1 bg-transparent/40 rounded-full ${
-          index === 0 && currentStory.index === 0 ? "hidden" : ""
+          index === 0 ? "hidden" : ""
         }`}
-        onClick={() => {
-          if (index === 0 && currentStory.index > 0) {
-            setCurrentStory(
-              stories[
-                currentStory.index > 0
-                  ? currentStory.index - 1
-                  : currentStory.index
-              ]
-            );
-            setIndex(currentStory.images.length - 1);
-          } else if (index > 0) {
-            setIndex(index - 1);
-          }
-        }}
-        ref={prevRef}
+        onClick={(e) => setIndex(index - 1)}
       >
         <ChevronLeft size="20" />
       </button>
       <button
         className={`absolute top-1/2 right-2 -translate-y-1/2 p-1 bg-transparent/40 rounded-full ${
-          index >= currentStory.images.length - 1 &&
-          currentStory.index >= stories.length - 1
-            ? "hidden"
-            : ""
+          index === currentStory.images.length - 1 ? "hidden" : ""
         }`}
-        ref={nextRef}
-        onClick={() => {
-          console.log("click");
-          if (
-            index === currentStory.images.length - 1 &&
-            currentStory.index < stories.length - 1
-          ) {
-            setCurrentStory(
-              stories[
-                currentStory.index < stories.length - 1
-                  ? currentStory.index + 1
-                  : currentStory.index
-              ]
-            );
-            setIndex(0);
-          } else if (index >= 0 && index < currentStory.images.length - 1) {
-            setIndex(index + 1);
-          }
-        }}
+        onClick={(e) => setIndex(index + 1)}
       >
         <ChevronRight size="20" />
       </button>
-      <div className="ring-1 ring-stone-800 flex items-center my-2 rounded-sm bg-black min-w-72 sm:h-[50rem] max-h-full h-fit aspect-9/16 sm:w-fit w-full relative">
+      <div className="ring-1 ring-stone-800 flex items-center my-2 rounded-sm bg-black min-w-72 sm:h-[50rem] max-h-full h-fit sm:aspect-9/16 max-sm:h-full sm:w-fit w-full relative">
         <div className="w-full absolute flex items-center justify-between p-4 pt-2 top-0 left-0 bg-gradient-to-b from-transparent/40 via-transparent/20 to-transparent pb-4">
           <div className="w-full flex flex-col justify-start">
             <div className="flex gap-0.5">
@@ -280,9 +245,9 @@ function Story({ params }: Props) {
                   key={i}
                 >
                   <span
-                    className={`h-[3px] bg-stone-100 w-0 inline-block absolute ${
+                    className={`h-[3px] bg-stone-100 w-0 inline-block absolute rounded-lg ${
                       index === i ? "animate-story" : ""
-                    } ${index > i ? "w-full" : "w-0"}`}
+                    } ${index >= i ? "w-full" : "w-0"}`}
                     ref={index === i ? progressBarRef : null}
                   ></span>
                 </div>
@@ -302,21 +267,12 @@ function Story({ params }: Props) {
                     {currentStory.fullName}
                   </span>
                   <span className="text-stone-500 text-xs">
-                    {currentStory.username}
+                    @{currentStory.username}
                   </span>
                 </div>
                 <span className="text-stone-500 text-sm">&#183; 3h</span>
               </Link>
               <div className="flex items-center justify-center gap-2">
-                <button
-                  className={`${
-                    currentStory.images[index].isVideo ? "" : "hidden"
-                  }`}
-                  onClick={() => setIsMuted(!isMuted)}
-                  title={isMuted ? "Unmute" : "Mute"}
-                >
-                  {isMuted ? <VolumeXIcon /> : <Volume2Icon />}
-                </button>
                 <button
                   onClick={() => setIsPaused(!isPaused)}
                   title={isPaused ? "Play" : "Pause"}
@@ -397,23 +353,14 @@ function Story({ params }: Props) {
             </div>
           </div>
         </div>
-        {currentStory.images[index].isVideo ? (
-          <video
-            src={currentStory.images[index].link}
-            autoPlay
-            muted={isMuted}
-            ref={videoRef}
-          />
-        ) : (
-          <Image
-            src={currentStory.images[index].link}
-            alt={`Story ${currentStory.index + 1} by ${currentStory.username}`}
-            className="max-h-full h-fit w-full object-contain select-none pointer-events-none"
-            width="768"
-            height="1024"
-            priority={true}
-          />
-        )}
+        <Image
+          src={currentStory.images[index]?.link}
+          alt="Error fetching the story"
+          className="max-h-full h-fit w-full object-contain select-none pointer-events-none"
+          width="768"
+          height="1024"
+          priority={true}
+        />
         <button
           className="w-1/2 absolute left-0 bg-transparent h-full"
           onClick={() => nextRef.current?.click()}
@@ -458,7 +405,10 @@ function Story({ params }: Props) {
               size="icon"
               className="px-2 w-fit hover:bg-transparent rounded-full"
               onClick={() =>
-                setCurrentStory({ ...currentStory, liked: !currentStory.liked })
+                setCurrentStory({
+                  ...currentStory,
+                  liked: !currentStory.liked,
+                })
               }
               type="button"
             >

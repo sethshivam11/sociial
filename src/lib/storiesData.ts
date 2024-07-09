@@ -1,7 +1,6 @@
 export const stories = [
   {
     _id: "1",
-    index: 0,
     images: [
       {
         link: "https://res.cloudinary.com/dv3qbj0bn/image/upload/f_auto,q_auto/cld-sample",
@@ -21,7 +20,6 @@ export const stories = [
   },
   {
     _id: "2",
-    index: 1,
     images: [
       {
         link: "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_90/v1715866646/cld-sample-4.jpg",
