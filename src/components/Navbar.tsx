@@ -282,6 +282,7 @@ function Navbar() {
                 >
                   Report problem
                 </MenubarItem>
+                <MenubarSeparator />
                 <MenubarItem
                   className="py-2.5 rounded-lg pl-2.5 text-red-600 focus:text-red-600"
                   onClick={() => {

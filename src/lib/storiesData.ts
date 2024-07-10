@@ -3,6 +3,9 @@ export const stories = [
     _id: "1",
     images: [
       {
+        link: "https://res.cloudinary.com/dv3qbj0bn/image/upload/f_auto,q_auto/zznyjn4yp53ybxakqcas",
+      },
+      {
         link: "https://res.cloudinary.com/dv3qbj0bn/image/upload/f_auto,q_auto/cld-sample",
       },
       {

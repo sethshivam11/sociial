@@ -3,16 +3,15 @@ import {
   ChevronLeft,
   ChevronRight,
   Heart,
+  Loader2,
   MoreHorizontal,
   Pause,
   PlayIcon,
   SendHorizonal,
-  Volume2Icon,
-  VolumeXIcon,
   X,
 } from "lucide-react";
 import React from "react";
-import { useRouter } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
@@ -49,7 +48,6 @@ interface Story {
   avatar: string;
   liked: boolean;
   username: string;
-  isVideo?: boolean;
 }
 
 function Story({ params }: Props) {
@@ -66,23 +64,72 @@ function Story({ params }: Props) {
   const prevRef = React.useRef<HTMLButtonElement>(null);
   const closeRef1 = React.useRef<HTMLButtonElement>(null);
   const closeRef2 = React.useRef<HTMLButtonElement>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
   const progressBarRef = React.useRef<HTMLSpanElement>(null);
   const [index, setIndex] = React.useState(0);
   const [reportDialog, setReportDialog] = React.useState(false);
-  const [currentStory, setCurrentStory] = React.useState<Story>({
-    _id: "",
-    images: [],
-    fullName: "",
-    username: "",
-    avatar: "",
-    liked: false,
-  });
+  const [currentStory, setCurrentStory] = React.useState<Story | null>(null);
+  const [loading, setLoading] = React.useState(true);
   const [linkedStories, setLinkedStories] = React.useState({
     prevStory: "",
     nextStory: "",
   });
-  const [isPaused, setIsPaused] = React.useState(false);
+  const [isPaused, setIsPaused] = React.useState(true);
   const [timer, setTimer] = React.useState<Timer | null>(null);
+  const [imageLoading, setImageLoading] = React.useState(false);
+
+  React.useEffect(() => {
+    function getStory() {
+      setLoading(true);
+      stories.map((story) => {
+        if (username === story.username) {
+          setCurrentStory(story);
+        }
+      });
+      setLoading(false);
+    }
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.target === inputRef.current) {
+        return;
+      }
+      switch (e.code) {
+        case "Space":
+          setIsPaused((paused) => !paused);
+          break;
+
+        case "ArrowRight":
+          nextRef.current?.click();
+          break;
+
+        case "ArrowLeft":
+          prevRef.current?.click();
+          break;
+
+        case "Escape":
+          router.push("/");
+          break;
+
+        default:
+          console.log(e.code);
+          break;
+      }
+    }
+
+    getStory();
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
+  React.useEffect(() => {
+    if (!loading && !currentStory) {
+      notFound();
+    }
+  }, [loading, currentStory]);
 
   function report(storyId: string, username: string) {
     console.log(`Reported story ${storyId} by user ${username}`);
@@ -131,15 +178,7 @@ function Story({ params }: Props) {
 
   React.useEffect(() => {
     const timer: Timer = new Timer(function () {
-      if (index <= stories.length - 1) {
-        setIndex(index + 1);
-      } else {
-        if (linkedStories.nextStory) {
-          router.push(`/story/${linkedStories.nextStory}`);
-        } else {
-          router.push("/");
-        }
-      }
+      nextRef.current?.click();
     }, 5000);
     setTimer(timer);
     return () => {
@@ -185,32 +224,21 @@ function Story({ params }: Props) {
   }, [index]);
 
   React.useEffect(() => {
-    let storyFound = {
-      found: false,
-    };
-    function getStory() {
-      stories.map((story) => {
-        if (username === story.username) {
-          setCurrentStory(story);
-          storyFound.found = true;
-        }
-      });
-    }
-    if (!currentStory.images.length) {
-      getStory();
-    }
-  }, []);
-
-  React.useEffect(() => {
+    if (!currentStory) return;
     const storyIndex = stories.indexOf(currentStory);
     const nextStory = stories[storyIndex + 1]?.username;
     const prevStory = stories[storyIndex - 1]?.username;
     setLinkedStories({ prevStory, nextStory });
-    console.log(prevStory, nextStory);
   }, [currentStory]);
 
+  if (!currentStory) {
+    return (
+      <div className="col-span-10 h-[100dvh] bg-white dark:bg-black"></div>
+    );
+  }
+
   return (
-    <div className="w-full col-span-10 h-[100dvh] flex items-center justify-center bg-stone-900">
+    <div className="w-full col-span-10 h-[100dvh] flex items-center justify-center bg-stone-900 text-white">
       <button
         className="text-stone-100 p-2 absolute hidden sm:inline-block right-0 top-0"
         onClick={() => router.push("/")}
@@ -221,17 +249,41 @@ function Story({ params }: Props) {
       </button>
       <button
         className={`absolute top-1/2 left-2 -translate-y-1/2 p-1 bg-transparent/40 rounded-full ${
-          index === 0 ? "hidden" : ""
+          index === 0 && !linkedStories.prevStory ? "hidden" : ""
         }`}
-        onClick={(e) => setIndex(index - 1)}
+        ref={prevRef}
+        onClick={() => {
+          if (index === 0) {
+            if (linkedStories.prevStory) {
+              router.push(`/story/${linkedStories.prevStory}`);
+            } else {
+              router.push("/");
+            }
+          } else {
+            setIndex(index - 1);
+          }
+        }}
       >
         <ChevronLeft size="20" />
       </button>
       <button
         className={`absolute top-1/2 right-2 -translate-y-1/2 p-1 bg-transparent/40 rounded-full ${
-          index === currentStory.images.length - 1 ? "hidden" : ""
+          index === currentStory.images.length - 1 && !linkedStories.nextStory
+            ? "hidden"
+            : ""
         }`}
-        onClick={(e) => setIndex(index + 1)}
+        ref={nextRef}
+        onClick={() => {
+          if (index === currentStory.images.length - 1) {
+            if (linkedStories.nextStory) {
+              router.push(`/story/${linkedStories.nextStory}`);
+            } else {
+              router.push("/");
+            }
+          } else {
+            setIndex(index + 1);
+          }
+        }}
       >
         <ChevronRight size="20" />
       </button>
@@ -353,25 +405,39 @@ function Story({ params }: Props) {
             </div>
           </div>
         </div>
-        <Image
-          src={currentStory.images[index]?.link}
-          alt="Error fetching the story"
-          className="max-h-full h-fit w-full object-contain select-none pointer-events-none"
-          width="768"
-          height="1024"
-          priority={true}
-        />
+        {!currentStory ? (
+          ""
+        ) : imageLoading ? (
+          <div className="w-full grid place-items-center">
+            <Loader2 className="animate-spin" size="30" />
+          </div>
+        ) : (
+          <Image
+            src={currentStory.images[index]?.link || ""}
+            alt="Error fetching the story"
+            className="max-h-full h-fit w-full object-fill select-none pointer-events-none"
+            width="768"
+            height="1024"
+            onLoadStart={() => setIsPaused(true)}
+            onLoad={() => setIsPaused(false)}
+            priority={true}
+          />
+        )}
         <button
-          className="w-1/2 absolute left-0 bg-transparent h-full"
-          onClick={() => nextRef.current?.click()}
-          onMouseDown={() => setIsPaused(true)}
-          onMouseUp={() => setIsPaused(false)}
-        />
-        <button
-          className="w-1/2 absolute right-0 bg-transparent h-full"
+          className="w-1/5 absolute left-0 bg-transparent h-full"
           onClick={() => prevRef.current?.click()}
           onMouseDown={() => setIsPaused(true)}
           onMouseUp={() => setIsPaused(false)}
+          onTouchStart={() => setIsPaused(true)}
+          onTouchEnd={() => setIsPaused(false)}
+        />
+        <button
+          className="w-4/5 absolute right-0 bg-transparent h-full"
+          onClick={() => nextRef.current?.click()}
+          onMouseDown={() => setIsPaused(true)}
+          onMouseUp={() => setIsPaused(false)}
+          onTouchStart={() => setIsPaused(true)}
+          onTouchEnd={() => setIsPaused(false)}
         />
 
         <Form {...form}>
@@ -392,9 +458,10 @@ function Story({ params }: Props) {
                     <Input
                       placeholder={`Reply to ${currentStory.username}`}
                       {...field}
+                      ref={inputRef}
                       autoComplete="off"
                       inputMode="text"
-                      className="bg-transparent rounded-full placeholder:text-stone-300 border-0 ring-2 ring-stone-200 focus-visible:ring-0 focus-visible:border-0 focus-visible:outline-none focus-within:ring-offset-transparent"
+                      className="bg-transparent rounded-full placeholder:text-stone-300 ring-2 border-0 ring-stone-200 focus-visible:ring-0 dark:focus-within:ring-offset-stone-200"
                     />
                   </FormControl>
                 </FormItem>
