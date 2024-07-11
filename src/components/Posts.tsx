@@ -1,9 +1,9 @@
 "use client";
-import { Bookmark, Heart } from "lucide-react";
+import { Bookmark, Heart, PlayIcon } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import Comment from "./Comment";
-import More from "./More";
+import PostOptions from "./PostOptions";
 import Share from "./Share";
 import {
   Carousel,
@@ -15,7 +15,6 @@ import {
 import PostsLoading from "./PostsLoading";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { nameFallback } from "@/lib/helpers";
-import Tags from "./Tags";
 import Link from "next/link";
 
 interface Post {
@@ -29,6 +28,9 @@ interface Post {
   caption: string;
   liked: boolean;
   images: string[];
+  video?: {
+    link: string;
+  };
   likesCount: number;
   commentsCount: number;
   tags?: Post["user"][];
@@ -76,6 +78,31 @@ function Posts() {
       images: [
         "https://images.pexels.com/photos/2449600/pexels-photo-2449600.png?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1",
       ],
+      tags: [
+        {
+          avatar: "https://github.com/shadcn.png",
+          fullName: "John Doe",
+          username: "johndoe",
+        },
+      ],
+      likesCount: 12,
+      commentsCount: 1,
+    },
+    {
+      _id: "7",
+      user: {
+        fullName: "Shivam",
+        username: "sethshivam11",
+        avatar:
+          "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+      },
+      caption:
+        "This is a caption which is very long and I don't know what to write in it so, i am just keep going to see the results. This is just a test caption to check the functionality of the app. I hope you are having a good day. Bye! 😊",
+      liked: false,
+      images: [],
+      video: {
+        link: "/test-1.mp4",
+      },
       tags: [
         {
           avatar: "https://github.com/shadcn.png",
@@ -250,62 +277,80 @@ function Posts() {
                     </p>
                   </div>
                 </Link>
-                <More user={post.user} postId={post._id} />
+                <PostOptions
+                  user={post.user}
+                  postId={post._id}
+                  isVideo={post.video ? true : false}
+                />
               </div>
-              <Carousel className="w-full my-2 mt-2">
-                <CarouselContent>
-                  {post.images.map((image, index) => {
-                    return (
-                      <CarouselItem key={index} className="relative">
-                        <div className="absolute right-2 top-2 bg-transparent/60 text-white px-2 py-0.5 rounded-2xl text-sm">
-                          {post.images.length > 1
-                            ? `${index + 1}/${post.images.length}`
-                            : ""}
-                        </div>
-                        <Tags tags={post.tags} />
-                        <div
-                          className={`absolute w-full h-full items-center justify-center ${
-                            post.liked ? "flex" : "hidden"
-                          }`}
-                        >
-                          <Heart
-                            size="150"
-                            strokeWidth="0"
-                            fill="rgb(244 63 94)"
-                            className="animate-like"
+              {post.video ? (
+                <Link href={`/video/${post._id}`} className="relative">
+                  <PlayIcon
+                    size="50"
+                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white bg-transparent/50 rounded-full p-2"
+                  />
+                  <video
+                    preload="metadata"
+                    className="w-full my-2 object-contain rounded-sm"
+                  >
+                    <source src={post.video.link} />
+                  </video>
+                </Link>
+              ) : (
+                <Carousel className="w-full my-2 mt-2">
+                  <CarouselContent>
+                    {post.images.map((image, index) => {
+                      return (
+                        <CarouselItem key={index} className="relative">
+                          <div className="absolute right-2 top-2 bg-transparent/60 text-white px-2 py-0.5 rounded-2xl text-sm">
+                            {post.images.length > 1
+                              ? `${index + 1}/${post.images.length}`
+                              : ""}
+                          </div>
+                          <div
+                            className={`absolute w-full h-full items-center justify-center ${
+                              post.liked ? "flex" : "hidden"
+                            }`}
+                          >
+                            <Heart
+                              size="150"
+                              strokeWidth="0"
+                              fill="rgb(244 63 94)"
+                              className="animate-like"
+                            />
+                          </div>
+                          <Image
+                            width={700}
+                            height={320}
+                            src={image}
+                            priority={
+                              index === 0 && postIndex < 10 ? true : false
+                            }
+                            onDoubleClick={(e) => {
+                              likePost(post._id);
+                              const heartContainer = (e.target as HTMLElement)
+                                .parentElement?.parentElement?.childNodes;
+                              setTimeout(
+                                () =>
+                                  heartContainer?.forEach((child) => {
+                                    (
+                                      child.childNodes[0] as HTMLElement
+                                    ).classList.add("hidden");
+                                  }),
+                                500
+                              );
+                            }}
+                            alt={`Photo by ${post.user.fullName} with username ${post.user.username}`}
+                            className="object-cover select-none w-full h-full rounded-sm"
                           />
-                        </div>
-                        <Image
-                          width={700}
-                          height={320}
-                          src={image}
-                          priority={
-                            index === 0 && postIndex < 10 ? true : false
-                          }
-                          onDoubleClick={(e) => {
-                            likePost(post._id);
-                            const heartContainer = (e.target as HTMLElement)
-                              .parentElement?.parentElement?.childNodes;
-                            setTimeout(
-                              () =>
-                                heartContainer?.forEach((child) => {
-                                  (
-                                    child.childNodes[0] as HTMLElement
-                                  ).classList.add("hidden");
-                                }),
-                              500
-                            );
-                          }}
-                          alt={`Photo by ${post.user.fullName} with username ${post.user.username}`}
-                          className="object-cover select-none w-full h-full rounded-sm"
-                        />
-                      </CarouselItem>
-                    );
-                  })}
-                </CarouselContent>
-                <CarouselPrevious />
-                <CarouselNext />
-              </Carousel>
+                        </CarouselItem>
+                      );
+                    })}
+                  </CarouselContent>
+                  <CarouselPrevious />
+                  <CarouselNext />
+                </Carousel>
+              )}
               <div className="flex justify-between select-none">
                 <div className="flex gap-3">
                   <button

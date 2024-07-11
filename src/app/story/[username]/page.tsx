@@ -31,6 +31,7 @@ import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
 import EmojiKeyboard from "@/components/EmojiKeyboard";
 import { stories } from "@/lib/storiesData";
+import { nameFallback } from "@/lib/helpers";
 
 interface Props {
   params: {
@@ -76,7 +77,7 @@ function Story({ params }: Props) {
   });
   const [isPaused, setIsPaused] = React.useState(true);
   const [timer, setTimer] = React.useState<Timer | null>(null);
-  const [imageLoading, setImageLoading] = React.useState(false);
+  const [imageLoading, setImageLoading] = React.useState(true);
 
   React.useEffect(() => {
     function getStory() {
@@ -231,6 +232,14 @@ function Story({ params }: Props) {
     setLinkedStories({ prevStory, nextStory });
   }, [currentStory]);
 
+  React.useEffect(() => {
+    if (imageLoading) {
+      setIsPaused(true);
+    } else {
+      setIsPaused(false);
+    }
+  }, [imageLoading]);
+
   if (!currentStory) {
     return (
       <div className="col-span-10 h-[100dvh] bg-white dark:bg-black"></div>
@@ -238,7 +247,7 @@ function Story({ params }: Props) {
   }
 
   return (
-    <div className="w-full col-span-10 h-[100dvh] flex items-center justify-center bg-stone-900 text-white">
+    <div className="w-full col-span-10 h-[100dvh] flex items-center justify-center bg-stone-900 text-white select-none">
       <button
         className="text-stone-100 p-2 absolute hidden sm:inline-block right-0 top-0"
         onClick={() => router.push("/")}
@@ -247,46 +256,28 @@ function Story({ params }: Props) {
       >
         <X size="40" />
       </button>
-      <button
-        className={`absolute top-1/2 left-2 -translate-y-1/2 p-1 bg-transparent/40 rounded-full ${
-          index === 0 && !linkedStories.prevStory ? "hidden" : ""
-        }`}
-        ref={prevRef}
-        onClick={() => {
-          if (index === 0) {
-            if (linkedStories.prevStory) {
-              router.push(`/story/${linkedStories.prevStory}`);
+      <div className="flex max-sm:hidden items-center justify-center h-full px-4 w-16">
+        <button
+          className={`p-1 bg-stone-200 text-black rounded-full ${
+            index === 0 && !linkedStories.prevStory ? "hidden" : ""
+          }`}
+          ref={prevRef}
+          onClick={() => {
+            if (index === 0) {
+              if (linkedStories.prevStory) {
+                router.push(`/story/${linkedStories.prevStory}`);
+              } else {
+                router.push("/");
+              }
             } else {
-              router.push("/");
+              setImageLoading(true);
+              setIndex(index - 1);
             }
-          } else {
-            setIndex(index - 1);
-          }
-        }}
-      >
-        <ChevronLeft size="20" />
-      </button>
-      <button
-        className={`absolute top-1/2 right-2 -translate-y-1/2 p-1 bg-transparent/40 rounded-full ${
-          index === currentStory.images.length - 1 && !linkedStories.nextStory
-            ? "hidden"
-            : ""
-        }`}
-        ref={nextRef}
-        onClick={() => {
-          if (index === currentStory.images.length - 1) {
-            if (linkedStories.nextStory) {
-              router.push(`/story/${linkedStories.nextStory}`);
-            } else {
-              router.push("/");
-            }
-          } else {
-            setIndex(index + 1);
-          }
-        }}
-      >
-        <ChevronRight size="20" />
-      </button>
+          }}
+        >
+          <ChevronLeft size="20" />
+        </button>
+      </div>
       <div className="ring-1 ring-stone-800 flex items-center my-2 rounded-sm bg-black min-w-72 sm:h-[50rem] max-h-full h-fit sm:aspect-9/16 max-sm:h-full sm:w-fit w-full relative">
         <div className="w-full absolute flex items-center justify-between p-4 pt-2 top-0 left-0 bg-gradient-to-b from-transparent/40 via-transparent/20 to-transparent pb-4">
           <div className="w-full flex flex-col justify-start">
@@ -405,23 +396,23 @@ function Story({ params }: Props) {
             </div>
           </div>
         </div>
-        {!currentStory ? (
-          ""
-        ) : imageLoading ? (
-          <div className="w-full grid place-items-center">
-            <Loader2 className="animate-spin" size="30" />
-          </div>
-        ) : (
-          <Image
-            src={currentStory.images[index]?.link || ""}
-            alt="Error fetching the story"
-            className="max-h-full h-fit w-full object-fill select-none pointer-events-none"
-            width="768"
-            height="1024"
-            onLoadStart={() => setIsPaused(true)}
-            onLoad={() => setIsPaused(false)}
-            priority={true}
-          />
+        {currentStory && (
+          <>
+            {imageLoading && (
+              <div className="w-full grid place-items-center absolute ">
+                <Loader2 className="animate-spin" size="30" />
+              </div>
+            )}
+            <Image
+              src={currentStory.images[index]?.link || ""}
+              alt="Error fetching the story"
+              className="max-h-full h-fit w-full object-fill select-none pointer-events-none"
+              width="768"
+              height="1024"
+              onLoad={() => setImageLoading(false)}
+              priority={true}
+            />
+          </>
         )}
         <button
           className="w-1/5 absolute left-0 bg-transparent h-full"
@@ -498,6 +489,30 @@ function Story({ params }: Props) {
             </Button>
           </form>
         </Form>
+      </div>
+      <div className="flex max-sm:hidden items-center justify-center h-full px-4 w-16">
+        <button
+          className={`p-1 bg-stone-200 text-black rounded-full ${
+            index === currentStory.images.length - 1 && !linkedStories.nextStory
+              ? "hidden"
+              : ""
+          }`}
+          ref={nextRef}
+          onClick={() => {
+            if (index === currentStory.images.length - 1) {
+              if (linkedStories.nextStory) {
+                router.push(`/story/${linkedStories.nextStory}`);
+              } else {
+                router.push("/");
+              }
+            } else {
+              setImageLoading(true);
+              setIndex(index + 1);
+            }
+          }}
+        >
+          <ChevronRight size="20" />
+        </button>
       </div>
     </div>
   );

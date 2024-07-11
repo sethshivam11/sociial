@@ -1,7 +1,7 @@
 "use client";
 import Comment from "@/components/Comment";
 import MobileNav from "@/components/MobileNav";
-import More from "@/components/More";
+import PostOptions from "@/components/PostOptions";
 import PostsLoading from "@/components/PostsLoading";
 import Share from "@/components/Share";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -13,7 +13,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { nameFallback } from "@/lib/helpers";
-import { Bookmark, Heart } from "lucide-react";
+import { Bookmark, Heart, PlayIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -41,6 +41,9 @@ function Page() {
     ],
     likesCount: 12,
     commentsCount: 1,
+    video: {
+      link: "/test-1.mp4",
+    },
   });
   const morePosts = [
     {
@@ -90,7 +93,6 @@ function Page() {
       likesCount: 1,
     },
   ]);
-  const [comment, setComment] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   function likePost(_id: string) {
     setPost({
@@ -115,7 +117,6 @@ function Page() {
       ...post,
       commentsCount: post.commentsCount + 1,
     });
-    setComment("");
   }
   function likeComment(_id: string, postId: string) {
     setComments(
@@ -161,9 +162,13 @@ function Page() {
                   </p>
                 </div>
               </div>
-              <More user={post.user} postId={post._id} />
+              <PostOptions
+                user={post.user}
+                postId={post._id}
+                isVideo={post.video ? true : false}
+              />
             </div>
-            <Carousel className="w-full my-2 mt-2">
+            <Carousel className="w-full my-2">
               <CarouselContent>
                 {post.images.map((image, index) => {
                   return (

@@ -26,7 +26,7 @@ import Image from "next/image";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { useToast } from "./ui/use-toast";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 interface Props {
   user: {
@@ -35,11 +35,13 @@ interface Props {
     avatar: string;
   };
   postId: string;
+  isVideo: boolean;
 }
 
-function More({ user, postId }: Props) {
+function PostOptions({ user, postId, isVideo }: Props) {
   const { toast } = useToast();
   const router = useRouter();
+  const location = usePathname();
   const [unfollowDialog, setUnfollowDialog] = React.useState(false);
   const [reportDialog, setReportDialog] = React.useState(false);
 
@@ -85,12 +87,18 @@ function More({ user, postId }: Props) {
           >
             Copy link
           </DialogClose>
-          <DialogClose
-            className="w-full md:px-20 py-1"
-            onClick={() => router.push(`/post/${postId}`)}
-          >
-            Open post
-          </DialogClose>
+          {location === "/" ? (
+            <DialogClose
+              className="w-full md:px-20 py-1"
+              onClick={() =>
+                router.push(isVideo ? `/video/${postId}` : `/post/${postId}`)
+              }
+            >
+              Open post
+            </DialogClose>
+          ) : (
+            ""
+          )}
           <DialogClose
             className="w-full md:px-20 py-1"
             onClick={() => router.push(`/${user.username}`)}
@@ -192,4 +200,4 @@ function More({ user, postId }: Props) {
   );
 }
 
-export default More;
+export default PostOptions;

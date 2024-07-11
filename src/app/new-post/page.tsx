@@ -142,7 +142,7 @@ function Page() {
       onDragOver={(event) => event.preventDefault()}
     >
       <AlertDialog>
-        <AlertDialogTrigger className="absolute right-2 top-2" asChild>
+        <AlertDialogTrigger className="absolute right-2 top-2">
           <X size="35" />
         </AlertDialogTrigger>
         <AlertDialogContent>

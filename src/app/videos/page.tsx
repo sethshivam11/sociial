@@ -27,9 +27,10 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
+import VideoOptions from "@/components/VideoOptions";
 import { nameFallback } from "@/lib/helpers";
 import {
-  ArrowLeft,
+  ChevronLeft,
   Heart,
   Loader2,
   MoreVerticalIcon,
@@ -41,11 +42,12 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useCallback } from "react";
 import { useDebounceCallback } from "usehooks-ts";
 
 function Videos() {
   const router = useRouter();
+  const containerRef = React.useRef<HTMLDivElement>(null);
   const [videoRef, setVideoRef] = React.useState<HTMLVideoElement | null>(null);
   const [isMuted, setIsMuted] = React.useState(true);
   const [isPaused, setIsPaused] = React.useState(false);
@@ -62,8 +64,7 @@ function Videos() {
       caption:
         "This is a caption which is very long and I don't know what to write in it so, i am just keep going to see the results. This is just a test caption to check the functionality of the app. I hope you are having a good day. Bye! 😊",
       liked: false,
-      video:
-        "https://res.cloudinary.com/dv3qbj0bn/video/upload/f_auto:video,q_auto/v1/samples/dance-2",
+      video: "https://res.cloudinary.com/dv3qbj0bn/video/upload/f_auto:video,q_auto/v1/samples/dance-2",
       likesCount: 12,
       commentsCount: 1,
     },
@@ -78,8 +79,7 @@ function Videos() {
       caption:
         "In the vibrant world of social media, where every moment is captured and shared, we find ourselves scrolling through an endless feed of memories and stories. Among these, a post catches our eye, a video accompanied by a caption that reads: \"This is a caption which is very long and I don't know what to write in it so, I am just keep going to see the results. This is just a test caption to check the functionality of the app. I hope you are having a good day. Bye! 😊\". It's a simple yet heartfelt message from a user named Shivam, known among his followers for his engaging content and genuine interactions. His avatar, a familiar face to many, signals another piece of content ready to spark joy and provoke thought. As we delve deeper, we encounter another post, this one succinct with the words: \"This is a caption\". It's a stark contrast to the previous one, yet it holds its own charm and simplicity. Each post, with its unique caption, video, and engagement metrics, tells a story, invites interaction, and builds connections. In this digital age, where every second is documented and shared, these posts are more than just content; they are windows into the lives of others, offering glimpses of their world, their thoughts, and their moments of vulnerability and joy. As we continue to scroll, we're reminded of the power of sharing, the beauty of connection, and the endless possibilities that come with opening up to the world.",
       liked: false,
-      video:
-        "https://res.cloudinary.com/dv3qbj0bn/video/upload/f_auto:video,q_auto/v1/sociial/videos/tnw4jy33z047bskwwhyt",
+      video: "https://res.cloudinary.com/dv3qbj0bn/video/upload/f_auto:video,q_auto/v1/sociial/videos/tnw4jy33z047bskwwhyt",
       likesCount: 12,
       commentsCount: 1,
     },
@@ -143,33 +143,8 @@ function Videos() {
       likesCount: 1,
     },
   ]);
-  const [unfollowDialog, setUnfollowDialog] = React.useState(false);
-  const [reportDialog, setReportDialog] = React.useState(false);
   const [sliderValue, setSliderValue] = React.useState(0);
-
-  function unfollow(username: string) {
-    console.log(`Unfollowed user ${username}`);
-  }
-
-  function report(postId: string, username: string) {
-    console.log(`Reported post ${postId} by user ${username}`);
-  }
-
-  async function copyLink(username: string, postId: string) {
-    const link = `${process.env.NEXT_PUBLIC_LINK || ""}/post/${postId}`;
-    if (navigator.clipboard === undefined) {
-      return toast({
-        title: "Error",
-        description: "An error occurred while copying the link.",
-        variant: "destructive",
-      });
-    }
-    await navigator.clipboard.writeText(link);
-    toast({
-      title: "Copied",
-      description: "The link has been copied to your clipboard.",
-    });
-  }
+  const [seeking, setSeeking] = React.useState(false);
   function likePost(_id: string) {
     setPosts(
       posts.map((post) =>
@@ -224,14 +199,43 @@ function Videos() {
     );
   }
 
+  const handleKeys = useCallback(
+    (e: KeyboardEvent) => {
+      switch (e.code) {
+        case "Space":
+          e.preventDefault();
+          setIsPaused(!isPaused);
+          break;
+        case "KeyM":
+          setIsMuted(!isMuted);
+          break;
+        case "ArrowRight":
+          if (videoRef) videoRef.currentTime = videoRef.currentTime + 5;
+          break;
+        case "ArrowLeft":
+          if (videoRef) videoRef.currentTime = videoRef.currentTime - 5;
+          break;
+        default:
+          console.log(e.code);
+          break;
+      }
+    },
+    [isPaused, isMuted]
+  );
+
   const debounce = useDebounceCallback((entry: IntersectionObserverEntry) => {
     const videoElement = entry.target as HTMLVideoElement;
-    videoElement.play().then(() => {
-      setIsPaused(false);
-      if (!videoElement.paused && !entry.isIntersecting) {
-        videoElement.pause();
-      }
-    });
+    if (entry.isIntersecting) {
+      videoElement.currentTime = 0;
+      videoElement.play().then(() => {
+        setIsPaused(false);
+        if (!videoElement.paused && !entry.isIntersecting) {
+          videoElement.pause();
+        }
+      });
+    } else {
+      videoElement.pause();
+    }
   }, 300);
 
   React.useEffect(() => {
@@ -243,35 +247,59 @@ function Videos() {
         const observer = new IntersectionObserver(
           (entries) => {
             entries.forEach((entry) => {
-              debounce(entry);
+              setSliderValue(0);
+              if (entry.isIntersecting) debounce(entry);
             });
           },
           {
             threshold: 0.9,
-            root: null,
+            root: containerRef.current,
             rootMargin: "100px",
           }
         );
         observer.observe(video);
         observers.push(observer);
+        const containerRect = containerRef.current?.getBoundingClientRect();
+        const videoRect = video.getBoundingClientRect();
+        if (
+          containerRect &&
+          videoRect.top >= containerRect.top &&
+          videoRect.bottom <= containerRect.bottom
+        ) {
+          video.play().then(() => {
+            setIsPaused(false);
+            setSliderValue(0);
+          });
+        }
       }
     });
 
     return () => {
       observers.forEach((observer) => observer.disconnect());
     };
-  }, [posts]);
+  }, [posts.length]);
 
   React.useEffect(() => {
-    if (isPaused) {
+    if (isPaused || seeking) {
       videoRef?.pause();
     } else {
       videoRef?.play();
     }
-  }, [isPaused]);
+  }, [isPaused, seeking]);
+
+  React.useEffect(() => {
+    window.addEventListener("keydown", handleKeys);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeys);
+    };
+  }, [handleKeys]);
 
   return (
-    <div className="max-h-[100dvh] h-[100dvh] xl:col-span-8 sm:col-span-9 col-span-10 snap-y snap-mandatory overflow-auto relative no-scrollbar">
+    <div
+      className="max-h-[100dvh] h-[100dvh] xl:col-span-8 sm:col-span-9 col-span-10 snap-y snap-mandatory overflow-auto relative no-scrollbar"
+      ref={containerRef}
+    >
       {posts.map((post, index) => (
         <section
           className="flex items-center justify-center snap-always snap-end w-full h-full py-2 max-sm:bg-stone-950"
@@ -279,15 +307,28 @@ function Videos() {
         >
           <div className="flex items-center justify-center h-full max-sm:w-full sm:aspect-9/16 bg-stone-950 text-white sm:border relative">
             <video
-              className="w-full object-contain aspect-square videoPlayer"
+              className="w-full h-full object-contain aspect-square"
               preload="auto"
               muted={isMuted}
               onClick={() => setIsPaused(!isPaused)}
               onWaiting={() => setBuffering(true)}
-              onTimeUpdate={() =>
-                setSliderValue(Math.ceil(videoRef?.currentTime || 0))
-              }
+              onTimeUpdate={() => {
+                if (!seeking && videoRef) {
+                  setSliderValue(videoRef.currentTime || 0);
+                }
+              }}
+              onProgress={(e) => {
+                if (!seeking) {
+                  e.currentTarget.currentTime = sliderValue;
+                }
+              }}
               onPlaying={(e) => {
+                const videos = document.querySelectorAll("video");
+                videos.forEach((video) => {
+                  if (!video.paused && video !== e.currentTarget) {
+                    video.pause();
+                  }
+                });
                 setVideoRef(e.currentTarget);
                 setBuffering(false);
               }}
@@ -296,14 +337,14 @@ function Videos() {
             >
               <source src={post.video} />
             </video>
-            <div className="flex items-center justify-start px-3 absolute top-0 left-0 w-full h-16 bg-gradient-to-b from-transparent/80 via-transparent/60 to-transparent">
+            <div className="flex items-center justify-start pr-3 absolute top-0 left-0 w-full h-16 bg-gradient-to-b from-transparent/80 via-transparent/60 to-transparent">
               <Button
                 variant="ghost"
                 size="icon"
-                className="p-1 rounded-xl sm:hidden mr-1"
+                className="p-1 w-fit rounded-xl sm:hidden mr-1 hover:bg-background"
                 onClick={() => router.push("/")}
               >
-                <ArrowLeft size="25" color="white" />
+                <ChevronLeft color="white" />
               </Button>
               <Link
                 href={`/${post.user.username}`}
@@ -336,144 +377,12 @@ function Videos() {
                 )}
               </Link>
             </div>
-            <Dialog>
-              <DialogTrigger
-                className="w-fit h-fit absolute top-2 right-2 rounded-full hover:bg-stone-800 p-2"
-                title="Options"
-                asChild
-              >
-                <MoreVerticalIcon />
-              </DialogTrigger>
-              <DialogContent
-                className="w-full md:w-fit"
-                hideCloseIcon
-                onOpenAutoFocus={(e) => e.preventDefault()}
-              >
-                <DialogClose
-                  className="text-red-500 w-full md:px-20 py-1"
-                  onClick={() => setReportDialog(true)}
-                >
-                  Report
-                </DialogClose>
-                <DialogClose
-                  className="text-red-500 w-full md:px-20 py-1"
-                  onClick={() => setUnfollowDialog(true)}
-                >
-                  Unfollow
-                </DialogClose>
-                <DialogClose
-                  className="w-full md:px-20 py-1"
-                  onClick={() => copyLink(post.user.username, post._id)}
-                >
-                  Copy link
-                </DialogClose>
-                <DialogClose
-                  className="w-full md:px-20 py-1"
-                  onClick={() => router.push(`/video/${post._id}`)}
-                >
-                  Open post
-                </DialogClose>
-                <DialogClose
-                  className="w-full md:px-20 py-1"
-                  onClick={() => router.push(`/${post.user.username}`)}
-                >
-                  Go to Account
-                </DialogClose>
-                <DialogClose className="w-full md:px-20 py-1">
-                  Cancel
-                </DialogClose>
-              </DialogContent>
-            </Dialog>
-            <AlertDialog open={unfollowDialog}>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    <Image
-                      width="80"
-                      height="80"
-                      className="mx-auto select-none pointer-events-none"
-                      src={post.user.avatar}
-                      alt=""
-                    />
-                  </AlertDialogTitle>
-                  <AlertDialogDescription className="text-center">
-                    Unfollow&nbsp;
-                    <span className="font-semibold text-stone-700 dark:text-stone-300">
-                      {post.user.fullName}
-                    </span>
-                    &nbsp;&#183; @{post.user.username}
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter className="flex w-full sm:flex-col-reverse sm:gap-2 sm:justify-center items-center sm:space-x-0">
-                  <AlertDialogCancel
-                    autoFocus={false}
-                    className="w-full"
-                    onClick={() => setUnfollowDialog(false)}
-                  >
-                    Cancel
-                  </AlertDialogCancel>
-                  <AlertDialogAction
-                    className="w-full bg-destructive text-white hover:bg-destructive/90"
-                    onClick={() => unfollow(post.user.username)}
-                  >
-                    Unfollow
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-            <Dialog open={reportDialog}>
-              <DialogContent
-                className="sm:w-2/3 w-full h-fit flex flex-col bg-stone-100 dark:bg-stone-900"
-                hideCloseIcon
-              >
-                <DialogTitle className="text-center text-2xl my-1 ">
-                  Report Post
-                </DialogTitle>
-                <div className="space-y-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="report-title">Title</Label>
-                    <Input
-                      id="report-title"
-                      placeholder="What is the issue?"
-                      className="bg-stone-100 dark:bg-stone-900 sm:focus-within:ring-1"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="report-description">Description</Label>
-                    <Textarea
-                      id="report-description"
-                      placeholder="Describe the issue in detail."
-                      rows={5}
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="report-file">
-                    Image
-                    <span className="text-stone-500 text-sm">
-                      &nbsp;(Optional)
-                    </span>
-                  </Label>
-                  <Input
-                    type="file"
-                    id="report-file"
-                    accept="image/*"
-                    className="bg-stone-100 dark:bg-stone-900 sm:focus-within:ring-1 ring-stone-200"
-                  />
-                </div>
-                <DialogFooter className="flex gap-2">
-                  <Button
-                    variant="destructive"
-                    onClick={() => report(post._id, post.user.username)}
-                  >
-                    Report
-                  </Button>
-                  <DialogClose onClick={() => setReportDialog(false)}>
-                    Cancel
-                  </DialogClose>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+            <VideoOptions
+              postId={post._id}
+              fullName={post.user.fullName}
+              username={post.user.username}
+              avatar={post.user.avatar}
+            />
             {buffering ? (
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-transparent/50 p-4 rounded-full animate-visible">
                 <Loader2 className="animate-spin" size="50" />
@@ -530,7 +439,7 @@ function Videos() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="rounded-full p-1"
+                    className="rounded-full p-1 z-10"
                   >
                     {isPaused ? (
                       <Play
@@ -551,7 +460,7 @@ function Videos() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="rounded-full p-1"
+                    className="rounded-full p-1 z-10"
                     onClick={() => setIsMuted(!isMuted)}
                   >
                     {isMuted ? (
@@ -560,18 +469,24 @@ function Videos() {
                       <Volume2Icon size="30" />
                     )}
                   </Button>
-                  <div className="mx-3 w-full">
+                  <div className="mx-3 w-full z-10">
                     <Slider
                       value={[sliderValue]}
                       min={0}
                       max={videoRef?.duration || 15}
                       step={1}
                       onValueChange={(value) => {
-                        if (videoRef) {
-                          videoRef.currentTime = value[0] || 0;
-                        }
+                        setSeeking(true);
+                        setSliderValue(value[0]);
                       }}
-                      className="w-full"
+                      onValueCommit={() => {
+                        if (!videoRef) return;
+                        setSeeking(false);
+                        videoRef.currentTime = sliderValue;
+                      }}
+                      className={`w-full ${
+                        containerRef.current?.childNodes ? "" : "hidden"
+                      }`}
                     />
                   </div>
                 </div>

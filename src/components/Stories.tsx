@@ -20,7 +20,7 @@ function Stories() {
   ];
   const user = {
     fullName: "Shivam soni",
-    username: "sethshivam11",
+    username: "sethshivam",
     avatar:
       "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
   };
@@ -31,19 +31,29 @@ function Stories() {
         <div
           className={`w-20 h-20 rounded-full p-1 ${
             storyAvailable
-              ? "bg-gradient-to-bl from-red-500 via-blue-500 to-green-500 sm:hover:scale-105"
+              ? "bg-gradient-to-bl from-red-500 via-blue-500 to-green-500"
               : ""
           }`}
         >
-          <Avatar className="w-full h-full ring-2 ring-white dark:ring-black bg-white dark:bg-black">
-            <AvatarImage
-              src={user.avatar}
-              alt=""
-              className="pointer-events-none select-none"
-            />
-            <AvatarFallback>{nameFallback(user.fullName)}</AvatarFallback>
-          </Avatar>
-          <Link href="/">
+          <Link
+            href={storyAvailable ? `/story/${user.username}` : "/add-story"}
+          >
+            <Avatar
+              className={`w-full h-full ring-2 ring-white dark:ring-black ${
+                user.avatar.includes("tpfx0gzsk7ywiptsb6vl.png")
+                  ? "bg-[#cdd5d8]"
+                  : "bg-white dark:bg-black"
+              }`}
+            >
+              <AvatarImage
+                src={user.avatar}
+                alt=""
+                className="pointer-events-none select-none"
+              />
+              <AvatarFallback>{nameFallback(user.fullName)}</AvatarFallback>
+            </Avatar>
+          </Link>
+          <Link href="/add-story">
             <div className="absolute inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-blue-500 rounded-full bottom-0 end-0 sm:hover:scale-110">
               <Plus />
             </div>

@@ -13,13 +13,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 import {
   ChevronsLeftRight,
-  CirclePlus,
+  FileVideo,
+  Film,
+  MonitorPlay,
+  MonitorUp,
   RectangleHorizontal,
   RectangleVertical,
   Square,
+  Tv,
   X,
 } from "lucide-react";
-import * as NImage from "next/image";
 import Link from "next/link";
 import React from "react";
 import Cropper, { Area } from "react-easy-crop";
@@ -132,7 +135,7 @@ function Page() {
       onDragOver={(event) => event.preventDefault()}
     >
       <AlertDialog>
-        <AlertDialogTrigger className="absolute right-2 top-2" asChild>
+        <AlertDialogTrigger className="absolute right-2 top-2">
           <X size="35" />
         </AlertDialogTrigger>
         <AlertDialogContent>
@@ -272,10 +275,10 @@ function Page() {
             ref={dragContainer}
           >
             <div className="w-full h-full flex flex-col items-center justify-center gap-3">
-              <CirclePlus size="100" />
+              <MonitorPlay size="100" />
               <div className="flex flex-col items-center gap-2">
                 <span className="text-stone-500 text-sm">
-                  Drag and Drop Photos and Images here
+                  Drag and Drop Video files Here
                 </span>
                 <Button size="lg">
                   <Label

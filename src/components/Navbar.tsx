@@ -57,6 +57,7 @@ function Navbar() {
     "/call",
     "/new-post",
     "/upload-video",
+    "/add-story"
   ];
   const [unreadMessageCount, newNotifications] = [0, false];
   const user = {
