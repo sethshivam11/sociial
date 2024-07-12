@@ -236,7 +236,7 @@ function Videos() {
     } else {
       videoElement.pause();
     }
-  }, 300);
+  }, 100);
 
   React.useEffect(() => {
     const videos = document.querySelectorAll("video");

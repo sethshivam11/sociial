@@ -3,21 +3,9 @@ import Link from "next/link";
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { nameFallback } from "@/lib/helpers";
+import { stories } from "@/lib/storiesData";
 
 function Stories() {
-  const stories = [
-    {
-      fullName: "Shivam soni",
-      username: "johndoe",
-      avatar:
-        "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
-    },
-    {
-      fullName: "Shivam",
-      username: "sethshivam",
-      avatar: "https://github.com/shadcn.png",
-    },
-  ];
   const user = {
     fullName: "Shivam soni",
     username: "sethshivam",

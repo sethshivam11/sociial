@@ -45,7 +45,6 @@ function Navbar() {
   const router = useRouter();
   const { setTheme } = useTheme();
   const [reportDialog, setReportDialog] = React.useState(false);
-  const [iosDevice, setIosDevice] = React.useState(false);
   const [newPost, setNewPost] = React.useState<FileList | null>(null);
   const hideNav = [
     "/sign-in",
@@ -57,7 +56,7 @@ function Navbar() {
     "/call",
     "/new-post",
     "/upload-video",
-    "/add-story"
+    "/add-story",
   ];
   const [unreadMessageCount, newNotifications] = [0, false];
   const user = {
@@ -67,25 +66,9 @@ function Navbar() {
     username: "sethshivam11",
   };
 
-  React.useEffect(() => {
-    const ifIos =
-      [
-        "iPad Simulator",
-        "iPhone Simulator",
-        "iPod Simulator",
-        "iPad",
-        "iPhone",
-        "iPod",
-      ].includes(navigator.platform) ||
-      (navigator.userAgent.includes("Mac") && "ontouchend" in document);
-    if (ifIos) setIosDevice(true);
-  }, []);
-
   return (
     <nav
-      className={`xl:px-4 xl:py-6 p-3 sm:sticky fixed sm:top-0 left-0 sm:h-screen h-fit ${
-        iosDevice ? "bottom-14" : "bottom-0"
-      } xl:col-span-2 sm:col-span-1 col-span-10 sm:min-h-[42rem] max-h-[55rem] z-10 w-full min-w-max block 
+      className={`xl:px-4 xl:py-6 p-3 sm:sticky fixed sm:top-0 left-0 sm:h-screen h-fit bottom-0 xl:col-span-2 sm:col-span-1 col-span-10 sm:min-h-[42rem] max-h-[55rem] z-10 w-full min-w-max block 
       ${hideNav
         .map((path) => {
           if (location.includes(path) || location.startsWith(path))
@@ -102,13 +85,7 @@ function Navbar() {
           : ""
       }`}
     >
-      <div
-        className={`sm:bg-stone-100 sm:dark:bg-stone-900 backdrop-blur-sm h-full w-full sm:rounded-3xl rounded-2xl xl:p-6 sm:px-2 sm:py-4 sm:w-fit xl:w-full flex flex-col items-center justify-between ${
-          iosDevice
-            ? "bg-stone-100 dark:bg-stone-900"
-            : "bg-stone-100/50 dark:bg-stone-900/50"
-        }`}
-      >
+      <div className="sm:bg-stone-100 sm:dark:bg-stone-900 min-h-14 bg-stone-100/50 dark:bg-stone-900/50 backdrop-blur-sm blur-bg h-full w-full sm:rounded-3xl rounded-2xl xl:p-6 sm:px-2 sm:py-4 sm:w-fit xl:w-full flex flex-col items-center justify-between">
         <Link href="/" className="sm:inline hidden w-full" title="Sociial">
           <div className="text-3xl tracking-tighter font-extrabold flex items-center md:justify-start md:pt-0 justify-center gap-2 w-full px-2">
             <Image

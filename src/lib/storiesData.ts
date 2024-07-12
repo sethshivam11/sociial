@@ -1,5 +1,19 @@
 export const stories = [
   {
+    _id: "0",
+    images: [
+      {
+        link: "https://res.cloudinary.com/dv3qbj0bn/image/upload/f_auto,q_auto/cld-sample-5",
+      },
+    ],
+    fullName: "John Doe",
+    username: "johndoe0",
+    avatar:
+      "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+
+    liked: false,
+  },
+  {
     _id: "1",
     images: [
       {
@@ -17,8 +31,7 @@ export const stories = [
     ],
     fullName: "John Doe",
     username: "johndoe",
-    avatar:
-      "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+    avatar: "https://github.com/shadcn.png",
     liked: false,
   },
   {
@@ -33,6 +46,19 @@ export const stories = [
     ],
     fullName: "Shivam Soni",
     username: "sethshivam",
+    avatar:
+      "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+    liked: false,
+  },
+  {
+    _id: "3",
+    images: [
+      {
+        link: "https://res.cloudinary.com/dv3qbj0bn/image/upload/f_auto,q_auto/cld-sample-3",
+      },
+    ],
+    fullName: "John Doe",
+    username: "johndoe3",
     avatar:
       "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
     liked: false,

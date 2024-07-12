@@ -101,7 +101,7 @@ function Profile({
               <p className="lg:text-4xl text-2xl tracking-tight font-extrabold w-full">
                 {user.fullName}
               </p>
-              <p className="text-stone-500 lg:text-xl text-lg flex items-center justify-center">
+              <div className="text-stone-500 lg:text-xl text-lg flex items-center justify-center">
                 {user.isPremium ? (
                   <Menubar className="border-0 h-fit w-fit">
                     <MenubarMenu>
@@ -141,7 +141,7 @@ function Profile({
                   ""
                 )}
                 &nbsp;@{user.username}
-              </p>
+              </div>
               <div className="flex items-center justify-center gap-2 max-sm:gap-4">
                 {user.username === username ? (
                   <Button
@@ -323,7 +323,7 @@ function Profile({
               className="flex flex-col items-center justify-center gap-2"
               onClick={() => router.push(`/${user.username}/following`)}
             >
-              <span className="block lg:text-xl text-lg">Followings</span>
+              <span className="block lg:text-xl text-lg">Following</span>
               <span className="lg:text-2xl text-lg">
                 {user.followingsCount}
               </span>

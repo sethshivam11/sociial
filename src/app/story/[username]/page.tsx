@@ -11,7 +11,7 @@ import {
   X,
 } from "lucide-react";
 import React from "react";
-import { notFound, useRouter } from "next/navigation";
+import { notFound, useRouter, useSearchParams } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
@@ -43,7 +43,6 @@ interface Story {
   _id: string;
   images: {
     link: string;
-    isVideo?: boolean;
   }[];
   fullName: string;
   avatar: string;
@@ -51,7 +50,20 @@ interface Story {
   username: string;
 }
 
+interface LinkedStories {
+  prevStory2: {
+    username: string;
+    fullName: string;
+    image: string;
+    avatar: string;
+  } | null;
+  prevStory1: LinkedStories["prevStory2"];
+  nextStory1: LinkedStories["prevStory2"];
+  nextStory2: LinkedStories["prevStory2"];
+}
+
 function Story({ params }: Props) {
+  const query = useSearchParams();
   const form = useForm<{
     reply: string;
   }>({
@@ -71,9 +83,11 @@ function Story({ params }: Props) {
   const [reportDialog, setReportDialog] = React.useState(false);
   const [currentStory, setCurrentStory] = React.useState<Story | null>(null);
   const [loading, setLoading] = React.useState(true);
-  const [linkedStories, setLinkedStories] = React.useState({
-    prevStory: "",
-    nextStory: "",
+  const [linkedStories, setLinkedStories] = React.useState<LinkedStories>({
+    prevStory2: null,
+    prevStory1: null,
+    nextStory1: null,
+    nextStory2: null,
   });
   const [isPaused, setIsPaused] = React.useState(true);
   const [timer, setTimer] = React.useState<Timer | null>(null);
@@ -85,6 +99,9 @@ function Story({ params }: Props) {
       stories.map((story) => {
         if (username === story.username) {
           setCurrentStory(story);
+          if (query.get("previous")) {
+            setIndex(story.images.length - 1);
+          }
         }
       });
       setLoading(false);
@@ -227,10 +244,44 @@ function Story({ params }: Props) {
   React.useEffect(() => {
     if (!currentStory) return;
     const storyIndex = stories.indexOf(currentStory);
-    const nextStory = stories[storyIndex + 1]?.username;
-    const prevStory = stories[storyIndex - 1]?.username;
-    setLinkedStories({ prevStory, nextStory });
-  }, [currentStory]);
+    const prevSecondStory = stories[storyIndex - 2];
+    const prevFirstStory = stories[storyIndex - 1];
+    const nextFirstStory = stories[storyIndex + 1];
+    const nextSecondStory = stories[storyIndex + 2];
+    const prevStory2 = prevSecondStory
+      ? {
+          username: prevSecondStory.username,
+          fullName: prevSecondStory.fullName,
+          avatar: prevSecondStory.avatar,
+          image: prevSecondStory.images[0].link,
+        }
+      : null;
+    const prevStory1 = prevFirstStory
+      ? {
+          username: prevFirstStory.username,
+          fullName: prevFirstStory.fullName,
+          avatar: prevFirstStory.avatar,
+          image: prevFirstStory.images[0].link,
+        }
+      : null;
+    const nextStory1 = nextFirstStory
+      ? {
+          username: nextFirstStory.username,
+          fullName: nextFirstStory.fullName,
+          avatar: nextFirstStory.avatar,
+          image: nextFirstStory.images[0].link,
+        }
+      : null;
+    const nextStory2 = nextSecondStory
+      ? {
+          username: nextSecondStory.username,
+          fullName: nextSecondStory.fullName,
+          avatar: nextSecondStory.avatar,
+          image: nextSecondStory.images[0].link,
+        }
+      : null;
+    setLinkedStories({ prevStory2, prevStory1, nextStory1, nextStory2 });
+  }, [currentStory?.username]);
 
   React.useEffect(() => {
     if (imageLoading) {
@@ -256,16 +307,54 @@ function Story({ params }: Props) {
       >
         <X size="40" />
       </button>
+      <div className="w-48 aspect-9/16 max-xl:w-32 max-md:hidden mx-2 rounded-sm relative">
+        {linkedStories.prevStory2 && (
+          <Link href={linkedStories.prevStory2.username}>
+            <Avatar className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none w-20 h-20">
+              <AvatarImage src={linkedStories.prevStory2.avatar} alt="" />
+              <AvatarFallback>
+                {nameFallback(linkedStories.prevStory2.fullName)}
+              </AvatarFallback>
+            </Avatar>
+            <Image
+              src={linkedStories.prevStory2.image}
+              alt=""
+              width="100"
+              height="200"
+              className="w-full h-full object-cover rounded-sm"
+            />
+          </Link>
+        )}
+      </div>
+      <div className="w-48 aspect-9/16 max-xl:w-32 max-lg:hidden mx-2 rounded-sm relative">
+        {linkedStories.prevStory1 && (
+          <Link href={linkedStories.prevStory1.username}>
+            <Avatar className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none shadow-lg w-20 h-20">
+              <AvatarImage src={linkedStories.prevStory1.avatar} alt="" />
+              <AvatarFallback>
+                {nameFallback(linkedStories.prevStory1.fullName)}
+              </AvatarFallback>
+            </Avatar>
+            <Image
+              src={linkedStories.prevStory1.image}
+              alt=""
+              className="w-full h-full object-cover rounded-sm"
+              width="100"
+              height="200"
+            />
+          </Link>
+        )}
+      </div>
       <div className="flex max-sm:hidden items-center justify-center h-full px-4 w-16">
         <button
           className={`p-1 bg-stone-200 text-black rounded-full ${
-            index === 0 && !linkedStories.prevStory ? "hidden" : ""
+            index === 0 && !linkedStories.prevStory1 ? "hidden" : ""
           }`}
           ref={prevRef}
           onClick={() => {
-            if (index === 0) {
-              if (linkedStories.prevStory) {
-                router.push(`/story/${linkedStories.prevStory}`);
+            if (index === 0 && linkedStories.prevStory1) {
+              if (linkedStories.prevStory1.username) {
+                router.push(`/story/${linkedStories.prevStory1.username}?previous=true`);
               } else {
                 router.push("/");
               }
@@ -462,12 +551,12 @@ function Story({ params }: Props) {
               variant="ghost"
               size="icon"
               className="px-2 w-fit hover:bg-transparent rounded-full"
-              onClick={() =>
+              onClick={() => {
                 setCurrentStory({
                   ...currentStory,
                   liked: !currentStory.liked,
-                })
-              }
+                });
+              }}
               type="button"
             >
               <Heart
@@ -493,15 +582,16 @@ function Story({ params }: Props) {
       <div className="flex max-sm:hidden items-center justify-center h-full px-4 w-16">
         <button
           className={`p-1 bg-stone-200 text-black rounded-full ${
-            index === currentStory.images.length - 1 && !linkedStories.nextStory
+            index === currentStory.images.length - 1 &&
+            !linkedStories.nextStory1
               ? "hidden"
               : ""
           }`}
           ref={nextRef}
           onClick={() => {
             if (index === currentStory.images.length - 1) {
-              if (linkedStories.nextStory) {
-                router.push(`/story/${linkedStories.nextStory}`);
+              if (linkedStories.nextStory1?.username) {
+                router.push(`/story/${linkedStories.nextStory1?.username}`);
               } else {
                 router.push("/");
               }
@@ -513,6 +603,44 @@ function Story({ params }: Props) {
         >
           <ChevronRight size="20" />
         </button>
+      </div>
+      <div className="w-48 aspect-9/16 max-xl:w-32 max-md:hidden mx-2 rounded-sm relative">
+        {linkedStories.nextStory1 && (
+          <Link href={linkedStories.nextStory1.username}>
+            <Avatar className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none w-20 h-20">
+              <AvatarImage src={linkedStories.nextStory1.avatar} alt="" />
+              <AvatarFallback>
+                {nameFallback(linkedStories.nextStory1.fullName)}
+              </AvatarFallback>
+            </Avatar>
+            <Image
+              src={linkedStories.nextStory1.image}
+              alt=""
+              width="100"
+              height="200"
+              className="w-full h-full object-cover rounded-sm"
+            />
+          </Link>
+        )}
+      </div>
+      <div className="w-48 aspect-9/16 max-xl:w-32 max-lg:hidden mx-2 rounded-sm relative">
+        {linkedStories.nextStory2 && (
+          <Link href={linkedStories.nextStory2.username}>
+            <Avatar className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none w-20 h-20">
+              <AvatarImage src={linkedStories.nextStory2.avatar} alt="" />
+              <AvatarFallback>
+                {nameFallback(linkedStories.nextStory2.fullName)}
+              </AvatarFallback>
+            </Avatar>
+            <Image
+              src={linkedStories.nextStory2.image}
+              alt=""
+              width="100"
+              height="200"
+              className="w-full h-full object-cover rounded-sm"
+            />
+          </Link>
+        )}
       </div>
     </div>
   );

@@ -88,4 +88,7 @@
     -webkit-appearance: none;
     margin: 0;
   }
+  .blur-bg {
+    -webkit-backdrop-filter: blur(4px);
+  }
 }
