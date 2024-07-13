@@ -183,7 +183,7 @@ function Navbar() {
           <Link
             href={`/${user.username}`}
             className={`md:w-full w-fit flex items-center xl:justify-start justify-center xl:pl-4 sm:p-3 p-2 gap-3 rounded-2xl hover:ring-stone-600 dark:hover:ring-stone-400 transition-colors ${
-              location.includes(`/${user.username}`)
+              location === `/${user.username}`
                 ? "sm:bg-stone-200 sm:dark:bg-stone-800 sm:hover:ring-0"
                 : "sm:hover:ring-2"
             }`}

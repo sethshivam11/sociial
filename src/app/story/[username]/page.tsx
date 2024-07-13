@@ -79,6 +79,9 @@ function Story({ params }: Props) {
   const closeRef2 = React.useRef<HTMLButtonElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const progressBarRef = React.useRef<HTMLSpanElement>(null);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const touchStartRef = React.useRef<number>(0);
+
   const [index, setIndex] = React.useState(0);
   const [reportDialog, setReportDialog] = React.useState(false);
   const [currentStory, setCurrentStory] = React.useState<Story | null>(null);
@@ -92,6 +95,83 @@ function Story({ params }: Props) {
   const [isPaused, setIsPaused] = React.useState(true);
   const [timer, setTimer] = React.useState<Timer | null>(null);
   const [imageLoading, setImageLoading] = React.useState(true);
+
+  function report(storyId: string, username: string) {
+    console.log(`Reported story ${storyId} by user ${username}`);
+  }
+
+  function onSubmit(data: { reply: string }) {
+    console.log(data.reply);
+  }
+
+  function handleTouchStart(e: React.TouchEvent<HTMLButtonElement>) {
+    setIsPaused(true);
+    touchStartRef.current = e.touches[0].clientX;
+  }
+
+  function handleTouchEnd(e: React.TouchEvent<HTMLButtonElement>) {
+    const touchEnd = e.changedTouches[0].clientX;
+    const delta = touchEnd - touchStartRef.current;
+
+    if (delta > 100) {
+      if (linkedStories.prevStory1) {
+        router.prefetch(`/story/${linkedStories.prevStory1.username}`);
+        setIsPaused(true);
+        router.push(
+          `/story/${linkedStories.prevStory1.username}?previous=true`
+        );
+      } else {
+        router.prefetch("/");
+        router.push("/");
+      }
+    } else if (delta < -100) {
+      if (linkedStories.nextStory1) {
+        setIsPaused(true);
+        router.prefetch(`/story/${linkedStories.nextStory1.username}`);
+        router.push(`/story/${linkedStories.nextStory1.username}`);
+      } else {
+        router.prefetch("/");
+        router.push("/");
+      }
+    }
+  }
+
+  class Timer {
+    private timerId: NodeJS.Timeout | undefined;
+    private start: number;
+    private remaining: number;
+    private callback: () => void;
+
+    constructor(callback: () => void, delay: number) {
+      this.remaining = delay;
+      this.callback = callback;
+      this.resume();
+      this.start = Date.now();
+      this.clear();
+      this.timerId = undefined;
+    }
+
+    pause() {
+      clearTimeout(this.timerId);
+      this.timerId = undefined;
+      this.remaining -= Date.now() - this.start;
+    }
+
+    clear() {
+      if (this.timerId) {
+        return clearTimeout(this.timerId);
+      }
+    }
+
+    resume() {
+      if (this.timerId) {
+        return;
+      }
+
+      this.start = Date.now();
+      this.timerId = setTimeout(this.callback, this.remaining);
+    }
+  }
 
   React.useEffect(() => {
     function getStory() {
@@ -136,10 +216,24 @@ function Story({ params }: Props) {
 
     getStory();
 
+    // const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+    const handleFullscreenChange = () => {
+      const isFullscreen = document.fullscreenElement !== null;
+      alert(isFullscreen);
+      // if (!isFullscreen && containerRef.current) {
+      containerRef.current?.requestFullscreen().catch((err) => {
+        alert("Failed to enter fullscreen:" + err);
+      });
+      // }
+    };
+
     document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("DOMContentLoaded", handleFullscreenChange);
 
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("DOMContentLoaded", handleFullscreenChange);
     };
   }, []);
 
@@ -148,51 +242,6 @@ function Story({ params }: Props) {
       notFound();
     }
   }, [loading, currentStory]);
-
-  function report(storyId: string, username: string) {
-    console.log(`Reported story ${storyId} by user ${username}`);
-  }
-
-  function onSubmit(data: { reply: string }) {
-    console.log(data.reply);
-  }
-
-  class Timer {
-    private timerId: NodeJS.Timeout | undefined;
-    private start: number;
-    private remaining: number;
-    private callback: () => void;
-
-    constructor(callback: () => void, delay: number) {
-      this.remaining = delay;
-      this.callback = callback;
-      this.resume();
-      this.start = Date.now();
-      this.clear();
-      this.timerId = undefined;
-    }
-
-    pause() {
-      clearTimeout(this.timerId);
-      this.timerId = undefined;
-      this.remaining -= Date.now() - this.start;
-    }
-
-    clear() {
-      if (this.timerId) {
-        return clearTimeout(this.timerId);
-      }
-    }
-
-    resume() {
-      if (this.timerId) {
-        return;
-      }
-
-      this.start = Date.now();
-      this.timerId = setTimeout(this.callback, this.remaining);
-    }
-  }
 
   React.useEffect(() => {
     const timer: Timer = new Timer(function () {
@@ -298,7 +347,10 @@ function Story({ params }: Props) {
   }
 
   return (
-    <div className="w-full col-span-10 h-[100dvh] flex items-center justify-center bg-stone-900 text-white select-none">
+    <div
+      className="w-full col-span-10 h-[100dvh] flex items-center justify-center bg-stone-900 text-white select-none"
+      ref={containerRef}
+    >
       <button
         className="text-stone-100 p-2 absolute hidden sm:inline-block right-0 top-0"
         onClick={() => router.push("/")}
@@ -354,7 +406,9 @@ function Story({ params }: Props) {
           onClick={() => {
             if (index === 0 && linkedStories.prevStory1) {
               if (linkedStories.prevStory1.username) {
-                router.push(`/story/${linkedStories.prevStory1.username}?previous=true`);
+                router.push(
+                  `/story/${linkedStories.prevStory1.username}?previous=true`
+                );
               } else {
                 router.push("/");
               }
@@ -508,18 +562,17 @@ function Story({ params }: Props) {
           onClick={() => prevRef.current?.click()}
           onMouseDown={() => setIsPaused(true)}
           onMouseUp={() => setIsPaused(false)}
-          onTouchStart={() => setIsPaused(true)}
-          onTouchEnd={() => setIsPaused(false)}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
         />
         <button
           className="w-4/5 absolute right-0 bg-transparent h-full"
           onClick={() => nextRef.current?.click()}
           onMouseDown={() => setIsPaused(true)}
           onMouseUp={() => setIsPaused(false)}
-          onTouchStart={() => setIsPaused(true)}
-          onTouchEnd={() => setIsPaused(false)}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
         />
-
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}

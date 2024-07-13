@@ -341,14 +341,14 @@ function Videos() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="p-1 w-fit rounded-xl sm:hidden mr-1 hover:bg-background"
+                className="p-1 w-fit rounded-xl sm:hidden mx-1 hover:bg-background"
                 onClick={() => router.push("/")}
               >
                 <ChevronLeft color="white" />
               </Button>
               <Link
                 href={`/${post.user.username}`}
-                className="flex items-center justify-start"
+                className="flex items-center justify-start sm:pl-4"
               >
                 <Avatar>
                   <AvatarImage src={post.user.avatar} />

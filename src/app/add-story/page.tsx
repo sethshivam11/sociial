@@ -119,7 +119,11 @@ function Page() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      <div className="h-full flex flex-col py-8 px-3 max-sm:hidden">
+      <div
+        className={`h-full flex flex-col py-8 px-3 max-sm:hidden ${
+          stories.length ? "" : "hidden"
+        }`}
+      >
         <ToggleGroup type="single" className="flex-col">
           <ToggleGroupItem value="" size="lg">
             <Type />
@@ -182,8 +186,15 @@ function Page() {
               </AlertDialogContent>
             </AlertDialog>
             <CircleFadingPlus size="60" />
-            <div className="flex flex-col items-center gap-2">
-              <p className="text-stone-500">Drop your Photos and Images here</p>
+            <div className="flex flex-col items-center gap-3">
+              <div>
+                <h1 className="font-bold text-2xl tracking-tight w-full text-center">
+                  Add to Story
+                </h1>
+                <p className="text-stone-500">
+                  Drop your Photos and Images here
+                </p>
+              </div>
               <Button>
                 <Label
                   htmlFor="new-post"

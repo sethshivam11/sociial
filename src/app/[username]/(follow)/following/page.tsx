@@ -42,7 +42,7 @@ function Page() {
   return (
     <>
       {followers.length ? (
-        <div className="flex flex-col gap-3 px-3 h-fit overflow-y-auto overflow-x-hidden pb-2 min-h-full">
+        <div className="flex flex-col gap-3 px-3 h-fit overflow-y-auto overflow-x-hidden pb-2">
           {followers.map((follower, index) => (
             <div
               className="flex items-start justify-start hover:bg-stone-200 hover:dark:bg-stone-800 rounded-lg p-2"

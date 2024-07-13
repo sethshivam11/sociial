@@ -258,28 +258,30 @@ function Page() {
       },
     },
   ];
-  
+
   return (
-    <div className="sm:container flex flex-col items-center justify-start max-h-[100dvh] min-h-[100dvh] xl:col-span-8 sm:col-span-9 col-span-10 sm:py-6">
-      <div className="h-full lg:w-3/4 w-full rounded-xl sm:bg-stone-100 sm:dark:bg-stone-900 sm:pt-4 md:px-16 sm:px-6 px-0 pb-28">
-        <div className="w-full flex justify-between items-center pt-3 max-sm:pb-4 max-sm:px-6 max-sm:bg-stone-200 max-sm:dark:bg-stone-800">
-          <Link href="/">
-            <Button variant="ghost" size="icon" className="rounded-xl">
-              <ArrowLeft />
-            </Button>
-          </Link>
-          <h1 className="text-2xl tracking-tight font-bold w-full text-center">
-            Notifications
-          </h1>
-          <Link href="/settings/notifications">
-            <Button variant="ghost" size="icon" className="rounded-xl">
-              <Wrench />
-            </Button>
-          </Link>
+    <div className="sm:container flex flex-col items-center justify-start min-h-[100dvh] xl:col-span-8 sm:col-span-9 col-span-10 sm:pt-6 pb-3">
+      <div className="h-full lg:w-3/4 w-full rounded-xl sm:bg-stone-100 sm:dark:bg-stone-900 md:px-16 sm:px-6 px-0">
+        <div className="sticky top-0 sm:bg-stone-100 sm:dark:bg-stone-900 bg-background w-full z-10">
+          <div className="w-full flex justify-between items-center max-sm:px-3 sm:pt-4 pt-2">
+            <Link href="/">
+              <Button variant="ghost" size="icon" className="rounded-xl max-sm:hover:bg-background">
+                <ArrowLeft />
+              </Button>
+            </Link>
+            <h1 className="sm:text-2xl text-lg tracking-tight font-bold w-full text-center sm:py-2">
+              Notifications
+            </h1>
+            <Link href="/settings/notifications">
+              <Button variant="ghost" size="icon" className="rounded-xl max-sm:hover:bg-background">
+                <Wrench />
+              </Button>
+            </Link>
+          </div>
+          <hr className="w-full bg-stone-950 sm:mt-3 mt-2 sm:mb-2 mb-0" />
         </div>
-        <hr className="w-full max-sm:hidden bg-stone-950 mb-8 mt-3" />
         {notifications.length ? (
-          <div className="flex flex-col gap-3 px-3 h-full mb-16 overflow-y-auto mt-4">
+          <div className="flex flex-col gap-3 px-3 h-fit overflow-y-auto pb-2">
             {notifications.map((notification, index) => (
               <div
                 className="flex items-start justify-start hover:bg-stone-200 hover:dark:bg-stone-800 rounded-lg p-2"

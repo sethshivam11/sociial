@@ -7,7 +7,6 @@ import {
   Ban,
   Bell,
   KeySquare,
-  Lock,
   Palette,
   Shield,
   UserCircle2,
@@ -40,21 +39,21 @@ function Page({ children }: React.PropsWithChildren) {
   return (
     <div className="sm:container flex items-start justify-start max-h-[100dvh] min-h-[100dvh] xl:col-span-8 sm:col-span-9 col-span-10 sm:py-6">
       <div
-        className={`lg:w-1/4 w-full h-full lg:max-h-full lg:border-r-2 border-stone-200 dark:border-stone-800 ${
-          location === "/settings" ? "block" : "max-lg:hidden"
+        className={`lg:w-1/4 sm:w-1/3 w-full h-full lg:max-h-full sm:border-r-2 border-stone-200 dark:border-stone-800 ${
+          location === "/settings" ? "block" : "max-sm:hidden"
         }`}
       >
-        <h1 className="sm:text-3xl text-xl tracking-tighter font-bold text-center w-full sm:py-6 py-4 flex items-center">
+        <div className="sm:text-3xl text-xl tracking-tighter font-bold text-center w-full sm:py-6 py-2 flex items-center">
           <Button
             variant="ghost"
             size="icon"
-            className="sm:hidden mx-4"
+            className="sm:hidden mx-4 hover:bg-background"
             onClick={() => router.push(`/${username}`)}
           >
             <ArrowLeft />
           </Button>
-          Settings
-        </h1>
+          <h1 className="w-full max-sm:mr-[72px]">Settings</h1>
+        </div>
         <hr className="w-full bg-stone-500 mb-4" />
         <div className="flex flex-col sm:px-1 px-4 overflow-y-auto gap-2">
           <Link

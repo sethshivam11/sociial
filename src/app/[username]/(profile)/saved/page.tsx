@@ -3,6 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
 import React from "react";
 import { Heart, MessageSquareText, Image as PostImage } from "lucide-react";
+import Link from "next/link";
 
 function Page() {
   const [loading, setLoading] = React.useState(false);
@@ -44,7 +45,8 @@ function Page() {
         })
       ) : posts.length ? (
         posts.map((post, index) => (
-          <div
+          <Link
+            href={`/post/${post._id}`}
             className="lg:w-1/4 w-1/3 aspect-square p-1 relative"
             key={index}
           >
@@ -55,7 +57,7 @@ function Page() {
               className="w-full h-full object-cover rounded-sm select-none pointer-events-none"
               alt=""
             />
-          </div>
+          </Link>
         ))
       ) : (
         <div className="flex flex-col items-center justify-center w-full min-h-96 h-full">

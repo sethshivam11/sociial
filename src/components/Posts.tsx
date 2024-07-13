@@ -101,7 +101,7 @@ function Posts() {
       liked: false,
       images: [],
       video: {
-        link: "/test-1.mp4",
+        link: "https://res.cloudinary.com/dv3qbj0bn/video/upload/f_auto:video,q_auto/v1/samples/dance-2",
       },
       tags: [
         {

@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Search } from "lucide-react";
 import Link from "next/link";
@@ -15,13 +16,19 @@ function Layout({ children }: { children: React.ReactNode }) {
   const location = usePathname();
   return (
     <div className="sm:container flex flex-col items-center justify-start xl:col-span-8 sm:col-span-9 col-span-10 sm:py-6">
-      <div className="h-fit lg:w-3/4 w-full rounded-xl sm:bg-stone-100 sm:dark:bg-stone-900 sm:pt-4 sm:px-6 px-0 pb-4 relative">
+      <div className="h-fit lg:w-3/4 w-full rounded-xl sm:bg-stone-100 sm:dark:bg-stone-900 sm:pt-4 sm:px-6 px-0 pb-4 min-h-full relative">
         <div className="sticky top-0 sm:bg-stone-100 sm:dark:bg-stone-900 bg-background w-full py-2 z-10">
-          <div className="w-full flex items-center justify-start text-center pt-2 max-sm:my-4 max-sm:mx-2">
+          <div className="w-full flex items-center justify-start text-center max-sm:mb-5 max-sm:px-2">
             <Link href={`/${user.username}`}>
-              <ArrowLeft />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-xl ml-2 max-sm:hover:bg-background"
+              >
+                <ArrowLeft />
+              </Button>
             </Link>
-            <h1 className="sm:text-2xl text-lg tracking-tight font-bold text-center w-full mr-6">
+            <h1 className="sm:text-2xl text-lg tracking-tight font-bold text-center w-full mr-12">
               {user.fullName}
             </h1>
           </div>
@@ -48,12 +55,16 @@ function Layout({ children }: { children: React.ReactNode }) {
             </Link>
           </div>
           <hr className="w-full bg-stone-950 mb-5 mt-3" />
-          <div className="flex items-center gap-2 bg-background rounded-lg w-full mt-3 pl-3 focus-within:ring-2 focus-within:ring-stone-200 border">
-            <Search />
-            <Input
-              placeholder="Search"
-              className="focus-within:ring-offset-transparent ring-offset-0 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-e-lg w-full"
-            />
+          <div className="w-full px-2">
+            <div className="flex items-center gap-2 bg-background rounded-lg w-full mt-3 pl-3 focus-within:ring-2 focus-within:ring-stone-200 border">
+              <Search />
+              <Input
+                placeholder="Search"
+                inputMode="text"
+                autoComplete="off"
+                className="focus-within:ring-offset-transparent ring-offset-0 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-e-lg w-full"
+              />
+            </div>
           </div>
         </div>
 
