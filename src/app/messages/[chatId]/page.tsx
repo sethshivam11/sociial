@@ -4,7 +4,7 @@ import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { nameFallback } from "@/lib/helpers";
 import {
-  ArrowLeft,
+  ChevronLeft,
   CameraIcon,
   DownloadIcon,
   FileIcon,
@@ -51,6 +51,7 @@ import {
   DialogContent,
   DialogClose,
 } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 interface Message {
   id: string;
@@ -79,7 +80,7 @@ function Page({ params }: { params: { chatId: string } }) {
   const chatId = params.chatId;
   const messageScrollElement = React.useRef<HTMLDivElement>(null);
   const lastMessageRef = React.useRef<HTMLDivElement>(null);
-  const inputRef = React.useRef<HTMLInputElement>(null);
+  const inputRef = React.useRef<HTMLTextAreaElement>(null);
   const [isTyping, setIsTyping] = React.useState(true);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -542,25 +543,43 @@ function Page({ params }: { params: { chatId: string } }) {
     } else {
       setTheme(themes[0]);
     }
+
+    function handleTyping(e: KeyboardEvent) {
+      if (e.target === inputRef.current && e.code === "Enter") {
+        e.preventDefault();
+        form.handleSubmit(onSubmit)();
+        return form.reset();
+      }
+      setIsTyping(true);
+      setTimeout(() => {
+        setIsTyping(false);
+      }, 2000);
+    }
+
+    document.addEventListener("keydown", handleTyping);
+
+    return () => {
+      document.removeEventListener("keydown", handleTyping);
+    };
   }, []);
 
   return (
     <div
-      className={`md:border-l-2 border-stone-200 dark:border-stone-800 md:ml-3 md:flex flex flex-col items-start justify-start gap-1 relative lg:col-span-7 md:col-span-6 col-span-10 overflow-y-auto overflow-x-clip sm:min-h-[42rem] max-h-[100dvh] ${
+      className={`md:border-l-2 border-stone-200 dark:border-stone-800 md:ml-3 md:flex flex flex-col items-start justify-start gap-1 relative lg:col-span-7 md:col-span-6 col-span-10 ${
         location !== "/messages" ? "" : "hidden"
       } `}
     >
-      <div className="flex gap-2 items-center justify-between sm:absolute fixed top-0 bottom-auto left-0 w-full md:h-20 h-16 md:ml-3 border-b-2 border-stone-200 dark:border-stone-800 bg-white dark:bg-black md:px-4 pl-1 pr-0 z-20">
+      <div className="flex gap-2 items-center justify-between py-2 sticky top-0 left-0 w-full md:h-20  md:ml-3 border-b-2 border-stone-200 dark:border-stone-800 bg-white dark:bg-black md:px-4 pl-1 pr-0 z-20">
         <div className="flex items-center justify-center">
           <Button
             variant="ghost"
             size="icon"
-            className={`px-2 rounded-xl ${
+            className={`rounded-xl max-sm:hover:bg-black w-8 ${
               location.includes("/messages/") ? "sm:hidden" : ""
             }`}
             onClick={() => router.push("/messages")}
           >
-            <ArrowLeft />
+            <ChevronLeft />
           </Button>
           <Avatar
             className="w-12 h-12 ml-0.5 mr-2 cursor-pointer"
@@ -613,7 +632,7 @@ function Page({ params }: { params: { chatId: string } }) {
         </div>
       </div>
       <div
-        className="max-h-full overflow-y-auto overflow-x-auto md:mt-20 mt-16 md:mb-16 flex flex-col items-start justify-start w-full mr-0 py-2 px-3"
+        className="flex flex-col items-start justify-start w-full mr-0 py-2 px-3"
         ref={messageScrollElement}
       >
         {infoOpen ? (
@@ -693,7 +712,7 @@ function Page({ params }: { params: { chatId: string } }) {
                   }`}
                 >
                   <span
-                    className={` rounded-[50px] py-1 -mb-0.5 px-3 opacity-70 ${
+                    className={`py-1 rounded-xl -mb-1 px-3 opacity-70 ${
                       message.type === "sent"
                         ? `${theme.color} text-${theme.text}`
                         : "bg-stone-300 dark:bg-stone-800"
@@ -708,7 +727,7 @@ function Page({ params }: { params: { chatId: string } }) {
                       : ""}
                   </span>
                   <div
-                    className={`py-2 px-4 rounded-[50px] w-fit relative ${
+                    className={`py-2 px-4 rounded-2xl w-fit relative ${
                       message.type === "reply"
                         ? `${theme.color} text-${theme.text} max-w-3/4`
                         : "bg-stone-300 dark:bg-stone-800 max-w-3/4"
@@ -738,7 +757,7 @@ function Page({ params }: { params: { chatId: string } }) {
                           </button>
                         </DialogTrigger>
                         <DialogContent
-                          className="bg-black h-full w-screen max-w-screen"
+                          className="bg-black h-full w-[100dvh] max-w-[100dvh]"
                           hideCloseIcon
                         >
                           <Image
@@ -746,7 +765,7 @@ function Page({ params }: { params: { chatId: string } }) {
                             width="160"
                             height="160"
                             alt=""
-                            className="h-full w-full max-h-screen object-contain"
+                            className="h-full w-full max-h-[100dvh] object-contain"
                             onError={() => (
                               <span className="text-black dark:text-white">
                                 Something went wrong
@@ -804,11 +823,11 @@ function Page({ params }: { params: { chatId: string } }) {
       {infoOpen ? (
         ""
       ) : (
-        <div className="sm:absolute fixed bg-white dark:bg-black bottom-0 left-0 w-full px-2.5 flex items-center justify-center h-16 py-2 z-20">
+        <div className="sticky bg-white dark:bg-black bottom-0 left-0 w-full px-2.5 flex items-center justify-center py-2 z-20">
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="flex items-center w-full justify-center gap-2"
+              className="flex items-end w-full justify-center gap-2"
             >
               <EmojiKeyboard
                 setMessage={(emoji: string): void =>
@@ -822,18 +841,21 @@ function Page({ params }: { params: { chatId: string } }) {
                 render={({ field }) => (
                   <FormItem className="w-full relative flex flex-col bg-white dark:bg-black">
                     <div
-                      className={`flex flex-col gap-0 px-3 py-1 rounded-xl absolute bottom-12 w-full bg-stone-200 dark:bg-stone-800 ring-4 ring-white dark:ring-black leading-5 overflow-hidden ${
+                      className={`flex items-center justify-between gap-0 px-3 py-1 rounded-lg sticky bottom-14 w-full ring-4 ring-white dark:ring-black leading-5 overflow-hidden ${
                         reply.content ? "" : "hidden"
                       }`}
                     >
-                      <div
-                        className={`absolute left-0 ${theme.color} w-1 h-full`}
-                      />
+                      <div className="flex flex-col">
+                        {reply.username}
+                        <span className="text-stone-500 text-sm">
+                          {reply.content.slice(0, 100)}
+                        </span>
+                      </div>
                       <Button
                         variant="ghost"
                         size="icon"
                         type="button"
-                        className="absolute top-1 right-1 h-fit w-fit hover:bg-stone-200 hover:dark:bg-stone-800"
+                        className="top-1 right-1 h-fit w-fit hover:bg-white dark:hover:bg-black"
                         onClick={() =>
                           setReply({
                             username: "",
@@ -841,23 +863,20 @@ function Page({ params }: { params: { chatId: string } }) {
                           })
                         }
                       >
-                        <X size="16" />
+                        <X size="30" />
                       </Button>
-                      {reply.username}
-                      <span className="text-stone-500">{reply.content}</span>
                     </div>
 
                     <FormControl>
-                      <Input
+                      <Textarea
                         placeholder="Type a message..."
                         {...field}
-                        className="rounded-xl"
+                        className="rounded-xl resize-none min-h-10 h-11"
                         autoComplete="off"
                         inputMode="text"
                         ref={inputRef}
                       />
                     </FormControl>
-
                     <FormMessage />
                   </FormItem>
                 )}

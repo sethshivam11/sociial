@@ -81,6 +81,7 @@ function Story({ params }: Props) {
   const progressBarRef = React.useRef<HTMLSpanElement>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const touchStartRef = React.useRef<number>(0);
+  const storyContainer = React.useRef<HTMLDivElement>(null);
 
   const [index, setIndex] = React.useState(0);
   const [reportDialog, setReportDialog] = React.useState(false);
@@ -114,18 +115,18 @@ function Story({ params }: Props) {
     const delta = touchEnd - touchStartRef.current;
 
     if (delta > 100) {
-      if (linkedStories.prevStory1) {
+      if (linkedStories.prevStory1 && containerRef.current) {
         router.prefetch(`/story/${linkedStories.prevStory1.username}`);
         setIsPaused(true);
         router.push(
-          `/story/${linkedStories.prevStory1.username}?previous=true`
+          `/story/${linkedStories.prevStory1.username}?previous=true&skip=true`
         );
       } else {
         router.prefetch("/");
         router.push("/");
       }
     } else if (delta < -100) {
-      if (linkedStories.nextStory1) {
+      if (linkedStories.nextStory1 && containerRef.current) {
         setIsPaused(true);
         router.prefetch(`/story/${linkedStories.nextStory1.username}`);
         router.push(`/story/${linkedStories.nextStory1.username}`);
@@ -421,7 +422,10 @@ function Story({ params }: Props) {
           <ChevronLeft size="20" />
         </button>
       </div>
-      <div className="ring-1 ring-stone-800 flex items-center my-2 rounded-sm bg-black min-w-72 sm:h-[50rem] max-h-full h-fit sm:aspect-9/16 max-sm:h-full sm:w-fit w-full relative">
+      <div
+        className="ring-1 ring-stone-800 flex items-center my-2 rounded-sm bg-black min-w-72 sm:h-[50rem] max-h-full h-fit sm:aspect-9/16 max-sm:h-full sm:w-fit w-full transition-opacity duration-200 relative"
+        ref={storyContainer}
+      >
         <div className="w-full absolute flex items-center justify-between p-4 pt-2 top-0 left-0 bg-gradient-to-b from-transparent/40 via-transparent/20 to-transparent pb-4">
           <div className="w-full flex flex-col justify-start">
             <div className="flex gap-0.5">

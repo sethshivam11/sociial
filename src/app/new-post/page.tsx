@@ -191,7 +191,7 @@ function Page() {
                 {files.map((file, index) => (
                   <div
                     key={index}
-                    className="w-20 h-20 relative bg-transparent/50 rounded-lg p-1 flex items-center justify-center"
+                    className="w-20 h-20 relative overflow-hidden bg-transparent/50 rounded-lg border-2 flex items-center justify-center"
                   >
                     <button onClick={() => setSelectedFile(file)}>
                       <NImage.default
@@ -199,7 +199,7 @@ function Page() {
                         alt=""
                         width="100"
                         height="100"
-                        className="object-cover w-full h-full pointer-events-none select-none cursor-pointer"
+                        className="object-cover w-full pointer-events-none select-none cursor-pointer"
                       />
                     </button>
                     <button

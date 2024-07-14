@@ -194,9 +194,9 @@ function Messages({ children }: { children: React.ReactNode }) {
   }, [search, savedChats]);
 
   return (
-    <div className="grid min-h-screen xl:col-span-8 sm:col-span-9 col-span-10 sm:grid-cols-10 sm:container max-md:pr-2 max-sm:pr-0">
+    <div className="grid min-h-[100dvh] xl:col-span-8 sm:col-span-9 col-span-10 sm:grid-cols-10 sm:container max-md:pr-2 max-sm:pr-0">
       <div
-        className={`lg:col-span-3 md:col-span-4 col-span-10 md:flex flex-col items-start justify-start gap-2 py-6 h-full max-h-[100dvh] sm:min-h-[42rem] md:px-0 sm:px-4 px-5 ${
+        className={`lg:col-span-3 md:col-span-4 col-span-10 md:flex flex-col items-start justify-start gap-2 py-6 h-full max-h-[100dvh] sm:min-h-[42rem] md:px-0 sm:px-4 px-5 sticky top-0 ${
           location === "/messages" ? "flex" : "hidden"
         }`}
       >
@@ -233,7 +233,7 @@ function Messages({ children }: { children: React.ReactNode }) {
             <X size="20" />
           </button>
         </div>
-        <div className="space-y-1 py-3 w-full md:overflow-y-auto md:h-screen sm:pb-2 pb-20 pr-2">
+        <div className="space-y-1 py-3 w-full md:overflow-y-auto md:h-[100dvh] sm:pb-2 pb-20 pr-2">
           {chats.length ? (
             chats.map((chat, index) => (
               <button

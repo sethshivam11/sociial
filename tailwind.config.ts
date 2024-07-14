@@ -91,6 +91,14 @@ const config = {
           from: { opacity: "0" },
           to: { opacity: "1" },
         },
+        "story-skip-start": {
+          from: { opacity: "0" },
+          to: { opacity: "0.5" },
+        },
+        "story-skip-end": {
+          from: { opacity: "0.5" },
+          to: { opacity: "0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -98,6 +106,8 @@ const config = {
         "story": "story 5s linear 1",
         "like": "like 0.5s ease-in-out forwards",
         "opacity": "visible 0.1s ease-out",
+        "skip-start": "story-skip-start 0.15s ease-out",
+        "skip-end": "story-skip-end 0.15s ease-in",
       },
     },
   },

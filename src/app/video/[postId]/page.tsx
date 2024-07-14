@@ -3,7 +3,7 @@ import Comment from "@/components/Comment";
 import Share from "@/components/Share";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
+import { SliderVideo } from "@/components/ui/slider-video";
 import VideoOptions from "@/components/VideoOptions";
 import { nameFallback } from "@/lib/helpers";
 import {
@@ -192,7 +192,7 @@ function Page() {
       <section className="flex items-center justify-center snap-always snap-end w-full h-full py-2 max-sm:bg-stone-950">
         <div className="flex items-center justify-center h-full max-sm:w-full sm:aspect-9/16 bg-stone-950 text-white sm:border relative">
           <video
-            className="w-full h-full object-contain aspect-square"
+            className="w-full cursor-pointer object-contain aspect-square"
             preload="auto"
             muted={isMuted}
             onClick={() => setIsPaused(!isPaused)}
@@ -268,113 +268,139 @@ function Page() {
             username={post.user.username}
             avatar={post.user.avatar}
           />
-          {buffering ? (
+          {buffering && (
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-transparent/50 p-4 rounded-full animate-visible">
               <Loader2 className="animate-spin" size="50" />
             </div>
-          ) : (
-            <div className="flex flex-col absolute bottom-0 left-0 w-full ">
-              <div className="flex flex-col items-end justify-start gap-5 px-3 w-full pb-10">
-                <button
-                  title={post.liked ? "Unlike" : "Like"}
-                  onClick={() => {
-                    likePost(post._id);
-                  }}
-                >
-                  <Heart
-                    size="30"
-                    className={`${
-                      post.liked ? "text-rose-500" : "sm:hover:opacity-60"
-                    } transition-all active:scale-110`}
-                    fill={post.liked ? "rgb(244 63 94)" : "none"}
-                  />
-                  <span className="text-sm">{post.likesCount}</span>
-                </button>
-                <Comment
-                  comments={comments}
-                  user={post.user}
-                  commentsCount={post.commentsCount}
-                  likeComment={likeComment}
-                  addComment={addComment}
-                  isVideo={true}
+          )}
+          <div className="flex flex-col absolute bottom-0 left-0 w-full ">
+            <div className="absolute bottom-10 right-0 max-sm:flex hidden flex-col items-center justify-start gap-4 px-3 pb-10">
+              <button
+                title={post.liked ? "Unlike" : "Like"}
+                onClick={() => {
+                  likePost(post._id);
+                }}
+              >
+                <Heart
+                  size="30"
+                  className={`${
+                    post.liked ? "text-rose-500" : "sm:hover:opacity-60"
+                  } transition-all active:scale-110`}
+                  fill={post.liked ? "rgb(244 63 94)" : "none"}
                 />
-                <Share _id={post._id} isVideo={true} />
-              </div>
-              <p className="absolute bottom-10 w-full pr-12 pl-6 text-sm bg-gradient-to-b from-transparent via-transparent/60 to-transparent-90">
-                <span>{post.caption.slice(0, 80)}&nbsp;</span>
-                <button
-                  className="text-stone-500"
-                  onClick={(e) => {
-                    const btn = e.target as HTMLButtonElement;
-                    const span = btn.parentElement
-                      ?.childNodes[0] as HTMLElement;
-                    if (span.innerHTML !== post.caption) {
-                      span.innerHTML = post.caption;
-                      btn.innerHTML = "&nbsp;less";
-                    } else {
-                      span.innerHTML = post.caption.slice(0, 80);
-                      btn.innerHTML = "&nbsp;more";
-                    }
-                  }}
-                >
-                  more
-                </button>
-              </p>
-              <div className="flex items-center justify-start px-3 h-fit bg-gradient-to-b from-transparent via-transparent/50 to-transparent/60">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="rounded-full p-1 z-10"
-                >
-                  {isPaused ? (
-                    <Play
-                      size="30"
-                      strokeWidth="0"
-                      fill="currentColor"
-                      onClick={() => setIsPaused(!isPaused)}
-                    />
-                  ) : (
-                    <Pause
-                      size="30"
-                      strokeWidth="0"
-                      fill="currentColor"
-                      onClick={() => setIsPaused(!isPaused)}
-                    />
-                  )}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="rounded-full p-1 z-10"
-                  onClick={() => setIsMuted(!isMuted)}
-                >
-                  {isMuted ? (
-                    <VolumeXIcon size="30" />
-                  ) : (
-                    <Volume2Icon size="30" />
-                  )}
-                </Button>
-                <div className="mx-3 w-full z-10">
-                  <Slider
-                    value={[sliderValue]}
-                    min={0}
-                    max={videoRef?.duration || 15}
-                    step={1}
-                    onValueChange={(value) => {
-                      setSeeking(true);
-                      setSliderValue(value[0]);
-                    }}
-                    onValueCommit={() => {
-                      if (!videoRef) return;
-                      setSeeking(false);
-                      videoRef.currentTime = sliderValue;
-                    }}
-                    className="w-full"
+                <span className="text-sm">{post.likesCount}</span>
+              </button>
+              <Comment
+                comments={comments}
+                user={post.user}
+                commentsCount={post.commentsCount}
+                likeComment={likeComment}
+                addComment={addComment}
+                isVideo={true}
+              />
+              <Share _id={post._id} isVideo={true} />
+            </div>
+            <p className="w-full max-h-80 overflow-y-auto overflow-x-clip no-scrollbar max-sm:pr-12 pr-6 pl-6 text-sm">
+              <span>{post.caption.slice(0, 80)}&nbsp;</span>
+              <button
+                className="text-stone-400 text-left"
+                onClick={(e) => {
+                  const btn = e.target as HTMLButtonElement;
+                  const span = btn.parentElement?.childNodes[0] as HTMLElement;
+                  if (span.innerHTML !== "") {
+                    span.innerHTML = "";
+                    btn.classList.remove("text-stone-400");
+                    btn.innerHTML = post.caption;
+                  } else {
+                    span.innerHTML = post.caption.slice(0, 80);
+                    btn.classList.add("text-stone-400");
+                    btn.innerHTML = "&nbsp;more";
+                  }
+                }}
+              >
+                more
+              </button>
+            </p>
+            <div className="flex items-center justify-start px-3 h-fit bg-gradient-to-b from-transparent via-transparent/50 to-transparent/60">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full p-1 z-10"
+              >
+                {isPaused ? (
+                  <Play
+                    size="30"
+                    strokeWidth="0"
+                    fill="currentColor"
+                    onClick={() => setIsPaused(!isPaused)}
                   />
-                </div>
+                ) : (
+                  <Pause
+                    size="30"
+                    strokeWidth="0"
+                    fill="currentColor"
+                    onClick={() => setIsPaused(!isPaused)}
+                  />
+                )}
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full p-1 z-10"
+                onClick={() => setIsMuted(!isMuted)}
+              >
+                {isMuted ? (
+                  <VolumeXIcon size="30" />
+                ) : (
+                  <Volume2Icon size="30" />
+                )}
+              </Button>
+              <div className="mx-3 w-full z-10">
+                <SliderVideo
+                  value={[sliderValue]}
+                  min={0}
+                  max={videoRef?.duration || 15}
+                  step={1}
+                  onValueChange={(value) => {
+                    setSeeking(true);
+                    setSliderValue(value[0]);
+                  }}
+                  onValueCommit={() => {
+                    if (!videoRef) return;
+                    setSeeking(false);
+                    videoRef.currentTime = sliderValue;
+                  }}
+                  className="w-full "
+                />
               </div>
             </div>
-          )}
+          </div>
+        </div>
+        <div className="sm:flex hidden flex-col items-center justify-end gap-4 px-3 pb-12 h-full">
+          <button
+            title={post.liked ? "Unlike" : "Like"}
+            onClick={() => {
+              likePost(post._id);
+            }}
+          >
+            <Heart
+              size="30"
+              className={`${
+                post.liked ? "text-rose-500" : "sm:hover:opacity-60"
+              } transition-all active:scale-110`}
+              fill={post.liked ? "rgb(244 63 94)" : "none"}
+            />
+            <span className="text-sm">{post.likesCount}</span>
+          </button>
+          <Comment
+            comments={comments}
+            user={post.user}
+            commentsCount={post.commentsCount}
+            likeComment={likeComment}
+            addComment={addComment}
+            isVideo={true}
+          />
+          <Share _id={post._id} isVideo={true} />
         </div>
       </section>
     </div>

@@ -1,39 +1,16 @@
 "use client";
 import Comment from "@/components/Comment";
-import MobileNav from "@/components/MobileNav";
 import Share from "@/components/Share";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
-import { Textarea } from "@/components/ui/textarea";
-import { toast } from "@/components/ui/use-toast";
+import { SliderVideo } from "@/components/ui/slider-video";
 import VideoOptions from "@/components/VideoOptions";
 import { nameFallback } from "@/lib/helpers";
 import {
+  Bookmark,
   ChevronLeft,
   Heart,
   Loader2,
-  MoreVerticalIcon,
   Pause,
   Play,
   Volume2Icon,
@@ -64,7 +41,8 @@ function Videos() {
       caption:
         "This is a caption which is very long and I don't know what to write in it so, i am just keep going to see the results. This is just a test caption to check the functionality of the app. I hope you are having a good day. Bye! 😊",
       liked: false,
-      video: "https://res.cloudinary.com/dv3qbj0bn/video/upload/f_auto:video,q_auto/v1/samples/dance-2",
+      video:
+        "https://res.cloudinary.com/dv3qbj0bn/video/upload/f_auto:video,q_auto/v1/samples/dance-2",
       likesCount: 12,
       commentsCount: 1,
     },
@@ -79,7 +57,8 @@ function Videos() {
       caption:
         "In the vibrant world of social media, where every moment is captured and shared, we find ourselves scrolling through an endless feed of memories and stories. Among these, a post catches our eye, a video accompanied by a caption that reads: \"This is a caption which is very long and I don't know what to write in it so, I am just keep going to see the results. This is just a test caption to check the functionality of the app. I hope you are having a good day. Bye! 😊\". It's a simple yet heartfelt message from a user named Shivam, known among his followers for his engaging content and genuine interactions. His avatar, a familiar face to many, signals another piece of content ready to spark joy and provoke thought. As we delve deeper, we encounter another post, this one succinct with the words: \"This is a caption\". It's a stark contrast to the previous one, yet it holds its own charm and simplicity. Each post, with its unique caption, video, and engagement metrics, tells a story, invites interaction, and builds connections. In this digital age, where every second is documented and shared, these posts are more than just content; they are windows into the lives of others, offering glimpses of their world, their thoughts, and their moments of vulnerability and joy. As we continue to scroll, we're reminded of the power of sharing, the beauty of connection, and the endless possibilities that come with opening up to the world.",
       liked: false,
-      video: "https://res.cloudinary.com/dv3qbj0bn/video/upload/f_auto:video,q_auto/v1/sociial/videos/tnw4jy33z047bskwwhyt",
+      video:
+        "https://res.cloudinary.com/dv3qbj0bn/video/upload/f_auto:video,q_auto/v1/sociial/videos/tnw4jy33z047bskwwhyt",
       likesCount: 12,
       commentsCount: 1,
     },
@@ -307,7 +286,7 @@ function Videos() {
         >
           <div className="flex items-center justify-center h-full max-sm:w-full sm:aspect-9/16 bg-stone-950 text-white sm:border relative">
             <video
-              className="w-full h-full object-contain aspect-square"
+              className="w-full cursor-pointer"
               preload="auto"
               muted={isMuted}
               onClick={() => setIsPaused(!isPaused)}
@@ -360,7 +339,7 @@ function Videos() {
                   <h1 className="text-xl tracking-tight font-semibold leading-4">
                     {post.user.fullName}
                   </h1>
-                  <p className="text-stone-500 text-sm">
+                  <p className="text-stone-400 text-sm">
                     @{post.user.username}
                   </p>
                 </div>
@@ -383,115 +362,142 @@ function Videos() {
               username={post.user.username}
               avatar={post.user.avatar}
             />
-            {buffering ? (
+            {buffering && (
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-transparent/50 p-4 rounded-full animate-visible">
                 <Loader2 className="animate-spin" size="50" />
               </div>
-            ) : (
-              <div className="flex flex-col absolute bottom-0 left-0 w-full ">
-                <div className="flex flex-col items-end justify-start gap-5 px-3 w-full pb-10">
-                  <button
-                    title={post.liked ? "Unlike" : "Like"}
-                    onClick={() => {
-                      likePost(post._id);
-                    }}
-                  >
-                    <Heart
-                      size="30"
-                      className={`${
-                        post.liked ? "text-rose-500" : "sm:hover:opacity-60"
-                      } transition-all active:scale-110`}
-                      fill={post.liked ? "rgb(244 63 94)" : "none"}
-                    />
-                    <span className="text-sm">{post.likesCount}</span>
-                  </button>
-                  <Comment
-                    comments={comments}
-                    user={post.user}
-                    commentsCount={post.commentsCount}
-                    likeComment={likeComment}
-                    addComment={addComment}
-                    isVideo={true}
+            )}
+            <div className="flex flex-col absolute bottom-0 left-0 w-full bg-gradient-to-b from-transparent via-transparent/50 to-transparent/60">
+              <div className="absolute bottom-10 right-0 max-sm:flex hidden flex-col items-center justify-start gap-4 px-3 pb-10">
+                <button
+                  title={post.liked ? "Unlike" : "Like"}
+                  onClick={() => {
+                    likePost(post._id);
+                  }}
+                >
+                  <Heart
+                    size="30"
+                    className={`${
+                      post.liked ? "text-rose-500" : "sm:hover:opacity-60"
+                    } transition-all active:scale-110`}
+                    fill={post.liked ? "rgb(244 63 94)" : "none"}
                   />
-                  <Share _id={post._id} isVideo={true} />
-                </div>
-                <p className="absolute bottom-10 w-full pr-12 pl-6 text-sm bg-gradient-to-b from-transparent via-transparent/60 to-transparent-90">
-                  <span>{post.caption.slice(0, 80)}&nbsp;</span>
-                  <button
-                    className="text-stone-500"
-                    onClick={(e) => {
-                      const btn = e.target as HTMLButtonElement;
-                      const span = btn.parentElement
-                        ?.childNodes[0] as HTMLElement;
-                      if (span.innerHTML !== post.caption) {
-                        span.innerHTML = post.caption;
-                        btn.innerHTML = "&nbsp;less";
-                      } else {
-                        span.innerHTML = post.caption.slice(0, 80);
-                        btn.innerHTML = "&nbsp;more";
-                      }
-                    }}
-                  >
-                    more
-                  </button>
-                </p>
-                <div className="flex items-center justify-start px-3 h-fit bg-gradient-to-b from-transparent via-transparent/50 to-transparent/60">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="rounded-full p-1 z-10"
-                  >
-                    {isPaused ? (
-                      <Play
-                        size="30"
-                        strokeWidth="0"
-                        fill="currentColor"
-                        onClick={() => setIsPaused(!isPaused)}
-                      />
-                    ) : (
-                      <Pause
-                        size="30"
-                        strokeWidth="0"
-                        fill="currentColor"
-                        onClick={() => setIsPaused(!isPaused)}
-                      />
-                    )}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="rounded-full p-1 z-10"
-                    onClick={() => setIsMuted(!isMuted)}
-                  >
-                    {isMuted ? (
-                      <VolumeXIcon size="30" />
-                    ) : (
-                      <Volume2Icon size="30" />
-                    )}
-                  </Button>
-                  <div className="mx-3 w-full z-10">
-                    <Slider
-                      value={[sliderValue]}
-                      min={0}
-                      max={videoRef?.duration || 15}
-                      step={1}
-                      onValueChange={(value) => {
-                        setSeeking(true);
-                        setSliderValue(value[0]);
-                      }}
-                      onValueCommit={() => {
-                        if (!videoRef) return;
-                        setSeeking(false);
-                        videoRef.currentTime = sliderValue;
-                      }}
-                      className={`w-full ${
-                        containerRef.current?.childNodes ? "" : "hidden"
-                      }`}
+                  <span className="text-sm">{post.likesCount}</span>
+                </button>
+                <Comment
+                  comments={comments}
+                  user={post.user}
+                  commentsCount={post.commentsCount}
+                  likeComment={likeComment}
+                  addComment={addComment}
+                  isVideo={true}
+                />
+                <Share _id={post._id} isVideo={true} />
+              </div>
+              <p className="w-full max-h-80 overflow-y-auto overflow-x-clip no-scrollbar max-sm:pr-12 pr-6 pl-6 text-sm">
+                <span>{post.caption.slice(0, 80)}&nbsp;</span>
+                <button
+                  className="text-stone-400 text-left"
+                  onClick={(e) => {
+                    const btn = e.target as HTMLButtonElement;
+                    const span = btn.parentElement
+                      ?.childNodes[0] as HTMLElement;
+                    if (span.innerHTML !== "") {
+                      span.innerHTML = "";
+                      btn.classList.remove("text-stone-400");
+                      btn.innerHTML = post.caption;
+                    } else {
+                      span.innerHTML = post.caption.slice(0, 80);
+                      btn.classList.add("text-stone-400");
+                      btn.innerHTML = "&nbsp;more";
+                    }
+                  }}
+                >
+                  more
+                </button>
+              </p>
+              <div className="flex items-center justify-start px-3 h-fit">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="rounded-full p-1 z-10"
+                >
+                  {isPaused ? (
+                    <Play
+                      size="30"
+                      strokeWidth="0"
+                      fill="currentColor"
+                      onClick={() => setIsPaused(!isPaused)}
                     />
-                  </div>
+                  ) : (
+                    <Pause
+                      size="30"
+                      strokeWidth="0"
+                      fill="currentColor"
+                      onClick={() => setIsPaused(!isPaused)}
+                    />
+                  )}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="rounded-full p-1 z-10"
+                  onClick={() => setIsMuted(!isMuted)}
+                >
+                  {isMuted ? (
+                    <VolumeXIcon size="30" />
+                  ) : (
+                    <Volume2Icon size="30" />
+                  )}
+                </Button>
+                <div className="mx-3 w-full z-10">
+                  <SliderVideo
+                    value={[sliderValue]}
+                    min={0}
+                    max={videoRef?.duration || 15}
+                    step={1}
+                    onValueChange={(value) => {
+                      setSeeking(true);
+                      setSliderValue(value[0]);
+                    }}
+                    onValueCommit={() => {
+                      if (!videoRef) return;
+                      setSeeking(false);
+                      videoRef.currentTime = sliderValue;
+                    }}
+                    className={`w-full ${
+                      containerRef.current?.childNodes ? "" : "hidden"
+                    }`}
+                  />
                 </div>
               </div>
-            )}
+            </div>
+          </div>
+          <div className="sm:flex hidden flex-col items-center justify-end gap-4 px-3 pb-12 h-full">
+            <button
+              title={post.liked ? "Unlike" : "Like"}
+              onClick={() => {
+                likePost(post._id);
+              }}
+            >
+              <Heart
+                size="30"
+                className={`${
+                  post.liked ? "text-rose-500" : "sm:hover:opacity-60"
+                } transition-all active:scale-110`}
+                fill={post.liked ? "rgb(244 63 94)" : "none"}
+              />
+              <span className="text-sm">{post.likesCount}</span>
+            </button>
+            <Comment
+              comments={comments}
+              user={post.user}
+              commentsCount={post.commentsCount}
+              likeComment={likeComment}
+              addComment={addComment}
+              isVideo={true}
+            />
+            <Share _id={post._id} isVideo={true} />
           </div>
         </section>
       ))}
