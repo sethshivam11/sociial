@@ -52,6 +52,9 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import CameraDialog from "@/components/CameraDialog";
+import MediaDialog from "@/components/MediaDialog";
+import AudioDialog from "@/components/AudioDialog";
 
 interface Message {
   id: string;
@@ -81,7 +84,10 @@ function Page({ params }: { params: { chatId: string } }) {
   const messageScrollElement = React.useRef<HTMLDivElement>(null);
   const lastMessageRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLTextAreaElement>(null);
-  const [isTyping, setIsTyping] = React.useState(true);
+  const [isTyping, setIsTyping] = React.useState(false);
+  const [cameraOpen, setCameraOpen] = React.useState(false);
+  const [mediaOpen, setMediaOpen] = React.useState(false);
+  const [audioOpen, setAudioOpen] = React.useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -894,15 +900,24 @@ function Page({ params }: { params: { chatId: string } }) {
                     </Button>
                   </MenubarTrigger>
                   <MenubarContent align="center" className="rounded-xl">
-                    <MenubarItem className="rounded-lg py-2">
+                    <MenubarItem
+                      className="rounded-lg py-2"
+                      onClick={() => setMediaOpen(true)}
+                    >
                       <ImageIcon />
                       &nbsp;Photos & Videos
                     </MenubarItem>
-                    <MenubarItem className="rounded-lg py-2">
+                    <MenubarItem
+                      className="rounded-lg py-2"
+                      onClick={() => setCameraOpen(true)}
+                    >
                       <CameraIcon />
                       &nbsp;Camera
                     </MenubarItem>
-                    <MenubarItem className="rounded-lg py-2">
+                    <MenubarItem
+                      className="rounded-lg py-2"
+                      onClick={() => setAudioOpen(true)}
+                    >
                       <MicIcon />
                       &nbsp;Audio
                     </MenubarItem>
@@ -931,6 +946,9 @@ function Page({ params }: { params: { chatId: string } }) {
           </Form>
         </div>
       )}
+      <CameraDialog open={cameraOpen} setOpen={setCameraOpen} />
+      <MediaDialog open={mediaOpen} setOpen={setMediaOpen} />
+      <AudioDialog open={audioOpen} setOpen={setAudioOpen} />
     </div>
   );
 }
