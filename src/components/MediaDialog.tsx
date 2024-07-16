@@ -4,7 +4,6 @@ import {
   DialogContent,
   DialogTitle,
   DialogFooter,
-  DialogClose,
 } from "./ui/dialog";
 import {
   Carousel,
@@ -35,14 +34,14 @@ function MediaDialog({ open, setOpen }: Props) {
         setFiles([]);
       }}
     >
-      <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
+      <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-sm:w-full max-sm:h-full max-sm:max-w-full">
         <DialogTitle className="text-center text-xl">
           {files.length ? "Media Preview" : "Add Files"}
         </DialogTitle>
         <input
           type="file"
           id="file-input"
-          className="w-0 h-0 invisible border-0"
+          className="w-0 h-0 absolute invisible border-0"
           ref={inputRef}
           accept="image/*,video/*"
           onChange={(e) => {
@@ -94,7 +93,7 @@ function MediaDialog({ open, setOpen }: Props) {
                       width={500}
                       height={500}
                       alt=""
-                      className="object-contain w-full select-none pointer-events-none"
+                      className="object-contain w-full select-none pointer-events-none max-h-[80dvh]"
                     />
                   ) : (
                     <video src={file.url} controls className="w-full" />
@@ -104,7 +103,7 @@ function MediaDialog({ open, setOpen }: Props) {
             </CarouselContent>
           </Carousel>
         ) : (
-          <div className="flex flex-col items-center justify-center gap-3 h-96">
+          <div className="flex flex-col items-center justify-center gap-3 max-sm:h-80 sm:min-h-96">
             <ImageIcon size="70" />
             <p className="text-sm text-gray-500">Add Photos & Videos</p>
             <Button className="rounded-xl">

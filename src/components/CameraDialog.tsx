@@ -73,16 +73,18 @@ function CameraDialog({ open, setOpen }: Props) {
           .filter((device) => device.kind === "videoinput")
           .forEach((device) => {
             if (activeCamera === "user" && device.label.includes("back")) {
-              return getUserMedia(device.deviceId);
+              return getUserMedia({ exact: device.deviceId });
             } else {
-              return getUserMedia(device.deviceId);
+              return getUserMedia({ exact: device.deviceId });
             }
           });
       }
     });
   }
 
-  const getUserMedia = React.useCallback(async function (deviceId?: string) {
+  const getUserMedia = React.useCallback(async function (deviceId?: {
+    exact: string;
+  }) {
     const mediaDevicesAvailable =
       (await navigator.mediaDevices) ||
       (await navigator.mediaDevices?.getUserMedia);
@@ -120,7 +122,7 @@ function CameraDialog({ open, setOpen }: Props) {
     await navigator.mediaDevices
       .enumerateDevices()
       .then((devices) => {
-        if (devices.length > 1) {
+        if (devices.filter(({ kind }) => kind === "videoinput").length > 1) {
           setMultipleCamAvailable(true);
         }
       })
@@ -129,7 +131,8 @@ function CameraDialog({ open, setOpen }: Props) {
     return () => {
       resetCamera();
     };
-  }, []);
+  },
+  []);
 
   React.useEffect(() => {
     if (open) {
@@ -145,7 +148,10 @@ function CameraDialog({ open, setOpen }: Props) {
         resetCamera();
       }}
     >
-      <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
+      <DialogContent
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        className="max-sm:h-full max-sm:w-full max-sm:max-w-full max-sm:px-1"
+      >
         <DialogTitle className="tracking-tight text-2xl font-bold text-center">
           {image ? "Image Preview" : "Take a Photo"}
         </DialogTitle>
@@ -162,7 +168,7 @@ function CameraDialog({ open, setOpen }: Props) {
             <video
               ref={videoRef}
               autoPlay={true}
-              className="w-full object-contain aspect-square"
+              className="w-full object-contain min-h-96"
               playsInline
             />
             <canvas ref={canvasRef} className="w-0 h-0 hidden"></canvas>
