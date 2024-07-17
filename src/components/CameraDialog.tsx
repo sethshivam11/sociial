@@ -66,23 +66,14 @@ function CameraDialog({ open, setOpen }: Props) {
     if (!multipleCamAvailalble) return;
 
     stopCamera();
-
-    await navigator.mediaDevices.enumerateDevices().then((devices) => {
-      if (devices.length > 1) {
-        devices
-          .filter((device) => device.kind === "videoinput")
-          .forEach((device) => {
-            if (activeCamera === "user" && device.label.includes("back")) {
-              return getUserMedia({ exact: device.deviceId });
-            } else {
-              return getUserMedia({ exact: device.deviceId });
-            }
-          });
-      }
-    });
+    if (activeCamera === "user") {
+      getUserMedia({ exact: "environment" });
+    } else {
+      getUserMedia({ exact: "user" });
+    }
   }
 
-  const getUserMedia = React.useCallback(async function (deviceId?: {
+  const getUserMedia = React.useCallback(async function (facingMode?: {
     exact: string;
   }) {
     const mediaDevicesAvailable =
@@ -96,7 +87,7 @@ function CameraDialog({ open, setOpen }: Props) {
       });
     }
     await navigator.mediaDevices
-      .getUserMedia({ video: deviceId ? { deviceId } : true })
+      .getUserMedia({ video: facingMode ? { facingMode } : true })
       .then((stream) => {
         setPermissionDenied(false);
         if (videoRef.current) {
@@ -106,6 +97,7 @@ function CameraDialog({ open, setOpen }: Props) {
         const capabilties = stream?.getTracks()[0].getCapabilities();
         if (capabilties.facingMode) {
           setActiveCamera(capabilties.facingMode[0]);
+          console.log(capabilties.facingMode[0]);
         }
       })
       .catch((err) => {
@@ -119,7 +111,7 @@ function CameraDialog({ open, setOpen }: Props) {
           });
         }
       });
-    await navigator.mediaDevices
+    navigator.mediaDevices
       .enumerateDevices()
       .then((devices) => {
         if (devices.filter(({ kind }) => kind === "videoinput").length > 1) {

@@ -239,11 +239,8 @@ function Posts() {
               className="rounded-xl bg-stone-100 dark:bg-stone-900 p-4 w-full sm:w-[85%] mx-auto min-h-64 min-w-64"
             >
               <div className="flex justify-between w-full">
-                <Link
-                  href={`/${post.user.username}`}
-                  className="flex items-center gap-2 w-full group"
-                >
-                  <div className="w-8 h-8">
+                <div className="flex items-center gap-2 w-full">
+                  <Link className="w-8 h-8" href={`/${post.user.username}`}>
                     <Avatar className="w-8 h-8">
                       <AvatarImage
                         src={post.user.avatar}
@@ -254,12 +251,10 @@ function Posts() {
                         {nameFallback(post.user.fullName)}
                       </AvatarFallback>
                     </Avatar>
-                  </div>
-                  <div>
+                  </Link>
+                  <Link href={`/${post.user.username}`}>
                     <p className="flex items-center justify-start gap-0.5">
-                      <span className="group-hover:underline underline-offset-2">
-                        {post.user.fullName}
-                      </span>
+                      <span>{post.user.fullName}</span>
                       {post.user.isPremium ? (
                         <Image
                           src="/icons/premium.svg"
@@ -275,8 +270,8 @@ function Posts() {
                     <p className="text-sm text-gray-500 leading-3">
                       @{post.user.username}
                     </p>
-                  </div>
-                </Link>
+                  </Link>
+                </div>
                 <PostOptions
                   user={post.user}
                   postId={post._id}

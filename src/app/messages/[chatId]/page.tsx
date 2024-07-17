@@ -55,6 +55,7 @@ import { Textarea } from "@/components/ui/textarea";
 import CameraDialog from "@/components/CameraDialog";
 import MediaDialog from "@/components/MediaDialog";
 import AudioDialog from "@/components/AudioDialog";
+import Link from "next/link";
 
 interface Message {
   id: string;
@@ -587,25 +588,22 @@ function Page({ params }: { params: { chatId: string } }) {
           >
             <ChevronLeft />
           </Button>
-          <Avatar
-            className="w-12 h-12 ml-0.5 mr-2 cursor-pointer"
-            onClick={() => router.push(`/${recipent.username}`)}
-          >
-            <AvatarImage
-              src={recipent.avatar}
-              alt=""
-              className="pointer-events-none select-none"
-            />
-            <AvatarFallback>{nameFallback(recipent.fullName)}</AvatarFallback>
-          </Avatar>
-          <button
-            className="flex flex-col items-start justify-start group"
-            onClick={() => router.push(`/${recipent.username}`)}
+          <Link href={`/${recipent.username}`}>
+            <Avatar className="w-12 h-12 ml-0.5 mr-2 cursor-pointer">
+              <AvatarImage
+                src={recipent.avatar}
+                alt=""
+                className="pointer-events-none select-none"
+              />
+              <AvatarFallback>{nameFallback(recipent.fullName)}</AvatarFallback>
+            </Avatar>
+          </Link>
+          <Link
+            className="flex flex-col items-start justify-start"
+            href={`/${recipent.username}`}
           >
             <h1 className="text-xl tracking-tight font-bold leading-4 flex items-center justify-start gap-1">
-              <span className="group-hover:underline underline-offset-2">
-                {recipent.fullName}
-              </span>
+              <span>{recipent.fullName}</span>
               {recipent.isPremium ? (
                 <Image
                   src="/icons/premium.svg"
@@ -619,20 +617,24 @@ function Page({ params }: { params: { chatId: string } }) {
               )}
             </h1>
             <p className="text-stone-500 text-sm">@{recipent.username}</p>
-          </button>
+          </Link>
         </div>
-        <div className="px-4 space-x-4">
-          <button
-            onClick={() => router.push(`/call/audio/${recipent.username}`)}
+        <div className="flex items-center justify-center px-4 gap-0.5">
+          <Link
+            href={`/call?username=${recipent.username}&video=false`}
+            target="_blank"
+            className="inline-block p-2"
           >
             <Phone size="20" />
-          </button>
-          <button
-            onClick={() => router.push(`/call/video/${recipent.username}`)}
+          </Link>
+          <Link
+            href={`/call?username=${recipent.username}&video=true`}
+            target="_blank"
+            className="inline-block p-2"
           >
             <Video />
-          </button>
-          <button onClick={() => setInfoOpen(!infoOpen)}>
+          </Link>
+          <button onClick={() => setInfoOpen(!infoOpen)} className="p-2">
             <Info strokeWidth={infoOpen ? "3" : "2"} />
           </button>
         </div>

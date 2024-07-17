@@ -63,8 +63,8 @@ function Suggestions() {
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col gap-0 leading-3">
-                        <span className="text-md font-semibold flex items-center justify-start gap-1 group">
-                          <span className="group-hover:underline underline-offset-2">
+                        <span className="text-md font-semibold flex items-center justify-start gap-1">
+                          <span>
                             {user.name}
                           </span>
                           {user.isPremium ? (
