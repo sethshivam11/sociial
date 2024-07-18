@@ -141,7 +141,7 @@ function Page() {
         autoPlay
         playsInline
       />
-      <div className="flex items-center justify-center gap-4 absolute bottom-10">
+      <div className="flex items-center justify-center gap-4 absolute bottom-10 z-10">
         <Button
           size="icon"
           variant="secondary"
@@ -156,7 +156,7 @@ function Page() {
           size="icon"
           variant="secondary"
           className={`rounded-full p-3 w-fit h-fit shadow-xl ${
-            selfVideoPaused ? "bg-stone-200 hover:bg-stone-400 text-black" : ""
+            selfVideoPaused ? "bg-stone-200 sm:hover:bg-stone-400 text-black" : ""
           }`}
           onClick={handleSelfVideoPause}
         >
@@ -166,7 +166,7 @@ function Page() {
           size="icon"
           variant="secondary"
           className={`rounded-full p-3 w-fit h-fit shadow-xl ${
-            selfMuted ? "bg-stone-200 hover:bg-stone-400 text-black" : ""
+            selfMuted ? "bg-stone-200 sm:hover:bg-stone-400 text-black" : ""
           }`}
           onClick={() => setSelfMuted((prevMuted) => !prevMuted)}
         >
@@ -204,7 +204,7 @@ function Page() {
           )}
         </button>
         <video
-          className="w-full bg-black sm:object-contain object-cover sm:rounded-xl"
+          className="w-full max-sm:h-full bg-black sm:object-contain object-cover sm:rounded-xl"
           ref={selfVideoRef}
           autoPlay
           muted

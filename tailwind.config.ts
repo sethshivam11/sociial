@@ -99,6 +99,17 @@ const config = {
           from: { opacity: "0.5" },
           to: { opacity: "0" },
         },
+        "recording": {
+          "0%": {
+            padding: "10px",
+          },
+          "50%": {
+            padding: "50px",
+          },
+          "100%": {
+            padding: "10px",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -108,6 +119,7 @@ const config = {
         "opacity": "visible 0.1s ease-out",
         "skip-start": "story-skip-start 0.15s ease-out",
         "skip-end": "story-skip-end 0.15s ease-in",
+        "recording": "recording 2s ease-in-out infinite",
       },
     },
   },

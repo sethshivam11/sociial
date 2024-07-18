@@ -43,7 +43,7 @@ function MediaDialog({ open, setOpen }: Props) {
           id="file-input"
           className="w-0 h-0 absolute invisible border-0"
           ref={inputRef}
-          accept="image/*,video/*"
+          accept="image/*,video/mp4,video/3gp"
           onChange={(e) => {
             const files = e.target.files;
             if (files) {

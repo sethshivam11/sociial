@@ -19,6 +19,8 @@ import {
   Video,
   VideoIcon,
   X,
+  PlayIcon,
+  MapPinnedIcon,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -50,17 +52,21 @@ import {
   DialogTrigger,
   DialogContent,
   DialogClose,
+  DialogFooter,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import CameraDialog from "@/components/CameraDialog";
 import MediaDialog from "@/components/MediaDialog";
 import AudioDialog from "@/components/AudioDialog";
 import Link from "next/link";
+import DocumentDialog from "@/components/DocumentDialog";
 
 interface Message {
   id: string;
   content: string;
   type: string;
+  kind?: "message" | "location" | "image" | "video" | "audio" | "document";
   time: string;
   reply?: {
     username: string;
@@ -89,6 +95,8 @@ function Page({ params }: { params: { chatId: string } }) {
   const [cameraOpen, setCameraOpen] = React.useState(false);
   const [mediaOpen, setMediaOpen] = React.useState(false);
   const [audioOpen, setAudioOpen] = React.useState(false);
+  const [documentOpen, setDocumentOpen] = React.useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -398,6 +406,43 @@ function Page({ params }: { params: { chatId: string } }) {
         },
       ],
     },
+    {
+      id: "32",
+      content: "https://google.com/maps?q=26.8756,80.9115",
+      type: "reply",
+      time: "12:45 PM",
+      kind: "location",
+    },
+    {
+      id: "33",
+      content:
+        "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+      type: "sent",
+      time: "12:45 PM",
+      kind: "image",
+    },
+    {
+      id: "34",
+      content: "/test-2.mp4",
+      type: "reply",
+      time: "12:45 PM",
+      kind: "video",
+    },
+    {
+      id: "35",
+      content: "/test-audio.mp3",
+      type: "sent",
+      time: "12:45 PM",
+      kind: "audio",
+    },
+    {
+      id: "36",
+      content:
+        "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+      type: "sent",
+      time: "12:45 PM",
+      kind: "document",
+    },
   ]);
   const [reply, setReply] = React.useState({
     username: "",
@@ -492,46 +537,105 @@ function Page({ params }: { params: { chatId: string } }) {
     }
   }
 
-  function giveAssets(reply: string): React.ReactNode {
-    if (message.includes("res.cloudinary.com")) {
-      if (message.includes("ImageAsset@sociial.vercel.app")) {
+  function giveAssets(content: string, kind: string): React.ReactNode {
+    switch (kind) {
+      case "location":
         return (
-          <>
-            <ImageIcon size="10" />
-            &nbsp;Image
-          </>
+          <Link href={content}>
+            <MapPinnedIcon strokeWidth="1.5" size="80" />
+          </Link>
         );
-      } else if ("VideoAsset@sociial.vercel.app") {
+      case "image":
         return (
-          <>
-            <VideoIcon />
-            &nbsp;Video
-          </>
+          <Dialog>
+            <DialogTrigger asChild>
+              <button className="w-40 min-h-20 max-h-40 rounded-sm">
+                <Image
+                  src={content}
+                  alt=""
+                  width="160"
+                  height="160"
+                  className="w-full h-full"
+                />
+              </button>
+            </DialogTrigger>
+            <DialogContent className="bg-black h-full w-full max-h-[100dvh]">
+              <DialogTitle></DialogTitle>
+              <Image
+                src={content}
+                width="160"
+                height="160"
+                alt=""
+                className="h-full w-full object-contain m-auto"
+                onError={() => (
+                  <span className="text-black dark:text-white">
+                    Something went wrong
+                  </span>
+                )}
+              />
+              <DialogFooter className="max-sm:items-end items-end">
+                <Button size="icon" className="rounded-xl">
+                  <DownloadIcon />
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         );
-      } else if ("AudioAsset@sociial.vercel.app") {
+      case "video":
         return (
-          <>
-            <Mic size="10" />
-            &nbsp;Audio
-          </>
+          <Dialog>
+            <DialogTrigger asChild>
+              <button className="w-40 min-h-20 max-h-40 rounded-sm relative">
+                <span className="absolute z-10 top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 bg-transparent/50 rounded-full p-2">
+                  <PlayIcon fill="white" color="white" />
+                </span>
+                <video
+                  src={content}
+                  width="160"
+                  height="160"
+                  className="w-full object-contain rounded-lg"
+                />
+              </button>
+            </DialogTrigger>
+            <DialogContent className="bg-black h-full w-full max-h-[100dvh]">
+              <DialogTitle></DialogTitle>
+              <video
+                src={content}
+                className="w-full object-contain m-auto"
+                onError={() => (
+                  <span className="text-black dark:text-white">
+                    Something went wrong
+                  </span>
+                )}
+                controls
+                controlsList="nodownload"
+              />
+              <DialogFooter className="max-sm:items-end items-end">
+                <Button size="icon" className="rounded-xl">
+                  <DownloadIcon />
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         );
-      } else {
+      case "audio":
         return (
-          <>
-            <FileIcon size="10" />
-            &nbsp;Document
-          </>
+          <div className="py-2">
+            <audio src={content} controls controlsList="nodownload" />
+          </div>
         );
-      }
-    } else if ("LocationAsset@sociial.vercel.app") {
-      return (
-        <>
-          <MapPin />
-          &nbsp;Location
-        </>
-      );
-    } else {
-      return <>{message}</>;
+      default:
+        return (
+          <div className="flex items-center justify-between gap-3 border-1 border-stone-200 bg-transparent/50 rounded-full px-4 py-2">
+            <FileIcon size="40" />
+            <p className="w-20">
+              ...{content.slice(content.length - 10, content.length)}
+            </p>
+            <Button size="icon" variant="secondary" className="bg-transparent">
+              <DownloadIcon />
+            </Button>
+          </div>
+        );
     }
   }
 
@@ -572,7 +676,7 @@ function Page({ params }: { params: { chatId: string } }) {
 
   return (
     <div
-      className={`md:border-l-2 border-stone-200 dark:border-stone-800 md:ml-3 md:flex flex flex-col items-start justify-start gap-1 relative lg:col-span-7 md:col-span-6 col-span-10 ${
+      className={`md:border-l-2 border-stone-200 dark:border-stone-800 md:ml-3 md:flex flex flex-col items-start justify-start gap-1 overflow-x-hidden relative lg:col-span-7 md:col-span-6 col-span-10 ${
         location !== "/messages" ? "" : "hidden"
       } `}
     >
@@ -698,133 +802,173 @@ function Page({ params }: { params: { chatId: string } }) {
                 View profile
               </Button>
             </div>
-            {messages.map((message, index) => (
-              <div
-                className={`group flex items-center justify-start w-full ${
-                  message.type === "reply"
-                    ? "flex-row"
-                    : "flex-row-reverse ml-auto"
-                }`}
-                key={index}
-                onDoubleClick={() => {
-                  setReply({
-                    username: recipent.username,
-                    content: message.content,
-                  });
-                  inputRef.current?.focus();
-                }}
-              >
+            {messages.map((message, index) =>
+              !message.kind || message.kind === "message" ? (
                 <div
-                  className={`flex flex-col gap-0 ${
-                    message.type === "reply" ? "items-start" : "items-end"
+                  className={`group flex items-center justify-start w-full ${
+                    message.type === "reply"
+                      ? "flex-row"
+                      : "flex-row-reverse ml-auto"
                   }`}
+                  key={index}
+                  onDoubleClick={() => {
+                    setReply({
+                      username: recipent.username,
+                      content: message.content,
+                    });
+                    inputRef.current?.focus();
+                  }}
                 >
-                  <span
-                    className={`py-1 rounded-xl -mb-1 px-3 opacity-70 ${
-                      message.type === "sent"
-                        ? `${theme.color} text-${theme.text}`
-                        : "bg-stone-300 dark:bg-stone-800"
-                    } ${
-                      message.reply && message.reply.content ? "" : "hidden"
+                  <div
+                    className={`flex flex-col gap-0 ${
+                      message.type === "reply" ? "items-start" : "items-end"
                     }`}
                   >
-                    {message.reply && message.reply.content
-                      ? message.reply.content.length > 100
-                        ? `${message.reply.content.slice(0, 100)}...`
-                        : message.reply.content
-                      : ""}
-                  </span>
-                  <div
-                    className={`py-2 px-4 rounded-2xl w-fit relative ${
-                      message.type === "reply"
-                        ? `${theme.color} text-${theme.text} max-w-3/4`
-                        : "bg-stone-300 dark:bg-stone-800 max-w-3/4"
-                    } ${
-                      messages[index - 1]?.type === message.type
-                        ? "mb-1"
-                        : "mb-3"
-                    }
+                    <span
+                      className={`py-1 rounded-xl -mb-1 px-3 opacity-70 ${
+                        message.type === "sent"
+                          ? `${theme.color} text-${theme.text}`
+                          : "bg-stone-300 dark:bg-stone-800"
+                      } ${
+                        message.reply && message.reply.content ? "" : "hidden"
+                      }`}
+                    >
+                      {message.reply && message.reply.content
+                        ? message.reply.content.length > 100
+                          ? `${message.reply.content.slice(0, 100)}...`
+                          : message.reply.content
+                        : ""}
+                    </span>
+                    <div
+                      className={`py-2 px-4 rounded-2xl w-fit relative ${
+                        message.type === "reply"
+                          ? `${theme.color} text-${theme.text} max-w-3/4`
+                          : "bg-stone-300 dark:bg-stone-800 max-w-3/4"
+                      } ${
+                        messages[index - 1]?.type === message.type
+                          ? "mb-1"
+                          : "mb-3"
+                      }
                   ${message.reacts ? "mb-4" : "mb-1"}`}
-                    ref={
-                      messages[messages.length - 1] === message
-                        ? lastMessageRef
-                        : null
-                    }
+                      ref={
+                        messages[messages.length - 1] === message
+                          ? lastMessageRef
+                          : null
+                      }
+                    >
+                      {message.content}
+                      {message.reacts && (
+                        <MessageReacts
+                          reacts={message.reacts}
+                          type={message.type}
+                        />
+                      )}
+                    </div>
+                  </div>
+                  <div
+                    className={`reactions flex group-hover:visible invisible w-fit mb-2 mx-0.5 gap-0 ${
+                      message.type === "reply" ? "flex-row" : "flex-row-reverse"
+                    }`}
                   >
-                    {message.content.includes("res.cloudinary.com") ? (
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <button className="w-40 h-40 rounded-sm">
-                            <Image
-                              src={message.content}
-                              alt=""
-                              width="160"
-                              height="160"
-                              className="w-full h-full"
-                            />
-                          </button>
-                        </DialogTrigger>
-                        <DialogContent
-                          className="bg-black h-full w-[100dvh] max-w-[100dvh]"
-                          hideCloseIcon
-                        >
-                          <Image
-                            src={message.content}
-                            width="160"
-                            height="160"
-                            alt=""
-                            className="h-full w-full max-h-[100dvh] object-contain"
-                            onError={() => (
-                              <span className="text-black dark:text-white">
-                                Something went wrong
-                              </span>
-                            )}
-                          />
-                          <div className="flex items-center justify-between gap-5 absolute top-3 right-3">
-                            <DialogClose>
-                              <DownloadIcon size="40" />
-                            </DialogClose>
-                            <DialogClose>
-                              <X size="40" />
-                            </DialogClose>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                    ) : (
-                      message.content
-                    )}
-                    {message.reacts && (
-                      <MessageReacts
-                        reacts={message.reacts}
-                        type={message.type}
-                      />
-                    )}
+                    <MessageOptions
+                      username={recipent.username}
+                      setReply={(reply) => {
+                        const filteredReply = checkForAssets(reply.content);
+                        console.log(filteredReply);
+                        setReply({
+                          username: reply.username,
+                          content: filteredReply,
+                        });
+                        inputRef.current?.focus();
+                      }}
+                      message={message.content}
+                      type={message.type}
+                      id={message.id}
+                      reactMessage={(emoji) => reactMessage(message, emoji)}
+                    />
                   </div>
                 </div>
+              ) : (
                 <div
-                  className={`reactions flex group-hover:visible invisible w-fit mb-2 mx-0.5 gap-0 ${
-                    message.type === "reply" ? "flex-row" : "flex-row-reverse"
+                  className={`group flex items-center justify-start w-full relative ${
+                    message.type === "reply"
+                      ? "flex-row"
+                      : "flex-row-reverse ml-auto"
                   }`}
+                  key={index}
+                  onDoubleClick={() => {
+                    setReply({
+                      username: recipent.username,
+                      content: message.content,
+                    });
+                    inputRef.current?.focus();
+                  }}
                 >
-                  <MessageOptions
-                    username={recipent.username}
-                    setReply={(reply) => {
-                      const filteredReply = checkForAssets(reply.content);
-                      console.log(filteredReply);
-                      setReply({
-                        username: reply.username,
-                        content: filteredReply,
-                      });
-                      inputRef.current?.focus();
-                    }}
-                    message={message.content}
-                    type={message.type}
-                    id={message.id}
-                    reactMessage={(emoji) => reactMessage(message, emoji)}
-                  />
+                  <div
+                    className={`flex flex-col2 gap-0 ${
+                      message.type === "reply" ? "items-start" : "items-end"
+                    }`}
+                  >
+                    <span
+                      className={`py-1 rounded-xl -mb-1 px-3 opacity-70 ${
+                        message.type === "sent"
+                          ? `${theme.color} text-${theme.text}`
+                          : "bg-stone-300 dark:bg-stone-800"
+                      } ${
+                        message.reply && message.reply.content ? "" : "hidden"
+                      }`}
+                    >
+                      {message.reply && message.reply.content
+                        ? message.reply.content.length > 100
+                          ? `${message.reply.content.slice(0, 100)}...`
+                          : message.reply.content
+                        : ""}
+                    </span>
+                    <div
+                      className={`py-2 px-4 rounded-2xl w-fit max-w-3/4 relative ${
+                        message.type === "reply"
+                          ? `${theme.color} text-${theme.text}`
+                          : "bg-stone-300 dark:bg-stone-800"
+                      } ${
+                        messages[index - 1]?.type === message.type
+                          ? "mb-1"
+                          : "mb-3"
+                      } 
+                      ${message.reacts ? "mb-4" : "mb-1"}`}
+                      ref={
+                        messages[messages.length - 1] === message
+                          ? lastMessageRef
+                          : null
+                      }
+                    >
+                      {giveAssets(message.content, message.kind)}
+                    </div>
+                  </div>
+                  <div
+                    className={`reactions flex group-hover:visible invisible w-fit mb-2 mx-0.5 gap-0 ${
+                      message.type === "reply" ? "flex-row" : "flex-row-reverse"
+                    }`}
+                  >
+                    <MessageOptions
+                      username={recipent.username}
+                      setReply={(reply) => {
+                        const filteredReply = checkForAssets(reply.content);
+                        console.log(filteredReply);
+                        setReply({
+                          username: reply.username,
+                          content: filteredReply,
+                        });
+                        inputRef.current?.focus();
+                      }}
+                      message={message.content}
+                      type={message.type}
+                      id={message.id}
+                      reactMessage={(emoji) => reactMessage(message, emoji)}
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            )}
           </>
         )}
       </div>
@@ -923,7 +1067,10 @@ function Page({ params }: { params: { chatId: string } }) {
                       <MicIcon />
                       &nbsp;Audio
                     </MenubarItem>
-                    <MenubarItem className="rounded-lg py-2">
+                    <MenubarItem
+                      className="rounded-lg py-2"
+                      onClick={() => setDocumentOpen(true)}
+                    >
                       <FileIcon />
                       &nbsp;Document
                     </MenubarItem>
@@ -951,6 +1098,7 @@ function Page({ params }: { params: { chatId: string } }) {
       <CameraDialog open={cameraOpen} setOpen={setCameraOpen} />
       <MediaDialog open={mediaOpen} setOpen={setMediaOpen} />
       <AudioDialog open={audioOpen} setOpen={setAudioOpen} />
+      <DocumentDialog open={documentOpen} setOpen={setDocumentOpen} />
     </div>
   );
 }
