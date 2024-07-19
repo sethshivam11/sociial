@@ -47,12 +47,12 @@ function Page({ children }: React.PropsWithChildren) {
           <Button
             variant="ghost"
             size="icon"
-            className="sm:hidden mx-4 hover:bg-background"
+            className="sm:hidden ml-2 hover:bg-background"
             onClick={() => router.push(`/${username}`)}
           >
             <ArrowLeft />
           </Button>
-          <h1 className="w-full max-sm:mr-[72px]">Settings</h1>
+          <h1 className="w-full pr-14">Settings</h1>
         </div>
         <hr className="w-full bg-stone-500 mb-4" />
         <div className="flex flex-col sm:px-1 px-4 overflow-y-auto gap-2">

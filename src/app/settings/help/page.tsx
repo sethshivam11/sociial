@@ -56,7 +56,7 @@ function Page() {
           <Button
             variant="ghost"
             size="icon"
-            className="rounded-xl ml-4 hover:bg-background"
+            className="rounded-xl ml-2 hover:bg-background"
           >
             <ArrowLeft />
           </Button>

@@ -19,7 +19,7 @@ import {
   Square,
   X,
 } from "lucide-react";
-import * as NImage from "next/image";
+import NextImage from "next/image";
 import Link from "next/link";
 import React from "react";
 import Cropper, { Area } from "react-easy-crop";
@@ -194,7 +194,7 @@ function Page() {
                     className="w-20 h-20 relative overflow-hidden bg-transparent/50 rounded-lg border-2 flex items-center justify-center"
                   >
                     <button onClick={() => setSelectedFile(file)}>
-                      <NImage.default
+                      <NextImage
                         src={file}
                         alt=""
                         width="100"
@@ -222,7 +222,7 @@ function Page() {
                   variant="ghost"
                   size="icon"
                 >
-                  <Label htmlFor="new-post">
+                  <Label htmlFor="new-post" className="cursor-pointer">
                     <CirclePlus size="50" />
                   </Label>
                 </Button>
@@ -350,6 +350,7 @@ function Page() {
             const inputFiles = e.target.files;
             if (inputFiles === null) return;
             if (inputFiles.length > 5) {
+              e.target.files = null;
               return toast({
                 title: "Warning",
                 description: "You can only upload 5 files at a time",

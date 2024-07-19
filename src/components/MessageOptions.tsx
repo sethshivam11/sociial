@@ -14,10 +14,11 @@ import { useTheme } from "next-themes";
 
 interface Props {
   username: string;
-  setReply: (reply: { username: string; content: string }) => void;
+  setReply: (reply: { username: string; kind: string; content: string }) => void;
   message: string;
   id: string;
   type: string;
+  kind: string;
   reactMessage: (emoji: string) => void;
 }
 
@@ -27,6 +28,7 @@ function MessageOptions({
   reactMessage,
   type,
   username,
+  kind,
   setReply,
 }: Props) {
   const { theme } = useTheme();
@@ -73,6 +75,7 @@ function MessageOptions({
               onClick={() =>
                 setReply({
                   username,
+                  kind,
                   content: message,
                 })
               }

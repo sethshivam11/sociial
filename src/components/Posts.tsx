@@ -287,6 +287,7 @@ function Posts() {
                   <video
                     preload="metadata"
                     className="w-full my-2 object-contain rounded-sm"
+                    playsInline
                   >
                     <source src={post.video.link} />
                   </video>

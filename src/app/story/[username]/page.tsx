@@ -360,10 +360,10 @@ function Story({ params }: Props) {
       >
         <X size="40" />
       </button>
-      <div className="w-48 aspect-9/16 max-xl:w-32 max-md:hidden mx-2 rounded-sm relative">
+      <div className="w-48 aspect-9/16 max-xl:w-32 max-md:hidden mx-2 rounded-sm overflow-clip relative">
         {linkedStories.prevStory2 && (
           <Link href={linkedStories.prevStory2.username}>
-            <Avatar className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none w-20 h-20">
+            <Avatar className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none w-20 h-20 z-10">
               <AvatarImage src={linkedStories.prevStory2.avatar} alt="" />
               <AvatarFallback>
                 {nameFallback(linkedStories.prevStory2.fullName)}
@@ -372,17 +372,17 @@ function Story({ params }: Props) {
             <Image
               src={linkedStories.prevStory2.image}
               alt=""
-              width="100"
-              height="200"
-              className="w-full h-full object-cover rounded-sm"
+              width="200"
+              height="350"
+              className="w-full h-full blur-sm object-cover rounded-sm"
             />
           </Link>
         )}
       </div>
-      <div className="w-48 aspect-9/16 max-xl:w-32 max-lg:hidden mx-2 rounded-sm relative">
+      <div className="w-48 aspect-9/16 max-xl:w-32 max-lg:hidden mx-2 rounded-sm overflow-clip relative">
         {linkedStories.prevStory1 && (
           <Link href={linkedStories.prevStory1.username}>
-            <Avatar className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none shadow-lg w-20 h-20">
+            <Avatar className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none shadow-lg w-20 h-20 z-10">
               <AvatarImage src={linkedStories.prevStory1.avatar} alt="" />
               <AvatarFallback>
                 {nameFallback(linkedStories.prevStory1.fullName)}
@@ -391,10 +391,11 @@ function Story({ params }: Props) {
             <Image
               src={linkedStories.prevStory1.image}
               alt=""
-              className="w-full h-full object-cover rounded-sm"
-              width="100"
-              height="200"
+              className="w-full h-full blur-sm object-cover rounded-sm"
+              width="200"
+              height="350"
             />
+            6{" "}
           </Link>
         )}
       </div>
@@ -554,8 +555,8 @@ function Story({ params }: Props) {
               src={currentStory.images[index]?.link || ""}
               alt="Error fetching the story"
               className="max-h-full h-fit w-full object-fill select-none pointer-events-none"
-              width="768"
-              height="1024"
+              width="450"
+              height="800"
               onLoad={() => setImageLoading(false)}
               priority={true}
             />
@@ -661,10 +662,10 @@ function Story({ params }: Props) {
           <ChevronRight size="20" />
         </button>
       </div>
-      <div className="w-48 aspect-9/16 max-xl:w-32 max-md:hidden mx-2 rounded-sm relative">
+      <div className="w-48 aspect-9/16 max-xl:w-32 max-md:hidden mx-2 rounded-sm overflow-clip relative">
         {linkedStories.nextStory1 && (
           <Link href={linkedStories.nextStory1.username}>
-            <Avatar className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none w-20 h-20">
+            <Avatar className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none w-20 h-20 z-10">
               <AvatarImage src={linkedStories.nextStory1.avatar} alt="" />
               <AvatarFallback>
                 {nameFallback(linkedStories.nextStory1.fullName)}
@@ -673,17 +674,17 @@ function Story({ params }: Props) {
             <Image
               src={linkedStories.nextStory1.image}
               alt=""
-              width="100"
-              height="200"
-              className="w-full h-full object-cover rounded-sm"
+              width="200"
+              height="350"
+              className="w-full h-full blur-sm object-cover rounded-sm z-0"
             />
           </Link>
         )}
       </div>
-      <div className="w-48 aspect-9/16 max-xl:w-32 max-lg:hidden mx-2 rounded-sm relative">
+      <div className="w-48 aspect-9/16 max-xl:w-32 max-lg:hidden mx-2 rounded-sm overflow-clip relative">
         {linkedStories.nextStory2 && (
           <Link href={linkedStories.nextStory2.username}>
-            <Avatar className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none w-20 h-20">
+            <Avatar className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none w-20 h-20 z-10">
               <AvatarImage src={linkedStories.nextStory2.avatar} alt="" />
               <AvatarFallback>
                 {nameFallback(linkedStories.nextStory2.fullName)}
@@ -692,9 +693,9 @@ function Story({ params }: Props) {
             <Image
               src={linkedStories.nextStory2.image}
               alt=""
-              width="100"
-              height="200"
-              className="w-full h-full object-cover rounded-sm"
+              width="200"
+              height="350"
+              className="w-full h-full blur-sm object-cover rounded-sm"
             />
           </Link>
         )}

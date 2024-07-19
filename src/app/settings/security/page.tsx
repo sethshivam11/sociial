@@ -8,7 +8,7 @@ function Page() {
     <div className="flex flex-col items-center justify-start overflow-y-auto max-h-[100dvh] h-full xl:col-span-8 sm:col-span-9 col-span-10 w-full">
       <h1 className="text-lg tracking-tight font-semibold sm:w-3/4 sm:px-8 w-full text-left sm:my-4 my-2 flex items-center gap-4">
         <Link href="/settings" className="sm:hidden">
-          <Button variant="ghost" size="icon" className="rounded-xl ml-4 hover:bg-background">
+          <Button variant="ghost" size="icon" className="rounded-xl ml-2 hover:bg-background">
             <ArrowLeft />
           </Button>
         </Link>

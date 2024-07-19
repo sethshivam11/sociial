@@ -65,7 +65,7 @@ function Page() {
         <Button
           variant="ghost"
           size="icon"
-          className="ml-4 rounded-xl sm:hidden hover:bg-background"
+          className="ml-2 rounded-xl sm:hidden hover:bg-background"
           onClick={() => router.push("/settings")}
         >
           <ArrowLeft />

@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogFooter,
-} from "./ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogFooter } from "./ui/dialog";
 import {
   Carousel,
   CarouselContent,
@@ -16,6 +11,7 @@ import Image from "next/image";
 import { Button } from "./ui/button";
 import { ImageIcon, PlusCircle, SendHorizonal, XIcon } from "lucide-react";
 import { Label } from "./ui/label";
+import { toast } from "./ui/use-toast";
 
 interface Props {
   open: boolean;
@@ -34,7 +30,10 @@ function MediaDialog({ open, setOpen }: Props) {
         setFiles([]);
       }}
     >
-      <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-sm:w-full max-sm:h-full max-sm:max-w-full">
+      <DialogContent
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        className="max-sm:w-full max-sm:h-full max-sm:max-w-full"
+      >
         <DialogTitle className="text-center text-xl">
           {files.length ? "Media Preview" : "Add Files"}
         </DialogTitle>
@@ -45,9 +44,17 @@ function MediaDialog({ open, setOpen }: Props) {
           ref={inputRef}
           accept="image/*,video/mp4,video/3gp"
           onChange={(e) => {
-            const files = e.target.files;
-            if (files) {
-              const maxCap = files.length > 5 ? 5 : files.length;
+            const inputFiles = e.target.files;
+            if (inputFiles) {
+              if (inputFiles.length > 5) {
+                e.target.files = null;
+                return toast({
+                  title: "Warning",
+                  description: "You can only upload 5 files at a time",
+                  variant: "destructive",
+                });
+              }
+              const maxCap = inputFiles.length > 5 ? 5 : inputFiles.length;
               for (let i = 0; i < maxCap; i++) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
@@ -55,12 +62,11 @@ function MediaDialog({ open, setOpen }: Props) {
                     ...prevFiles,
                     {
                       url: e.target?.result as string,
-                      type: files.item(i)?.type as string,
+                      type: inputFiles.item(i)?.type as string,
                     },
                   ]);
-                  console.log(e.target?.result);
                 };
-                reader.readAsDataURL(files[i]);
+                reader.readAsDataURL(inputFiles[i]);
               }
             }
           }}

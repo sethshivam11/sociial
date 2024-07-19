@@ -7,7 +7,6 @@ import { SliderVideo } from "@/components/ui/slider-video";
 import VideoOptions from "@/components/VideoOptions";
 import { nameFallback } from "@/lib/helpers";
 import {
-  Bookmark,
   ChevronLeft,
   Heart,
   Loader2,
@@ -320,7 +319,7 @@ function Videos() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="p-1 w-fit rounded-xl sm:hidden mx-1 hover:bg-background"
+                className="p-1 w-fit rounded-xl sm:hidden mx-1 hover:bg-transparent"
                 onClick={() => router.push("/")}
               >
                 <ChevronLeft color="white" />

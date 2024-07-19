@@ -443,6 +443,14 @@ function Page({ params }: { params: { chatId: string } }) {
       time: "12:45 PM",
       kind: "document",
     },
+    {
+      id: "37",
+      content:
+        "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+      type: "reply",
+      time: "12:45 PM",
+      kind: "document",
+    },
   ]);
   const [reply, setReply] = React.useState({
     username: "",
@@ -519,21 +527,20 @@ function Page({ params }: { params: { chatId: string } }) {
     );
   }
 
-  function checkForAssets(message: string): string {
-    if (message.includes("res.cloudinary.com")) {
-      if (message.includes("/image")) {
-        return "ImageAsset@sociial.vercel.app";
-      } else if (message.includes("/video")) {
-        return "VideoAsset@sociial.vercel.app";
-      } else if (message.includes("/audio")) {
-        return "AudioAsset@sociial.vercel.app";
-      } else {
-        return "DocumentAsset@sociial.vercel.app";
-      }
-    } else if (message.includes("https://google.com/maps?q=")) {
-      return "LocationAsset@sociial.vercel.app";
-    } else {
-      return message;
+  function checkForAssets(message: string, kind: string): string {
+    switch (kind) {
+      case "location":
+        return `📍 Location`;
+      case "image":
+        return `📷 Image`;
+      case "video":
+        return `🎥 Video`;
+      case "audio":
+        return `🔊 Audio`;
+      case "document":
+        return `📄 Document`;
+      default:
+        return message;
     }
   }
 
@@ -541,7 +548,7 @@ function Page({ params }: { params: { chatId: string } }) {
     switch (kind) {
       case "location":
         return (
-          <Link href={content}>
+          <Link href={content} target="_blank">
             <MapPinnedIcon strokeWidth="1.5" size="80" />
           </Link>
         );
@@ -559,7 +566,7 @@ function Page({ params }: { params: { chatId: string } }) {
                 />
               </button>
             </DialogTrigger>
-            <DialogContent className="bg-black h-full w-full max-h-[100dvh]">
+            <DialogContent className="h-full w-full">
               <DialogTitle></DialogTitle>
               <Image
                 src={content}
@@ -597,7 +604,7 @@ function Page({ params }: { params: { chatId: string } }) {
                 />
               </button>
             </DialogTrigger>
-            <DialogContent className="bg-black h-full w-full max-h-[100dvh]">
+            <DialogContent className="h-full w-full">
               <DialogTitle></DialogTitle>
               <video
                 src={content}
@@ -626,12 +633,18 @@ function Page({ params }: { params: { chatId: string } }) {
         );
       default:
         return (
-          <div className="flex items-center justify-between gap-3 border-1 border-stone-200 bg-transparent/50 rounded-full px-4 py-2">
+          <div
+            className={`flex items-center justify-between gap-4 rounded-full py-2 w-fit`}
+          >
             <FileIcon size="40" />
-            <p className="w-20">
+            <p className="">
               ...{content.slice(content.length - 10, content.length)}
             </p>
-            <Button size="icon" variant="secondary" className="bg-transparent">
+            <Button
+              size="icon"
+              variant="secondary"
+              className="bg-transparent hover:bg-transparent/50 text-white rounded-xl"
+            >
               <DownloadIcon />
             </Button>
           </div>
@@ -676,7 +689,7 @@ function Page({ params }: { params: { chatId: string } }) {
 
   return (
     <div
-      className={`md:border-l-2 border-stone-200 dark:border-stone-800 md:ml-3 md:flex flex flex-col items-start justify-start gap-1 overflow-x-hidden relative lg:col-span-7 md:col-span-6 col-span-10 ${
+      className={`md:border-l-2 border-stone-200 dark:border-stone-800 md:ml-3 md:flex flex flex-col items-start justify-start gap-1 lg:col-span-7 md:col-span-6 col-span-10 ${
         location !== "/messages" ? "" : "hidden"
       } `}
     >
@@ -685,7 +698,7 @@ function Page({ params }: { params: { chatId: string } }) {
           <Button
             variant="ghost"
             size="icon"
-            className={`rounded-xl max-sm:hover:bg-black w-8 ${
+            className={`rounded-xl hover:bg-transparent w-8 ${
               location.includes("/messages/") ? "sm:hidden" : ""
             }`}
             onClick={() => router.push("/messages")}
@@ -812,9 +825,13 @@ function Page({ params }: { params: { chatId: string } }) {
                   }`}
                   key={index}
                   onDoubleClick={() => {
+                    const filteredReply = checkForAssets(
+                      message.content,
+                      message.kind || "message"
+                    );
                     setReply({
                       username: recipent.username,
-                      content: message.content,
+                      content: filteredReply,
                     });
                     inputRef.current?.focus();
                   }}
@@ -873,7 +890,10 @@ function Page({ params }: { params: { chatId: string } }) {
                     <MessageOptions
                       username={recipent.username}
                       setReply={(reply) => {
-                        const filteredReply = checkForAssets(reply.content);
+                        const filteredReply = checkForAssets(
+                          reply.content,
+                          reply.kind
+                        );
                         console.log(filteredReply);
                         setReply({
                           username: reply.username,
@@ -883,6 +903,7 @@ function Page({ params }: { params: { chatId: string } }) {
                       }}
                       message={message.content}
                       type={message.type}
+                      kind={message.kind || "message"}
                       id={message.id}
                       reactMessage={(emoji) => reactMessage(message, emoji)}
                     />
@@ -897,9 +918,13 @@ function Page({ params }: { params: { chatId: string } }) {
                   }`}
                   key={index}
                   onDoubleClick={() => {
+                    const filteredReply = checkForAssets(
+                      message.content,
+                      message.kind || "message"
+                    );
                     setReply({
                       username: recipent.username,
-                      content: message.content,
+                      content: filteredReply,
                     });
                     inputRef.current?.focus();
                   }}
@@ -952,7 +977,10 @@ function Page({ params }: { params: { chatId: string } }) {
                     <MessageOptions
                       username={recipent.username}
                       setReply={(reply) => {
-                        const filteredReply = checkForAssets(reply.content);
+                        const filteredReply = checkForAssets(
+                          reply.content,
+                          reply.kind
+                        );
                         console.log(filteredReply);
                         setReply({
                           username: reply.username,
@@ -963,6 +991,7 @@ function Page({ params }: { params: { chatId: string } }) {
                       message={message.content}
                       type={message.type}
                       id={message.id}
+                      kind={message.kind || "message"}
                       reactMessage={(emoji) => reactMessage(message, emoji)}
                     />
                   </div>
@@ -975,122 +1004,123 @@ function Page({ params }: { params: { chatId: string } }) {
       {infoOpen ? (
         ""
       ) : (
-        <div className="sticky bg-white dark:bg-black bottom-0 left-0 w-full px-2.5 flex items-center justify-center py-2 z-20">
+        <div className="sticky bg-white dark:bg-black bottom-0 left-0 w-full px-2.5 flex items-center justify-center z-20">
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="flex items-end w-full justify-center gap-2"
+              className="flex flex-col items-center w-full justify-center gap-2"
             >
-              <EmojiKeyboard
-                setMessage={(emoji: string): void =>
-                  form.setValue("message", emoji)
-                }
-                message={message}
-              />
-              <FormField
-                control={form.control}
-                name="message"
-                render={({ field }) => (
-                  <FormItem className="w-full relative flex flex-col bg-white dark:bg-black">
-                    <div
-                      className={`flex items-center justify-between gap-0 px-3 py-1 rounded-lg sticky bottom-14 w-full ring-4 ring-white dark:ring-black leading-5 overflow-hidden ${
-                        reply.content ? "" : "hidden"
-                      }`}
-                    >
-                      <div className="flex flex-col">
-                        {reply.username}
-                        <span className="text-stone-500 text-sm">
-                          {reply.content.slice(0, 100)}
-                        </span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        type="button"
-                        className="top-1 right-1 h-fit w-fit hover:bg-white dark:hover:bg-black"
-                        onClick={() =>
-                          setReply({
-                            username: "",
-                            content: "",
-                          })
-                        }
-                      >
-                        <X size="30" />
-                      </Button>
-                    </div>
-
-                    <FormControl>
-                      <Textarea
-                        placeholder="Type a message..."
-                        {...field}
-                        className="rounded-xl resize-none min-h-10 h-11"
-                        autoComplete="off"
-                        inputMode="text"
-                        ref={inputRef}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Menubar className="border-0 p-0">
-                <MenubarMenu>
-                  <MenubarTrigger asChild>
-                    <Button
-                      className="rounded-xl px-2"
-                      type="button"
-                      size="icon"
-                      variant="ghost"
-                    >
-                      <Paperclip />
-                    </Button>
-                  </MenubarTrigger>
-                  <MenubarContent align="center" className="rounded-xl">
-                    <MenubarItem
-                      className="rounded-lg py-2"
-                      onClick={() => setMediaOpen(true)}
-                    >
-                      <ImageIcon />
-                      &nbsp;Photos & Videos
-                    </MenubarItem>
-                    <MenubarItem
-                      className="rounded-lg py-2"
-                      onClick={() => setCameraOpen(true)}
-                    >
-                      <CameraIcon />
-                      &nbsp;Camera
-                    </MenubarItem>
-                    <MenubarItem
-                      className="rounded-lg py-2"
-                      onClick={() => setAudioOpen(true)}
-                    >
-                      <MicIcon />
-                      &nbsp;Audio
-                    </MenubarItem>
-                    <MenubarItem
-                      className="rounded-lg py-2"
-                      onClick={() => setDocumentOpen(true)}
-                    >
-                      <FileIcon />
-                      &nbsp;Document
-                    </MenubarItem>
-                    <MenubarItem
-                      className="rounded-lg py-2"
-                      onClick={shareLocation}
-                    >
-                      <MapPin />
-                      &nbsp;Location
-                    </MenubarItem>
-                  </MenubarContent>
-                </MenubarMenu>
-              </Menubar>
-              <Button
-                type="submit"
-                disabled={!message.length}
-                className={`rounded-xl ${theme.color} hover:${theme.color} hover:opacity-80 transition-opacity text-${theme.text}`}
+              <div
+                className={`flex items-center justify-between gap-0 px-3 py-1 w-full border-t-2 leading-5 overflow-hidden ${
+                  reply.content ? "" : "hidden"
+                }`}
               >
-                <SendHorizonal />
-              </Button>
+                <div className="flex flex-col">
+                  {reply.username}
+                  <span className="text-stone-500 text-sm">
+                    {reply.content.slice(0, 100)}
+                  </span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  type="button"
+                  className="top-1 right-1 h-fit w-fit hover:bg-white dark:hover:bg-black"
+                  onClick={() =>
+                    setReply({
+                      username: "",
+                      content: "",
+                    })
+                  }
+                >
+                  <X size="30" />
+                </Button>
+              </div>
+              <div className="flex items-end w-full justify-center gap-2 py-2">
+                <EmojiKeyboard
+                  setMessage={(emoji: string): void =>
+                    form.setValue("message", emoji)
+                  }
+                  message={message}
+                />
+                <FormField
+                  control={form.control}
+                  name="message"
+                  render={({ field }) => (
+                    <FormItem className="w-full relative flex flex-col bg-white dark:bg-black">
+                      <FormControl>
+                        <Textarea
+                          placeholder="Type a message..."
+                          {...field}
+                          className="rounded-xl resize-none min-h-10 h-11"
+                          autoComplete="off"
+                          inputMode="text"
+                          ref={inputRef}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Menubar className="border-0 p-0">
+                  <MenubarMenu>
+                    <MenubarTrigger asChild>
+                      <Button
+                        className="rounded-xl px-2"
+                        type="button"
+                        size="icon"
+                        variant="ghost"
+                      >
+                        <Paperclip />
+                      </Button>
+                    </MenubarTrigger>
+                    <MenubarContent align="center" className="rounded-xl">
+                      <MenubarItem
+                        className="rounded-lg py-2"
+                        onClick={() => setMediaOpen(true)}
+                      >
+                        <ImageIcon />
+                        &nbsp;Photos & Videos
+                      </MenubarItem>
+                      <MenubarItem
+                        className="rounded-lg py-2"
+                        onClick={() => setCameraOpen(true)}
+                      >
+                        <CameraIcon />
+                        &nbsp;Camera
+                      </MenubarItem>
+                      <MenubarItem
+                        className="rounded-lg py-2"
+                        onClick={() => setAudioOpen(true)}
+                      >
+                        <MicIcon />
+                        &nbsp;Audio
+                      </MenubarItem>
+                      <MenubarItem
+                        className="rounded-lg py-2"
+                        onClick={() => setDocumentOpen(true)}
+                      >
+                        <FileIcon />
+                        &nbsp;Document
+                      </MenubarItem>
+                      <MenubarItem
+                        className="rounded-lg py-2"
+                        onClick={shareLocation}
+                      >
+                        <MapPin />
+                        &nbsp;Location
+                      </MenubarItem>
+                    </MenubarContent>
+                  </MenubarMenu>
+                </Menubar>
+                <Button
+                  type="submit"
+                  disabled={!message.length}
+                  className={`rounded-xl ${theme.color} hover:${theme.color} hover:opacity-80 transition-opacity text-${theme.text}`}
+                >
+                  <SendHorizonal />
+                </Button>
+              </div>
             </form>
           </Form>
         </div>

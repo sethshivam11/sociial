@@ -29,8 +29,8 @@ function MessageReacts({ reacts, type }: Props) {
       <DialogTrigger
         className={`absolute rounded-full text-xs px-1 py-0.5 z-10 ring-1 -bottom-3 ring-white dark:ring-black text-white dark:text-black ${
           reacts && type === "reply"
-            ? "left-3 mr-auto bg-stone-800 dark:bg-stone-300"
-            : "right-3 ml-auto bg-stone-300 dark:bg-stone-800"
+            ? "left-3 mr-auto bg-stone-800 dark:bg-stone-300 text-white dark:text-black"
+            : "right-3 ml-auto bg-stone-300 dark:bg-stone-800 text-black dark:text-white"
         }`}
       >
         {getUniqueEmojis(reacts)}
