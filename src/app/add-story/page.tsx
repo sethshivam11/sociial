@@ -1,11 +1,14 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import {
-  Brush,
   Check,
+  Circle,
   CircleFadingPlus,
   CirclePlus,
-  Highlighter,
+  Pencil,
+  Plus,
+  RectangleVertical,
+  SquareIcon,
   Type,
   X,
 } from "lucide-react";
@@ -33,23 +36,53 @@ import { Label } from "@/components/ui/label";
 import NextImage from "next/image";
 import Link from "next/link";
 
+interface TextItem {
+  text: string;
+  size: number;
+  color: string;
+  x: number;
+  y: number;
+}
+
 function Page() {
   const router = useRouter();
   const dragContainer = React.useRef<HTMLDivElement>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const colors = [
+    "#000000",
+    "#ffffff",
+    "#f43f5e",
+    "#10b981",
+    "#eab308",
+    "#3b82f6",
+  ];
 
   const [selectedFile, setSelectedFile] = React.useState<string>("");
   const [stories, setStories] = React.useState<string[]>([]);
-  const [text, setText] = React.useState<string>("");
-  const [brush, setBrush] = React.useState({ active: false, color: "white" });
-  const [marker, setMarker] = React.useState({
-    active: false,
-    color: "yellow",
-  });
-  const [editable, setEditable] = React.useState<boolean>(false);
-  const [textPosition, setTextPosition] = React.useState<{
-    x: number;
-    y: number;
-  }>({ x: 50, y: 50 });
+  const [textItems, setTextItems] = React.useState<TextItem[]>([]);
+  const [brush, setBrush] = React.useState(false);
+  const [color, setColor] = React.useState(colors[0]);
+  const [imagePosition, setImagePosition] = React.useState<"cover" | "contain">(
+    "cover"
+  );
+
+  React.useEffect(() => {
+    if (selectedFile) {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+      const img = new Image();
+      img.src = selectedFile;
+      img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+      };
+    }
+  }, [selectedFile]);
+
   return (
     <div
       className="col-span-10 min-h-[100dvh] max-h-[100dvh] flex items-center justify-center bg-stone-900"
@@ -109,107 +142,178 @@ function Page() {
           }
         }
       }}
-      onDragOver={(event) => event.preventDefault()}
+      onDragOver={(e) => e.preventDefault()}
     >
-      {stories.length > 0 && (
-        <>
-          <AlertDialog>
-            <AlertDialogTrigger className="absolute left-2 top-2 z-10 bg-transparent/50 rounded-full p-2">
-              <X size="30" color="white" />
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogTitle>Discard Post</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to discard this story? All changes will be
-                lost.
-              </AlertDialogDescription>
-              <AlertDialogFooter className="max-sm:flex-col mt-4">
-                <AlertDialogAction
-                  className="bg-destructive text-white hover:bg-destructive/90"
-                  onClick={() => router.push("/")}
-                >
-                  Discard
-                </AlertDialogAction>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-          <AlertDialog>
-            <AlertDialogTrigger className="absolute right-2 top-2 z-10 bg-transparent/50 rounded-full p-2">
-              <Check size="30" color="#3b82f6" />
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogTitle>Post Story</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to post this story?
-              </AlertDialogDescription>
-              <AlertDialogFooter className="max-sm:flex-col mt-4">
-                <AlertDialogAction onClick={() => router.push("/")}>
-                  Post
-                </AlertDialogAction>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </>
-      )}
       <div
-        className={`sm:h-full flex flex-col max-sm:flex-row sm:py-8 sm:px-3 gap-1 max-sm:absolute max-sm:bottom-2 z-10 ${
+        className={`sm:h-full flex flex-col max-sm:flex-row sm:py-8 sm:px-3 gap-1 justify-between max-sm:absolute max-sm:bottom-2 z-10 ${
           stories.length ? "" : "hidden"
         }`}
       >
-        <Button
-          size="icon"
-          variant="outline"
-          className="bg-transparent/50 max-sm:border-0 sm:bg-stone-950 sm:border-stone-800 sm:hover:bg-stone-800 hover:bg-transparent/50 p-3 h-fit w-fit sm:rounded-xl rounded-full"
-        >
-          <Type color="white" />
-        </Button>
-        <Button
-          size="icon"
-          variant="outline"
-          className="bg-transparent/50 max-sm:border-0 sm:bg-stone-950 sm:border-stone-800 sm:hover:bg-stone-800 hover:bg-transparent/50 p-3 h-fit w-fit sm:rounded-xl rounded-full"
-        >
-          <Brush color="white" />
-        </Button>
-        <Button
-          size="icon"
-          variant="outline"
-          className="bg-transparent/50 max-sm:border-0 sm:bg-stone-950 sm:border-stone-800 sm:hover:bg-stone-800 hover:bg-transparent/50 p-3 h-fit w-fit sm:rounded-xl rounded-full"
-        >
-          <Highlighter color="white" />
-        </Button>
-        <Menubar className="border-0 p-0 bg-transparent w-fit h-fit">
+        <div className="flex sm:flex-col gap-1">
+          <Button
+            size="icon"
+            variant="outline"
+            className={`bg-transparent/50 max-sm:border-0 sm:bg-stone-950 sm:border-stone-800 sm:hover:bg-stone-800 hover:bg-transparent/50 p-3 h-fit w-fit sm:rounded-xl rounded-full`}
+          >
+            <Type color="white" />
+          </Button>
+          <Button
+            size="icon"
+            variant="outline"
+            className={`bg-transparent/50 max-sm:border-0 sm:bg-stone-950 sm:border-stone-800 sm:hover:bg-stone-800 hover:bg-transparent/50 p-3 h-fit w-fit sm:rounded-xl rounded-full ring-stone-200 ${
+              brush ? "bg-stone-800 ring-2 hover:bg-stone-800" : "ring-0"
+            }`}
+            onClick={() => {
+              setBrush((prev) => !prev);
+            }}
+          >
+            <Pencil color="white" />
+          </Button>
+          <Button
+            size="icon"
+            variant="outline"
+            className={`bg-transparent/50 max-sm:border-0 sm:bg-stone-950 sm:border-stone-800 sm:hover:bg-stone-800 hover:bg-transparent/50 p-3 h-fit w-fit sm:rounded-xl rounded-full`}
+            onClick={() =>
+              setImagePosition((prev) =>
+                prev === "cover" ? "contain" : "cover"
+              )
+            }
+          >
+            {imagePosition === "contain" ? (
+              <SquareIcon />
+            ) : (
+              <RectangleVertical />
+            )}
+          </Button>
+        </div>
+        <div className="flex max-sm:fixed bottom-1 left-1 flex-col gap-1">
+          {brush &&
+            colors.map((clr, index) => (
+              <Button
+                size="icon"
+                variant="outline"
+                className={`bg-transparent/50
+                  max-sm:bg-transparent sm:bg-stone-950 max-sm:border-transparent sm:border-stone-800 sm:hover:bg-stone-800 hover:bg-stone-500 p-0 sm:p-3 h-fit w-fit rounded-full ${
+                    color === clr
+                      ? "sm:ring-1 sm:ring-stone-200 max-sm:bg-stone-500"
+                      : ""
+                  }`}
+                onClick={() => setColor(clr)}
+                key={index}
+              >
+                <Circle
+                  fill={clr}
+                  color="#78716c"
+                  className={`inline-block rounded-full sm:w-6 w-8 sm:h-6 h-8`}
+                />
+              </Button>
+            ))}
+        </div>
+
+        <Menubar className="border-0 p-0 bg-transparent rounded-xl min-w-10 w-fit h-fit sm:hidden">
           <MenubarMenu>
             <MenubarTrigger asChild>
-              <Button className="bg-transparent/50 hover:bg-transparent/50 sm:hidden max-sm:border-0 p-3 h-fit w-fit rounded-full">
+              <Button className="bg-transparent/50 hover:bg-transparent/50 sm:hidden max-sm:border-0 p-3 h-fit rounded-full">
                 <CirclePlus size="25" color="white" />
               </Button>
             </MenubarTrigger>
-            <MenubarContent align="center" className="rounded-xl">
+            <MenubarContent
+              align="center"
+              className="flex-row bg-transparent/50 border-0 rounded-xl min-w-10"
+            >
               {stories.map((story, index) => (
-                <MenubarItem key={index}>
+                <MenubarItem
+                  key={index}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (selectedFile === story) {
+                      setStories((prevStory) =>
+                        prevStory.filter((_, i) => i !== index)
+                      );
+                      const idx = index === 0 ? 1 : 0;
+                      setSelectedFile(stories[idx]);
+                    } else setSelectedFile(story);
+                  }}
+                  className="hover:bg-transparent/20 rounded-lg cursor-pointer relative"
+                >
+                  {story === selectedFile && (
+                    <X
+                      strokeWidth="1.5"
+                      className="absolute bg-transparent/50 w-14 h-14"
+                    />
+                  )}
                   <NextImage
                     src={story}
                     width="50"
                     height="50"
                     alt=""
-                    className="w-12 h-12 object-cover pointer-events-none select-none"
+                    className="w-14 h-14 object-cover pointer-events-none select-none"
                   />
                 </MenubarItem>
               ))}
+              <MenubarItem className="focus:bg-transparent" asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`w-full h-14 bg-transparent hover:bg-transparent cursor-pointer ${
+                    stories.length >= 5 ? "hidden" : ""
+                  }`}
+                  onClick={() => inputRef.current?.click()}
+                >
+                  <Plus size="35" />
+                </Button>
+              </MenubarItem>
             </MenubarContent>
           </MenubarMenu>
         </Menubar>
       </div>
       <div className="ring-1 ring-stone-800 flex items-center my-2 rounded-sm bg-black min-w-72 sm:h-[50rem] max-h-full h-fit sm:aspect-9/16 max-sm:h-full sm:w-fit w-full relative">
+        {stories.length > 0 && (
+          <>
+            <AlertDialog>
+              <AlertDialogTrigger className="absolute left-2 top-2 z-10 bg-transparent/50 rounded-full p-2">
+                <X size="30" color="white" />
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogTitle>Discard Post</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to discard this story? All changes will
+                  be lost.
+                </AlertDialogDescription>
+                <AlertDialogFooter className="max-sm:flex-col mt-4">
+                  <AlertDialogAction
+                    className="bg-destructive text-white hover:bg-destructive/90"
+                    onClick={() => router.push("/")}
+                  >
+                    Discard
+                  </AlertDialogAction>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+            <AlertDialog>
+              <AlertDialogTrigger className="absolute right-2 top-2 z-10 bg-transparent/50 rounded-full p-2">
+                <Check size="30" color="#3b82f6" />
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogTitle>Post Story</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to post this story?
+                </AlertDialogDescription>
+                <AlertDialogFooter className="max-sm:flex-col mt-4">
+                  <AlertDialogAction onClick={() => router.push("/")}>
+                    Post
+                  </AlertDialogAction>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </>
+        )}
         {stories.length ? (
-          <NextImage
-            src={selectedFile}
-            alt=""
-            width="450"
-            height="800"
-            className="w-full h-full pointer-events-none select-none object-cover"
+          <canvas
+            ref={canvasRef}
+            className={`w-full h-full z-10 object-${imagePosition}`}
           />
         ) : (
           <div
@@ -246,17 +350,17 @@ function Page() {
           stories.length ? "" : "hidden"
         }`}
       >
-        {stories.map((file, index) => (
+        {stories.map((story, index) => (
           <div
             key={index}
             className="w-20 h-20 relative overflow-hidden bg-transparent/50 rounded-lg border-2 flex items-center justify-center"
           >
             <button
-              onClick={() => setSelectedFile(file)}
+              onClick={() => setSelectedFile(story)}
               className="w-full h-full"
             >
               <NextImage
-                src={file}
+                src={story}
                 alt=""
                 width="100"
                 height="100"
@@ -265,11 +369,15 @@ function Page() {
             </button>
             <button
               className="absolute top-1 right-1 bg-transparent/50 text-white rounded-full p-0.5"
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 setStories((prevStory) =>
                   prevStory.filter((_, i) => i !== index)
                 );
-                setSelectedFile(stories[0]);
+                if (selectedFile === story) {
+                  const idx = index === 0 ? 1 : 0;
+                  setSelectedFile(stories[idx]);
+                }
               }}
             >
               <X size="16" />
@@ -290,6 +398,7 @@ function Page() {
       </div>
       <input
         type="file"
+        ref={inputRef}
         onChange={(e) => {
           const inputFiles = e.target.files;
           if (inputFiles === null) return;
@@ -325,6 +434,7 @@ function Page() {
               });
             }
           }
+          e.target.files = null;
         }}
         id="new-story"
         accept="image/*"

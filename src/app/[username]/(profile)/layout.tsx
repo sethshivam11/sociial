@@ -114,7 +114,10 @@ function Profile({
                           className="w-5"
                         />
                       </MenubarTrigger>
-                      <MenubarContent className="px-6 py-4 drop-shadow-sm rounded-xl" align="center">
+                      <MenubarContent
+                        className="px-6 py-4 drop-shadow-sm rounded-xl"
+                        align="center"
+                      >
                         <h1 className="text-xl tracking-tight font-bold">
                           Verified Account
                         </h1>
@@ -131,7 +134,10 @@ function Profile({
                         <p className="text-stone-500 text-sm flex items-center justify-start gap-1 my-3">
                           <CalendarDays /> Verified since {}
                         </p>
-                        <Button className="w-full rounded-xl">
+                        <Button
+                          className="w-full rounded-xl"
+                          onClick={() => router.push("/get-premium")}
+                        >
                           Upgrade to Premium
                         </Button>
                       </MenubarContent>
