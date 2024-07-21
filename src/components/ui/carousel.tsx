@@ -1,12 +1,7 @@
 "use client";
 
 import * as React from "react";
-import {
-  ArrowLeftIcon,
-  ArrowRightIcon,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react";

@@ -5,6 +5,8 @@ import {
   Circle,
   CircleFadingPlus,
   CirclePlus,
+  Eraser,
+  Paintbrush,
   Pencil,
   Plus,
   RectangleVertical,
@@ -35,6 +37,10 @@ import { toast } from "@/components/ui/use-toast";
 import { Label } from "@/components/ui/label";
 import NextImage from "next/image";
 import Link from "next/link";
+import {
+  ReactSketchCanvas,
+  type ReactSketchCanvasRef,
+} from "react-sketch-canvas";
 
 interface TextItem {
   text: string;
@@ -48,40 +54,40 @@ function Page() {
   const router = useRouter();
   const dragContainer = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const canvasRef = React.useRef<ReactSketchCanvasRef>(null);
   const colors = [
     "#000000",
     "#ffffff",
-    "#f43f5e",
-    "#10b981",
-    "#eab308",
-    "#3b82f6",
+    "#ff0000",
+    "#00ff00",
+    "#ffff00",
+    "#0000ff",
   ];
 
   const [selectedFile, setSelectedFile] = React.useState<string>("");
   const [stories, setStories] = React.useState<string[]>([]);
   const [textItems, setTextItems] = React.useState<TextItem[]>([]);
+  const [strokeWidth, setStrokeWidth] = React.useState(5);
   const [brush, setBrush] = React.useState(false);
   const [color, setColor] = React.useState(colors[0]);
-  const [imagePosition, setImagePosition] = React.useState<"cover" | "contain">(
-    "cover"
-  );
-
-  React.useEffect(() => {
-    if (selectedFile) {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
-      const img = new Image();
-      img.src = selectedFile;
-      img.onload = () => {
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0);
-      };
+  const [eraseMode, setEraseMode] = React.useState(false);
+  function handleEraserClick() {
+    if (eraseMode) {
+      setEraseMode(false);
+      return canvasRef.current?.eraseMode(false);
     }
-  }, [selectedFile]);
+    setBrush(false);
+    setEraseMode(true);
+    canvasRef.current?.eraseMode(true);
+  }
+  function handlePencilClick() {
+    if (brush) {
+      return setBrush(false);
+    }
+    setBrush(true);
+    setEraseMode(false);
+    canvasRef.current?.eraseMode(false);
+  }
 
   return (
     <div
@@ -163,30 +169,22 @@ function Page() {
             className={`bg-transparent/50 max-sm:border-0 sm:bg-stone-950 sm:border-stone-800 sm:hover:bg-stone-800 hover:bg-transparent/50 p-3 h-fit w-fit sm:rounded-xl rounded-full ring-stone-200 ${
               brush ? "bg-stone-800 ring-2 hover:bg-stone-800" : "ring-0"
             }`}
-            onClick={() => {
-              setBrush((prev) => !prev);
-            }}
+            onClick={handlePencilClick}
           >
             <Pencil color="white" />
           </Button>
           <Button
             size="icon"
             variant="outline"
-            className={`bg-transparent/50 max-sm:border-0 sm:bg-stone-950 sm:border-stone-800 sm:hover:bg-stone-800 hover:bg-transparent/50 p-3 h-fit w-fit sm:rounded-xl rounded-full`}
-            onClick={() =>
-              setImagePosition((prev) =>
-                prev === "cover" ? "contain" : "cover"
-              )
-            }
+            className={`bg-transparent/50 max-sm:border-0 sm:bg-stone-950 sm:border-stone-800 sm:hover:bg-stone-800 hover:bg-transparent/50 p-3 h-fit w-fit sm:rounded-xl rounded-full ring-stone-200 ${
+              eraseMode ? "bg-stone-800 ring-2 hover:bg-stone-800" : "ring-0"
+            }`}
+            onClick={handleEraserClick}
           >
-            {imagePosition === "contain" ? (
-              <SquareIcon />
-            ) : (
-              <RectangleVertical />
-            )}
+            <Eraser color="white" />
           </Button>
         </div>
-        <div className="flex max-sm:fixed bottom-1 left-1 flex-col gap-1">
+        <div className="flex max-sm:fixed max-sm:px-2 bottom-1 left-1 flex-col gap-1">
           {brush &&
             colors.map((clr, index) => (
               <Button
@@ -209,7 +207,6 @@ function Page() {
               </Button>
             ))}
         </div>
-
         <Menubar className="border-0 p-0 bg-transparent rounded-xl min-w-10 w-fit h-fit sm:hidden">
           <MenubarMenu>
             <MenubarTrigger asChild>
@@ -311,9 +308,14 @@ function Page() {
           </>
         )}
         {stories.length ? (
-          <canvas
+          <ReactSketchCanvas
             ref={canvasRef}
-            className={`w-full h-full z-10 object-${imagePosition}`}
+            backgroundImage={selectedFile}
+            strokeColor={color}
+            strokeWidth={brush ? strokeWidth : 0}
+            eraserWidth={strokeWidth * 2}
+            preserveBackgroundImageAspectRatio="xMidYMid"
+            exportWithBackgroundImage={true}
           />
         ) : (
           <div
@@ -326,7 +328,7 @@ function Page() {
             <CircleFadingPlus size="60" color="white" />
             <div className="flex flex-col items-center gap-3">
               <div>
-                <h1 className="font-bold text-2xl tracking-tight w-full text-center text-white">
+                <h1 className="font-semibold text-2xl w-full text-center text-white">
                   Add to Story
                 </h1>
                 <p className="text-stone-500">
@@ -346,56 +348,132 @@ function Page() {
         )}
       </div>
       <div
-        className={`h-full flex flex-col py-8 px-3 gap-1 max-sm:hidden ${
+        className={`h-full flex flex-col sm:justify-between justify-end max-sm:absolute max-sm:right-0 py-8 px-3 gap-1 ${
           stories.length ? "" : "hidden"
         }`}
       >
-        {stories.map((story, index) => (
-          <div
-            key={index}
-            className="w-20 h-20 relative overflow-hidden bg-transparent/50 rounded-lg border-2 flex items-center justify-center"
+        <div className="flex flex-col gap-1 max-sm:hidden">
+          {stories.map((story, index) => (
+            <div
+              key={index}
+              className="w-20 h-20 relative overflow-hidden bg-transparent/50 rounded-lg border-2 flex items-center justify-between"
+            >
+              <button
+                onClick={() => {
+                  setSelectedFile(story);
+                  canvasRef.current?.resetCanvas();
+                }}
+                className="w-full h-full"
+              >
+                <NextImage
+                  src={story}
+                  alt=""
+                  width="100"
+                  height="100"
+                  className="object-cover w-full h-full pointer-events-none select-none cursor-pointer"
+                />
+              </button>
+              <button
+                className="absolute top-1 right-1 bg-transparent/50 text-white rounded-full p-0.5"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setStories((prevStory) =>
+                    prevStory.filter((_, i) => i !== index)
+                  );
+                  if (selectedFile === story) {
+                    const idx = index === 0 ? 1 : 0;
+                    setSelectedFile(stories[idx]);
+                  }
+                }}
+              >
+                <X size="16" />
+              </button>
+            </div>
+          ))}
+          <Button
+            className={`rounded-xl mx-2 w-fit h-fit p-2 bg-stone-800 hover:bg-stone-900 ${
+              stories.length >= 5 ? "hidden" : ""
+            }`}
+            variant="ghost"
+            size="icon"
           >
-            <button
-              onClick={() => setSelectedFile(story)}
-              className="w-full h-full"
+            <Label htmlFor="new-story" className="cursor-pointer">
+              <CirclePlus size="50" color="white" />
+            </Label>
+          </Button>
+        </div>
+        {(brush || eraseMode) && (
+          <div className="flex flex-col items-center justify-center gap-1">
+            <Button
+              size="icon"
+              variant="outline"
+              className={`bg-transparent/50
+                  sm:bg-stone-950 max-sm:border-transparent sm:border-stone-800 sm:hover:bg-stone-800 hover:bg-stone-500 p-3 rounded-full ${
+                    strokeWidth === 3
+                      ? "sm:ring-1 sm:ring-stone-200 max-sm:bg-stone-500"
+                      : ""
+                  }`}
+              onClick={() => setStrokeWidth(3)}
             >
-              <NextImage
-                src={story}
-                alt=""
-                width="100"
-                height="100"
-                className="object-cover w-full h-full pointer-events-none select-none cursor-pointer"
+              <Circle
+                color="#78716c"
+                fill={eraseMode ? "white" : color}
+                className={`inline-block rounded-full sm:w-6 w-8 sm:h-6 h-8`}
               />
-            </button>
-            <button
-              className="absolute top-1 right-1 bg-transparent/50 text-white rounded-full p-0.5"
-              onClick={(e) => {
-                e.stopPropagation();
-                setStories((prevStory) =>
-                  prevStory.filter((_, i) => i !== index)
-                );
-                if (selectedFile === story) {
-                  const idx = index === 0 ? 1 : 0;
-                  setSelectedFile(stories[idx]);
-                }
-              }}
+            </Button>
+            <Button
+              size="icon"
+              variant="outline"
+              className={`bg-transparent/50
+                  sm:bg-stone-950 max-sm:border-transparent sm:border-stone-800 sm:hover:bg-stone-800 hover:bg-stone-500 p-2 rounded-full ${
+                    strokeWidth === 6
+                      ? "sm:ring-1 sm:ring-stone-200 max-sm:bg-stone-500"
+                      : ""
+                  }`}
+              onClick={() => setStrokeWidth(6)}
             >
-              <X size="16" />
-            </button>
+              <Circle
+                color="#78716c"
+                fill={eraseMode ? "white" : color}
+                className={`inline-block rounded-full sm:w-6 w-8 sm:h-6 h-8`}
+              />
+            </Button>
+            <Button
+              size="icon"
+              variant="outline"
+              className={`bg-transparent/50
+                  sm:bg-stone-950 max-sm:border-transparent sm:border-stone-800 sm:hover:bg-stone-800 hover:bg-stone-500 p-1 rounded-full ${
+                    strokeWidth === 9
+                      ? "sm:ring-1 sm:ring-stone-200 max-sm:bg-stone-500"
+                      : ""
+                  }`}
+              onClick={() => setStrokeWidth(9)}
+            >
+              <Circle
+                color="#78716c"
+                fill={eraseMode ? "white" : color}
+                className={`inline-block rounded-full sm:w-6 w-8 sm:h-6 h-8`}
+              />
+            </Button>
+            <Button
+              size="icon"
+              variant="outline"
+              className={`bg-transparent/50
+                  max-sm:bg-transparent max-sm:hover:bg-transparent sm:bg-stone-950 max-sm:border-transparent sm:border-stone-800 sm:hover:bg-stone-800 hover:bg-stone-500 p-1 sm:p-3 h-fit w-fit rounded-xl ${
+                    eraseMode ? "visible" : "invisible"
+                  }`}
+              onClick={() => canvasRef.current?.resetCanvas()}
+            >
+              <Paintbrush color="white" />
+            </Button>
           </div>
-        ))}
-        <Button
-          className={`rounded-xl mx-2 w-fit h-fit p-2 ${
-            stories.length >= 5 ? "hidden" : ""
-          }`}
-          variant="ghost"
-          size="icon"
-        >
-          <Label htmlFor="new-story" className="cursor-pointer">
-            <CirclePlus size="50" />
-          </Label>
-        </Button>
+        )}
       </div>
+      {stories.length === 0 && (
+        <Link href="/" className="absolute right-2 top-2 max-sm:hidden">
+          <X size="30" color="white" />
+        </Link>
+      )}
       <input
         type="file"
         ref={inputRef}
