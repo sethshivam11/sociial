@@ -1,6 +1,8 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import {
+  AArrowDownIcon,
+  AArrowUpIcon,
   Check,
   Circle,
   CircleFadingPlus,
@@ -9,8 +11,6 @@ import {
   Paintbrush,
   Pencil,
   Plus,
-  RectangleVertical,
-  SquareIcon,
   Type,
   X,
 } from "lucide-react";
@@ -34,23 +34,64 @@ import {
 } from "@/components/ui/menubar";
 import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/use-toast";
-import { Label } from "@/components/ui/label";
 import NextImage from "next/image";
 import Link from "next/link";
 import {
   ReactSketchCanvas,
   type ReactSketchCanvasRef,
 } from "react-sketch-canvas";
+import { Rnd } from "react-rnd";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Label } from "@/components/ui/label";
 
 interface TextItem {
+  id: number;
   text: string;
   size: number;
   color: string;
   x: number;
   y: number;
+  open?: boolean;
 }
 
 function Page() {
+  const formSchema = z.object({
+    text: z
+      .string()
+      .min(1, {
+        message: "Text is required",
+      })
+      .max(100, {
+        message: "Text must be less than 100 characters",
+      }),
+  });
+  const form = useForm({
+    defaultValues: {
+      text: "",
+      size: 20,
+    },
+    resolver: zodResolver(formSchema),
+  });
   const router = useRouter();
   const dragContainer = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -63,14 +104,17 @@ function Page() {
     "#ffff00",
     "#0000ff",
   ];
-
   const [selectedFile, setSelectedFile] = React.useState<string>("");
   const [stories, setStories] = React.useState<string[]>([]);
   const [textItems, setTextItems] = React.useState<TextItem[]>([]);
-  const [strokeWidth, setStrokeWidth] = React.useState(5);
+  const [strokeWidth, setStrokeWidth] = React.useState(6);
   const [brush, setBrush] = React.useState(false);
   const [color, setColor] = React.useState(colors[0]);
   const [eraseMode, setEraseMode] = React.useState(false);
+  const [isEditing, setIsEditing] = React.useState(false);
+  function onSubmit(data: z.infer<typeof formSchema>) {
+    console.log(data);
+  }
   function handleEraserClick() {
     if (eraseMode) {
       setEraseMode(false);
@@ -87,6 +131,47 @@ function Page() {
     setBrush(true);
     setEraseMode(false);
     canvasRef.current?.eraseMode(false);
+  }
+  function handleFiles(inputFiles: FileList) {
+    const limit = 5 - stories.length - inputFiles.length;
+    const maxCap = limit > 0 ? inputFiles.length : 5 - stories.length;
+    for (let i = 0; i < maxCap; i++) {
+      const file = inputFiles.item(i);
+      if (file && file.type.includes("image")) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const img = reader.result as string;
+          setStories((prevStories) => [...prevStories, img]);
+          setSelectedFile(img);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        toast({
+          title: "Error",
+          description: "Only images are allowed",
+          variant: "destructive",
+        });
+      }
+    }
+  }
+  function addTextItem() {
+    const id = textItems.length;
+    setTextItems((prevItems) => [
+      ...prevItems,
+      {
+        id,
+        text: "Type here",
+        size: 20,
+        color: "#000000",
+        x: 50,
+        y: 50,
+      },
+    ]);
+  }
+  function handleEdit(item: TextItem) {
+    form.setValue("size", item.size);
+    form.setValue("text", item.text);
+    setIsEditing(true);
   }
 
   return (
@@ -115,38 +200,7 @@ function Page() {
       onDrop={(e) => {
         e.preventDefault();
         const droppedFiles = e.dataTransfer.files;
-        if (droppedFiles.length > 5) {
-          return toast({
-            title: "Warning",
-            description: "You can only upload 5 files at a time",
-            variant: "destructive",
-          });
-        }
-        for (let i = 0; i < droppedFiles.length; i++) {
-          const file = droppedFiles.item(i);
-          if (file?.type.includes("image")) {
-            const img = new Image();
-            img.src = URL.createObjectURL(file);
-            if (droppedFiles.length >= 10) {
-              const removedfirstItem = stories.shift();
-              if (removedfirstItem) {
-                setStories((prevStories) => [...prevStories, img.src]);
-              } else {
-                setStories([img.src]);
-              }
-            } else {
-              setStories((prevStories) => [...prevStories, img.src]);
-            }
-            setSelectedFile(img.src);
-          } else {
-            toast({
-              title: "Error",
-              description:
-                "Only images are allowed, click the link below to upload videos",
-              variant: "destructive",
-            });
-          }
-        }
+        handleFiles(droppedFiles);
       }}
       onDragOver={(e) => e.preventDefault()}
     >
@@ -160,6 +214,7 @@ function Page() {
             size="icon"
             variant="outline"
             className={`bg-transparent/50 max-sm:border-0 sm:bg-stone-950 sm:border-stone-800 sm:hover:bg-stone-800 hover:bg-transparent/50 p-3 h-fit w-fit sm:rounded-xl rounded-full`}
+            onClick={() => addTextItem()}
           >
             <Type color="white" />
           </Button>
@@ -307,16 +362,123 @@ function Page() {
             </AlertDialog>
           </>
         )}
+        <Dialog
+          open={isEditing}
+          onOpenChange={(open) => {
+            setIsEditing(open);
+          }}
+        >
+          <DialogContent>
+            <DialogTitle className="w-full text-center">Edit Text</DialogTitle>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-5 mt-4"
+              >
+                <FormField
+                  control={form.control}
+                  name="text"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Textarea
+                          style={{
+                            fontSize: `${form.watch("size")}px`,
+                            lineHeight: "normal",
+                            // color: form.color
+                          }}
+                          placeholder="Your text here"
+                          {...field}
+                          autoFocus
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button
+                  variant="ghost"
+                  type="button"
+                  size="icon"
+                  onClick={() => {
+                    const size = form.watch("size");
+                    if (size <= 50) {
+                      form.setValue("size", form.watch("size") + 5);
+                    }
+                  }}
+                  disabled={form.watch("size") >= 50}
+                >
+                  <AArrowUpIcon />
+                </Button>
+                <Button
+                  variant="ghost"
+                  type="button"
+                  size="icon"
+                  onClick={() => {
+                    const size = form.watch("size");
+                    if (size <= 50) {
+                      form.setValue("size", form.watch("size") - 5);
+                    }
+                  }}
+                  disabled={form.watch("size") <= 10}
+                >
+                  <AArrowDownIcon />
+                </Button>
+                {colors.map((color, index) => (
+                  <button key={index}>
+                    <Circle color="#78716c" fill={color} />
+                  </button>
+                ))}
+                <DialogFooter className="max-sm:gap-2">
+                  <Button
+                    variant="destructive"
+                    type="button"
+                    onClick={() => {
+                      setIsEditing(false);
+                      form.reset();
+                    }}
+                  >
+                    Delete
+                  </Button>
+                  <Button type="submit">Save</Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
         {stories.length ? (
-          <ReactSketchCanvas
-            ref={canvasRef}
-            backgroundImage={selectedFile}
-            strokeColor={color}
-            strokeWidth={brush ? strokeWidth : 0}
-            eraserWidth={strokeWidth * 2}
-            preserveBackgroundImageAspectRatio="xMidYMid"
-            exportWithBackgroundImage={true}
-          />
+          <>
+            {textItems.map((item, index) => (
+              <Rnd
+                key={index}
+                style={{ fontSize: item.size }}
+                default={{
+                  x: item.x,
+                  y: item.y,
+                  width: "fit-content",
+                  height: "fit-content",
+                }}
+                bounds="parent"
+                minWidth={50}
+                minHeight={50}
+              >
+                <button
+                  className="cursor-default"
+                  onDoubleClick={() => handleEdit(item)}
+                >
+                  {item.text}
+                </button>
+              </Rnd>
+            ))}
+            <ReactSketchCanvas
+              ref={canvasRef}
+              backgroundImage={selectedFile}
+              strokeColor={color}
+              strokeWidth={brush ? strokeWidth : 0}
+              eraserWidth={strokeWidth * 2}
+              preserveBackgroundImageAspectRatio="xMidYMid"
+            />
+          </>
         ) : (
           <div
             className="flex flex-col items-center justify-center gap-6 w-full h-full border-dashed sm:border-2 border-stone-500"
@@ -360,8 +522,16 @@ function Page() {
             >
               <button
                 onClick={() => {
-                  setSelectedFile(story);
+                  canvasRef.current?.exportImage("jpeg").then((data) => {
+                    setStories((prevStories) => {
+                      const idx = prevStories.indexOf(selectedFile);
+                      const updatedStories = [...prevStories];
+                      updatedStories[idx] = data;
+                      return updatedStories;
+                    });
+                  });
                   canvasRef.current?.resetCanvas();
+                  setSelectedFile(story);
                 }}
                 className="w-full h-full"
               >
@@ -480,38 +650,7 @@ function Page() {
         onChange={(e) => {
           const inputFiles = e.target.files;
           if (inputFiles === null) return;
-          if (inputFiles.length > 5) {
-            e.target.files = null;
-            return toast({
-              title: "Warning",
-              description: "You can only upload 5 files at a time",
-              variant: "destructive",
-            });
-          }
-          for (let i = 0; i < inputFiles.length; i++) {
-            const file = inputFiles.item(i);
-            if (file && file.type.includes("image")) {
-              const img = new Image();
-              img.src = URL.createObjectURL(file);
-              if (inputFiles.length >= 5) {
-                const removedfirstItem = stories.shift();
-                if (removedfirstItem) {
-                  setStories((prevStories) => [...prevStories, img.src]);
-                } else {
-                  setStories([img.src]);
-                }
-              } else {
-                setStories((prevStories) => [...prevStories, img.src]);
-              }
-              setSelectedFile(img.src);
-            } else {
-              toast({
-                title: "Error",
-                description: "Only images are allowed",
-                variant: "destructive",
-              });
-            }
-          }
+          handleFiles(inputFiles);
           e.target.files = null;
         }}
         id="new-story"
