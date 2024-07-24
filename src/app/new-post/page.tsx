@@ -46,6 +46,24 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+
+interface Post extends Area {
+  image: string;
+}
 
 function Page() {
   const router = useRouter();
@@ -63,22 +81,70 @@ function Page() {
       caption: "",
     },
   });
-  const [files, setFiles] = React.useState<string[]>([]);
   const [selectedFile, setSelectedFile] = React.useState<string>("");
-  const [posts, setPosts] = React.useState<Area[]>([]);
+  const [posts, setPosts] = React.useState<Post[]>([]);
   const [aspect, setAspect] = React.useState(1 / 1);
   const [crop, setCrop] = React.useState({ x: 0, y: 0 });
   const [zoom, setZoom] = React.useState(1);
+  const [showDialog, setShowDialog] = React.useState(false);
+  const [finalPosts, setFinalPosts] = React.useState<string[]>([]);
 
   const dragContainer = React.useRef<HTMLDivElement>(null);
 
   const onCropComplete = (croppedArea: Area, _: Area) => {
-    setPosts([...posts, croppedArea]);
+    const postIndex = posts.findIndex((post) => post.image === selectedFile);
+    if (postIndex !== -1) {
+      const newPosts = [...posts];
+      newPosts[postIndex] = { ...croppedArea, image: selectedFile };
+      setPosts(newPosts);
+    }
   };
+
+  function handleFiles(inputFiles: FileList) {
+    const limit = 5 - posts.length - inputFiles.length;
+    const maxCap = limit > 0 ? inputFiles.length : 5 - posts.length;
+    for (let i = 0; i < maxCap; i++) {
+      const file = inputFiles.item(i);
+      if (file && file.type.includes("image")) {
+        const img = new Image();
+        const imgURL = URL.createObjectURL(file);
+        img.style.aspectRatio = `${aspect}`;
+        img.src = imgURL;
+        img.onload = () => {
+          setPosts((prevPosts) => [
+            ...prevPosts,
+            {
+              image: imgURL,
+              x: 0,
+              y: 0,
+              width: img.width,
+              height: img.height,
+            },
+          ]);
+          if (!selectedFile) {
+            setSelectedFile(imgURL);
+          }
+        };
+      } else {
+        toast({
+          title: "Error",
+          description: "Only images are allowed",
+          variant: "destructive",
+        });
+      }
+    }
+  }
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
+    console.log(posts);
+    setFinalPosts(posts.map((post) => post.image));
+    setShowDialog(true);
   }
+
+  React.useEffect(() => {
+    console.log(posts);
+  }, [posts]);
 
   return (
     <div
@@ -106,38 +172,7 @@ function Page() {
       onDrop={(e) => {
         e.preventDefault();
         const droppedFiles = e.dataTransfer.files;
-        if (droppedFiles.length > 5) {
-          return toast({
-            title: "Warning",
-            description: "You can only upload 5 files at a time",
-            variant: "destructive",
-          });
-        }
-        for (let i = 0; i < droppedFiles.length; i++) {
-          const file = droppedFiles.item(i);
-          if (file?.type.includes("image")) {
-            const img = new Image();
-            img.src = URL.createObjectURL(file);
-            if (droppedFiles.length >= 5) {
-              const removedfirstItem = files.shift();
-              if (removedfirstItem) {
-                setFiles((prevFiles) => [...prevFiles, img.src]);
-              } else {
-                setFiles([img.src]);
-              }
-            } else {
-              setFiles((prevFiles) => [...prevFiles, img.src]);
-            }
-            setSelectedFile(img.src);
-          } else {
-            toast({
-              title: "Error",
-              description:
-                "Only images are allowed, click the link below to upload videos",
-              variant: "destructive",
-            });
-          }
-        }
+        handleFiles(droppedFiles);
       }}
       onDragOver={(event) => event.preventDefault()}
     >
@@ -166,7 +201,7 @@ function Page() {
         <h1 className="font-bold text-2xl tracking-tight w-full text-center mb-6">
           Create New Post
         </h1>
-        {files.length ? (
+        {posts.length ? (
           <div className="flex flex-col items-center justify-center w-full h-full gap-3">
             <div className="w-full h-full flex max-sm:flex-col items-center justify-center gap-3">
               <div className="w-full h-full relative rounded-xl">
@@ -181,21 +216,26 @@ function Page() {
                   showGrid={false}
                   classes={{
                     cropAreaClassName:
-                      "cursor-grab active:cursor-grabbing w-full h-full  ",
+                      "cursor-grab active:cursor-grabbing w-full h-full",
                     containerClassName:
                       "hover:cursor-grab active:cursor-grabbing rounded-xl dark:bg-white",
                   }}
                 />
               </div>
               <div className="flex sm:flex-col items-center justify-start gap-2 h-full w-fit">
-                {files.map((file, index) => (
+                {posts.map((post, index) => (
                   <div
                     key={index}
                     className="w-20 h-20 relative overflow-hidden bg-transparent/50 rounded-lg border-2 flex items-center justify-center"
                   >
-                    <button onClick={() => setSelectedFile(file)}>
+                    <button
+                      onClick={() => {
+                        setSelectedFile(post.image);
+                        setCrop({ x: post.x, y: post.y });
+                      }}
+                    >
                       <NextImage
-                        src={file}
+                        src={post.image}
                         alt=""
                         width="100"
                         height="100"
@@ -205,10 +245,12 @@ function Page() {
                     <button
                       className="absolute top-1 right-1 bg-transparent/50 text-white rounded-full p-0.5"
                       onClick={() => {
-                        setFiles((files) =>
-                          files.filter((_, i) => i !== index)
-                        );
-                        setSelectedFile(files[0]);
+                        setPosts((post) => post.filter((_, i) => i !== index));
+                        if (selectedFile === post.image) {
+                          const idx = index === 0 ? 1 : 0;
+                          setSelectedFile(posts[idx].image);
+                          setCrop({ x: posts[idx].x, y: posts[idx].y });
+                        }
                       }}
                     >
                       <X size="16" />
@@ -217,7 +259,7 @@ function Page() {
                 ))}
                 <Button
                   className={`rounded-xl mx-2 w-fit h-fit p-2 ${
-                    files.length >= 5 ? "hidden" : ""
+                    posts.length >= 5 ? "hidden" : ""
                   }`}
                   variant="ghost"
                   size="icon"
@@ -348,40 +390,8 @@ function Page() {
           type="file"
           onChange={(e) => {
             const inputFiles = e.target.files;
-            if (inputFiles === null) return;
-            if (inputFiles.length > 5) {
-              e.target.files = null;
-              return toast({
-                title: "Warning",
-                description: "You can only upload 5 files at a time",
-                variant: "destructive",
-              });
-            }
-            for (let i = 0; i < inputFiles.length; i++) {
-              const file = inputFiles.item(i);
-              if (file?.type.includes("image")) {
-                const img = new Image();
-                img.src = URL.createObjectURL(file);
-                if (inputFiles.length >= 5) {
-                  const removedfirstItem = files.shift();
-                  if (removedfirstItem) {
-                    setFiles((prevFiles) => [...prevFiles, img.src]);
-                  } else {
-                    setFiles([img.src]);
-                  }
-                } else {
-                  setFiles((prevFiles) => [...prevFiles, img.src]);
-                }
-                setSelectedFile(img.src);
-              } else {
-                toast({
-                  title: "Error",
-                  description:
-                    "Only images are allowed, click the link below to upload videos",
-                  variant: "destructive",
-                });
-              }
-            }
+            if (!inputFiles) return;
+            handleFiles(inputFiles);
           }}
           id="new-post"
           accept="image/*"
@@ -389,6 +399,30 @@ function Page() {
           multiple
         />
       </div>
+      <Dialog open={showDialog} onOpenChange={setShowDialog}>
+        <DialogContent hideCloseIcon>
+          <DialogTitle className="text-2xl text-center w-full my-2">
+            Post Preview
+          </DialogTitle>
+          <Carousel>
+            <CarouselContent>
+              {finalPosts.map((post, index) => (
+                <CarouselItem key={index}>
+                  <NextImage src={post} alt="" width="720" height="320" />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselNext />
+            <CarouselPrevious />
+          </Carousel>
+          <DialogFooter className="max-sm:gap-2">
+            <DialogClose asChild>
+              <Button variant="ghost">Cancel</Button>
+            </DialogClose>
+            <Button onClick={() => router.push("/")}>Post</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

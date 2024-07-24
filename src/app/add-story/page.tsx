@@ -50,16 +50,14 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { z } from "zod";
+import { set, z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Label } from "@/components/ui/label";
@@ -71,31 +69,11 @@ interface TextItem {
   color: string;
   x: number;
   y: number;
+  background?: string;
   open?: boolean;
 }
 
 function Page() {
-  const formSchema = z.object({
-    text: z
-      .string()
-      .min(1, {
-        message: "Text is required",
-      })
-      .max(100, {
-        message: "Text must be less than 100 characters",
-      }),
-  });
-  const form = useForm({
-    defaultValues: {
-      text: "",
-      size: 20,
-    },
-    resolver: zodResolver(formSchema),
-  });
-  const router = useRouter();
-  const dragContainer = React.useRef<HTMLDivElement>(null);
-  const inputRef = React.useRef<HTMLInputElement>(null);
-  const canvasRef = React.useRef<ReactSketchCanvasRef>(null);
   const colors = [
     "#000000",
     "#ffffff",
@@ -104,16 +82,55 @@ function Page() {
     "#ffff00",
     "#0000ff",
   ];
+  const formSchema = z.object({
+    id: z.number(),
+    text: z
+      .string()
+      .min(1, {
+        message: "Text is required",
+      })
+      .max(100, {
+        message: "Text must be less than 100 characters",
+      }),
+    color: z.string(),
+    size: z.number().min(10).max(50),
+  });
+  const form = useForm({
+    defaultValues: {
+      id: -1,
+      text: "",
+      size: 20,
+      color: colors[0],
+    },
+    resolver: zodResolver(formSchema),
+  });
+  const router = useRouter();
+  const dragContainer = React.useRef<HTMLDivElement>(null);
+  const timerRef = React.useRef<NodeJS.Timeout | null>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const canvasRef = React.useRef<ReactSketchCanvasRef>(null);
+  const containerRef = React.useRef<HTMLDivElement>(null);
   const [selectedFile, setSelectedFile] = React.useState<string>("");
   const [stories, setStories] = React.useState<string[]>([]);
   const [textItems, setTextItems] = React.useState<TextItem[]>([]);
   const [strokeWidth, setStrokeWidth] = React.useState(6);
   const [brush, setBrush] = React.useState(false);
-  const [color, setColor] = React.useState(colors[0]);
+  const [color, setColor] = React.useState(colors[1]);
   const [eraseMode, setEraseMode] = React.useState(false);
   const [isEditing, setIsEditing] = React.useState(false);
   function onSubmit(data: z.infer<typeof formSchema>) {
-    console.log(data);
+    setTextItems((prevItems) =>
+      prevItems.map((item) => {
+        if (item.id === data.id) {
+          item.text = data.text;
+          item.size = data.size;
+          item.color = data.color;
+        }
+        return item;
+      })
+    );
+    form.reset();
+    setIsEditing(false);
   }
   function handleEraserClick() {
     if (eraseMode) {
@@ -142,7 +159,9 @@ function Page() {
         reader.onload = () => {
           const img = reader.result as string;
           setStories((prevStories) => [...prevStories, img]);
-          setSelectedFile(img);
+          if (!selectedFile) {
+            setSelectedFile(img);
+          }
         };
         reader.readAsDataURL(file);
       } else {
@@ -156,22 +175,54 @@ function Page() {
   }
   function addTextItem() {
     const id = textItems.length;
-    setTextItems((prevItems) => [
-      ...prevItems,
-      {
-        id,
-        text: "Type here",
-        size: 20,
-        color: "#000000",
-        x: 50,
-        y: 50,
-      },
-    ]);
+    const newItem = {
+      id,
+      text: "Type here",
+      size: 20,
+      color: "#000000",
+      x: 50,
+      y: 50,
+    };
+    setTextItems((prevItems) => [...prevItems, newItem]);
+    handleEdit(newItem);
   }
   function handleEdit(item: TextItem) {
     form.setValue("size", item.size);
     form.setValue("text", item.text);
+    form.setValue("color", item.color);
+    form.setValue("id", item.id);
     setIsEditing(true);
+  }
+  function handleImageChange(story: string) {
+    canvasRef.current?.exportImage("jpeg").then((data) => {
+      const canvas = document.createElement("canvas");
+      canvas.style.objectFit = "contain";
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+      const img = new Image();
+      img.src = data;
+      img.onload = () => {
+        canvas.width = 450;
+        canvas.height = 800;
+        ctx.drawImage(img, 0, 0);
+        textItems.forEach((item) => {
+          ctx.fillStyle = item.color;
+          ctx.font = `${item.size}px '__Inter_aaf875', '__Inter_Fallback_aaf875'`;
+          ctx.textAlign = "center";
+          ctx.fillText(item.text, item.x, item.y);
+        });
+        setTextItems([]);
+        const imageWithText = canvas.toDataURL("image/jpeg", 1);
+        setStories((prevStories) => {
+          const idx = prevStories.indexOf(selectedFile);
+          const updatedStories = [...prevStories];
+          updatedStories[idx] = imageWithText;
+          return updatedStories;
+        });
+        canvasRef.current?.resetCanvas();
+        setSelectedFile(story);
+      };
+    });
   }
 
   return (
@@ -319,7 +370,10 @@ function Page() {
           </MenubarMenu>
         </Menubar>
       </div>
-      <div className="ring-1 ring-stone-800 flex items-center my-2 rounded-sm bg-black min-w-72 sm:h-[50rem] max-h-full h-fit sm:aspect-9/16 max-sm:h-full sm:w-fit w-full relative">
+      <div
+        className="ring-1 ring-stone-800 flex items-center my-2 rounded-sm bg-black min-w-72 sm:h-[50rem] max-h-full h-fit sm:aspect-9/16 max-sm:h-full sm:w-fit w-full relative"
+        ref={containerRef}
+      >
         {stories.length > 0 && (
           <>
             <AlertDialog>
@@ -362,13 +416,8 @@ function Page() {
             </AlertDialog>
           </>
         )}
-        <Dialog
-          open={isEditing}
-          onOpenChange={(open) => {
-            setIsEditing(open);
-          }}
-        >
-          <DialogContent>
+        <Dialog open={isEditing} onOpenChange={setIsEditing}>
+          <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
             <DialogTitle className="w-full text-center">Edit Text</DialogTitle>
             <Form {...form}>
               <form
@@ -385,61 +434,81 @@ function Page() {
                           style={{
                             fontSize: `${form.watch("size")}px`,
                             lineHeight: "normal",
-                            // color: form.color
                           }}
                           placeholder="Your text here"
                           {...field}
-                          autoFocus
+                          onFocus={(e) => e.target.select()}
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <Button
-                  variant="ghost"
-                  type="button"
-                  size="icon"
-                  onClick={() => {
-                    const size = form.watch("size");
-                    if (size <= 50) {
-                      form.setValue("size", form.watch("size") + 5);
-                    }
-                  }}
-                  disabled={form.watch("size") >= 50}
-                >
-                  <AArrowUpIcon />
-                </Button>
-                <Button
-                  variant="ghost"
-                  type="button"
-                  size="icon"
-                  onClick={() => {
-                    const size = form.watch("size");
-                    if (size <= 50) {
-                      form.setValue("size", form.watch("size") - 5);
-                    }
-                  }}
-                  disabled={form.watch("size") <= 10}
-                >
-                  <AArrowDownIcon />
-                </Button>
-                {colors.map((color, index) => (
-                  <button key={index}>
-                    <Circle color="#78716c" fill={color} />
-                  </button>
-                ))}
+                <div className="flex items-center justify-between gap-1">
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      type="button"
+                      size="icon"
+                      onClick={() => {
+                        const size = form.watch("size");
+                        if (size <= 50) {
+                          form.setValue("size", form.watch("size") + 5);
+                        }
+                      }}
+                      disabled={form.watch("size") >= 50}
+                    >
+                      <AArrowUpIcon />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      type="button"
+                      size="icon"
+                      onClick={() => {
+                        const size = form.watch("size");
+                        if (size <= 50) {
+                          form.setValue("size", form.watch("size") - 5);
+                        }
+                      }}
+                      disabled={form.watch("size") <= 10}
+                    >
+                      <AArrowDownIcon />
+                    </Button>
+                  </div>
+                  <div className="flex gap-2">
+                    {colors.map((color, index) => (
+                      <button
+                        key={index}
+                        className={`rounded-full hover:bg-stone-500 ${
+                          form.watch("color") === color
+                            ? "scale-125 bg-stone-500"
+                            : ""
+                        }`}
+                        onClick={() => form.setValue("color", color)}
+                        type="button"
+                      >
+                        <Circle color="#78716c" fill={color} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <DialogFooter className="max-sm:gap-2">
-                  <Button
-                    variant="destructive"
-                    type="button"
-                    onClick={() => {
-                      setIsEditing(false);
-                      form.reset();
-                    }}
-                  >
-                    Delete
-                  </Button>
+                  <DialogClose asChild>
+                    <Button
+                      variant="destructive"
+                      type="button"
+                      onClick={() => {
+                        setTextItems((prevItems) =>
+                          prevItems.filter(
+                            (item) => item.id !== form.watch("id")
+                          )
+                        );
+                        form.reset();
+                      }}
+                    >
+                      Delete
+                    </Button>
+                  </DialogClose>
                   <Button type="submit">Save</Button>
                 </DialogFooter>
               </form>
@@ -451,19 +520,57 @@ function Page() {
             {textItems.map((item, index) => (
               <Rnd
                 key={index}
-                style={{ fontSize: item.size }}
+                style={{
+                  fontSize: item.size,
+                  color: item.color,
+                  backgroundColor: item.background
+                    ? item.background
+                    : "transparent",
+                  borderRadius: "5px",
+                }}
                 default={{
                   x: item.x,
                   y: item.y,
-                  width: "fit-content",
-                  height: "fit-content",
+                  width: "max-content",
+                  height: "max-content",
+                }}
+                onDragStop={(_, direction) => {
+                  setTextItems((prevItems) =>
+                    prevItems.map((prevItem) => {
+                      const rect =
+                        containerRef.current?.getBoundingClientRect();
+                      console.log(rect, direction);
+                      if (prevItem.id === item.id && rect) {
+                        prevItem.x = direction.x + 55;
+                        prevItem.y = direction.y + 33;
+                      }
+                      return prevItem;
+                    })
+                  );
                 }}
                 bounds="parent"
                 minWidth={50}
                 minHeight={50}
               >
                 <button
-                  className="cursor-default"
+                  className="cursor-all-scroll pt-2.5 px-2 font-bold"
+                  onTouchStart={() => {
+                    timerRef.current = setTimeout(() => {
+                      handleEdit(item);
+                    }, 300);
+                  }}
+                  onTouchEnd={() => {
+                    if (timerRef.current) {
+                      clearTimeout(timerRef.current);
+                      timerRef.current = null;
+                    }
+                  }}
+                  onTouchMove={() => {
+                    if (timerRef.current) {
+                      clearTimeout(timerRef.current);
+                      timerRef.current = null;
+                    }
+                  }}
                   onDoubleClick={() => handleEdit(item)}
                 >
                   {item.text}
@@ -521,18 +628,7 @@ function Page() {
               className="w-20 h-20 relative overflow-hidden bg-transparent/50 rounded-lg border-2 flex items-center justify-between"
             >
               <button
-                onClick={() => {
-                  canvasRef.current?.exportImage("jpeg").then((data) => {
-                    setStories((prevStories) => {
-                      const idx = prevStories.indexOf(selectedFile);
-                      const updatedStories = [...prevStories];
-                      updatedStories[idx] = data;
-                      return updatedStories;
-                    });
-                  });
-                  canvasRef.current?.resetCanvas();
-                  setSelectedFile(story);
-                }}
+                onClick={() => handleImageChange(story)}
                 className="w-full h-full"
               >
                 <NextImage
