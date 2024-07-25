@@ -13,14 +13,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 import {
   ChevronsLeftRight,
-  FileVideo,
-  Film,
   MonitorPlay,
-  MonitorUp,
   RectangleHorizontal,
   RectangleVertical,
   Square,
-  Tv,
   X,
 } from "lucide-react";
 import Link from "next/link";
@@ -28,7 +24,7 @@ import React from "react";
 import Cropper, { Area } from "react-easy-crop";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { set, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import {
   Form,
   FormControl,
@@ -49,8 +45,16 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 function Page() {
+  const cropperRef = React.useRef<Cropper>(null);
   const router = useRouter();
   const formSchema = z.object({
     caption: z
@@ -73,9 +77,11 @@ function Page() {
     video: "",
     area: { x: 0, y: 0, width: 0, height: 0 },
   });
+  const [finalVideo, setFinalVideo] = React.useState<string>("");
   const [aspect, setAspect] = React.useState(1 / 1);
   const [crop, setCrop] = React.useState({ x: 0, y: 0 });
   const [zoom, setZoom] = React.useState(1);
+  const [showDialog, setShowDialog] = React.useState(false);
 
   const dragContainer = React.useRef<HTMLDivElement>(null);
 
@@ -84,7 +90,8 @@ function Page() {
   };
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+    if (!cropperRef.current) return;
+    setShowDialog(true);
   }
 
   return (
@@ -164,6 +171,7 @@ function Page() {
             <div className="w-full h-full flex max-sm:flex-col items-center justify-center gap-3">
               <div className="w-full h-full relative rounded-xl">
                 <Cropper
+                  ref={cropperRef}
                   video={videoFile.video}
                   crop={crop}
                   zoom={zoom}
@@ -324,6 +332,27 @@ function Page() {
           className="w-0 h-0 p-0 border-0 invisible"
         />
       </div>
+      <Dialog open={showDialog} onOpenChange={setShowDialog}>
+        <DialogContent hideCloseIcon>
+          <DialogTitle className="text-2xl text-center w-full my-2">
+            Post Preview
+          </DialogTitle>
+          <video
+            autoPlay
+            controls
+            controlsList="nodownload"
+            className="w-full h-full"
+          >
+            <source src={finalVideo} />
+          </video>
+          <DialogFooter className="max-sm:gap-2">
+            <DialogClose asChild>
+              <Button variant="ghost">Cancel</Button>
+            </DialogClose>
+            <Button onClick={() => router.push("/")}>Post</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

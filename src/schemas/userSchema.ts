@@ -44,7 +44,9 @@ const fullNameSchema = z
   });
 
 const verificationCodeSchema = z.coerce
-  .number()
+  .number({
+    message: "Invalid verification code",
+  })
   .min(100000, {
     message: "Invalid verification code",
   })

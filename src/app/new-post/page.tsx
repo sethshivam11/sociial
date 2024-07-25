@@ -142,10 +142,6 @@ function Page() {
     setShowDialog(true);
   }
 
-  React.useEffect(() => {
-    console.log(posts);
-  }, [posts]);
-
   return (
     <div
       className="sm:container flex flex-col items-center justify-start h-full min-h-[100dvh] col-span-10 px-3 py-6"

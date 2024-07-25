@@ -7,11 +7,149 @@ import { Circle, History, Search, SearchX, Users, X } from "lucide-react";
 import { useDebounceCallback } from "usehooks-ts";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
 function Messages({ children }: { children: React.ReactNode }) {
+  const formSchema = z.object({
+    name: z
+      .string()
+      .min(3, {
+        message: "Group Name must be at least 3 characters long",
+      })
+      .max(50, {
+        message: "Group Name must be at most 50 characters long",
+      }),
+    description: z.string(),
+  });
+  const form = useForm({
+    defaultValues: {
+      name: "",
+      description: "",
+    },
+    resolver: zodResolver(formSchema),
+  });
   const router = useRouter();
   const location = usePathname();
-  const [chats, setChats] = React.useState([
+  const savedFollowers = [
+    {
+      fullName: "John Doe",
+      username: "johndoe",
+      avatar: "https://github.com/shadcn.png",
+    },
+    {
+      fullName: "Jane Smith",
+      username: "janesmith",
+      avatar: "https://github.com/shadcn.png",
+    },
+    {
+      fullName: "Alex Johnson",
+      username: "alexjohnson",
+      avatar: "https://github.com/shadcn.png",
+    },
+    {
+      fullName: "Maria Garcia",
+      username: "mariagarcia",
+      avatar: "https://github.com/shadcn.png",
+    },
+    {
+      fullName: "James Wilson",
+      username: "jameswilson",
+      avatar: "https://github.com/shadcn.png",
+    },
+    {
+      fullName: "Linda Brown",
+      username: "lindabrown",
+      avatar: "https://github.com/shadcn.png",
+    },
+    {
+      fullName: "Robert Davis",
+      username: "robertdavis",
+      avatar: "https://github.com/shadcn.png",
+    },
+    {
+      fullName: "Robert Davis",
+      username: "robertdavis",
+      avatar: "https://github.com/shadcn.png",
+    },
+    {
+      fullName: "Robert Davis",
+      username: "robertdavis",
+      avatar: "https://github.com/shadcn.png",
+    },
+    {
+      fullName: "Robert Davis",
+      username: "robertdavis",
+      avatar: "https://github.com/shadcn.png",
+    },
+    {
+      fullName: "Robert Davis",
+      username: "robertdavis",
+      avatar: "https://github.com/shadcn.png",
+    },
+    {
+      fullName: "Robert Davis",
+      username: "robertdavis",
+      avatar: "https://github.com/shadcn.png",
+    },
+    {
+      fullName: "Robert Davis",
+      username: "robertdavis",
+      avatar: "https://github.com/shadcn.png",
+    },
+    {
+      fullName: "Robert Davis",
+      username: "robertdavis",
+      avatar: "https://github.com/shadcn.png",
+    },
+    {
+      fullName: "Robert Davis",
+      username: "robertdavis",
+      avatar: "https://github.com/shadcn.png",
+    },
+    {
+      fullName: "Robert Davis",
+      username: "robertdavis",
+      avatar: "https://github.com/shadcn.png",
+    },
+    {
+      fullName: "Robert Davis",
+      username: "robertdavis",
+      avatar: "https://github.com/shadcn.png",
+    },
+    {
+      fullName: "Robert Davis",
+      username: "robertdavis",
+      avatar: "https://github.com/shadcn.png",
+    },
+    {
+      fullName: "Robert Davis",
+      username: "robertdavis",
+      avatar: "https://github.com/shadcn.png",
+    },
+  ];
+  const savedChats = [
     {
       id: "1",
       fullName: "John Doe",
@@ -175,23 +313,47 @@ function Messages({ children }: { children: React.ReactNode }) {
       message: "Good morning!",
       avatar: "https://github.com/shadcn.png",
     },
-  ]);
-  const [search, setSearch] = React.useState("");
-  const [savedChats, setSavedChats] = React.useState(chats);
+  ];
+  const [chats, setChats] = React.useState(savedChats);
+  const [level, setLevel] = React.useState<"1" | "2">("1");
+  const [participants, setParticipants] = React.useState<typeof followers>([]);
+  const [searchChats, setSearchChats] = React.useState("");
+  const [searchFollowers, setSearchFollowers] = React.useState("");
+  const [followers, setFollowers] = React.useState(savedFollowers);
   const searchRef = React.useRef<HTMLInputElement>(null);
-  const debounced = useDebounceCallback(setSearch, 500);
+  const setChatsDebounced = useDebounceCallback(setSearchChats, 500);
+  const setFollowersDebounced = useDebounceCallback(setSearchFollowers, 500);
+  const [newChatDialog, setNewChatDialog] = React.useState(false);
+  function onSubmit(data: z.infer<typeof formSchema>) {
+    console.log(data);
+    setNewChatDialog(false);
+  }
 
   React.useEffect(() => {
-    if (search) {
+    if (searchChats) {
       setChats(
         savedChats.filter((chat) =>
-          chat.fullName.toLowerCase().includes(search.toLowerCase())
+          chat.fullName.toLowerCase().includes(searchChats.toLowerCase())
         )
       );
     } else {
       setChats(savedChats);
     }
-  }, [search, savedChats]);
+  }, [searchChats]);
+
+  React.useEffect(() => {
+    if (searchFollowers) {
+      setFollowers(
+        savedFollowers.filter((follower) =>
+          follower.fullName
+            .toLowerCase()
+            .includes(searchFollowers.toLowerCase())
+        )
+      );
+    } else {
+      setFollowers(savedFollowers);
+    }
+  }, [searchFollowers]);
 
   return (
     <div className="grid min-h-[100dvh] max-sm:max-h-[100dvh] xl:col-span-8 sm:col-span-9 col-span-10 sm:grid-cols-10 sm:container max-md:pr-2 max-sm:pr-0">
@@ -204,29 +366,186 @@ function Messages({ children }: { children: React.ReactNode }) {
           <h1 className="text-2xl tracking-tight font-bold text-left py-2.5">
             Conversations
           </h1>
-          <button className="">
-            <Users />
-          </button>
-        </div>
+          <Dialog
+            open={newChatDialog}
+            onOpenChange={(open) => {
+              setNewChatDialog(open);
+              setParticipants([]);
+              setLevel("1");
+              form.reset();
+            }}
+          >
+            <DialogTrigger asChild>
+              <Button
+                className="bg-transparent hover:bg-transparent text-black dark:text-white"
+                onClick={() => setNewChatDialog(true)}
+              >
+                <Users />
+              </Button>
+            </DialogTrigger>
+            <DialogContent
+              className={`sm:w-2/3 sm:max-h-[83%] max-h-full w-full flex flex-col bg-stone-100 dark:bg-stone-900`}
+              onOpenAutoFocus={(e) => e.preventDefault()}
+              hideCloseIcon
+            >
+              <DialogTitle>New Group Chat</DialogTitle>
+              {level === "1" ? (
+                <>
+                  <Input
+                    defaultValue={searchFollowers}
+                    name="searchFollowers"
+                    autoComplete="off"
+                    inputMode="search"
+                    placeholder="Search"
+                    onChange={(e) => setFollowersDebounced(e.target.value)}
+                  />
+                  <hr className="bg-stone-500 my-2" />
+                  <div className="flex flex-col justify-start items-start gap-4 overflow-y-auto h-full">
+                    {followers.map((follower, index) => {
+                      return (
+                        <div
+                          className="flex items-center justify-between w-full px-2 gap-3 rounded-lg"
+                          key={index}
+                        >
+                          <Label
+                            htmlFor={`follower-${index}`}
+                            className="flex items-center gap-3 rounded-lg w-full cursor-pointer"
+                          >
+                            <div className="w-8 h-8">
+                              <Image
+                                width={32}
+                                height={32}
+                                src={follower.avatar}
+                                alt=""
+                                className="w-full h-full rounded-full pointer-events-none select-none"
+                              />
+                            </div>
+                            <div>
+                              <p className="text-lg leading-5">
+                                {follower.fullName}
+                              </p>
+                              <p className="text-sm text-gray-500">
+                                @{follower.username}
+                              </p>
+                            </div>
+                          </Label>
+                          <Checkbox
+                            id={`follower-${index}`}
+                            className="rounded-full w-5 h-5 data-[state=checked]:bg-blue-500 data-[state=checked]:text-white border-2 data-[state=checked]:border-0"
+                            onCheckedChange={(checked) => {
+                              checked
+                                ? setParticipants([...participants, follower])
+                                : setParticipants((prevParticipants) =>
+                                    prevParticipants.filter(
+                                      (user) =>
+                                        user.username !== follower.username
+                                    )
+                                  );
+                            }}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <DialogFooter className="max-sm:gap-2">
+                    <DialogClose asChild>
+                      <Button
+                        variant="ghost"
+                        type="button"
+                        className="rounded-xl"
+                      >
+                        Cancel
+                      </Button>
+                    </DialogClose>
+                    <Button
+                      type="submit"
+                      className="rounded-xl"
+                      onClick={() => {
+                        setLevel("2");
+                      }}
+                      disabled={participants.length < 1}
+                    >
+                      Next
+                    </Button>
+                  </DialogFooter>
+                </>
+              ) : (
+                <Form {...form}>
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-5 h-full w-full"
+                  >
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Group Name</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Group Name"
+                              className="focus-visible:ring-offset-0 focus-visible:ring-1"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Group Description</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Group Description"
+                              className="bg-stone-50 dark:bg-background"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
+                    <DialogFooter className="max-sm:gap-2">
+                      <DialogClose asChild>
+                        <Button
+                          variant="ghost"
+                          type="button"
+                          className="rounded-xl"
+                        >
+                          Cancel
+                        </Button>
+                      </DialogClose>
+                      <Button type="submit" className="rounded-xl">
+                        Create
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </Form>
+              )}
+            </DialogContent>
+          </Dialog>
+        </div>
         <div className="w-full ring-2 flex items-center justify-center rounded-lg space-y-0 gap-1 ring-stone-500 focus-within:dark:ring-stone-200 focus-within:ring-stone-800 px-2 py-0.5 mb-2">
           <Search />
           <Input
             className="w-full ring-0 border-0 focus-visible:border-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:ring-offset-transparent"
             name="search"
-            defaultValue={search}
+            defaultValue={searchChats}
             ref={searchRef}
-            onChange={(e) => {
-              debounced(e.target.value);
-            }}
+            onChange={(e) => setChatsDebounced(e.target.value)}
             placeholder="Search for messages"
             autoComplete="off"
             inputMode="text"
           />
           <button
-            className={`${search ? "visible" : "invisible"}`}
+            className={`${searchChats ? "visible" : "invisible"}`}
             onClick={() => {
-              debounced("");
+              setChatsDebounced("");
               (searchRef.current as HTMLInputElement).value = "";
             }}
           >
@@ -289,7 +608,7 @@ function Messages({ children }: { children: React.ReactNode }) {
             ))
           ) : (
             <div className="w-full flex flex-col items-center justify-center gap-4 text-center h-full">
-              {search.length ? (
+              {searchChats.length ? (
                 <>
                   <SearchX size="60" />
                   <div>

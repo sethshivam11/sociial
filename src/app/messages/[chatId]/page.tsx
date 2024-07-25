@@ -1,5 +1,4 @@
 "use client";
-import { Input } from "@/components/ui/input";
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { nameFallback } from "@/lib/helpers";
@@ -11,13 +10,11 @@ import {
   ImageIcon,
   Info,
   MapPin,
-  Mic,
   MicIcon,
   Paperclip,
   Phone,
   SendHorizonal,
   Video,
-  VideoIcon,
   X,
   PlayIcon,
   MapPinnedIcon,
@@ -36,7 +33,7 @@ import EmojiKeyboard from "@/components/EmojiKeyboard";
 import MessageReacts from "@/components/MessageReacts";
 import MessageOptions from "@/components/MessageOptions";
 import ChatInfo from "@/components/ChatInfo";
-import Image from "next/image";
+import NextImage from "next/image";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -51,7 +48,6 @@ import {
   Dialog,
   DialogTrigger,
   DialogContent,
-  DialogClose,
   DialogFooter,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -65,7 +61,7 @@ import DocumentDialog from "@/components/DocumentDialog";
 interface Message {
   id: string;
   content: string;
-  type: string;
+  type: "sent" | "reply";
   kind?: "message" | "location" | "image" | "video" | "audio" | "document";
   time: string;
   reply?: {
@@ -423,14 +419,16 @@ function Page({ params }: { params: { chatId: string } }) {
     },
     {
       id: "34",
-      content: "/test-2.mp4",
+      content:
+        "https://res.cloudinary.com/dv3qbj0bn/video/upload/f_auto:video,q_auto/v1/samples/dance-2",
       type: "reply",
       time: "12:45 PM",
       kind: "video",
     },
     {
       id: "35",
-      content: "/test-audio.mp3",
+      content:
+        "https://res.cloudinary.com/dv3qbj0bn/video/upload/v1721891990/sociial/audio/wt9znh9o5jbe6cuso7ye.mp3",
       type: "sent",
       time: "12:45 PM",
       kind: "audio",
@@ -459,10 +457,20 @@ function Page({ params }: { params: { chatId: string } }) {
   const [infoOpen, setInfoOpen] = React.useState(false);
   const message = form.watch("message");
 
+  function handleDownload(content: string) {
+    const fileURL = content.replace("/upload", "/upload/fl_attachment");
+    const a = document.createElement("a");
+    a.href = fileURL;
+    a.download = `Document-${content}`;
+    document.body.append(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
   function onSubmit({ message }: z.infer<typeof formSchema>) {
     if (!message) return;
     const date = new Date();
-    const savedMessage = {
+    const savedMessage: Message = {
       id: String(messages.length + 1),
       content: message,
       type: "sent",
@@ -506,11 +514,25 @@ function Page({ params }: { params: { chatId: string } }) {
   function shareLocation() {
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        console.log(position);
-        form.setValue(
-          "message",
-          `https://google.com/maps?q=${position.coords.latitude},${position.coords.longitude}`
-        );
+        const content = `https://google.com/maps?q=${position.coords.latitude},${position.coords.longitude}`;
+        const date = new Date();
+        const savedMessage: Message = {
+          id: String(messages.length + 1),
+          content,
+          type: "sent",
+          kind: "location",
+          time: `${date.getHours()}:${date.getMinutes()} ${
+            date.getHours() > 12 ? "PM" : "AM"
+          }`,
+        };
+        setMessages([...messages, savedMessage]);
+        setTimeout(() => {
+          lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
+          setReply({
+            username: "",
+            content: "",
+          });
+        }, 1);
       },
       (err) => {
         console.log(err);
@@ -557,7 +579,7 @@ function Page({ params }: { params: { chatId: string } }) {
           <Dialog>
             <DialogTrigger asChild>
               <button className="w-40 min-h-20 max-h-40 rounded-sm">
-                <Image
+                <NextImage
                   src={content}
                   alt=""
                   width="160"
@@ -568,7 +590,7 @@ function Page({ params }: { params: { chatId: string } }) {
             </DialogTrigger>
             <DialogContent className="h-full w-full">
               <DialogTitle></DialogTitle>
-              <Image
+              <NextImage
                 src={content}
                 width="160"
                 height="160"
@@ -581,7 +603,11 @@ function Page({ params }: { params: { chatId: string } }) {
                 )}
               />
               <DialogFooter className="max-sm:items-end items-end">
-                <Button size="icon" className="rounded-xl">
+                <Button
+                  size="icon"
+                  className="rounded-xl"
+                  onClick={() => handleDownload(content)}
+                >
                   <DownloadIcon />
                 </Button>
               </DialogFooter>
@@ -618,7 +644,11 @@ function Page({ params }: { params: { chatId: string } }) {
                 controlsList="nodownload"
               />
               <DialogFooter className="max-sm:items-end items-end">
-                <Button size="icon" className="rounded-xl">
+                <Button
+                  size="icon"
+                  className="rounded-xl"
+                  onClick={() => handleDownload(content)}
+                >
                   <DownloadIcon />
                 </Button>
               </DialogFooter>
@@ -628,7 +658,7 @@ function Page({ params }: { params: { chatId: string } }) {
       case "audio":
         return (
           <div className="py-2">
-            <audio src={content} controls controlsList="nodownload" />
+            <audio src={content} controls />
           </div>
         );
       default:
@@ -644,6 +674,7 @@ function Page({ params }: { params: { chatId: string } }) {
               size="icon"
               variant="secondary"
               className="bg-transparent hover:bg-transparent/50 text-white rounded-xl"
+              onClick={() => handleDownload(content)}
             >
               <DownloadIcon />
             </Button>
@@ -722,7 +753,7 @@ function Page({ params }: { params: { chatId: string } }) {
             <h1 className="text-xl tracking-tight font-bold leading-4 flex items-center justify-start gap-1">
               <span>{recipent.fullName}</span>
               {recipent.isPremium ? (
-                <Image
+                <NextImage
                   src="/icons/premium.svg"
                   width="20"
                   height="20"
@@ -751,7 +782,17 @@ function Page({ params }: { params: { chatId: string } }) {
           >
             <Video />
           </Link>
-          <button onClick={() => setInfoOpen(!infoOpen)} className="p-2">
+          <button
+            onClick={() => {
+              if (infoOpen) {
+                document.body.classList.remove("sm:overflow-y-scroll");
+              } else {
+                document.body.classList.add("sm:overflow-y-scroll");
+              }
+              setInfoOpen(!infoOpen);
+            }}
+            className="p-2"
+          >
             <Info strokeWidth={infoOpen ? "3" : "2"} />
           </button>
         </div>
@@ -789,7 +830,7 @@ function Page({ params }: { params: { chatId: string } }) {
                 <h1 className="text-2xl font-bold tracking-tight flex items-center justify-start gap-1">
                   {recipent.fullName}
                   {recipent.isPremium ? (
-                    <Image
+                    <NextImage
                       src="/icons/premium.svg"
                       width="20"
                       height="20"

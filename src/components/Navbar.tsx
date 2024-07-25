@@ -25,6 +25,15 @@ import {
   MenubarSubTrigger,
   MenubarTrigger,
 } from "@/components/ui/menubar";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useTheme } from "next-themes";
 import { nameFallback } from "@/lib/helpers";
 import {
@@ -45,7 +54,7 @@ function Navbar() {
   const router = useRouter();
   const { setTheme } = useTheme();
   const [reportDialog, setReportDialog] = React.useState(false);
-  const [newPost, setNewPost] = React.useState<FileList | null>(null);
+  const [logOutDialog, setLogOutDialog] = React.useState(false);
   const hideNav = [
     "/sign-in",
     "/sign-up",
@@ -263,10 +272,7 @@ function Navbar() {
                 <MenubarSeparator />
                 <MenubarItem
                   className="py-2.5 rounded-lg pl-2.5 text-red-600 focus:text-red-600"
-                  onClick={() => {
-                    localStorage.clear();
-                    router.push("/sign-in");
-                  }}
+                  onClick={() => setLogOutDialog(true)}
                 >
                   Log Out
                 </MenubarItem>
@@ -326,6 +332,31 @@ function Navbar() {
               </DialogFooter>
             </DialogContent>
           </Dialog>
+          <AlertDialog open={logOutDialog} onOpenChange={setLogOutDialog}>
+            <AlertDialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
+              <AlertDialogTitle className="w-full text-center text-2xl tracking-tight font-bold">
+                Log Out
+              </AlertDialogTitle>
+              <p className="dark:text-stone-400">
+                You can always log back in at any time. Are you sure you want to
+                Log Out?
+              </p>
+              <AlertDialogFooter>
+                <AlertDialogCancel className="rounded-xl">
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => {
+                    localStorage.clear();
+                    router.push("/sign-in");
+                  }}
+                  className="rounded-xl"
+                >
+                  Confirm
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
     </nav>

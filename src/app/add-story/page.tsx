@@ -335,13 +335,14 @@ function Page() {
                       );
                       const idx = index === 0 ? 1 : 0;
                       setSelectedFile(stories[idx]);
-                    } else setSelectedFile(story);
+                    } else handleImageChange(story);
                   }}
                   className="hover:bg-transparent/20 rounded-lg cursor-pointer relative"
                 >
                   {story === selectedFile && (
                     <X
                       strokeWidth="1.5"
+                      color="white"
                       className="absolute bg-transparent/50 w-14 h-14"
                     />
                   )}

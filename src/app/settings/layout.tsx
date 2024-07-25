@@ -1,4 +1,13 @@
 "use client";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/context/UserProvider";
 import {
@@ -7,6 +16,7 @@ import {
   Ban,
   Bell,
   KeySquare,
+  LogOut,
   Palette,
   Shield,
   UserCircle2,
@@ -122,6 +132,35 @@ function Page({ children }: React.PropsWithChildren) {
           >
             <Shield size="30" strokeWidth="1.5" /> Help
           </Link>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <button
+                className={`sm:hidden flex items-center justify-start gap-2 py-2 px-3 hover:bg-stone-200 hover:dark:bg-stone-800 rounded-lg`}
+              >
+                <LogOut size="30" strokeWidth="1.5" /> Log Out
+              </button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogTitle className="w-full text-center text-2xl tracking-tight font-bold">
+                Log Out
+              </AlertDialogTitle>
+              <p>
+                You can always log back in at any time. Are you sure you want to
+                Log Out?
+              </p>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => {
+                    localStorage.clear();
+                    router.push("/sign-in");
+                  }}
+                >
+                  Confirm
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
       <div

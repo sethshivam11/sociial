@@ -98,7 +98,7 @@ function VerifyCodePage({ searchParams }: Props) {
       >
         <Card className="w-fit space-y-2 ring-1 ring-gray-400 p-4">
           <CardHeader>
-            <CardTitle className="text-4xl font-extrabold tracking-tight text-center lg:text-5xl mb-2">
+            <CardTitle className="sm:text-4xl text-3xl font-extrabold tracking-tight text-center lg:text-5xl mb-2">
               Verify your account
             </CardTitle>
             <CardDescription>
@@ -114,7 +114,6 @@ function VerifyCodePage({ searchParams }: Props) {
                   <FormLabel>Code</FormLabel>
                   <FormControl>
                     <Input
-                      type="number"
                       placeholder="verification code"
                       inputMode="numeric"
                       autoComplete="one-time-code"
