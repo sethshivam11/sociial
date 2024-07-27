@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
@@ -17,9 +17,19 @@ import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { emailSchema, passwordSchema, usernameSchema } from "@/schemas/userSchema";
+import {
+  emailSchema,
+  passwordSchema,
+  usernameSchema,
+} from "@/schemas/userSchema";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/lib/store/store";
+import { loginUser } from "@/lib/store/features/slices/userSlice";
+import { useRouter } from "next/navigation";
+import { toast } from "@/components/ui/use-toast";
 
 function SignInPage() {
+  const router = useRouter();
   const formSchema = z.object({
     identifier: emailSchema.or(usernameSchema),
     password: passwordSchema,
@@ -31,19 +41,34 @@ function SignInPage() {
       password: "",
     },
   });
-  const [loading, setLoading] = React.useState(false);
+  const dispatch: AppDispatch = useDispatch();
+  const loading = useSelector((state: RootState) => state.user.loading);
   const [showPwd, setShowPwd] = React.useState(false);
-  function onSubmit(data: z.infer<typeof formSchema>) {
+  async function onSubmit(data: z.infer<typeof formSchema>) {
     let username = "";
+    let email = "";
     if (!(data.identifier.includes("@") || data.identifier.includes("."))) {
       username = data.identifier;
-      data.identifier = "";
+    } else {
+      email = data.identifier;
     }
-    console.log({
-      username,
-      email: data.identifier,
-      password: data.password,
-    });
+    const response = await dispatch(
+      loginUser({ email, username, password: data.password })
+    );
+    if (response.payload && response.payload.success) {
+      router.push("/");
+    } else {
+      if (response.payload?.message === "User not found") {
+        toast({
+          title: "Invalid username or email",
+          description: "Please check your username or email and try again",
+        });
+      } else {
+        toast({
+          title: response.payload?.message || "Something went wrong",
+        });
+      }
+    }
   }
   return (
     <div className="flex justify-center col-span-10 py-12 items-center min-h-screen bg-white dark:bg-zinc-800">

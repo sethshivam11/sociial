@@ -9,10 +9,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { useUser } from "@/context/UserProvider";
 import {
   ArrowLeft,
-  BadgeCheck,
   Ban,
   Bell,
   KeySquare,
@@ -26,7 +24,6 @@ import { usePathname, useRouter } from "next/navigation";
 import React from "react";
 
 function Page({ children }: React.PropsWithChildren) {
-  const { user } = useUser();
   const location = usePathname();
   const router = useRouter();
   const username = "sethshivam11";
@@ -116,12 +113,12 @@ function Page({ children }: React.PropsWithChildren) {
           >
             <Palette size="30" strokeWidth="1.5" /> Theme
           </Link>
-          <Link
+          {/* <Link
             href={user.isPremium ? "/settings/premium" : "/get-premium"}
             className="flex items-center justify-start gap-2 py-2 px-3 hover:bg-stone-200 hover:dark:bg-stone-800 rounded-lg"
           >
             <BadgeCheck size="30" strokeWidth="1.5" /> Premium
-          </Link>
+          </Link> */}
           <Link
             href="/settings/help"
             className={`flex items-center justify-start gap-2 py-2 px-3 hover:bg-stone-200 hover:dark:bg-stone-800 rounded-lg ${

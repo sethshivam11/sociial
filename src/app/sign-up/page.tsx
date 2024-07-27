@@ -25,6 +25,10 @@ import {
   passwordSchema,
   usernameSchema,
 } from "@/schemas/userSchema";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/lib/store/store";
+import { registerUser } from "@/lib/store/features/slices/userSlice";
+import { useRouter } from "next/navigation";
 
 function SignUpPage() {
   const formSchema = z
@@ -54,8 +58,9 @@ function SignUpPage() {
       confirmPassword: "",
     },
   });
-
-  const [loading, setLoading] = React.useState(false);
+  const router = useRouter();
+  const { loading } = useSelector((state: RootState) => state.user);
+  const dispatch: AppDispatch = useDispatch();
   const [showPwd, setShowPwd] = React.useState(false);
   const [username, setUsername] = React.useState("");
   const [avatar, setAvatar] = React.useState<File | null>(null);
@@ -63,12 +68,19 @@ function SignUpPage() {
   const [isFetchingUsername, setIsFetchingUsername] = React.useState(false);
   const [usernameMessage, setUsernameMessage] = React.useState("");
 
-  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+  async function onSubmit(data: z.infer<typeof formSchema>) {
     if (data.password !== data.confirmPassword) {
       return console.log("Passwords do not match");
     }
-    console.log(data, avatar);
-  };
+    const response = await dispatch(registerUser({ ...data, avatar }));
+    if (response.payload && response.payload.success) {
+      router.push(`/verify-code?username=${response.payload.data.username}`);
+    } else {
+      toast({
+        title: response.payload?.message || "Something went wrong",
+      });
+    }
+  }
 
   function isUsernameAvailable(username: string) {
     if (!username?.trim()) {
