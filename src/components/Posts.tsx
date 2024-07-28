@@ -23,7 +23,6 @@ interface Post {
     fullName: string;
     username: string;
     avatar: string;
-    isPremium?: boolean;
   };
   caption: string;
   liked: boolean;
@@ -45,7 +44,6 @@ function Posts() {
         username: "sethshivam11",
         avatar:
           "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
-        isPremium: true,
       },
       caption:
         "This is a caption which is very long and I don't know what to write in it so, i am just keep going to see the results. This is just a test caption to check the functionality of the app. I hope you are having a good day. Bye! 😊",
@@ -255,17 +253,6 @@ function Posts() {
                   <Link href={`/${post.user.username}`}>
                     <p className="flex items-center justify-start gap-0.5">
                       <span>{post.user.fullName}</span>
-                      {post.user.isPremium ? (
-                        <Image
-                          src="/icons/premium.svg"
-                          width="20"
-                          height="20"
-                          alt=""
-                          className="w-5"
-                        />
-                      ) : (
-                        ""
-                      )}
                     </p>
                     <p className="text-sm text-gray-500 leading-3">
                       @{post.user.username}

@@ -22,7 +22,6 @@ function Page() {
       "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
     fullName: "Shivam Soni",
     username: "sethshivam",
-    isPremium: false,
   };
   const peerVideoRef = React.useRef<HTMLVideoElement>(null);
   const selfVideoRef = React.useRef<HTMLVideoElement>(null);

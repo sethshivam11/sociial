@@ -108,7 +108,6 @@ function Page({ params }: { params: { chatId: string } }) {
     followersCount: 24,
     followingCount: 12,
     postsCount: 4,
-    isPremium: true,
   });
   const [user, setUser] = React.useState({
     id: "2",
@@ -751,18 +750,7 @@ function Page({ params }: { params: { chatId: string } }) {
             href={`/${recipent.username}`}
           >
             <h1 className="text-xl tracking-tight font-bold leading-4 flex items-center justify-start gap-1">
-              <span>{recipent.fullName}</span>
-              {recipent.isPremium ? (
-                <NextImage
-                  src="/icons/premium.svg"
-                  width="20"
-                  height="20"
-                  alt=""
-                  className="w-5"
-                />
-              ) : (
-                ""
-              )}
+              {recipent.fullName}
             </h1>
             <p className="text-stone-500 text-sm">@{recipent.username}</p>
           </Link>
@@ -829,17 +817,6 @@ function Page({ params }: { params: { chatId: string } }) {
               <div className="grid place-items-center">
                 <h1 className="text-2xl font-bold tracking-tight flex items-center justify-start gap-1">
                   {recipent.fullName}
-                  {recipent.isPremium ? (
-                    <NextImage
-                      src="/icons/premium.svg"
-                      width="20"
-                      height="20"
-                      alt=""
-                      className="w-5"
-                    />
-                  ) : (
-                    ""
-                  )}
                 </h1>
                 <p className="text-sm text-stone-500">@{recipent.username}</p>
                 <p>

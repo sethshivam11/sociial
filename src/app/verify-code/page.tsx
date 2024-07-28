@@ -20,11 +20,13 @@ import {
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { Loader2 } from "lucide-react";
-import { useUser } from "@/context/UserProvider";
 import { z } from "zod";
 import { usernameSchema, verificationCodeSchema } from "@/schemas/userSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@/components/ui/use-toast";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/lib/store/store";
+import { resendVerificationCode } from "@/lib/store/features/slices/userSlice";
 
 interface Props {
   searchParams: {
@@ -34,7 +36,10 @@ interface Props {
 }
 
 function VerifyCodePage({ searchParams }: Props) {
-  const { isSendingMail, loading, resendVerificationCode } = useUser();
+  const dispatch: AppDispatch = useDispatch();
+  const { isSendingMail, loading } = useSelector(
+    (state: RootState) => state.user
+  );
   const formSchema = z.object({
     username: z.string(),
     code: verificationCodeSchema,
@@ -48,6 +53,11 @@ function VerifyCodePage({ searchParams }: Props) {
   });
 
   const [timer, setTimer] = React.useState(0);
+
+  function handleSendCode() {
+    setTimer(30);
+    dispatch(resendVerificationCode(form.watch("username")));
+  }
 
   function onSubmit(data: z.infer<typeof formSchema>) {
     try {
@@ -63,7 +73,6 @@ function VerifyCodePage({ searchParams }: Props) {
         console.log(error);
       }
     }
-    console.log(data);
   }
 
   React.useEffect(() => {
@@ -131,10 +140,7 @@ function VerifyCodePage({ searchParams }: Props) {
               <button
                 className="text-blue-500 disabled:opacity-80 mt-2"
                 disabled={timer > 0 || isSendingMail}
-                onClick={() => {
-                  setTimer(30);
-                  resendVerificationCode(form.watch("username"));
-                }}
+                onClick={handleSendCode}
                 type="button"
               >
                 &nbsp;{timer > 0 ? timer : "Resend"}
@@ -142,11 +148,7 @@ function VerifyCodePage({ searchParams }: Props) {
             </p>
           </CardContent>
           <CardFooter>
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full"
-            >
+            <Button type="submit" disabled={loading} className="w-full">
               {loading ? <Loader2 className="animate-spin" /> : "Verify"}
             </Button>
           </CardFooter>

@@ -1,4 +1,4 @@
-export interface FollowUser {
+export interface BasicUserI {
   _id: string;
   avatar: string;
   fullName: string;
@@ -6,28 +6,27 @@ export interface FollowUser {
   isPremium: boolean;
 }
 
-export interface UserInterface {
-  fullName: string;
-  email: string;
-  username: string;
-  password: string;
+export interface UserI {
+  _id: string;
   avatar: string;
-  bio: string;
-  blocked: FollowUser[];
+  fullName: string;
+  username: string;
+  email: string;
   followingCount: number;
   followersCount: number;
   postsCount: number;
-  isPremium: boolean;
   isMailVerified: boolean;
+  bio: string;
+  blocked: BasicUserI[];
 }
 
-export interface Follow {
+export interface FollowI {
   _id: string;
-  followers: FollowUser[];
-  followings: FollowUser[];
+  followers: BasicUserI[];
+  followings: BasicUserI[];
 }
 
-export interface Profile {
+export interface ProfileI {
   _id: string;
   fullName: string;
   username: string;
@@ -39,49 +38,28 @@ export interface Profile {
   isPremium: boolean;
 }
 
-export interface UserContext {
-  user: UserInterface;
-  loading: boolean;
-  storage: {
-    accessToken: string;
-    refreshToken: string;
+export interface UserSliceI {
+  user: {
+    _id: string;
+    avatar: string;
+    fullName: string;
+    username: string;
+    email: string;
+    followingCount: number;
+    followersCount: number;
+    postsCount: number;
+    isMailVerified: boolean;
+    bio: string;
+    blocked: string[];
   };
-  setLoading: Function;
-  followers: FollowUser[];
-  following: FollowUser[];
+  profile: ProfileI;
+  followers: BasicUserI[];
+  following: BasicUserI[];
   unreadMessageCount: number;
-  setUnreadMessageCount: Function;
   newNotifications: boolean;
-  setNewNotifications: Function;
-  setFollowers: Function;
-  setFollowing: Function;
-  getProfile: Function;
-  profile: Profile;
-  setProfile: Function;
-  fetchUser: Function;
-  registerUser: Function;
-  loginUser: Function;
-  logoutUser: Function;
-  verifyMail: Function;
-  updatePassword: Function;
-  updateAvatar: Function;
-  removeAvatar: Function;
-  updateDetails: Function;
-  updateBlueTick: Function;
-  blockUser: Function;
-  unblockUser: Function;
-  renewAccessToken: Function;
-  isSendingMail: boolean;
-  setIsSendingMail: Function;
-  isOffline: boolean;
-  setIsOffline: Function;
-  resendVerificationCode: Function;
+  loading: boolean;
+  isError: boolean;
   isLoggedIn: boolean;
-  setIsLoggedIn: Function;
-  follow: Function;
-  unfollow: Function;
-  getFollowers: Function;
-  getFollowing: Function;
-  setPage: React.Dispatch<React.SetStateAction<number>>;
+  isSendingMail: boolean;
   page: number;
 }

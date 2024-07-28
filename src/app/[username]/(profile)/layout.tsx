@@ -7,7 +7,6 @@ import {
   MoreHorizontal,
   Mail,
   QrCode,
-  CalendarDays,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import React from "react";
@@ -28,12 +27,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 import QRCode from "qrcode";
 import Image from "next/image";
-import {
-  Menubar,
-  MenubarContent,
-  MenubarMenu,
-  MenubarTrigger,
-} from "@/components/ui/menubar";
 
 function Profile({
   children,
@@ -59,7 +52,6 @@ function Profile({
     followingsCount: 12,
     postsCount: 4,
     follow: true,
-    isPremium: true,
   });
   const username = params.username;
 
@@ -102,51 +94,7 @@ function Profile({
                 {user.fullName}
               </p>
               <div className="text-stone-500 lg:text-xl text-lg flex items-center justify-center">
-                {user.isPremium ? (
-                  <Menubar className="border-0 h-fit w-fit">
-                    <MenubarMenu>
-                      <MenubarTrigger className="p-0 ">
-                        <Image
-                          src="/icons/verified.svg"
-                          width="20"
-                          height="20"
-                          alt=""
-                          className="w-5"
-                        />
-                      </MenubarTrigger>
-                      <MenubarContent
-                        className="px-6 py-4 drop-shadow-sm rounded-xl"
-                        align="center"
-                      >
-                        <h1 className="text-xl tracking-tight font-bold">
-                          Verified Account
-                        </h1>
-                        <p className="text-stone-500 text-sm flex items-center justify-start gap-1 my-3">
-                          <Image
-                            src="/icons/premium.svg"
-                            width="20"
-                            height="20"
-                            alt=""
-                            className="w-5"
-                          />
-                          This is a premium account
-                        </p>
-                        <p className="text-stone-500 text-sm flex items-center justify-start gap-1 my-3">
-                          <CalendarDays /> Verified since {}
-                        </p>
-                        <Button
-                          className="w-full rounded-xl"
-                          onClick={() => router.push("/get-premium")}
-                        >
-                          Upgrade to Premium
-                        </Button>
-                      </MenubarContent>
-                    </MenubarMenu>
-                  </Menubar>
-                ) : (
-                  ""
-                )}
-                &nbsp;@{user.username}
+                @{user.username}
               </div>
               <div className="flex items-center justify-center gap-2 max-sm:gap-4">
                 {user.username === username ? (
@@ -353,7 +301,7 @@ function Profile({
             />
             <span className="max-sm:hidden">Posts</span>
           </button>
-          <button
+          {/* <button
             className={`flex items-center justify-center gap-2 relative after:rounded-sm sm:after:w-28 after:w-16 after:absolute after:top-8 after:border-stone-800 after:dark:border-stone-200 ${
               location.includes("/tagged") ? "after:border-2" : "after:border-0"
             }`}
@@ -361,7 +309,7 @@ function Profile({
           >
             <Tag strokeWidth={location.includes("/tagged") ? "2.5" : "1"} />
             <span className="max-sm:hidden">Tagged</span>
-          </button>
+          </button> */}
           <button
             className={`flex items-center justify-center gap-2 relative after:rounded-sm sm:after:w-28 after:w-16 after:absolute after:top-8 after:border-stone-800 after:dark:border-stone-200 ${
               location.includes("/saved") ? "after:border-2" : "after:border-0"

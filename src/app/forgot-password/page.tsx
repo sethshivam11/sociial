@@ -29,10 +29,9 @@ import {
   usernameSchema,
   verificationCodeSchema,
 } from "@/schemas/userSchema";
-import { useUser } from "@/context/UserProvider";
 
 const ForgotPasswordPage = () => {
-  const { isSendingMail } = useUser();
+  const isSendingMail = false;
   const formSchema = z
     .object({
       identifier: emailSchema.or(usernameSchema),

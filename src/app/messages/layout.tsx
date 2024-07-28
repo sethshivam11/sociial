@@ -157,7 +157,6 @@ function Messages({ children }: { children: React.ReactNode }) {
       message: "Hello",
       avatar: "https://github.com/shadcn.png",
       unreadMessages: true,
-      isPremium: true,
     },
     {
       id: "2",
@@ -191,7 +190,6 @@ function Messages({ children }: { children: React.ReactNode }) {
       username: "emilywhite",
       message: "Cheers!",
       avatar: "https://github.com/shadcn.png",
-      isPremium: true,
     },
     {
       id: "6",
@@ -576,20 +574,7 @@ function Messages({ children }: { children: React.ReactNode }) {
                   <AvatarFallback>{nameFallback(chat.fullName)}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col items-start justify-center w-full">
-                  <p className="flex items-center justify-start gap-0.5">
-                    {chat.fullName}
-                    {chat.isPremium ? (
-                      <Image
-                        src="/icons/premium.svg"
-                        alt=""
-                        width="20"
-                        height="20"
-                        className="w-5"
-                      />
-                    ) : (
-                      ""
-                    )}
-                  </p>
+                  <p>{chat.fullName}</p>
                   <p className="text-sm md:w-40 sm:w-80 w-40 text-left text-stone-500 text-ellipsis whitespace-nowrap overflow-x-hidden">
                     {chat.message}
                   </p>

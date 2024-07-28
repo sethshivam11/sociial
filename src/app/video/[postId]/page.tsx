@@ -33,7 +33,6 @@ function Page() {
       username: "sethshivam11",
       avatar:
         "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
-      isPremium: true,
     },
     caption:
       "This is a caption which is very long and I don't know what to write in it so, i am just keep going to see the results. This is just a test caption to check the functionality of the app. I hope you are having a good day. Bye! 😊",
@@ -249,17 +248,6 @@ function Page() {
                 </h1>
                 <p className="text-stone-500 text-sm">@{post.user.username}</p>
               </div>
-              {post.user.isPremium ? (
-                <Image
-                  src="/icons/premium.svg"
-                  alt=""
-                  width="20"
-                  height="20"
-                  className="w-5 h-5 pointer-events-none select-none"
-                />
-              ) : (
-                ""
-              )}
             </Link>
           </div>
           <VideoOptions
