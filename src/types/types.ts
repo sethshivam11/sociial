@@ -20,12 +20,6 @@ export interface UserI {
   blocked: BasicUserI[];
 }
 
-export interface FollowI {
-  _id: string;
-  followers: BasicUserI[];
-  followings: BasicUserI[];
-}
-
 export interface ProfileI {
   _id: string;
   fullName: string;
@@ -36,6 +30,16 @@ export interface ProfileI {
   following: number;
   postsCount: number;
   isPremium: boolean;
+}
+
+export interface PostI {
+  _id: string;
+  user: string;
+  caption: string;
+  images: string[];
+  kind: "image" | "video";
+  likesCount: number;
+  commentsCount: number;
 }
 
 export interface UserSliceI {
@@ -61,5 +65,26 @@ export interface UserSliceI {
   isError: boolean;
   isLoggedIn: boolean;
   isSendingMail: boolean;
+  page: number;
+}
+
+export interface FollowSliceI {
+  _id: string;
+  followers: BasicUserI[];
+  followings: BasicUserI[];
+  maxFollowers: number;
+  maxFollowings: number;
+  loading: boolean;
+  loadingMore: boolean;
+  isError: boolean;
+  page: number;
+}
+
+export interface PostSliceI {
+  posts: PostI[];
+  post: PostI;
+  loading: boolean;
+  loadingMore: boolean;
+  isError: boolean;
   page: number;
 }

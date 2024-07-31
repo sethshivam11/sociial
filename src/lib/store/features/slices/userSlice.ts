@@ -197,12 +197,31 @@ export const updateDetails = createAsyncThunk(
 export const renewAccessToken = createAsyncThunk(
   "users/renewAccessToken",
   async () => {
-    const parsed = await fetch("/api/v1/users/renewAccessToken");
+    const parsed = await fetch("/api/v1/users/renewAccessToken", {
+      method: "POST",
+      body: JSON.stringify({
+        refreshToken: localStorage.getItem("refreshToken"),
+      }),
+    });
     return parsed.json();
   }
 );
 
-export const followUser = createAsyncThunk("users/followUser", async () => {});
+export const blockUser = createAsyncThunk(
+  "users/blockUser",
+  async (userId: string) => {
+    const parsed = await fetch(`/api/v1/users/block/${userId}`);
+    return parsed.json();
+  }
+);
+
+export const unblockUser = createAsyncThunk(
+  "usrers/unblockUser",
+  async (userId: string) => {
+    const parsed = await fetch(`/api/v1/users/unblock/${userId}`);
+    return parsed.json();
+  }
+);
 
 export const userSlice = createSlice({
   name: "user",
@@ -222,7 +241,7 @@ export const userSlice = createSlice({
         localStorage.setItem("refreshToken", action.payload.refreshToken);
       }
     });
-    builder.addCase(loginUser.rejected, (state, payload) => {
+    builder.addCase(loginUser.rejected, (state, action) => {
       state.isLoggedIn = false;
       state.isError = true;
       state.loading = false;
@@ -252,7 +271,7 @@ export const userSlice = createSlice({
     builder.addCase(verifyCode.fulfilled, (state, action) => {
       state.loading = false;
       if (action.payload && action.payload.success) {
-        state.user.isMailVerified = true;
+        state.user.isMailVerified = action.payload.isMailVerified;
       }
     });
     builder.addCase(verifyCode.rejected, (state, payload) => {
@@ -278,9 +297,14 @@ export const userSlice = createSlice({
       state.loading = false;
       if (action.payload && action.payload.success) {
         state.profile = action.payload.data;
+      } else if (
+        action.payload &&
+        action.payload.message === "Token expired!"
+      ) {
+        console.log(action);
       }
     });
-    builder.addCase(getProfile.rejected, (state) => {
+    builder.addCase(getProfile.rejected, (state, action) => {
       state.isError = true;
       state.loading = false;
     });
@@ -386,11 +410,46 @@ export const userSlice = createSlice({
       state.loading = false;
       if (action.payload && action.payload.success) {
         localStorage.setItem("accessToken", action.payload.data.accessToken);
+      } else if (action.payload && action.payload.success === false) {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
       }
     });
     builder.addCase(renewAccessToken.rejected, (state) => {
       state.isError = true;
       state.loading = false;
+    });
+
+    builder.addCase(blockUser.pending, (state) => {
+      state.isError = false;
+      state.loading = true;
+    });
+    builder.addCase(blockUser.fulfilled, (state, action) => {
+      state.loading = false;
+      if (action.payload && action.payload.success) {
+        state.user.blocked.push(action.payload.data.blocked);
+      }
+    });
+    builder.addCase(blockUser.rejected, (state) => {
+      state.isError = true;
+      state.loading = false;
+    });
+
+    builder.addCase(unblockUser.pending, (state) => {
+      state.isError = false;
+      state.loading = true;
+    });
+    builder.addCase(unblockUser.fulfilled, (state, action) => {
+      state.loading = false;
+      if (action.payload && action.payload.success) {
+        state.user.blocked = state.user.blocked.filter(
+          (user) => user !== action.payload.data.unblockUserId
+        );
+      }
+    });
+    builder.addCase(unblockUser.rejected, (state) => {
+      state.loading = false;
+      state.isError = true;
     });
   },
 });
