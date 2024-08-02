@@ -84,7 +84,9 @@ export interface PostSliceI {
   posts: PostI[];
   post: PostI;
   loading: boolean;
+  skeletonLoading: boolean;
   loadingMore: boolean;
+  maxPosts: number;
   isError: boolean;
   page: number;
 }

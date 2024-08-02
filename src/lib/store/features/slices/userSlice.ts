@@ -235,7 +235,7 @@ export const userSlice = createSlice({
     builder.addCase(loginUser.fulfilled, (state, action) => {
       state.isLoggedIn = true;
       state.loading = false;
-      if (action.payload && action.payload.success) {
+      if (action.payload.success) {
         state.user = action.payload.data.user;
         localStorage.setItem("accessToken", action.payload.accessToken);
         localStorage.setItem("refreshToken", action.payload.refreshToken);
@@ -254,7 +254,7 @@ export const userSlice = createSlice({
     builder.addCase(registerUser.fulfilled, (state, action) => {
       state.isLoggedIn = true;
       state.loading = false;
-      if (action.payload && action.payload.success) {
+      if (action.payload.success) {
         state.user = action.payload.data;
       }
     });
@@ -270,7 +270,7 @@ export const userSlice = createSlice({
     });
     builder.addCase(verifyCode.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload && action.payload.success) {
+      if (action.payload.success) {
         state.user.isMailVerified = action.payload.isMailVerified;
       }
     });
@@ -295,7 +295,7 @@ export const userSlice = createSlice({
     });
     builder.addCase(getProfile.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload && action.payload.success) {
+      if (action.payload.success) {
         state.profile = action.payload.data;
       } else if (
         action.payload &&
@@ -316,7 +316,7 @@ export const userSlice = createSlice({
     builder.addCase(logOutUser.fulfilled, (state, action) => {
       state.loading = false;
       state.isLoggedIn = false;
-      if (action.payload && action.payload.success) {
+      if (action.payload.success) {
         state.user = initialState.user;
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
@@ -345,7 +345,7 @@ export const userSlice = createSlice({
     });
     builder.addCase(updateAvatar.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload && action.payload.success) {
+      if (action.payload.success) {
         state.user.avatar = action.payload.data.avatar;
       }
     });
@@ -360,7 +360,7 @@ export const userSlice = createSlice({
     });
     builder.addCase(removeAvatar.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload && action.payload.success) {
+      if (action.payload.success) {
         state.user.avatar = action.payload.data.avatar;
       }
     });
@@ -376,7 +376,7 @@ export const userSlice = createSlice({
     builder.addCase(getLoggedInUser.fulfilled, (state, action) => {
       state.loading = false;
       state.isLoggedIn = true;
-      if (action.payload && action.payload.success) {
+      if (action.payload.success) {
         state.user = action.payload.data;
       }
     });
@@ -391,7 +391,7 @@ export const userSlice = createSlice({
     });
     builder.addCase(updateDetails.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload && action.payload.success) {
+      if (action.payload.success) {
         state.user.fullName = action.payload.data.fullName;
         state.user.username = action.payload.data.username;
         state.user.bio = action.payload.data.bio;
@@ -408,9 +408,9 @@ export const userSlice = createSlice({
     });
     builder.addCase(renewAccessToken.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload && action.payload.success) {
+      if (action.payload.success) {
         localStorage.setItem("accessToken", action.payload.data.accessToken);
-      } else if (action.payload && action.payload.success === false) {
+      } else if (action.payload.success === false) {
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
       }
@@ -426,7 +426,7 @@ export const userSlice = createSlice({
     });
     builder.addCase(blockUser.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload && action.payload.success) {
+      if (action.payload.success) {
         state.user.blocked.push(action.payload.data.blocked);
       }
     });
@@ -441,7 +441,7 @@ export const userSlice = createSlice({
     });
     builder.addCase(unblockUser.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload && action.payload.success) {
+      if (action.payload.success) {
         state.user.blocked = state.user.blocked.filter(
           (user) => user !== action.payload.data.unblockUserId
         );

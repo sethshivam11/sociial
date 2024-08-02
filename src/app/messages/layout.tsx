@@ -315,29 +315,14 @@ function Messages({ children }: { children: React.ReactNode }) {
   const [chats, setChats] = React.useState(savedChats);
   const [level, setLevel] = React.useState<"1" | "2">("1");
   const [participants, setParticipants] = React.useState<typeof followers>([]);
-  const [searchChats, setSearchChats] = React.useState("");
   const [searchFollowers, setSearchFollowers] = React.useState("");
   const [followers, setFollowers] = React.useState(savedFollowers);
-  const searchRef = React.useRef<HTMLInputElement>(null);
-  const setChatsDebounced = useDebounceCallback(setSearchChats, 500);
   const setFollowersDebounced = useDebounceCallback(setSearchFollowers, 500);
   const [newChatDialog, setNewChatDialog] = React.useState(false);
   function onSubmit(data: z.infer<typeof formSchema>) {
     console.log(data);
     setNewChatDialog(false);
   }
-
-  React.useEffect(() => {
-    if (searchChats) {
-      setChats(
-        savedChats.filter((chat) =>
-          chat.fullName.toLowerCase().includes(searchChats.toLowerCase())
-        )
-      );
-    } else {
-      setChats(savedChats);
-    }
-  }, [searchChats]);
 
   React.useEffect(() => {
     if (searchFollowers) {
@@ -528,30 +513,8 @@ function Messages({ children }: { children: React.ReactNode }) {
             </DialogContent>
           </Dialog>
         </div>
-        <div className="w-full ring-2 flex items-center justify-center rounded-lg space-y-0 gap-1 ring-stone-500 focus-within:dark:ring-stone-200 focus-within:ring-stone-800 px-2 py-0.5 mb-2">
-          <Search />
-          <Input
-            className="w-full ring-0 border-0 focus-visible:border-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:ring-offset-transparent"
-            name="search"
-            defaultValue={searchChats}
-            ref={searchRef}
-            onChange={(e) => setChatsDebounced(e.target.value)}
-            placeholder="Search for messages"
-            autoComplete="off"
-            inputMode="text"
-          />
-          <button
-            className={`${searchChats ? "visible" : "invisible"}`}
-            onClick={() => {
-              setChatsDebounced("");
-              (searchRef.current as HTMLInputElement).value = "";
-            }}
-          >
-            <X size="20" />
-          </button>
-        </div>
         <div className="space-y-1 py-3 w-full md:overflow-y-auto md:h-[100dvh] sm:pb-2 pb-20 pr-2">
-          {chats.length ? (
+          {chats.length > 1 ? (
             chats.map((chat, index) => (
               <button
                 className={`flex items-center justify-center rounded-md w-full gap-2 p-2 ${
@@ -593,29 +556,15 @@ function Messages({ children }: { children: React.ReactNode }) {
             ))
           ) : (
             <div className="w-full flex flex-col items-center justify-center gap-4 text-center h-full">
-              {searchChats.length ? (
-                <>
-                  <SearchX size="60" />
-                  <div>
-                    <h2 className="text-2xl tracking-tight font-bold">
-                      Nothing found
-                    </h2>
-                    <p className="text-stone-500">Try something else</p>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <History size="60" />
-                  <div>
-                    <h2 className="text-2xl tracking-tight font-bold">
-                      No Chats yet
-                    </h2>
-                    <p className="text-stone-500">
-                      Start a conversation with someone!
-                    </p>
-                  </div>
-                </>
-              )}
+              <History size="60" />
+              <div>
+                <h2 className="text-2xl tracking-tight font-bold">
+                  No Chats yet
+                </h2>
+                <p className="text-stone-500">
+                  Start a conversation with someone!
+                </p>
+              </div>
             </div>
           )}
         </div>

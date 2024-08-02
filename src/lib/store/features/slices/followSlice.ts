@@ -83,7 +83,7 @@ const followSlice = createSlice({
     builder.addCase(followUser.fulfilled, (state, action) => {
       state.loading = false;
       state.isError = false;
-      if (action.payload && action.payload.success) {
+      if (action.payload.success) {
         state.followings.push(action.payload.data.follow);
       }
     });
@@ -99,7 +99,7 @@ const followSlice = createSlice({
     builder.addCase(unfollowUser.fulfilled, (state, action) => {
       state.loading = false;
       state.isError = false;
-      if (action.payload && action.payload.success) {
+      if (action.payload.success) {
         state.followings.push(action.payload.data.unfollow);
       }
     });
@@ -115,7 +115,7 @@ const followSlice = createSlice({
     builder.addCase(getFollowers.fulfilled, (state, action) => {
       state.loading = false;
       state.isError = false;
-      if (action.payload && action.payload.success) {
+      if (action.payload.success) {
         state.followers = action.payload.data.followers;
         state.maxFollowers = action.payload.data.max;
       }
@@ -132,7 +132,7 @@ const followSlice = createSlice({
     builder.addCase(getFollowings.fulfilled, (state, action) => {
       state.loading = false;
       state.isError = false;
-      if (action.payload && action.payload.success) {
+      if (action.payload.success) {
         state.followings = action.payload.data.followings;
         state.maxFollowings = action.payload.data.max;
       }
@@ -149,7 +149,7 @@ const followSlice = createSlice({
     builder.addCase(getMoreFollowers.fulfilled, (state, action) => {
       state.loadingMore = false;
       state.isError = false;
-      if (action.payload && action.payload.success) {
+      if (action.payload.success) {
         state.followers = [
           ...state.followers,
           ...action.payload.data.followers,
@@ -168,7 +168,7 @@ const followSlice = createSlice({
     builder.addCase(getMoreFollowings.fulfilled, (state, action) => {
       state.loadingMore = false;
       state.isError = false;
-      if (action.payload && action.payload.success) {
+      if (action.payload.success) {
         state.followings = [
           ...state.followings,
           ...action.payload.data.followings,
