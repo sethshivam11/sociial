@@ -1,6 +1,7 @@
 "use client";
 import { UserSliceI } from "@/types/types";
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { AppDispatch, store } from "../../store";
 
 const initialState: UserSliceI = {
   user: {
@@ -32,10 +33,9 @@ const initialState: UserSliceI = {
   unreadMessageCount: 0,
   newNotifications: false,
   loading: false,
-  isError: false,
   isLoggedIn: false,
   isSendingMail: false,
-  page: 0,
+  page: 1,
 };
 
 export const loginUser = createAsyncThunk(
@@ -96,7 +96,9 @@ export const verifyCode = createAsyncThunk(
   "users/verifyCode",
   async ({ username, code }: { username: string; code: number }) => {
     if (!username || !code) return;
-    const parsed = await fetch(`/api/v1/verify?${username}&code=${code}`);
+    const parsed = await fetch(
+      `/api/v1/users/verify?username=${username}&code=${code}`
+    );
     return parsed.json();
   }
 );
@@ -110,13 +112,40 @@ export const resendVerificationCode = createAsyncThunk(
   }
 );
 
+export const forgotPassword = createAsyncThunk(
+  "users/forgotPassword",
+  async ({
+    email,
+    code,
+    username,
+    password,
+  }: {
+    email: string;
+    code: string;
+    username: string;
+    password: string;
+  }) => {
+    if (!email && !username) return;
+    const parsed = await fetch("/api/v1/users/forgotPassword", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, username, code, password }),
+    });
+    return parsed.json();
+  }
+);
+
 export const getProfile = createAsyncThunk(
   "users/getProfile",
   async ({ username, _id }: { username?: string; _id?: string }) => {
     if (!username && !_id) {
       return;
     }
-    const parsed = await fetch(`/api/v1/users?username=${username}&_id=${_id}`);
+    const parsed = await fetch(
+      `/api/v1/users?username=${username || ""}&_id=${_id || ""}`
+    );
     return parsed.json();
   }
 );
@@ -226,56 +255,52 @@ export const unblockUser = createAsyncThunk(
 export const userSlice = createSlice({
   name: "user",
   initialState,
-  reducers: {},
+  reducers: {
+    setPage(state, action) {
+      state.page = action.payload;
+    }
+  },
   extraReducers: (builder) => {
     builder.addCase(loginUser.pending, (state) => {
       state.loading = true;
-      state.isError = false;
     });
     builder.addCase(loginUser.fulfilled, (state, action) => {
-      state.isLoggedIn = true;
       state.loading = false;
       if (action.payload.success) {
+        state.isLoggedIn = true;
         state.user = action.payload.data.user;
         localStorage.setItem("accessToken", action.payload.accessToken);
         localStorage.setItem("refreshToken", action.payload.refreshToken);
       }
     });
     builder.addCase(loginUser.rejected, (state, action) => {
-      state.isLoggedIn = false;
-      state.isError = true;
       state.loading = false;
     });
 
     builder.addCase(registerUser.pending, (state) => {
       state.loading = true;
-      state.isError = false;
     });
     builder.addCase(registerUser.fulfilled, (state, action) => {
-      state.isLoggedIn = true;
       state.loading = false;
       if (action.payload.success) {
         state.user = action.payload.data;
       }
     });
     builder.addCase(registerUser.rejected, (state) => {
-      state.isLoggedIn = false;
-      state.isError = true;
       state.loading = false;
     });
 
     builder.addCase(verifyCode.pending, (state) => {
       state.loading = true;
-      state.isError = false;
     });
     builder.addCase(verifyCode.fulfilled, (state, action) => {
       state.loading = false;
       if (action.payload.success) {
+        state.isLoggedIn = true;
         state.user.isMailVerified = action.payload.isMailVerified;
       }
     });
     builder.addCase(verifyCode.rejected, (state, payload) => {
-      state.isError = true;
       state.loading = false;
     });
 
@@ -289,59 +314,57 @@ export const userSlice = createSlice({
       state.isSendingMail = false;
     });
 
+    builder.addCase(forgotPassword.pending, (state) => {
+      state.loading = true;
+    });
+    builder.addCase(forgotPassword.fulfilled, (state, action) => {
+      state.loading = false;
+    });
+    builder.addCase(forgotPassword.rejected, (state) => {
+      state.loading = false;
+    });
+
     builder.addCase(getProfile.pending, (state) => {
       state.loading = true;
-      state.isError = false;
     });
     builder.addCase(getProfile.fulfilled, (state, action) => {
       state.loading = false;
       if (action.payload.success) {
         state.profile = action.payload.data;
-      } else if (
-        action.payload &&
-        action.payload.message === "Token expired!"
-      ) {
-        console.log(action);
       }
     });
     builder.addCase(getProfile.rejected, (state, action) => {
-      state.isError = true;
       state.loading = false;
     });
 
     builder.addCase(logOutUser.pending, (state) => {
       state.loading = true;
-      state.isError = false;
     });
     builder.addCase(logOutUser.fulfilled, (state, action) => {
       state.loading = false;
-      state.isLoggedIn = false;
       if (action.payload.success) {
+        state.isLoggedIn = false;
         state.user = initialState.user;
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
       }
     });
     builder.addCase(logOutUser.rejected, (state) => {
-      state.isError = true;
       state.loading = false;
     });
 
     builder.addCase(updatePassword.pending, (state) => {
       state.loading = true;
-      state.isError = false;
     });
     builder.addCase(updatePassword.fulfilled, (state) => {
       state.loading = false;
     });
     builder.addCase(updatePassword.rejected, (state) => {
-      state.isError = true;
       state.loading = false;
     });
 
     builder.addCase(updateAvatar.pending, (state) => {
       state.loading = true;
-      state.isError = false;
     });
     builder.addCase(updateAvatar.fulfilled, (state, action) => {
       state.loading = false;
@@ -350,13 +373,11 @@ export const userSlice = createSlice({
       }
     });
     builder.addCase(updateAvatar.rejected, (state) => {
-      state.isError = true;
       state.loading = false;
     });
 
     builder.addCase(removeAvatar.pending, (state) => {
       state.loading = true;
-      state.isError = false;
     });
     builder.addCase(removeAvatar.fulfilled, (state, action) => {
       state.loading = false;
@@ -365,29 +386,25 @@ export const userSlice = createSlice({
       }
     });
     builder.addCase(removeAvatar.rejected, (state, action) => {
-      state.isError = true;
       state.loading = false;
     });
 
     builder.addCase(getLoggedInUser.pending, (state) => {
       state.loading = true;
-      state.isError = false;
     });
     builder.addCase(getLoggedInUser.fulfilled, (state, action) => {
       state.loading = false;
-      state.isLoggedIn = true;
       if (action.payload.success) {
+        state.isLoggedIn = true;
         state.user = action.payload.data;
       }
     });
     builder.addCase(getLoggedInUser.rejected, (state) => {
-      state.isError = true;
       state.loading = false;
     });
 
     builder.addCase(updateDetails.pending, (state) => {
       state.loading = true;
-      state.isError = false;
     });
     builder.addCase(updateDetails.fulfilled, (state, action) => {
       state.loading = false;
@@ -398,30 +415,23 @@ export const userSlice = createSlice({
       }
     });
     builder.addCase(updateDetails.rejected, (state) => {
-      state.isError = true;
       state.loading = false;
     });
 
     builder.addCase(renewAccessToken.pending, (state) => {
       state.loading = true;
-      state.isError = false;
     });
     builder.addCase(renewAccessToken.fulfilled, (state, action) => {
       state.loading = false;
       if (action.payload.success) {
         localStorage.setItem("accessToken", action.payload.data.accessToken);
-      } else if (action.payload.success === false) {
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
       }
     });
     builder.addCase(renewAccessToken.rejected, (state) => {
-      state.isError = true;
       state.loading = false;
     });
 
     builder.addCase(blockUser.pending, (state) => {
-      state.isError = false;
       state.loading = true;
     });
     builder.addCase(blockUser.fulfilled, (state, action) => {
@@ -431,12 +441,10 @@ export const userSlice = createSlice({
       }
     });
     builder.addCase(blockUser.rejected, (state) => {
-      state.isError = true;
       state.loading = false;
     });
 
     builder.addCase(unblockUser.pending, (state) => {
-      state.isError = false;
       state.loading = true;
     });
     builder.addCase(unblockUser.fulfilled, (state, action) => {
@@ -449,8 +457,28 @@ export const userSlice = createSlice({
     });
     builder.addCase(unblockUser.rejected, (state) => {
       state.loading = false;
-      state.isError = true;
     });
+
+    // builder.addMatcher(
+    //   (action) => action.type.endsWith("fulfilled"),
+    //   (
+    //     state,
+    //     action: PayloadAction<{
+    //       data: null;
+    //       success: boolean;
+    //       message: string;
+    //     }>
+    //   ) => {
+    //     if (!action.payload.success) {
+    //       const dispatch: AppDispatch = store.dispatch;
+    //       if (action.payload.message === "Invalid token!") {
+    //         dispatch(logOutUser());
+    //       } else if (action.payload.message === "Token expired!") {
+    //         dispatch(renewAccessToken());
+    //       }
+    //     }
+    //   }
+    // );
   },
 });
 

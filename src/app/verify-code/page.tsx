@@ -26,7 +26,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@/components/ui/use-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/lib/store/store";
-import { resendVerificationCode } from "@/lib/store/features/slices/userSlice";
+import {
+  resendVerificationCode,
+  verifyCode,
+} from "@/lib/store/features/slices/userSlice";
+import { useRouter } from "next/navigation";
 
 interface Props {
   searchParams: {
@@ -36,6 +40,7 @@ interface Props {
 }
 
 function VerifyCodePage({ searchParams }: Props) {
+  const router = useRouter();
   const dispatch: AppDispatch = useDispatch();
   const { isSendingMail, loading } = useSelector(
     (state: RootState) => state.user
@@ -54,14 +59,35 @@ function VerifyCodePage({ searchParams }: Props) {
 
   const [timer, setTimer] = React.useState(0);
 
-  function handleSendCode() {
-    setTimer(30);
-    dispatch(resendVerificationCode(form.watch("username")));
+  async function handleSendCode() {
+    const response = await dispatch(
+      resendVerificationCode(form.watch("username"))
+    );
+    if (response.payload.success) {
+      toast({
+        title: "Verification code sent successfully",
+      });
+      setTimer(60);
+    } else {
+      toast({
+        title: response.payload.message || "Something went wrong",
+        variant: "destructive",
+      });
+    }
   }
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
+  async function onSubmit(data: z.infer<typeof formSchema>) {
     try {
       usernameSchema.parse(data.username);
+      const response = await dispatch(verifyCode(data));
+      if (response.payload.success) {
+        router.push("/");
+      } else {
+        toast({
+          title: response.payload.message || "Something went wrong",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       if (error instanceof z.ZodError) {
         toast({
@@ -139,7 +165,7 @@ function VerifyCodePage({ searchParams }: Props) {
               Not recieved email?
               <button
                 className="text-blue-500 disabled:opacity-80 mt-2"
-                disabled={timer > 0 || isSendingMail}
+                disabled={timer > 0 || isSendingMail || loading}
                 onClick={handleSendCode}
                 type="button"
               >

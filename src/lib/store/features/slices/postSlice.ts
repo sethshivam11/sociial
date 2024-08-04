@@ -15,7 +15,6 @@ const initialState: PostSliceI = {
   loading: false,
   skeletonLoading: false,
   loadingMore: false,
-  isError: false,
   page: 1,
   maxPosts: 0,
 };
@@ -86,10 +85,13 @@ const likePost = createAsyncThunk("posts/like", async (postId: string) => {
   return parsed.json();
 });
 
-const dislikePost = createAsyncThunk("posts/like", async (postId: string) => {
-  const parsed = await fetch(`/api/v1/posts/dislike/${postId}`);
-  return parsed.json();
-});
+const dislikePost = createAsyncThunk(
+  "posts/dislike",
+  async (postId: string) => {
+    const parsed = await fetch(`/api/v1/posts/dislike/${postId}`);
+    return parsed.json();
+  }
+);
 
 const getUserPosts = createAsyncThunk(
   "posts/getUserPosts",
@@ -110,11 +112,14 @@ const getMoreUserPosts = createAsyncThunk(
 const postSlice = createSlice({
   name: "posts",
   initialState,
-  reducers: {},
+  reducers: {
+    setPage(state, action) {
+      state.page = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(createFeed.pending, (state) => {
       state.skeletonLoading = true;
-      state.isError = false;
     });
     builder.addCase(createFeed.fulfilled, (state, action) => {
       state.skeletonLoading = false;
@@ -125,12 +130,10 @@ const postSlice = createSlice({
     });
     builder.addCase(createFeed.rejected, (state) => {
       state.skeletonLoading = false;
-      state.isError = true;
     });
 
     builder.addCase(fetchMoreFeed.pending, (state) => {
       state.loadingMore = true;
-      state.isError = false;
     });
     builder.addCase(fetchMoreFeed.fulfilled, (state, action) => {
       state.loadingMore = false;
@@ -140,11 +143,9 @@ const postSlice = createSlice({
     });
     builder.addCase(fetchMoreFeed.rejected, (state) => {
       state.loadingMore = false;
-      state.isError = true;
     });
 
     builder.addCase(exploreFeed.pending, (state) => {
-      state.isError = false;
       state.loadingMore = true;
     });
     builder.addCase(exploreFeed.fulfilled, (state, action) => {
@@ -155,12 +156,10 @@ const postSlice = createSlice({
     });
     builder.addCase(exploreFeed.rejected, (state) => {
       state.loadingMore = false;
-      state.isError = true;
     });
 
     builder.addCase(getPost.pending, (state) => {
       state.skeletonLoading = true;
-      state.isError = false;
     });
     builder.addCase(getPost.fulfilled, (state, action) => {
       state.skeletonLoading = false;
@@ -171,12 +170,10 @@ const postSlice = createSlice({
     });
     builder.addCase(getPost.rejected, (state) => {
       state.skeletonLoading = false;
-      state.isError = true;
     });
 
     builder.addCase(createPost.pending, (state) => {
       state.loading = true;
-      state.isError = false;
     });
     builder.addCase(createPost.fulfilled, (state, action) => {
       state.loading = false;
@@ -186,12 +183,10 @@ const postSlice = createSlice({
     });
     builder.addCase(createPost.rejected, (state) => {
       state.loading = false;
-      state.isError = true;
     });
 
     builder.addCase(deletePost.pending, (state) => {
       state.loading = true;
-      state.isError = false;
     });
     builder.addCase(deletePost.fulfilled, (state, action) => {
       state.loading = false;
@@ -203,12 +198,10 @@ const postSlice = createSlice({
     });
     builder.addCase(deletePost.rejected, (state) => {
       state.loading = false;
-      state.isError = true;
     });
 
     builder.addCase(likePost.pending, (state) => {
       state.loading = true;
-      state.isError = false;
     });
     builder.addCase(likePost.fulfilled, (state, action) => {
       state.loading = false;
@@ -223,12 +216,10 @@ const postSlice = createSlice({
     });
     builder.addCase(likePost.rejected, (state) => {
       state.loading = false;
-      state.isError = true;
     });
 
     builder.addCase(dislikePost.pending, (state) => {
       state.loading = true;
-      state.isError = false;
     });
     builder.addCase(dislikePost.fulfilled, (state, action) => {
       state.loading = false;
@@ -243,12 +234,10 @@ const postSlice = createSlice({
     });
     builder.addCase(dislikePost.rejected, (state) => {
       state.loading = false;
-      state.isError = true;
     });
 
     builder.addCase(getUserPosts.pending, (state) => {
       state.skeletonLoading = true;
-      state.isError = false;
     });
     builder.addCase(getUserPosts.fulfilled, (state, action) => {
       state.skeletonLoading = false;
@@ -259,12 +248,10 @@ const postSlice = createSlice({
     });
     builder.addCase(getUserPosts.rejected, (state) => {
       state.skeletonLoading = false;
-      state.isError = true;
     });
 
     builder.addCase(getMoreUserPosts.pending, (state) => {
       state.loadingMore = true;
-      state.isError = false;
     });
     builder.addCase(getMoreUserPosts.fulfilled, (state, action) => {
       state.loadingMore = false;
@@ -274,7 +261,6 @@ const postSlice = createSlice({
     });
     builder.addCase(getMoreUserPosts.rejected, (state) => {
       state.loadingMore = false;
-      state.isError = true;
     });
   },
 });

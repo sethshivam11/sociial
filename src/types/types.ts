@@ -3,7 +3,6 @@ export interface BasicUserI {
   avatar: string;
   fullName: string;
   username: string;
-  isPremium: boolean;
 }
 
 export interface UserI {
@@ -42,6 +41,63 @@ export interface PostI {
   commentsCount: number;
 }
 
+export interface ChatI {
+  _id: string;
+  admin: [];
+  users: string[];
+  groupName: string;
+  groupIcon: string;
+  isGroupChat: boolean;
+}
+
+export interface CommentI {
+  _id: string;
+  user: BasicUserI;
+  comment: string;
+  post: string;
+  likes: BasicUserI[];
+  likesCount: number;
+}
+
+export interface StoryI {
+  _id: string;
+  user: {
+    _id: string;
+    avatar: string;
+    fullName: string;
+    username: string;
+  };
+  media: string[];
+  seenBy: string[];
+  likes: string[];
+  blockedTo: string[];
+}
+
+export interface NotificationI {
+  _id: string;
+  user: BasicUserI;
+  title: string;
+  description: string;
+  link: string;
+  read: boolean;
+}
+
+export interface PushNotificationI {
+  likes: boolean;
+  comments: boolean;
+  commentLikes: boolean;
+  storyLikes: boolean;
+  newFollowers: boolean;
+  newMessages: boolean;
+  newGroups: boolean;
+}
+
+export interface EmailNotificationI {
+  newProducts: boolean;
+  announcements: boolean;
+  support: boolean;
+}
+
 export interface UserSliceI {
   user: {
     _id: string;
@@ -62,7 +118,6 @@ export interface UserSliceI {
   unreadMessageCount: number;
   newNotifications: boolean;
   loading: boolean;
-  isError: boolean;
   isLoggedIn: boolean;
   isSendingMail: boolean;
   page: number;
@@ -76,7 +131,6 @@ export interface FollowSliceI {
   maxFollowings: number;
   loading: boolean;
   loadingMore: boolean;
-  isError: boolean;
   page: number;
 }
 
@@ -87,6 +141,46 @@ export interface PostSliceI {
   skeletonLoading: boolean;
   loadingMore: boolean;
   maxPosts: number;
-  isError: boolean;
   page: number;
+}
+
+export interface ChatSliceI {
+  chats: ChatI[];
+  chat: ChatI;
+  skeletonLoading: boolean;
+  loadingMore: boolean;
+  loading: boolean;
+  page: number;
+}
+
+export interface PushNotificationSliceI {
+  token: string;
+  loading: boolean;
+  pushNotifications: PushNotificationI;
+  emailNotifications: EmailNotificationI;
+}
+
+export interface CommentSliceI {
+  comments: CommentI[];
+  comment: CommentI;
+  loading: boolean;
+  skeletonLoading: boolean;
+  loadingMore: boolean;
+  page: number;
+}
+
+export interface NotificationSliceI {
+  notifications: NotificationI[];
+  loading: boolean;
+  skeletonLoading: boolean;
+  loadingMore: boolean;
+  page: number;
+}
+
+export interface StorySliceI {
+  stories: StoryI[];
+  story: StoryI;
+  userStory?: StoryI;
+  loading: boolean;
+  skeletonLoading: boolean;
 }

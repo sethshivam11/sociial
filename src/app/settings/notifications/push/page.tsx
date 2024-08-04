@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import React from "react";
@@ -16,6 +17,7 @@ function Page() {
     tags: true,
     group: true,
   });
+  const [pauseAll, setPauseAll] = React.useState(false);
 
   React.useEffect(() => {
     console.log(notificationPreferences);
@@ -23,15 +25,30 @@ function Page() {
 
   return (
     <div className="flex flex-col items-center justify-start overflow-y-auto max-h-[100dvh] h-full xl:col-span-8 sm:col-span-9 col-span-10 w-full max-sm:pb-10">
-      <h1 className="text-lg tracking-tight font-semibold sm:w-2/3 w-full text-left sm:my-2 my-2 flex items-center gap-4">
+      <div className="text-lg tracking-tight font-semibold sm:w-2/3 w-full text-left sm:my-2 my-2 flex items-center gap-4">
         <Link href="/settings/notifications" className="sm:hidden">
-          <Button variant="ghost" size="icon" className="rounded-xl ml-2 hover:bg-background">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-xl ml-2 hover:bg-background"
+          >
             <ArrowLeft />
           </Button>
         </Link>
         Push Notifications
-      </h1>
+      </div>
       <div className="sm:w-2/3 w-full max-sm:px-10 sm:space-y-8 space-y-5 mt-6">
+        <div className="w-full flex items-center justify-start gap-4">
+          <Label htmlFor="pause-all" className="text-md cursor-pointer w-full">
+            Pause all
+          </Label>
+          <Switch
+            id="pause-all"
+            checked={pauseAll}
+            onCheckedChange={setPauseAll}
+          />
+        </div>
+        <hr className="w-full bg-stone-500" />
         <div className="w-full flex flex-col items-center justify-start gap-4">
           <h2 className="w-full mb-2">Likes</h2>
           <Label
@@ -40,6 +57,7 @@ function Page() {
           >
             <input
               type="radio"
+              disabled={pauseAll}
               id="likes-off"
               name="likes"
               checked={!notificationPreferences.likes}
@@ -59,6 +77,7 @@ function Page() {
           >
             <input
               type="radio"
+              disabled={pauseAll}
               id="likes-on"
               name="likes"
               checked={notificationPreferences.likes}
@@ -82,6 +101,7 @@ function Page() {
           >
             <input
               type="radio"
+              disabled={pauseAll}
               id="comments-off"
               name="comments"
               checked={!notificationPreferences.comments}
@@ -101,6 +121,7 @@ function Page() {
           >
             <input
               type="radio"
+              disabled={pauseAll}
               id="comments-on"
               name="comments"
               checked={notificationPreferences.comments}
@@ -124,6 +145,7 @@ function Page() {
           >
             <input
               type="radio"
+              disabled={pauseAll}
               id="comment-likes-off"
               name="comment-likes"
               checked={!notificationPreferences.commentLikes}
@@ -143,6 +165,7 @@ function Page() {
           >
             <input
               type="radio"
+              disabled={pauseAll}
               id="comment-likes-on"
               name="comment-likes"
               checked={notificationPreferences.commentLikes}
@@ -166,6 +189,7 @@ function Page() {
           >
             <input
               type="radio"
+              disabled={pauseAll}
               id="story-likes-off"
               name="story-likes"
               checked={!notificationPreferences.storyLikes}
@@ -185,6 +209,7 @@ function Page() {
           >
             <input
               type="radio"
+              disabled={pauseAll}
               id="story-likes-on"
               name="story-likes"
               checked={notificationPreferences.storyLikes}
@@ -208,6 +233,7 @@ function Page() {
           >
             <input
               type="radio"
+              disabled={pauseAll}
               id="new-followers-off"
               name="new-followers"
               checked={!notificationPreferences.newFollowers}
@@ -227,6 +253,7 @@ function Page() {
           >
             <input
               type="radio"
+              disabled={pauseAll}
               id="new-followers-on"
               name="new-followers"
               checked={notificationPreferences.newFollowers}
@@ -250,6 +277,7 @@ function Page() {
           >
             <input
               type="radio"
+              disabled={pauseAll}
               id="messages-off"
               name="messages"
               checked={!notificationPreferences.messages}
@@ -269,6 +297,7 @@ function Page() {
           >
             <input
               type="radio"
+              disabled={pauseAll}
               id="messages-on"
               name="messages"
               checked={notificationPreferences.messages}
@@ -283,47 +312,7 @@ function Page() {
             On
           </Label>
         </div>
-        <div className="w-full flex flex-col items-center justify-start gap-4">
-          <h2 className="w-full mb-2">New Tags</h2>
-          <Label
-            htmlFor="tags-off"
-            className="flex gap-2 items-center justify-start font-light cursor-pointer w-full"
-          >
-            <input
-              type="radio"
-              id="tags-off"
-              name="messages"
-              checked={!notificationPreferences.tags}
-              onChange={(e) =>
-                setNotificationPreferences({
-                  ...notificationPreferences,
-                  tags: e.target.checked ? false : true,
-                })
-              }
-              className="w-6 h-6 accent-black dark:accent-white"
-            />
-            Off
-          </Label>
-          <Label
-            htmlFor="tags-on"
-            className="flex gap-2 items-center justify-start font-light cursor-pointer w-full"
-          >
-            <input
-              type="radio"
-              id="tags-on"
-              name="tags"
-              checked={notificationPreferences.tags}
-              onChange={(e) =>
-                setNotificationPreferences({
-                  ...notificationPreferences,
-                  tags: e.target.checked ? true : false,
-                })
-              }
-              className="w-6 h-6 accent-black dark:accent-white"
-            />
-            On
-          </Label>
-        </div>
+        <hr className="w-full bg-stone-500" />
         <div className="w-full flex flex-col items-center justify-start gap-4">
           <h2 className="w-full mb-2">New Groups</h2>
           <Label
@@ -332,6 +321,7 @@ function Page() {
           >
             <input
               type="radio"
+              disabled={pauseAll}
               id="group-off"
               name="messages"
               checked={!notificationPreferences.group}
@@ -351,6 +341,7 @@ function Page() {
           >
             <input
               type="radio"
+              disabled={pauseAll}
               id="group-on"
               name="group"
               checked={notificationPreferences.group}

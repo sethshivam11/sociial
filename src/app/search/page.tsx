@@ -16,7 +16,6 @@ import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { nameFallback } from "@/lib/helpers";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 
 interface Search {
   fullName: string;

@@ -226,7 +226,7 @@ function Posts() {
   }
 
   return (
-    <div className="flex flex-col py-2 sm:px-4 px-2 gap-4 w-full pb-4">
+    <div className="flex flex-col py-2 sm:px-4 px-2 gap-4 w-full sm:pb-4 pb-20">
       {loading ? (
         <PostsLoading />
       ) : (
@@ -403,10 +403,6 @@ function Posts() {
           );
         })
       )}
-      <div className="text-center sm:mb-4 mb-20 mt-3 relative">
-        <span className="bg-white dark:bg-black px-2">No more posts</span>
-        <hr className="-mt-3 bg-stone-500 border-stone-500" />
-      </div>
     </div>
   );
 }

@@ -29,8 +29,15 @@ import {
   usernameSchema,
   verificationCodeSchema,
 } from "@/schemas/userSchema";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/lib/store/store";
+import {
+  forgotPassword,
+  resendVerificationCode,
+} from "@/lib/store/features/slices/userSlice";
 
 const ForgotPasswordPage = () => {
+  const router = useRouter();
   const isSendingMail = false;
   const formSchema = z
     .object({
@@ -48,9 +55,9 @@ const ForgotPasswordPage = () => {
         path: ["confirmPassword"],
       }
     );
+  const { loading } = useSelector((state: RootState) => state.user);
+  const dispatch: AppDispatch = useDispatch();
   const [timer, setTimer] = React.useState(0);
-  const [loading, setLoading] = React.useState(false);
-  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -61,13 +68,28 @@ const ForgotPasswordPage = () => {
     },
   });
 
-  function handleGetCode() {
+  async function handleGetCode() {
     try {
       z.object({
         identifier: emailSchema.or(usernameSchema),
       }).parse({ identifier: form.watch("identifier") });
       form.clearErrors();
-      // resendVerificationCode(form.watch("identifier"));
+      const response = await dispatch(
+        resendVerificationCode(form.watch("identifier"))
+      );
+      if (response.payload.success) {
+        setTimer(60);
+        toast({
+          title: "Success",
+          description: response.payload.message,
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: response.payload.message || "Something went wrong",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       if (error instanceof z.ZodError) {
         form.setError("identifier", { message: error.errors[0].message });
@@ -75,49 +97,35 @@ const ForgotPasswordPage = () => {
     }
   }
 
-  function onSubmit({
+  async function onSubmit({
     identifier,
     password,
     code,
   }: z.infer<typeof formSchema>) {
-    const email =
-      identifier.includes("@") && identifier.includes(".") ? identifier : "";
-    if (!password) {
-      return console.log("Passwords do not match");
+    let username = "";
+    let email = "";
+    if (!(identifier.includes("@") || identifier.includes("."))) {
+      username = identifier;
+    } else {
+      email = identifier;
     }
-    setLoading(true);
-    fetch("/api/v1/users/forgotPassword", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email,
-        username: identifier,
-        password,
-        code,
-      }),
-    })
-      .then((parsed) => parsed.json())
-      .then((data) => {
-        if (data.success) {
-          toast({
-            title: "Success",
-            description: data.message,
-          });
-          router.push("/sign-in");
-        } else {
-          toast({
-            title: "Error",
-            description: data.error,
-            variant: "destructive",
-          });
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      })
-      .finally(() => setLoading(false));
+    const response = await dispatch(
+      forgotPassword({ email, username, code: code.toString(), password })
+    );
+    if (response.payload.success) {
+      router.push("/sign-in");
+    } else {
+      if (response.payload?.message === "User not found") {
+        toast({
+          title: "Invalid username or email",
+          description: "Please check your username or email and try again",
+        });
+      } else {
+        toast({
+          title: response.payload?.message || "Something went wrong",
+        });
+      }
+    }
   }
 
   React.useEffect(() => {
@@ -188,10 +196,12 @@ const ForgotPasswordPage = () => {
               <Button
                 variant="secondary"
                 type="button"
+                className="min-w-24"
                 disabled={
                   form.getValues("identifier").length === 0 ||
                   isSendingMail ||
-                  timer > 0
+                  timer > 0 ||
+                  loading
                 }
                 onClick={handleGetCode}
               >
@@ -241,6 +251,7 @@ const ForgotPasswordPage = () => {
             </Button>
             <Button
               variant="outline"
+              type="button"
               onClick={() => router.push("/sign-in")}
               className="w-full"
             >
