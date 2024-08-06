@@ -37,3 +37,4 @@ next-env.d.ts
 
 # test audio/video files
 /public/test*
+/public/swEnv.js

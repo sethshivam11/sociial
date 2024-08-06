@@ -1,7 +1,9 @@
-import MobileNav from "@/components/MobileNav";
-import Posts from "@/components/Posts";
-import Stories from "@/components/Stories";
-import Suggestions from "@/components/Suggestions";
+import dynamic from "next/dynamic";
+
+const MobileNav = dynamic(() => import("@/components/MobileNav"));
+const Posts = dynamic(() => import("@/components/Posts"));
+const Stories = dynamic(() => import("@/components/Stories"));
+const Suggestions = dynamic(() => import("@/components/Suggestions"));
 
 export default function Home() {
   return (

@@ -11,7 +11,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Link from "next/link";
-import Image from "next/image";
 import {
   AlertDialog,
   AlertDialogTitle,
@@ -103,20 +102,7 @@ function Page() {
                 <span className="flex h-2 w-2 translate-y-1 rounded-full bg-sky-500" />
                 <div className="space-y-1">
                   <div className="text-sm font-medium leading-none">
-                    {feature.title === "Verified Badge" ? (
-                      <div className="flex items-center justify-start gap-0.5">
-                        {feature.title}
-                        <Image
-                          src="/icons/premium.svg"
-                          alt=""
-                          width="20"
-                          height="20"
-                          className="w-5"
-                        />
-                      </div>
-                    ) : (
-                      feature.title
-                    )}
+                    {feature.title}
                   </div>
                   <p className="text-sm text-muted-foreground">
                     {feature.description}
@@ -160,20 +146,7 @@ function Page() {
                 <span className="flex h-2 w-2 translate-y-1 rounded-full bg-sky-500" />
                 <div className="space-y-1">
                   <div className="text-sm font-medium leading-none">
-                    {feature.title === "Verified Badge" ? (
-                      <div className="flex items-center justify-start gap-0.5">
-                        {feature.title}
-                        <Image
-                          src="/icons/premium.svg"
-                          alt=""
-                          width="20"
-                          height="20"
-                          className="w-5"
-                        />
-                      </div>
-                    ) : (
-                      feature.title
-                    )}
+                    {feature.title}
                   </div>
                   <p className="text-sm text-muted-foreground">
                     {feature.description}
@@ -210,9 +183,9 @@ function Page() {
             </span>
           </p>
           <AlertDialogDescription className="text-sm border p-2 rounded-lg">
-            By clicking &apos;Confirm & Pay&apos;, you&apos;ll proceed to the payment page
-            where you can complete your payment and subscribe to premium for
-            just {plan === "monthly" ? "₹49/month" : "₹499/year"}.
+            By clicking &apos;Confirm & Pay&apos;, you&apos;ll proceed to the
+            payment page where you can complete your payment and subscribe to
+            premium for just {plan === "monthly" ? "₹49/month" : "₹499/year"}.
             <br />
             Please note, this is a one-time payment for a&nbsp;
             {plan === "monthly" ? "month" : "year"} without any automatic

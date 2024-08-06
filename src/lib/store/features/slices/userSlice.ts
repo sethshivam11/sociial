@@ -1,7 +1,6 @@
 "use client";
 import { UserSliceI } from "@/types/types";
-import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import { AppDispatch, store } from "../../store";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 const initialState: UserSliceI = {
   user: {
@@ -258,7 +257,7 @@ export const userSlice = createSlice({
   reducers: {
     setPage(state, action) {
       state.page = action.payload;
-    }
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(loginUser.pending, (state) => {
@@ -269,8 +268,8 @@ export const userSlice = createSlice({
       if (action.payload.success) {
         state.isLoggedIn = true;
         state.user = action.payload.data.user;
-        localStorage.setItem("accessToken", action.payload.accessToken);
-        localStorage.setItem("refreshToken", action.payload.refreshToken);
+        localStorage.setItem("accessToken", action.payload.data.accessToken);
+        localStorage.setItem("refreshToken", action.payload.data.refreshToken);
       }
     });
     builder.addCase(loginUser.rejected, (state, action) => {

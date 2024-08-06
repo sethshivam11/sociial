@@ -6,6 +6,7 @@ import {
   ChevronRight,
   Mic,
   MicOff,
+  Phone,
   RefreshCcw,
   Video,
   VideoOff,
@@ -155,7 +156,9 @@ function Page() {
           size="icon"
           variant="secondary"
           className={`rounded-full p-3 w-fit h-fit shadow-xl ${
-            selfVideoPaused ? "bg-stone-200 sm:hover:bg-stone-400 text-black" : ""
+            selfVideoPaused
+              ? "bg-stone-200 sm:hover:bg-stone-400 text-black"
+              : ""
           }`}
           onClick={handleSelfVideoPause}
         >
@@ -177,13 +180,7 @@ function Page() {
           className="rounded-full p-3 w-fit h-fit shadow-xl"
           onClick={handleCallEnd}
         >
-          <Image
-            src="/icons/call-end.svg"
-            alt=""
-            width="30"
-            height="30"
-            className="w-[30px] h-[30px]"
-          />
+          <Phone size="30" className="rotate-[135deg]" />
         </Button>
       </div>
       <div
