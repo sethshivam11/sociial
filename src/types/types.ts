@@ -44,7 +44,7 @@ export interface PostI {
 export interface ChatI {
   _id: string;
   admin: [];
-  users: string[];
+  users: BasicUserI[];
   groupName: string;
   groupIcon: string;
   isGroupChat: boolean;
@@ -96,6 +96,30 @@ export interface EmailNotificationI {
   newProducts: boolean;
   announcements: boolean;
   support: boolean;
+}
+
+export interface MessageI {
+  _id: string;
+  sender: BasicUserI;
+  chat: string;
+  content: string;
+  kind?: "message" | "location" | "call" | "media" | "audio" | "document";
+  attachments: {
+    url: string;
+    type: "image" | "video" | "audio" | "document";
+  }[];
+  reacts: {
+    _id: string;
+    content: string;
+    user: BasicUserI;
+  }[];
+  readBy: BasicUserI[];
+  reply: {
+    username: string;
+    content: string;
+  };
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface UserSliceI {
@@ -183,4 +207,14 @@ export interface StorySliceI {
   userStory?: StoryI;
   loading: boolean;
   skeletonLoading: boolean;
+}
+
+export interface MessageSliceI {
+  messages: MessageI[];
+  typing: boolean;
+  loading: boolean;
+  skeletonLoading: boolean;
+  loadingMore: boolean;
+  page: number;
+  editingMessage: boolean;
 }

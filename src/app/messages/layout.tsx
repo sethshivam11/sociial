@@ -3,7 +3,7 @@ import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { nameFallback } from "@/lib/helpers";
 import { Input } from "@/components/ui/input";
-import { Circle, History, Search, SearchX, Users, X } from "lucide-react";
+import { Circle, History, Users } from "lucide-react";
 import { useDebounceCallback } from "usehooks-ts";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
@@ -30,6 +30,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { SocketProvider } from "@/context/SocketProvider";
 
 function Messages({ children }: { children: React.ReactNode }) {
   const formSchema = z.object({
@@ -339,160 +340,98 @@ function Messages({ children }: { children: React.ReactNode }) {
   }, [searchFollowers]);
 
   return (
-    <div className="grid min-h-[100dvh] max-sm:max-h-[100dvh] xl:col-span-8 sm:col-span-9 col-span-10 sm:grid-cols-10 sm:container max-md:pr-2 max-sm:pr-0">
-      <div
-        className={`lg:col-span-3 md:col-span-4 col-span-10 md:flex flex-col items-start justify-start gap-2 py-6 h-full max-h-[100dvh] sm:min-h-[42rem] md:px-0 sm:px-4 px-5 sticky top-0 ${
-          location === "/messages" ? "flex" : "hidden"
-        }`}
-      >
-        <div className="flex items-center justify-between w-full mb-4 pr-2">
-          <h1 className="text-2xl tracking-tight font-bold text-left py-2.5">
-            Conversations
-          </h1>
-          <Dialog
-            open={newChatDialog}
-            onOpenChange={(open) => {
-              setNewChatDialog(open);
-              setParticipants([]);
-              setLevel("1");
-              form.reset();
-            }}
-          >
-            <DialogTrigger asChild>
-              <Button
-                className="bg-transparent hover:bg-transparent text-black dark:text-white"
-                onClick={() => setNewChatDialog(true)}
-              >
-                <Users />
-              </Button>
-            </DialogTrigger>
-            <DialogContent
-              className={`sm:w-2/3 sm:max-h-[83%] max-h-full w-full flex flex-col bg-stone-100 dark:bg-stone-900`}
-              onOpenAutoFocus={(e) => e.preventDefault()}
-              hideCloseIcon
+    <SocketProvider>
+      <div className="grid min-h-[100dvh] max-sm:max-h-[100dvh] xl:col-span-8 sm:col-span-9 col-span-10 sm:grid-cols-10 sm:container max-md:pr-2 max-sm:pr-0">
+        <div
+          className={`lg:col-span-3 md:col-span-4 col-span-10 md:flex flex-col items-start justify-start gap-2 py-6 h-full max-h-[100dvh] sm:min-h-[42rem] md:px-0 sm:px-4 px-5 sticky top-0 ${
+            location === "/messages" ? "flex" : "hidden"
+          }`}
+        >
+          <div className="flex items-center justify-between w-full mb-4 pr-2">
+            <h1 className="text-2xl tracking-tight font-bold text-left py-2.5">
+              Conversations
+            </h1>
+            <Dialog
+              open={newChatDialog}
+              onOpenChange={(open) => {
+                setNewChatDialog(open);
+                setParticipants([]);
+                setLevel("1");
+                form.reset();
+              }}
             >
-              <DialogTitle>New Group Chat</DialogTitle>
-              {level === "1" ? (
-                <>
-                  <Input
-                    defaultValue={searchFollowers}
-                    name="searchFollowers"
-                    autoComplete="off"
-                    inputMode="search"
-                    placeholder="Search"
-                    onChange={(e) => setFollowersDebounced(e.target.value)}
-                  />
-                  <hr className="bg-stone-500 my-2" />
-                  <div className="flex flex-col justify-start items-start gap-4 overflow-y-auto h-full">
-                    {followers.map((follower, index) => {
-                      return (
-                        <div
-                          className="flex items-center justify-between w-full px-2 gap-3 rounded-lg"
-                          key={index}
-                        >
-                          <Label
-                            htmlFor={`follower-${index}`}
-                            className="flex items-center gap-3 rounded-lg w-full cursor-pointer"
+              <DialogTrigger asChild>
+                <Button
+                  className="bg-transparent hover:bg-transparent text-black dark:text-white"
+                  onClick={() => setNewChatDialog(true)}
+                >
+                  <Users />
+                </Button>
+              </DialogTrigger>
+              <DialogContent
+                className={`sm:w-2/3 sm:max-h-[83%] max-h-full w-full flex flex-col bg-stone-100 dark:bg-stone-900`}
+                onOpenAutoFocus={(e) => e.preventDefault()}
+                hideCloseIcon
+              >
+                <DialogTitle>New Group Chat</DialogTitle>
+                {level === "1" ? (
+                  <>
+                    <Input
+                      defaultValue={searchFollowers}
+                      name="searchFollowers"
+                      autoComplete="off"
+                      inputMode="search"
+                      placeholder="Search"
+                      onChange={(e) => setFollowersDebounced(e.target.value)}
+                    />
+                    <hr className="bg-stone-500 my-2" />
+                    <div className="flex flex-col justify-start items-start gap-4 overflow-y-auto h-full">
+                      {followers.map((follower, index) => {
+                        return (
+                          <div
+                            className="flex items-center justify-between w-full px-2 gap-3 rounded-lg"
+                            key={index}
                           >
-                            <div className="w-8 h-8">
-                              <Image
-                                width={32}
-                                height={32}
-                                src={follower.avatar}
-                                alt=""
-                                className="w-full h-full rounded-full pointer-events-none select-none"
-                              />
-                            </div>
-                            <div>
-                              <p className="text-lg leading-5">
-                                {follower.fullName}
-                              </p>
-                              <p className="text-sm text-gray-500">
-                                @{follower.username}
-                              </p>
-                            </div>
-                          </Label>
-                          <Checkbox
-                            id={`follower-${index}`}
-                            className="rounded-full w-5 h-5 data-[state=checked]:bg-blue-500 data-[state=checked]:text-white border-2 data-[state=checked]:border-0"
-                            onCheckedChange={(checked) => {
-                              checked
-                                ? setParticipants([...participants, follower])
-                                : setParticipants((prevParticipants) =>
-                                    prevParticipants.filter(
-                                      (user) =>
-                                        user.username !== follower.username
-                                    )
-                                  );
-                            }}
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <DialogFooter className="max-sm:gap-2">
-                    <DialogClose asChild>
-                      <Button
-                        variant="ghost"
-                        type="button"
-                        className="rounded-xl"
-                      >
-                        Cancel
-                      </Button>
-                    </DialogClose>
-                    <Button
-                      type="submit"
-                      className="rounded-xl"
-                      onClick={() => {
-                        setLevel("2");
-                      }}
-                      disabled={participants.length < 1}
-                    >
-                      Next
-                    </Button>
-                  </DialogFooter>
-                </>
-              ) : (
-                <Form {...form}>
-                  <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-5 h-full w-full"
-                  >
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Group Name</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Group Name"
-                              className="focus-visible:ring-offset-0 focus-visible:ring-1"
-                              {...field}
+                            <Label
+                              htmlFor={`follower-${index}`}
+                              className="flex items-center gap-3 rounded-lg w-full cursor-pointer"
+                            >
+                              <div className="w-8 h-8">
+                                <Image
+                                  width={32}
+                                  height={32}
+                                  src={follower.avatar}
+                                  alt=""
+                                  className="w-full h-full rounded-full pointer-events-none select-none"
+                                />
+                              </div>
+                              <div>
+                                <p className="text-lg leading-5">
+                                  {follower.fullName}
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                  @{follower.username}
+                                </p>
+                              </div>
+                            </Label>
+                            <Checkbox
+                              id={`follower-${index}`}
+                              className="rounded-full w-5 h-5 data-[state=checked]:bg-blue-500 data-[state=checked]:text-white border-2 data-[state=checked]:border-0"
+                              onCheckedChange={(checked) => {
+                                checked
+                                  ? setParticipants([...participants, follower])
+                                  : setParticipants((prevParticipants) =>
+                                      prevParticipants.filter(
+                                        (user) =>
+                                          user.username !== follower.username
+                                      )
+                                    );
+                              }}
                             />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="description"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Group Description</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="Group Description"
-                              className="bg-stone-50 dark:bg-background"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
+                          </div>
+                        );
+                      })}
+                    </div>
                     <DialogFooter className="max-sm:gap-2">
                       <DialogClose asChild>
                         <Button
@@ -503,74 +442,140 @@ function Messages({ children }: { children: React.ReactNode }) {
                           Cancel
                         </Button>
                       </DialogClose>
-                      <Button type="submit" className="rounded-xl">
-                        Create
+                      <Button
+                        type="submit"
+                        className="rounded-xl"
+                        onClick={() => {
+                          setLevel("2");
+                        }}
+                        disabled={participants.length < 1}
+                      >
+                        Next
                       </Button>
                     </DialogFooter>
-                  </form>
-                </Form>
-              )}
-            </DialogContent>
-          </Dialog>
-        </div>
-        <div className="space-y-1 py-3 w-full md:overflow-y-auto md:h-[100dvh] sm:pb-2 pb-20 pr-2">
-          {chats.length > 1 ? (
-            chats.map((chat, index) => (
-              <button
-                className={`flex items-center justify-center rounded-md w-full gap-2 p-2 ${
-                  location === `/messages/${chat.username}`
-                    ? "bg-stone-200 dark:bg-stone-800 hover:bg-stone-100 hover:dark:bg-stone-900"
-                    : "hover:bg-stone-200 dark:hover:bg-stone-800"
-                }`}
-                key={index}
-                title={chat.username}
-                onClick={() => {
-                  router.push(`/messages/${chat.username}`);
-                }}
-              >
-                <Avatar className="w-10 h-10">
-                  <AvatarImage
-                    src={chat.avatar}
-                    alt=""
-                    className="pointer-events-none select-none"
-                  />
-                  <AvatarFallback>{nameFallback(chat.fullName)}</AvatarFallback>
-                </Avatar>
-                <div className="flex flex-col items-start justify-center w-full">
-                  <p>{chat.fullName}</p>
-                  <p className="text-sm md:w-40 sm:w-80 w-40 text-left text-stone-500 text-ellipsis whitespace-nowrap overflow-x-hidden">
-                    {chat.message}
+                  </>
+                ) : (
+                  <Form {...form}>
+                    <form
+                      onSubmit={form.handleSubmit(onSubmit)}
+                      className="space-y-5 h-full w-full"
+                    >
+                      <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Group Name</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Group Name"
+                                className="focus-visible:ring-offset-0 focus-visible:ring-1"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="description"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Group Description</FormLabel>
+                            <FormControl>
+                              <Textarea
+                                placeholder="Group Description"
+                                className="bg-stone-50 dark:bg-background"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <DialogFooter className="max-sm:gap-2">
+                        <DialogClose asChild>
+                          <Button
+                            variant="ghost"
+                            type="button"
+                            className="rounded-xl"
+                          >
+                            Cancel
+                          </Button>
+                        </DialogClose>
+                        <Button type="submit" className="rounded-xl">
+                          Create
+                        </Button>
+                      </DialogFooter>
+                    </form>
+                  </Form>
+                )}
+              </DialogContent>
+            </Dialog>
+          </div>
+          <div className="space-y-1 py-3 w-full md:overflow-y-auto md:h-[100dvh] sm:pb-2 pb-20 pr-2">
+            {chats.length > 1 ? (
+              chats.map((chat, index) => (
+                <button
+                  className={`flex items-center justify-center rounded-md w-full gap-2 p-2 ${
+                    location === `/messages/${chat.username}`
+                      ? "bg-stone-200 dark:bg-stone-800 hover:bg-stone-100 hover:dark:bg-stone-900"
+                      : "hover:bg-stone-200 dark:hover:bg-stone-800"
+                  }`}
+                  key={index}
+                  title={chat.username}
+                  onClick={() => {
+                    router.push(`/messages/${chat.username}`);
+                  }}
+                >
+                  <Avatar className="w-10 h-10">
+                    <AvatarImage
+                      src={chat.avatar}
+                      alt=""
+                      className="pointer-events-none select-none"
+                    />
+                    <AvatarFallback>
+                      {nameFallback(chat.fullName)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col items-start justify-center w-full">
+                    <p>{chat.fullName}</p>
+                    <p className="text-sm md:w-40 sm:w-80 w-40 text-left text-stone-500 text-ellipsis whitespace-nowrap overflow-x-hidden">
+                      {chat.message}
+                    </p>
+                  </div>
+                  {chat.unreadMessages ? (
+                    <Circle
+                      fill="rgb(14 165 233)"
+                      color="rgb(14 165 233)"
+                      size="16"
+                      className="mr-2"
+                    />
+                  ) : (
+                    ""
+                  )}
+                </button>
+              ))
+            ) : (
+              <div className="w-full flex flex-col items-center justify-center gap-4 text-center h-full">
+                <History size="60" />
+                <div>
+                  <h2 className="text-2xl tracking-tight font-bold">
+                    No Chats yet
+                  </h2>
+                  <p className="text-stone-500">
+                    Start a conversation with someone!
                   </p>
                 </div>
-                {chat.unreadMessages ? (
-                  <Circle
-                    fill="rgb(14 165 233)"
-                    color="rgb(14 165 233)"
-                    size="16"
-                    className="mr-2"
-                  />
-                ) : (
-                  ""
-                )}
-              </button>
-            ))
-          ) : (
-            <div className="w-full flex flex-col items-center justify-center gap-4 text-center h-full">
-              <History size="60" />
-              <div>
-                <h2 className="text-2xl tracking-tight font-bold">
-                  No Chats yet
-                </h2>
-                <p className="text-stone-500">
-                  Start a conversation with someone!
-                </p>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
+        {children}
       </div>
-      {children}
-    </div>
+    </SocketProvider>
   );
 }
 

@@ -284,9 +284,6 @@ function Posts() {
     if (!savedConsent.consent || savedConsent.expiry < Date.now()) {
       setConsentDialog(true);
     }
-    onMessage(messaging, (payload) => {
-      console.log("Message received. ", payload);
-    });
   }, []);
 
   return (

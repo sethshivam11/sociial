@@ -176,7 +176,37 @@ const removeAdmin = createAsyncThunk(
 const chatSlice = createSlice({
   name: "chats",
   initialState,
-  reducers: {},
+  reducers: {
+    setPage: (state, action) => {
+      state.page = action.payload;
+    },
+    addedToGroup: (state, action) => {
+      state.chats = [action.payload.data, ...state.chats];
+    },
+    leftGroup: (state, action) => {
+      state.chat.users = state.chat.users.filter(
+        (user) => user.username !== action.payload.data.username
+      );
+    },
+    addedNewChat: (state, action) => {
+      state.chats = [action.payload.data, ...state.chats];
+    },
+    groupDetailsUpdated: (state, action) => {
+      state.chat.groupName = action.payload.data.groupName;
+      state.chat.groupIcon = action.payload.data.groupIcon;
+    },
+    newAdmin: (state, action) => {
+      state.chat.admin = action.payload.data.admin;
+    },
+    removedAdmin: (state, action) => {
+      state.chat.admin = action.payload.data.admin;
+    },
+    groupDeleted: (state, action) => {
+      state.chats = state.chats.filter(
+        (chat) => chat._id !== action.payload.data._id
+      );
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(getChats.pending, (state) => {
       state.skeletonLoading = true;
