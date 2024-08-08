@@ -22,7 +22,6 @@ import {
 import NextImage from "next/image";
 import Link from "next/link";
 import React from "react";
-import Cropper, { Area } from "react-easy-crop";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -47,26 +46,18 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-
-interface Post extends Area {
-  image: string;
-}
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/lib/store/store";
 
 function Page() {
   const router = useRouter();
+  const dispatch: AppDispatch = useDispatch();
   const formSchema = z.object({
     caption: z
       .string()
@@ -82,23 +73,9 @@ function Page() {
     },
   });
   const [selectedFile, setSelectedFile] = React.useState<string>("");
-  const [posts, setPosts] = React.useState<Post[]>([]);
-  const [aspect, setAspect] = React.useState(1 / 1);
-  const [crop, setCrop] = React.useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = React.useState(1);
-  const [showDialog, setShowDialog] = React.useState(false);
-  const [finalPosts, setFinalPosts] = React.useState<string[]>([]);
+  const [posts, setPosts] = React.useState<string[]>([]);
 
   const dragContainer = React.useRef<HTMLDivElement>(null);
-
-  const onCropComplete = (croppedArea: Area, _: Area) => {
-    const postIndex = posts.findIndex((post) => post.image === selectedFile);
-    if (postIndex !== -1) {
-      const newPosts = [...posts];
-      newPosts[postIndex] = { ...croppedArea, image: selectedFile };
-      setPosts(newPosts);
-    }
-  };
 
   function handleFiles(inputFiles: FileList) {
     const limit = 5 - posts.length - inputFiles.length;
@@ -108,19 +85,9 @@ function Page() {
       if (file && file.type.includes("image")) {
         const img = new Image();
         const imgURL = URL.createObjectURL(file);
-        img.style.aspectRatio = `${aspect}`;
         img.src = imgURL;
         img.onload = () => {
-          setPosts((prevPosts) => [
-            ...prevPosts,
-            {
-              image: imgURL,
-              x: 0,
-              y: 0,
-              width: img.width,
-              height: img.height,
-            },
-          ]);
+          setPosts((prevPosts) => [...prevPosts, imgURL]);
           if (!selectedFile) {
             setSelectedFile(imgURL);
           }
@@ -135,11 +102,8 @@ function Page() {
     }
   }
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    console.log(posts);
-    setFinalPosts(posts.map((post) => post.image));
-    setShowDialog(true);
+  function onSubmit({ caption }: z.infer<typeof formSchema>) {
+    console.log({ caption, posts });
   }
 
   return (
@@ -193,124 +157,32 @@ function Page() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      <div className="h-full lg:w-3/4 w-full rounded-xl sm:pt-4 md:px-16 sm:px-6 px-0 pb-28">
-        <h1 className="font-bold text-2xl tracking-tight w-full text-center mb-6">
+      <div className="h-full lg:w-3/4 w-full rounded-xl sm:pt-4 md:px-16 sm:px-6 px-0 ">
+        <h1 className="font-bold text-2xl tracking-tight w-full text-center">
           Create New Post
         </h1>
         {posts.length ? (
           <div className="flex flex-col items-center justify-center w-full h-full gap-3">
-            <div className="w-full h-full flex max-sm:flex-col items-center justify-center gap-3">
-              <div className="w-full h-full relative rounded-xl">
-                <Cropper
-                  image={selectedFile}
-                  crop={crop}
-                  zoom={zoom}
-                  aspect={aspect}
-                  onCropChange={setCrop}
-                  onCropComplete={onCropComplete}
-                  onZoomChange={setZoom}
-                  showGrid={false}
-                  classes={{
-                    cropAreaClassName:
-                      "cursor-grab active:cursor-grabbing w-full h-full",
-                    containerClassName:
-                      "hover:cursor-grab active:cursor-grabbing rounded-xl dark:bg-white",
-                  }}
-                />
-              </div>
-              <div className="flex sm:flex-col items-center justify-start gap-2 h-full w-fit">
-                {posts.map((post, index) => (
-                  <div
-                    key={index}
-                    className="w-20 h-20 relative overflow-hidden bg-transparent/50 rounded-lg border-2 flex items-center justify-center"
-                  >
-                    <button
-                      onClick={() => {
-                        setSelectedFile(post.image);
-                        setCrop({ x: post.x, y: post.y });
-                      }}
-                    >
+            <div className="w-full h-full flex max-sm:flex-col items-center justify-center relative">
+              <Carousel>
+                <CarouselContent className="lg:max-w-[35vw] sm:max-w-[50vw] max-w-full aspect-square">
+                  {posts.map((post, index) => (
+                    <CarouselItem key={index}>
                       <NextImage
-                        src={post.image}
+                        src={post}
                         alt=""
-                        width="100"
-                        height="100"
-                        className="object-cover w-full pointer-events-none select-none cursor-pointer"
+                        width="1080"
+                        height="720"
+                        className="object-cover overflow-hidden h-full w-full rounded-sm"
                       />
-                    </button>
-                    <button
-                      className="absolute top-1 right-1 bg-transparent/50 text-white rounded-full p-0.5"
-                      onClick={() => {
-                        setPosts((post) => post.filter((_, i) => i !== index));
-                        if (selectedFile === post.image) {
-                          const idx = index === 0 ? 1 : 0;
-                          setSelectedFile(posts[idx].image);
-                          setCrop({ x: posts[idx].x, y: posts[idx].y });
-                        }
-                      }}
-                    >
-                      <X size="16" />
-                    </button>
-                  </div>
-                ))}
-                <Button
-                  className={`rounded-xl mx-2 w-fit h-fit p-2 ${
-                    posts.length >= 5 ? "hidden" : ""
-                  }`}
-                  variant="ghost"
-                  size="icon"
-                >
-                  <Label htmlFor="new-post" className="cursor-pointer">
-                    <CirclePlus size="50" />
-                  </Label>
-                </Button>
-              </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselNext />
+                <CarouselPrevious />
+              </Carousel>
             </div>
-            <div className="flex items-center justify-evenly">
-              <Menubar className="border-0">
-                <MenubarMenu>
-                  <MenubarTrigger asChild>
-                    <Button size="icon" className="rounded-xl">
-                      <ChevronsLeftRight size="20" className="rotate-45" />
-                    </Button>
-                  </MenubarTrigger>
-                  <MenubarContent className="rounded-xl min-w-32">
-                    <MenubarItem
-                      className="flex items-center justify-between p-2 rounded-lg"
-                      onClick={() => setAspect(1 / 1)}
-                    >
-                      1:1
-                      <Square />
-                    </MenubarItem>
-                    <MenubarItem
-                      className="flex items-center justify-between p-2 rounded-lg"
-                      onClick={() => setAspect(4 / 5)}
-                    >
-                      4:5
-                      <RectangleVertical />
-                    </MenubarItem>
-                    <MenubarItem
-                      className="flex items-center justify-between p-2 rounded-lg"
-                      onClick={() => setAspect(16 / 9)}
-                    >
-                      16:9
-                      <RectangleHorizontal />
-                    </MenubarItem>
-                  </MenubarContent>
-                </MenubarMenu>
-              </Menubar>
-              <div className="px-2 py-4 rounded-lg mx-2 border">
-                <Slider
-                  value={[zoom]}
-                  min={1}
-                  max={3}
-                  step={0.01}
-                  className="w-60"
-                  onValueChange={(value) => setZoom(value[0])}
-                />
-              </div>
-            </div>
-            <div className="flex max-sm:flex-col items-center justify-start gap-4 w-full">
+            <div className="flex flex-col items-center justify-start gap-4 w-full">
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit(onSubmit)}
@@ -350,7 +222,7 @@ function Page() {
                 size="lg"
                 onClick={() => form.handleSubmit(onSubmit)()}
               >
-                Next
+                Post
               </Button>
             </div>
           </div>
@@ -395,30 +267,6 @@ function Page() {
           multiple
         />
       </div>
-      <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent hideCloseIcon>
-          <DialogTitle className="text-2xl text-center w-full my-2">
-            Post Preview
-          </DialogTitle>
-          <Carousel>
-            <CarouselContent>
-              {finalPosts.map((post, index) => (
-                <CarouselItem key={index}>
-                  <NextImage src={post} alt="" width="720" height="320" />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselNext />
-            <CarouselPrevious />
-          </Carousel>
-          <DialogFooter className="max-sm:gap-2">
-            <DialogClose asChild>
-              <Button variant="ghost">Cancel</Button>
-            </DialogClose>
-            <Button onClick={() => router.push("/")}>Post</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

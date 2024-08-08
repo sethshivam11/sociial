@@ -1,27 +1,11 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import {
-  Menubar,
-  MenubarContent,
-  MenubarItem,
-  MenubarMenu,
-  MenubarTrigger,
-} from "@/components/ui/menubar";
-import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
-import {
-  ChevronsLeftRight,
-  MonitorPlay,
-  RectangleHorizontal,
-  RectangleVertical,
-  Square,
-  X,
-} from "lucide-react";
+import { MonitorPlay, X } from "lucide-react";
 import Link from "next/link";
 import React from "react";
-import Cropper, { Area } from "react-easy-crop";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -45,24 +29,12 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { captionSchema } from "@/schemas/postSchema";
 
 function Page() {
-  const cropperRef = React.useRef<Cropper>(null);
   const router = useRouter();
   const formSchema = z.object({
-    caption: z
-      .string()
-      .max(1000, {
-        message: "Caption should not exceed 1000 characters",
-      })
-      .optional(),
+    caption: captionSchema,
   });
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -70,29 +42,11 @@ function Page() {
       caption: "",
     },
   });
-  const [videoFile, setVideoFile] = React.useState<{
-    video: string;
-    area: Area;
-  }>({
-    video: "",
-    area: { x: 0, y: 0, width: 0, height: 0 },
-  });
-  const [finalVideo, setFinalVideo] = React.useState<string>("");
-  const [aspect, setAspect] = React.useState(1 / 1);
-  const [crop, setCrop] = React.useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = React.useState(1);
-  const [showDialog, setShowDialog] = React.useState(false);
 
+  const [videoFile, setVideoFile] = React.useState("");
   const dragContainer = React.useRef<HTMLDivElement>(null);
 
-  const onCropComplete = (croppedArea: Area, _: Area) => {
-    setVideoFile((prev) => ({ ...prev, area: croppedArea }));
-  };
-
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!cropperRef.current) return;
-    setShowDialog(true);
-  }
+  function onSubmit(values: z.infer<typeof formSchema>) {}
 
   return (
     <div
@@ -131,10 +85,7 @@ function Page() {
         reader.onload = (event) => {
           const video = event.target?.result;
           if (video) {
-            setVideoFile({
-              video: video.toString(),
-              area: { x: 0, y: 0, width: 0, height: 0 },
-            });
+            setVideoFile(video.toString());
           }
         };
         reader.readAsDataURL(droppedFile);
@@ -166,74 +117,18 @@ function Page() {
         <h1 className="font-bold text-2xl tracking-tight w-full text-center mb-6">
           Create Video Post
         </h1>
-        {videoFile.video.length ? (
+        {videoFile.length ? (
           <div className="flex flex-col items-center justify-center w-full h-full gap-3">
-            <div className="w-full h-full flex max-sm:flex-col items-center justify-center gap-3">
-              <div className="w-full h-full relative rounded-xl">
-                <Cropper
-                  ref={cropperRef}
-                  video={videoFile.video}
-                  crop={crop}
-                  zoom={zoom}
-                  aspect={aspect}
-                  onCropChange={setCrop}
-                  onCropComplete={onCropComplete}
-                  onZoomChange={setZoom}
-                  showGrid={false}
-                  classes={{
-                    cropAreaClassName:
-                      "cursor-grab active:cursor-grabbing w-full h-full  ",
-                    containerClassName:
-                      "hover:cursor-grab active:cursor-grabbing rounded-xl dark:bg-white",
-                  }}
-                />
-              </div>
+            <div className="w-full h-full flex max-sm:flex-col items-center justify-center relative">
+              <video
+                src={videoFile}
+                className="min-h-40 min-w-40 sm:max-w-[70%] max-w-full rounded-sm"
+                autoPlay
+                controls
+                controlsList="nodownload"
+              ></video>
             </div>
-            <div className="flex items-center justify-evenly">
-              <Menubar className="border-0">
-                <MenubarMenu>
-                  <MenubarTrigger asChild>
-                    <Button size="icon" className="rounded-xl">
-                      <ChevronsLeftRight size="20" className="rotate-45" />
-                    </Button>
-                  </MenubarTrigger>
-                  <MenubarContent className="rounded-xl min-w-32">
-                    <MenubarItem
-                      className="flex items-center justify-between p-2 rounded-lg"
-                      onClick={() => setAspect(1 / 1)}
-                    >
-                      1:1
-                      <Square />
-                    </MenubarItem>
-                    <MenubarItem
-                      className="flex items-center justify-between p-2 rounded-lg"
-                      onClick={() => setAspect(4 / 5)}
-                    >
-                      4:5
-                      <RectangleVertical />
-                    </MenubarItem>
-                    <MenubarItem
-                      className="flex items-center justify-between p-2 rounded-lg"
-                      onClick={() => setAspect(16 / 9)}
-                    >
-                      16:9
-                      <RectangleHorizontal />
-                    </MenubarItem>
-                  </MenubarContent>
-                </MenubarMenu>
-              </Menubar>
-              <div className="px-2 py-4 rounded-lg mx-2 border">
-                <Slider
-                  value={[zoom]}
-                  min={1}
-                  max={3}
-                  step={0.01}
-                  className="w-60"
-                  onValueChange={(value) => setZoom(value[0])}
-                />
-              </div>
-            </div>
-            <div className="flex max-sm:flex-col items-center justify-start gap-4 w-full">
+            <div className="flex flex-col items-center justify-start gap-4 w-full">
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit(onSubmit)}
@@ -273,7 +168,7 @@ function Page() {
                 size="lg"
                 onClick={() => form.handleSubmit(onSubmit)()}
               >
-                Next
+                Post
               </Button>
             </div>
           </div>
@@ -319,10 +214,7 @@ function Page() {
                 if (videoElement) {
                   videoElement.setAttribute("src", video.toString());
                 }
-                setVideoFile({
-                  video: video.toString(),
-                  area: { x: 0, y: 0, width: 0, height: 0 },
-                });
+                setVideoFile(video.toString());
               }
             };
             reader.readAsDataURL(file);
@@ -332,27 +224,6 @@ function Page() {
           className="w-0 h-0 p-0 border-0 invisible"
         />
       </div>
-      <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent hideCloseIcon>
-          <DialogTitle className="text-2xl text-center w-full my-2">
-            Post Preview
-          </DialogTitle>
-          <video
-            autoPlay
-            controls
-            controlsList="nodownload"
-            className="w-full h-full"
-          >
-            <source src={finalVideo} />
-          </video>
-          <DialogFooter className="max-sm:gap-2">
-            <DialogClose asChild>
-              <Button variant="ghost">Cancel</Button>
-            </DialogClose>
-            <Button onClick={() => router.push("/")}>Post</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

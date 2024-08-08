@@ -160,7 +160,7 @@ const makeAdmin = createAsyncThunk(
 );
 
 const removeAdmin = createAsyncThunk(
-  "chats/makeAdmin",
+  "chats/removeAdmin",
   async ({ chatId, userId }: { userId: string; chatId: string }) => {
     const parsed = await fetch("/api/v1/chats/removeAdmin", {
       method: "PATCH",
@@ -188,8 +188,10 @@ const chatSlice = createSlice({
         (user) => user.username !== action.payload.data.username
       );
     },
-    addedNewChat: (state, action) => {
-      state.chats = [action.payload.data, ...state.chats];
+    groupDeleted: (state, action) => {
+      state.chats = state.chats.filter(
+        (chat) => chat._id !== action.payload.data._id
+      );
     },
     groupDetailsUpdated: (state, action) => {
       state.chat.groupName = action.payload.data.groupName;
@@ -201,10 +203,14 @@ const chatSlice = createSlice({
     removedAdmin: (state, action) => {
       state.chat.admin = action.payload.data.admin;
     },
-    groupDeleted: (state, action) => {
-      state.chats = state.chats.filter(
-        (chat) => chat._id !== action.payload.data._id
-      );
+    newChatStarted: (state, action) => {
+      state.chats = [action.payload.data, ...state.chats];
+    },
+    newMessage: (state, action) => {
+      state.chats = [
+        action.payload,
+        state.chats.filter((chat) => chat._id !== action.payload.data._id),
+      ];
     },
   },
   extraReducers: (builder) => {
@@ -371,4 +377,15 @@ const chatSlice = createSlice({
   },
 });
 
+export const {
+  setPage,
+  addedToGroup,
+  leftGroup,
+  groupDeleted,
+  groupDetailsUpdated,
+  newAdmin,
+  removedAdmin,
+  newChatStarted,
+  newMessage,
+} = chatSlice.actions;
 export default chatSlice.reducer;

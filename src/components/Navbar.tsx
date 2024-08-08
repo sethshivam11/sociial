@@ -105,7 +105,6 @@ function Navbar() {
               className="pointer-events-none select-none"
               priority={true}
             />
-
             <span className="xl:inline hidden">Sociial</span>
           </div>
         </Link>
@@ -211,14 +210,39 @@ function Navbar() {
           </Link>
         </div>
         <div className="w-full text-center sm:flex hidden flex-col xl:items-start items-center gap-4 sm:p-1">
-          <Link
-            href="/new-post"
-            className="bg-stone-800 dark:bg-stone-100 text-white dark:text-black xl:w-full w-fit flex items-center xl:justify-start xl:pl-4 sm:p-3 p-2 gap-3 rounded-2xl ring-stone-800 dark:hover:ring-stone-100 hover:ring-2"
-            title="New post"
-          >
-            <span className="text-center w-full xl:inline hidden">Create</span>
-            <Plus className="xl:hidden inline" />
-          </Link>
+          <Menubar className="w-full bg-transparent border-transparent xl:justify-start justify-center">
+            <MenubarMenu>
+              <MenubarTrigger
+                className="bg-tranparent xl:w-full w-fit ring-2 flex items-center xl:justify-start justify-center xl:pl-4 sm:p-3 p-2 gap-3 rounded-2xl hover:ring-stone-900  bg-stone-800 dark:bg-stone-100 text-white dark:text-black ring-stone-800 dark:hover:ring-stone-100 hover:ring-2"
+                title="Create"
+              >
+                <span className="text-center w-full xl:inline hidden">
+                  Create
+                </span>
+                <Plus className="xl:hidden inline" />
+              </MenubarTrigger>
+              <MenubarContent className="rounded-xl">
+                <MenubarItem
+                  className="py-2.5 rounded-lg pl-2.5"
+                  onClick={() => router.push("/new-post")}
+                >
+                  Post
+                </MenubarItem>
+                <MenubarItem
+                  className="py-2.5 rounded-lg pl-2.5"
+                  onClick={() => router.push("/upload-video")}
+                >
+                  Video
+                </MenubarItem>
+                <MenubarItem
+                  className="py-2.5 rounded-lg pl-2.5"
+                  onClick={() => router.push("/add-story")}
+                >
+                  Story
+                </MenubarItem>
+              </MenubarContent>
+            </MenubarMenu>
+          </Menubar>
           <Menubar className="w-full bg-transparent border-transparent xl:justify-start justify-center">
             <MenubarMenu>
               <MenubarTrigger

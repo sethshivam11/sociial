@@ -107,15 +107,15 @@ const messageSlice = createSlice({
     setEditingMessage: (state, action) => {
       state.editingMessage = action.payload;
     },
-    appendMessage: (state, action) => {
+    messageReceived: (state, action) => {
       state.messages = action.payload.data;
     },
-    removeMessage: (state, action) => {
+    messageDeleted: (state, action) => {
       state.messages = state.messages.filter(
         (message) => message._id !== action.payload.data._id
       );
     },
-    updateMessage: (state, action) => {
+    messageUpdated: (state, action) => {
       state.messages = state.messages.map((message) => {
         if (message._id === action.payload.data._id) {
           message.content = action.payload.data.content;
@@ -126,7 +126,7 @@ const messageSlice = createSlice({
     setTyping: (state, action) => {
       state.typing = action.payload;
     },
-    appendReact: (state, action) => {
+    reacted: (state, action) => {
       state.messages = state.messages.map((message) => {
         if (message._id === action.payload.data.messageId) {
           message.reacts = [action.payload.data.reacts, ...message.reacts];
@@ -134,7 +134,7 @@ const messageSlice = createSlice({
         return message;
       });
     },
-    removeReact: (state, action) => {
+    unreacted: (state, action) => {
       state.messages = state.messages.map((message) => {
         if (message._id === action.payload.data._id) {
           message.reacts = message.reacts.filter(
@@ -259,11 +259,11 @@ const messageSlice = createSlice({
 
 export const {
   setEditingMessage,
-  appendMessage,
-  removeMessage,
-  updateMessage,
+  messageReceived,
+  messageDeleted,
+  messageUpdated,
   setTyping,
-  appendReact,
-  removeReact,
+  reacted,
+  unreacted,
 } = messageSlice.actions;
 export default messageSlice.reducer;
