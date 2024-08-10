@@ -5,11 +5,8 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogFooter,
-  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,17 +16,15 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button } from "./ui/button";
 import Image from "next/image";
-import { Label } from "./ui/label";
-import { Textarea } from "./ui/textarea";
 import { useToast } from "./ui/use-toast";
 import { usePathname, useRouter } from "next/navigation";
+import ReportDialog from "./ReportDialog";
 
 interface Props {
   user: {
+    _id: string;
     username: string;
     fullName: string;
     avatar: string;
@@ -47,10 +42,6 @@ function PostOptions({ user, postId, isVideo }: Props) {
 
   function unfollow(username: string) {
     console.log(`Unfollowed user ${username}`);
-  }
-
-  function report(postId: string, username: string) {
-    console.log(`Reported post ${postId} by user ${user.username}`);
   }
 
   async function copyLink(username: string, postId: string) {
@@ -145,57 +136,12 @@ function PostOptions({ user, postId, isVideo }: Props) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      <Dialog open={reportDialog}>
-        <DialogContent
-          className="sm:w-2/3 w-full h-fit flex flex-col bg-stone-100 dark:bg-stone-900"
-          hideCloseIcon
-        >
-          <DialogTitle className="text-center text-2xl my-1 ">
-            Report Post
-          </DialogTitle>
-          <div className="space-y-3">
-            <div className="space-y-2">
-              <Label htmlFor="report-title">Title</Label>
-              <Input
-                id="report-title"
-                placeholder="What is the issue?"
-                className="bg-stone-100 dark:bg-stone-900 sm:focus-within:ring-1"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="report-description">Description</Label>
-              <Textarea
-                id="report-description"
-                placeholder="Describe the issue in detail."
-                rows={5}
-              />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="report-file">
-              Image
-              <span className="text-stone-500 text-sm">&nbsp;(Optional)</span>
-            </Label>
-            <Input
-              type="file"
-              id="report-file"
-              accept="image/*"
-              className="bg-stone-100 dark:bg-stone-900 sm:focus-within:ring-1 ring-stone-200"
-            />
-          </div>
-          <DialogFooter className="flex gap-2">
-            <Button
-              variant="destructive"
-              onClick={() => report(postId, user.username)}
-            >
-              Report
-            </Button>
-            <DialogClose onClick={() => setReportDialog(false)}>
-              Cancel
-            </DialogClose>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ReportDialog
+        open={reportDialog}
+        setOpen={setReportDialog}
+        entityId={postId}
+        type="post"
+      />
     </>
   );
 }

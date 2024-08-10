@@ -2,7 +2,7 @@
 import Comment from "@/components/Comment";
 import MobileNav from "@/components/MobileNav";
 import PostOptions from "@/components/PostOptions";
-import PostsLoading from "@/components/PostsLoading";
+import PostsLoading from "@/components/loaders/PostsLoading";
 import Share from "@/components/Share";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -24,6 +24,7 @@ function Page() {
   const [post, setPost] = React.useState({
     _id: "1",
     user: {
+      _id: "0",
       fullName: "Shivam Soni",
       username: "sethshivam11",
       avatar:

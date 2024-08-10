@@ -29,8 +29,7 @@ import {
   usernameSchema,
   verificationCodeSchema,
 } from "@/schemas/userSchema";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/lib/store/store";
+import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import {
   forgotPassword,
   resendVerificationCode,
@@ -55,8 +54,8 @@ const ForgotPasswordPage = () => {
         path: ["confirmPassword"],
       }
     );
-  const { loading } = useSelector((state: RootState) => state.user);
-  const dispatch: AppDispatch = useDispatch();
+  const { loading } = useAppSelector((state) => state.user);
+  const dispatch = useAppDispatch();
   const [timer, setTimer] = React.useState(0);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

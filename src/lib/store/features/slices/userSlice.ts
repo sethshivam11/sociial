@@ -346,6 +346,9 @@ export const userSlice = createSlice({
         state.user = initialState.user;
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
+        localStorage.removeItem("notificationConsent");
+        localStorage.removeItem("message-theme");
+        localStorage.removeItem("recentSearches");
       }
     });
     builder.addCase(logOutUser.rejected, (state) => {

@@ -32,6 +32,8 @@ import Image from "next/image";
 import EmojiKeyboard from "@/components/EmojiKeyboard";
 import { stories } from "@/lib/storiesData";
 import { nameFallback } from "@/lib/helpers";
+import { useAppSelector } from "@/lib/store/store";
+import ReportDialog from "@/components/ReportDialog";
 
 interface Props {
   params: {
@@ -73,6 +75,7 @@ function Story({ params }: Props) {
   });
   const router = useRouter();
   const { username } = params;
+  const { user } = useAppSelector((state) => state.user);
   const nextRef = React.useRef<HTMLButtonElement>(null);
   const prevRef = React.useRef<HTMLButtonElement>(null);
   const closeRef1 = React.useRef<HTMLButtonElement>(null);
@@ -96,10 +99,6 @@ function Story({ params }: Props) {
   const [isPaused, setIsPaused] = React.useState(true);
   const [timer, setTimer] = React.useState<Timer | null>(null);
   const [imageLoading, setImageLoading] = React.useState(true);
-
-  function report(storyId: string, username: string) {
-    console.log(`Reported story ${storyId} by user ${username}`);
-  }
 
   function onSubmit(data: { reply: string }) {
     console.log(data.reply);
@@ -491,47 +490,12 @@ function Story({ params }: Props) {
                     </DialogClose>
                   </DialogContent>
                 </Dialog>
-                <Dialog open={reportDialog}>
-                  <DialogContent
-                    className="sm:w-2/3 w-full h-fit flex flex-col bg-stone-100 dark:bg-stone-900"
-                    hideCloseIcon
-                  >
-                    <DialogTitle className="text-center text-2xl my-1 ">
-                      Report Story
-                    </DialogTitle>
-                    <div className="space-y-3">
-                      <div className="space-y-2">
-                        <Label htmlFor="report-title">Title</Label>
-                        <Input
-                          id="report-title"
-                          placeholder="Title for the issue"
-                          className="bg-stone-100 dark:bg-stone-900 sm:focus-within:ring-1"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="report-description">Description</Label>
-                        <Textarea
-                          id="report-description"
-                          placeholder="Detailed description of the issue"
-                          rows={5}
-                        />
-                      </div>
-                    </div>
-                    <DialogFooter className="flex gap-2">
-                      <Button
-                        variant="destructive"
-                        onClick={() =>
-                          report(currentStory._id, currentStory.username)
-                        }
-                      >
-                        Report
-                      </Button>
-                      <DialogClose onClick={() => setReportDialog(false)}>
-                        Cancel
-                      </DialogClose>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
+                <ReportDialog
+                  open={reportDialog}
+                  setOpen={setReportDialog}
+                  type="story"
+                  entityId={currentStory._id}
+                />
                 <button
                   className="sm:hidden"
                   onClick={() => router.push("/")}

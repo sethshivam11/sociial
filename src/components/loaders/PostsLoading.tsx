@@ -1,5 +1,5 @@
 import React from "react";
-import { Skeleton } from "./ui/skeleton";
+import { Skeleton } from "../ui/skeleton";
 
 function PostsLoading({ length = 5 }: { length?: number }) {
   return Array.from({ length }).map((_, index) => (

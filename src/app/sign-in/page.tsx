@@ -22,8 +22,7 @@ import {
   passwordSchema,
   usernameSchema,
 } from "@/schemas/userSchema";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/lib/store/store";
+import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { loginUser } from "@/lib/store/features/slices/userSlice";
 import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/use-toast";
@@ -41,8 +40,8 @@ function SignInPage() {
       password: "",
     },
   });
-  const dispatch: AppDispatch = useDispatch();
-  const loading = useSelector((state: RootState) => state.user.loading);
+  const dispatch = useAppDispatch();
+  const { loading } = useAppSelector((state) => state.user);
   const [showPwd, setShowPwd] = React.useState(false);
   async function onSubmit(data: z.infer<typeof formSchema>) {
     let username = "";
@@ -70,6 +69,7 @@ function SignInPage() {
       }
     }
   }
+
   return (
     <div className="flex justify-center col-span-10 py-12 items-center min-h-screen bg-white dark:bg-zinc-800">
       <Image

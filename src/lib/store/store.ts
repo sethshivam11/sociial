@@ -8,6 +8,8 @@ import commentSlice from "./features/slices/commentSlice";
 import notificationSlice from "./features/slices/notificationSlice";
 import chatSlice from "./features/slices/chatSlice";
 import messageSlice from "./features/slices/messageSlice";
+import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
+import reportSlice from "./features/slices/reportSlice";
 
 export const store = configureStore({
   reducer: {
@@ -15,6 +17,7 @@ export const store = configureStore({
     post: postSlice,
     chat: chatSlice,
     follow: followSlice,
+    report: reportSlice,
     message: messageSlice,
     comment: commentSlice,
     notification: notificationSlice,
@@ -24,3 +27,6 @@ export const store = configureStore({
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
+
+export const useAppDispatch = () => useDispatch<AppDispatch>();
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;

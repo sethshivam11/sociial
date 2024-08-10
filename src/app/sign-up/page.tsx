@@ -25,8 +25,7 @@ import {
   passwordSchema,
   usernameSchema,
 } from "@/schemas/userSchema";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/lib/store/store";
+import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { registerUser } from "@/lib/store/features/slices/userSlice";
 import { useRouter } from "next/navigation";
 
@@ -59,8 +58,8 @@ function SignUpPage() {
     },
   });
   const router = useRouter();
-  const { loading } = useSelector((state: RootState) => state.user);
-  const dispatch: AppDispatch = useDispatch();
+  const { loading } = useAppSelector((state) => state.user);
+  const dispatch = useAppDispatch();
   const [showPwd, setShowPwd] = React.useState(false);
   const [username, setUsername] = React.useState("");
   const [avatar, setAvatar] = React.useState<File | null>(null);

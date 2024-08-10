@@ -1,13 +1,20 @@
 "use client";
 import {
   Bell,
+  CircleFadingPlusIcon,
+  Grid2X2,
   Home,
+  LogOut,
   Mail,
   Menu,
+  Moon,
+  Palette,
   Plus,
   Search,
+  Settings,
+  ShieldAlert,
+  Sun,
   Tv,
-  ImageIcon,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -42,17 +49,20 @@ import {
   DialogContent,
   DialogFooter,
   DialogTitle,
-  DialogTrigger,
 } from "./ui/dialog";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
+import { useAppDispatch } from "@/lib/store/store";
+import { logOutUser } from "@/lib/store/features/slices/userSlice";
+import { toast } from "./ui/use-toast";
+import ReportDialog from "./ReportDialog";
 
 function Navbar() {
   const location = usePathname();
   const router = useRouter();
-  const { setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const [reportDialog, setReportDialog] = React.useState(false);
   const [logOutDialog, setLogOutDialog] = React.useState(false);
   const hideNav = [
@@ -69,11 +79,40 @@ function Navbar() {
   ];
   const [unreadMessageCount, newNotifications] = [0, false];
   const user = {
+    _id: "1",
     fullName: "Shivam",
     avatar:
       "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
     username: "sethshivam11",
   };
+  const dispatch = useAppDispatch();
+
+  function handleLogout() {
+    dispatch(logOutUser())
+      .then(({ payload }) => {
+        if (payload.success) {
+          router.push("/sign-in");
+        } else {
+          toast({
+            title: "Error",
+            description: payload.message || "Something went wrong!",
+            variant: "destructive",
+          });
+        }
+      })
+      .catch((err) => {
+        if (!navigator.onLine) {
+          toast({
+            title: "No internet connection",
+            description: "Looks like you have slow or no internet connection",
+            variant: "destructive",
+          });
+        }
+      })
+      .finally(() => {
+        setLogOutDialog(false);
+      });
+  }
 
   return (
     <nav
@@ -221,24 +260,27 @@ function Navbar() {
                 </span>
                 <Plus className="xl:hidden inline" />
               </MenubarTrigger>
-              <MenubarContent className="rounded-xl">
+              <MenubarContent className="rounded-xl" align="center">
                 <MenubarItem
                   className="py-2.5 rounded-lg pl-2.5"
                   onClick={() => router.push("/new-post")}
                 >
-                  Post
+                  <Grid2X2 />
+                  &nbsp;&nbsp;Post
                 </MenubarItem>
                 <MenubarItem
                   className="py-2.5 rounded-lg pl-2.5"
                   onClick={() => router.push("/upload-video")}
                 >
-                  Video
+                  <Tv />
+                  &nbsp;&nbsp;Video
                 </MenubarItem>
                 <MenubarItem
                   className="py-2.5 rounded-lg pl-2.5"
                   onClick={() => router.push("/add-story")}
                 >
-                  Story
+                  <CircleFadingPlusIcon />
+                  &nbsp;&nbsp; Story
                 </MenubarItem>
               </MenubarContent>
             </MenubarMenu>
@@ -259,30 +301,37 @@ function Navbar() {
                   className="py-2.5 rounded-lg pl-2.5"
                   onClick={() => router.push("/settings")}
                 >
-                  Settings
+                  <Settings />
+                  &nbsp;&nbsp;Settings
                 </MenubarItem>
                 <MenubarSub>
                   <MenubarSubTrigger className="py-2.5 rounded-lg pl-2.5">
-                    Theme
+                    {theme === "dark" && <Moon />}
+                    {theme === "light" && <Sun />}
+                    {theme === "system" && <Palette />}
+                    &nbsp;&nbsp;Theme
                   </MenubarSubTrigger>
                   <MenubarSubContent>
                     <MenubarItem
                       className="py-2.5 rounded-lg pl-2.5"
                       onClick={() => setTheme("system")}
                     >
-                      System
+                      <Palette />
+                      &nbsp;&nbsp;System
                     </MenubarItem>
                     <MenubarItem
                       className="py-2.5 rounded-lg pl-2.5"
                       onClick={() => setTheme("light")}
                     >
-                      Light
+                      <Sun />
+                      &nbsp;&nbsp;Light
                     </MenubarItem>
                     <MenubarItem
                       className="py-2.5 rounded-lg pl-2.5"
                       onClick={() => setTheme("dark")}
                     >
-                      Dark
+                      <Moon />
+                      &nbsp;&nbsp;Dark
                     </MenubarItem>
                   </MenubarSubContent>
                 </MenubarSub>
@@ -291,71 +340,25 @@ function Navbar() {
                   className="py-2.5 rounded-lg pl-2.5 text-red-600 focus:text-red-600"
                   onClick={() => setReportDialog(true)}
                 >
-                  Report problem
+                  <ShieldAlert />
+                  &nbsp;&nbsp;Report problem
                 </MenubarItem>
                 <MenubarSeparator />
                 <MenubarItem
                   className="py-2.5 rounded-lg pl-2.5 text-red-600 focus:text-red-600"
                   onClick={() => setLogOutDialog(true)}
                 >
-                  Log Out
+                  <LogOut />
+                  &nbsp;&nbsp;Log Out
                 </MenubarItem>
               </MenubarContent>
             </MenubarMenu>
           </Menubar>
-          <Dialog open={reportDialog}>
-            <DialogContent
-              className="sm:w-2/3 w-full h-fit flex flex-col bg-stone-100 dark:bg-stone-900"
-              hideCloseIcon
-            >
-              <DialogTitle className="text-center text-2xl my-1">
-                Report Post
-              </DialogTitle>
-              <div className="space-y-3">
-                <div className="space-y-2">
-                  <Label htmlFor="report-title">Title</Label>
-                  <Input
-                    id="report-title"
-                    placeholder="What is the issue?"
-                    className="bg-stone-100 dark:bg-stone-900 sm:focus-within:ring-1"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="report-description">Description</Label>
-                  <Textarea
-                    id="report-description"
-                    placeholder="Describe the issue in detail."
-                    rows={5}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="report-file">
-                    Image
-                    <span className="text-stone-500 text-sm">
-                      &nbsp;(Optional)
-                    </span>
-                  </Label>
-                  <Input
-                    type="file"
-                    id="report-file"
-                    accept="image/*"
-                    className="bg-stone-100 dark:bg-stone-900 sm:focus-within:ring-1 ring-stone-200"
-                  />
-                </div>
-              </div>
-              <DialogFooter className="flex gap-2">
-                <Button
-                  variant="destructive"
-                  onClick={() => console.log(user.username)}
-                >
-                  Report
-                </Button>
-                <DialogClose onClick={() => setReportDialog(false)}>
-                  Cancel
-                </DialogClose>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <ReportDialog
+            open={reportDialog}
+            setOpen={setReportDialog}
+            type="problem"
+          />
           <AlertDialog open={logOutDialog} onOpenChange={setLogOutDialog}>
             <AlertDialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
               <AlertDialogTitle className="w-full text-center text-2xl tracking-tight font-bold">
@@ -366,16 +369,8 @@ function Navbar() {
                 Log Out?
               </p>
               <AlertDialogFooter>
-                <AlertDialogCancel className="rounded-xl">
-                  Cancel
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() => {
-                    localStorage.clear();
-                    router.push("/sign-in");
-                  }}
-                  className="rounded-xl"
-                >
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleLogout}>
                   Confirm
                 </AlertDialogAction>
               </AlertDialogFooter>

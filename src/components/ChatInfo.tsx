@@ -8,17 +8,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { nameFallback } from "@/lib/helpers";
 import Link from "next/link";
 import { Button } from "./ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogTitle,
-  DialogTrigger,
-} from "./ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogTrigger } from "./ui/dialog";
 import Image from "next/image";
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
+import ReportDialog from "./ReportDialog";
 
 interface Theme {
   name: string;
@@ -67,6 +59,7 @@ function ChatInfo({
   });
   const { register, watch, setValue } = form;
   const muteNotifications = watch("muteNotifications");
+  const [reportDialog, setReportDialog] = React.useState(false);
   function handleSwitchChange() {
     setSwitchLoading(true);
     setTimeout(() => {
@@ -235,58 +228,19 @@ function ChatInfo({
         ) : (
           ""
         )}
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button
-              className="w-full text-red-600  hover:text-red-600"
-              variant="ghost"
-            >
-              Report Conversation
-            </Button>
-          </DialogTrigger>
-          <DialogContent
-            className="sm:w-2/3 w-full h-fit flex flex-col bg-stone-100 dark:bg-stone-900"
-            hideCloseIcon
-          >
-            <DialogTitle className="text-center text-2xl my-1 ">
-              Report Post
-            </DialogTitle>
-            <div className="space-y-3">
-              <div className="space-y-2">
-                <Label htmlFor="report-title">Title</Label>
-                <Input
-                  id="report-title"
-                  placeholder="What is the issue?"
-                  className="bg-stone-100 dark:bg-stone-900 sm:focus-within:ring-1"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="report-description">Description</Label>
-                <Textarea
-                  id="report-description"
-                  placeholder="Describe the issue in detail."
-                  rows={5}
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="report-file">
-                Image
-                <span className="text-stone-500 text-sm">&nbsp;(Optional)</span>
-              </Label>
-              <Input
-                type="file"
-                id="report-file"
-                accept="image/*"
-                className="bg-stone-100 dark:bg-stone-900 sm:focus-within:ring-1 ring-stone-200"
-              />
-            </div>
-            <DialogFooter className="flex gap-2">
-              <Button variant="destructive">Report</Button>
-              <DialogClose>Cancel</DialogClose>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <Button
+          className="w-full text-red-600  hover:text-red-600"
+          variant="ghost"
+          onClick={() => setReportDialog(true)}
+        >
+          Report Conversation
+        </Button>
+        <ReportDialog
+          open={reportDialog}
+          setOpen={setReportDialog}
+          type="chat"
+          entityId={chatId}
+        />
         <Button
           className="w-full text-red-600 hover:text-red-600"
           variant="ghost"

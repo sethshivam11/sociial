@@ -24,8 +24,7 @@ import { z } from "zod";
 import { usernameSchema, verificationCodeSchema } from "@/schemas/userSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@/components/ui/use-toast";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/lib/store/store";
+import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import {
   resendVerificationCode,
   verifyCode,
@@ -41,10 +40,8 @@ interface Props {
 
 function VerifyCodePage({ searchParams }: Props) {
   const router = useRouter();
-  const dispatch: AppDispatch = useDispatch();
-  const { isSendingMail, loading } = useSelector(
-    (state: RootState) => state.user
-  );
+  const dispatch = useAppDispatch();
+  const { isSendingMail, loading } = useAppSelector((state) => state.user);
   const formSchema = z.object({
     username: z.string(),
     code: verificationCodeSchema,

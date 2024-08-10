@@ -1,7 +1,7 @@
 "use client";
 import { Bookmark, Heart, Loader2, PlayIcon } from "lucide-react";
 import Image from "next/image";
-import React, { use } from "react";
+import React from "react";
 import Comment from "./Comment";
 import PostOptions from "./PostOptions";
 import Share from "./Share";
@@ -12,11 +12,11 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import PostsLoading from "./PostsLoading";
+import PostsLoading from "./loaders/PostsLoading";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { nameFallback } from "@/lib/helpers";
 import Link from "next/link";
-import { getToken, onMessage } from "firebase/messaging";
+import { getToken } from "firebase/messaging";
 import { messaging } from "@/lib/firebase";
 import {
   AlertDialog,
@@ -26,13 +26,13 @@ import {
   AlertDialogCancel,
   AlertDialogFooter,
 } from "./ui/alert-dialog";
-import { AppDispatch, RootState } from "@/lib/store/store";
-import { useDispatch, useSelector } from "react-redux";
 import { toast } from "./ui/use-toast";
+import { useAppSelector } from "@/lib/store/store";
 
 interface Post {
   _id: string;
   user: {
+    _id: string;
     fullName: string;
     username: string;
     avatar: string;
@@ -45,16 +45,15 @@ interface Post {
   };
   likesCount: number;
   commentsCount: number;
-  tags?: Post["user"][];
 }
 
 function Posts() {
-  const dispatch: AppDispatch = useDispatch();
-  const { loading } = useSelector((state: RootState) => state.post);
+  const { loading } = useAppSelector((state) => state.post);
   const [posts, setPosts] = React.useState<Post[]>([
     {
       _id: "1",
       user: {
+        _id: "0",
         fullName: "Shivam",
         username: "sethshivam11",
         avatar:
@@ -67,19 +66,13 @@ function Posts() {
         "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_90/v1715866646/cld-sample-4.jpg",
         "https://images.pexels.com/photos/2449600/pexels-photo-2449600.png?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1",
       ],
-      tags: [
-        {
-          avatar: "https://github.com/shadcn.png",
-          fullName: "John Doe",
-          username: "johndoe",
-        },
-      ],
       likesCount: 12,
       commentsCount: 1,
     },
     {
       _id: "4",
       user: {
+        _id: "1",
         fullName: "Shivam",
         username: "sethshivam11",
         avatar:
@@ -91,19 +84,13 @@ function Posts() {
       images: [
         "https://images.pexels.com/photos/2449600/pexels-photo-2449600.png?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1",
       ],
-      tags: [
-        {
-          avatar: "https://github.com/shadcn.png",
-          fullName: "John Doe",
-          username: "johndoe",
-        },
-      ],
       likesCount: 12,
       commentsCount: 1,
     },
     {
       _id: "7",
       user: {
+        _id: "2",
         fullName: "Shivam",
         username: "sethshivam11",
         avatar:
@@ -116,13 +103,6 @@ function Posts() {
       video: {
         link: "https://res.cloudinary.com/dv3qbj0bn/video/upload/f_auto:video,q_auto/v1/samples/dance-2",
       },
-      tags: [
-        {
-          avatar: "https://github.com/shadcn.png",
-          fullName: "John Doe",
-          username: "johndoe",
-        },
-      ],
       likesCount: 12,
       commentsCount: 1,
     },
@@ -132,6 +112,7 @@ function Posts() {
       _id: "12",
       postId: "1",
       user: {
+        _id: "",
         fullName: "Shad",
         username: "shadcn",
         avatar:
@@ -146,6 +127,7 @@ function Posts() {
       _id: "13",
       postId: "1",
       user: {
+        _id: "",
         fullName: "Shad",
         username: "shadcn",
         avatar:
@@ -160,6 +142,7 @@ function Posts() {
       _id: "12",
       postId: "1",
       user: {
+        _id: "",
         fullName: "Shad",
         username: "shadcn",
         avatar:
@@ -174,6 +157,7 @@ function Posts() {
       _id: "12",
       postId: "1",
       user: {
+        _id: "",
         fullName: "Shad",
         username: "shadcn",
         avatar:

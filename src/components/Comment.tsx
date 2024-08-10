@@ -6,7 +6,15 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Heart, MessageSquareText, SendHorizonal } from "lucide-react";
+import {
+  Ban,
+  Heart,
+  MessageSquareText,
+  MoreHorizontal,
+  SendHorizonal,
+  ShieldAlert,
+  Trash2,
+} from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -31,6 +39,14 @@ import {
   AlertDialogFooter,
   AlertDialogTitle,
 } from "./ui/alert-dialog";
+import {
+  Menubar,
+  MenubarContent,
+  MenubarItem,
+  MenubarMenu,
+  MenubarTrigger,
+} from "./ui/menubar";
+import ReportDialog from "./ReportDialog";
 
 interface Props {
   comments: {
@@ -66,6 +82,19 @@ export default function Comment({
   const [deleteComment, setDeleteComment] = React.useState({
     dialogOpen: false,
     commentId: "",
+  });
+  const [reportDialog, setReportDialog] = React.useState({
+    dialogOpen: false,
+    commentId: "",
+  });
+  const [blockDialog, setBlockDialog] = React.useState({
+    dialogOpen: false,
+    commentId: "",
+    user: {
+      username: "",
+      fullName: "",
+      avatar: "",
+    },
   });
   const formSchema = z.object({
     comment: z
@@ -161,17 +190,49 @@ export default function Comment({
                             ? "1 like"
                             : `${comment.likesCount} likes`}
                         </button>
-                        <button
-                          className="hover:text-red-500"
-                          onClick={() =>
-                            setDeleteComment({
-                              dialogOpen: true,
-                              commentId: comment._id,
-                            })
-                          }
-                        >
-                          Delete
-                        </button>
+                        <Menubar className="border-0 p-0 h-0 rounded-xl">
+                          <MenubarMenu>
+                            <MenubarTrigger className="w-fit h-fit py-0.5 px-2 rounded-md invisible group-hover:visible">
+                              <MoreHorizontal size="16" />
+                            </MenubarTrigger>
+                            <MenubarContent className="rounded-xl">
+                              <MenubarItem
+                                className="rounded-lg py-2 flex gap-2 items-center text-red-600 focus:text-red-600"
+                                onClick={() =>
+                                  setDeleteComment({
+                                    dialogOpen: true,
+                                    commentId: comment._id,
+                                  })
+                                }
+                              >
+                                <Trash2 /> Delete
+                              </MenubarItem>
+                              <MenubarItem
+                                className="rounded-lg py-2 flex gap-2 items-center text-red-600 focus:text-red-600"
+                                onClick={() =>
+                                  setReportDialog({
+                                    dialogOpen: true,
+                                    commentId: comment._id,
+                                  })
+                                }
+                              >
+                                <ShieldAlert /> Report
+                              </MenubarItem>
+                              <MenubarItem
+                                className="rounded-lg py-2 flex gap-2 items-center text-red-600 focus:text-red-600"
+                                onClick={() =>
+                                  setBlockDialog({
+                                    dialogOpen: true,
+                                    commentId: comment._id,
+                                    user,
+                                  })
+                                }
+                              >
+                                <Ban /> Block
+                              </MenubarItem>
+                            </MenubarContent>
+                          </MenubarMenu>
+                        </Menubar>
                       </div>
                     </div>
                   </div>
@@ -249,6 +310,48 @@ export default function Comment({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <AlertDialog
+        open={blockDialog.dialogOpen}
+        onOpenChange={(open) =>
+          setBlockDialog({ ...blockDialog, dialogOpen: open })
+        }
+      >
+        <AlertDialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
+          <AlertDialogTitle className="text-center">
+            Block {blockDialog.user.fullName}
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure want to block @{blockDialog.user.username}?
+          </AlertDialogDescription>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="mt-0">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive hover:bg-destructive/80 text-white"
+              onClick={() =>
+                setBlockDialog({
+                  dialogOpen: false,
+                  commentId: "",
+                  user: {
+                    username: "",
+                    fullName: "",
+                    avatar: "",
+                  },
+                })
+              }
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <ReportDialog
+        open={reportDialog.dialogOpen}
+        setOpen={(open) =>
+          setReportDialog({ ...reportDialog, dialogOpen: open })
+        }
+        type="comment"
+        entityId={reportDialog.commentId}
+      />
     </>
   );
 }

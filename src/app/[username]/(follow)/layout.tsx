@@ -1,23 +1,24 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ArrowLeft, Search } from "lucide-react";
+import { useAppSelector } from "@/lib/store/store";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
 
 function Layout({ children }: { children: React.ReactNode }) {
+  // const { user } = useAppSelector((state) => state.user);
   const user = {
-    username: "sethshivam11",
-    fullName: "Shivam Soni",
-    avatar:
-      "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
-  };
+    username: "sethshivam",
+    fullName: "Shivam",
+    avatar: "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+  }
   const location = usePathname();
+
   return (
     <div className="sm:container flex flex-col items-center justify-start xl:col-span-8 sm:col-span-9 col-span-10 sm:py-6">
-      <div className="h-fit lg:w-3/4 w-full rounded-xl sm:bg-stone-100 sm:dark:bg-stone-900 sm:pt-4 sm:px-6 px-0 pb-4 min-h-full relative">
-        <div className="sticky top-0 sm:bg-stone-100 sm:dark:bg-stone-900 bg-background w-full py-2 z-10">
+      <div className="h-fit lg:w-3/4 w-full rounded-xl sm:bg-stone-100 sm:dark:bg-stone-900 sm:pt-4 sm:px-6 px-0 min-h-full relative">
+        <div className="sm:bg-stone-100 sm:dark:bg-stone-900 bg-background w-full pt-2">
           <div className="w-full flex items-center justify-start text-center max-sm:mb-5 max-sm:px-2">
             <Link href={`/${user.username}`}>
               <Button
@@ -54,20 +55,8 @@ function Layout({ children }: { children: React.ReactNode }) {
               Following
             </Link>
           </div>
-          <hr className="w-full bg-stone-950 mb-5 mt-3" />
-          <div className="w-full px-2">
-            <div className="flex items-center gap-2 bg-background rounded-lg w-full mt-3 pl-3 focus-within:ring-2 focus-within:ring-stone-200 border">
-              <Search />
-              <Input
-                placeholder="Search"
-                inputMode="text"
-                autoComplete="off"
-                className="focus-within:ring-offset-transparent ring-offset-0 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-e-lg w-full"
-              />
-            </div>
-          </div>
+          <hr className="w-full bg-stone-950 mb-1 mt-3" />
         </div>
-
         {children}
       </div>
     </div>
