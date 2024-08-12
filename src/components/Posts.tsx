@@ -28,6 +28,7 @@ import {
 } from "./ui/alert-dialog";
 import { toast } from "./ui/use-toast";
 import { useAppSelector } from "@/lib/store/store";
+import LikeDialog from "./LikeDialog";
 
 interface Post {
   _id: string;
@@ -107,92 +108,7 @@ function Posts() {
       commentsCount: 1,
     },
   ]);
-  const [comments, setComments] = React.useState([
-    {
-      _id: "12",
-      postId: "1",
-      user: {
-        _id: "",
-        fullName: "Shad",
-        username: "shadcn",
-        avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
-      },
-      content:
-        "This is a comment which is very long and I also don't know what to write in it. So, I am just writing anything that comes to my mind. I hope you are having a good day. Bye! 😊 ",
-      liked: false,
-      likesCount: 1,
-    },
-    {
-      _id: "13",
-      postId: "1",
-      user: {
-        _id: "",
-        fullName: "Shad",
-        username: "shadcn",
-        avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
-      },
-      content:
-        "This is a comment which is very long and I also don't know what to write in it. So, I am just writing anything that comes to my mind. I hope you are having a good day. Bye! 😊 ",
-      liked: false,
-      likesCount: 1,
-    },
-    {
-      _id: "12",
-      postId: "1",
-      user: {
-        _id: "",
-        fullName: "Shad",
-        username: "shadcn",
-        avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
-      },
-      content:
-        "This is a comment which is very long and I also don't know what to write in it. So, I am just writing anything that comes to my mind. I hope you are having a good day. Bye! 😊 ",
-      liked: false,
-      likesCount: 1,
-    },
-    {
-      _id: "12",
-      postId: "1",
-      user: {
-        _id: "",
-        fullName: "Shad",
-        username: "shadcn",
-        avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
-      },
-      content:
-        "This is a comment which is very long and I also don't know what to write in it. So, I am just writing anything that comes to my mind. I hope you are having a good day. Bye! 😊 ",
-      liked: false,
-      likesCount: 1,
-    },
-  ]);
   const [consentDialog, setConsentDialog] = React.useState(false);
-  function addComment(content: string, postId: string) {
-    setComments([
-      {
-        _id: `${Math.floor(Math.random() * 100)}`,
-        postId: comments[0].postId,
-        content,
-        user: comments[0].user,
-        liked: false,
-        likesCount: 0,
-      },
-      ...comments,
-    ]);
-    setPosts(
-      posts.map((post) =>
-        post._id === postId
-          ? {
-              ...post,
-              commentsCount: post.commentsCount + 1,
-            }
-          : post
-      )
-    );
-  }
   function likePost(_id: string) {
     setPosts(
       posts.map((post) =>
@@ -205,21 +121,6 @@ function Posts() {
                 : post.likesCount + 1,
             }
           : post
-      )
-    );
-  }
-  function likeComment(_id: string, postId: string) {
-    setComments(
-      comments.map((comment) =>
-        comment._id === _id
-          ? {
-              ...comment,
-              liked: !comment.liked,
-              likesCount: comment.liked
-                ? comment.likesCount - 1
-                : comment.likesCount + 1,
-            }
-          : comment
       )
     );
   }
@@ -397,11 +298,8 @@ function Posts() {
                       />
                     </button>
                     <Comment
-                      comments={comments}
                       user={post.user}
                       commentsCount={post.commentsCount}
-                      likeComment={likeComment}
-                      addComment={addComment}
                     />
                     <Share _id={post._id} />
                   </div>
@@ -423,7 +321,7 @@ function Posts() {
                   </button>
                 </div>
                 <p className="text-sm text-stone-400 mt-1 select-none">
-                  {post.likesCount <= 1 ? "1 like" : `${post.likesCount} likes`}
+                  <LikeDialog likesCount={post.likesCount} postId={post._id} />
                 </p>
                 <p className="py-1 text-sm">
                   <span>{post.caption.slice(0, 30)}&nbsp;</span>

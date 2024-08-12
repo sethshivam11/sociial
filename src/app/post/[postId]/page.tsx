@@ -13,7 +13,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { nameFallback } from "@/lib/helpers";
-import { Bookmark, Heart, PlayIcon } from "lucide-react";
+import { Bookmark, Heart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -101,38 +101,6 @@ function Page() {
       liked: !post.liked,
       likesCount: post.liked ? post.likesCount - 1 : post.likesCount + 1,
     });
-  }
-  function addComment(content: string, postId: string) {
-    setComments([
-      ...comments,
-      {
-        _id: `${Math.floor(Math.random() * 100)}`,
-        postId: comments[0].postId,
-        content,
-        user: comments[0].user,
-        liked: false,
-        likesCount: 0,
-      },
-    ]);
-    setPost({
-      ...post,
-      commentsCount: post.commentsCount + 1,
-    });
-  }
-  function likeComment(_id: string, postId: string) {
-    setComments(
-      comments.map((comment) =>
-        comment._id === _id
-          ? {
-              ...comment,
-              liked: !comment.liked,
-              likesCount: comment.liked
-                ? comment.likesCount - 1
-                : comment.likesCount + 1,
-            }
-          : comment
-      )
-    );
   }
   return (
     <>
@@ -231,13 +199,7 @@ function Page() {
                     fill={post.liked ? "rgb(244 63 94)" : "none"}
                   />
                 </button>
-                <Comment
-                  comments={comments}
-                  user={post.user}
-                  commentsCount={post.commentsCount}
-                  likeComment={likeComment}
-                  addComment={addComment}
-                />
+                <Comment user={post.user} commentsCount={post.commentsCount} />
                 <Share _id={post._id} />
               </div>
               <button

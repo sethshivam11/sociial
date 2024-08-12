@@ -296,7 +296,7 @@ function Navbar() {
                 </span>
                 <Menu className="xl:hidden inline" />
               </MenubarTrigger>
-              <MenubarContent className="rounded-xl">
+              <MenubarContent className="rounded-xl" align="center">
                 <MenubarItem
                   className="py-2.5 rounded-lg pl-2.5"
                   onClick={() => router.push("/settings")}

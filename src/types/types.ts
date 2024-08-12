@@ -218,3 +218,8 @@ export interface MessageSliceI {
   page: number;
   editingMessage: boolean;
 }
+
+export interface LikeSliceI {
+  loading: boolean;
+  likes: BasicUserI[];
+}

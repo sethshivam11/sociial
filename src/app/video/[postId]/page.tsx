@@ -110,38 +110,6 @@ function Page() {
       likesCount: post.liked ? post.likesCount - 1 : post.likesCount + 1,
     });
   }
-  function addComment(content: string, postId: string) {
-    setComments([
-      ...comments,
-      {
-        _id: `${Math.floor(Math.random() * 100)}`,
-        postId: comments[0].postId,
-        content,
-        user: comments[0].user,
-        liked: false,
-        likesCount: 0,
-      },
-    ]);
-    setPost({
-      ...post,
-      commentsCount: post.commentsCount + 1,
-    });
-  }
-  function likeComment(_id: string, postId: string) {
-    setComments(
-      comments.map((comment) =>
-        comment._id === _id
-          ? {
-              ...comment,
-              liked: !comment.liked,
-              likesCount: comment.liked
-                ? comment.likesCount - 1
-                : comment.likesCount + 1,
-            }
-          : comment
-      )
-    );
-  }
 
   const handleKeys = React.useCallback(
     (e: KeyboardEvent) => {
@@ -279,11 +247,8 @@ function Page() {
                 <span className="text-sm">{post.likesCount}</span>
               </button>
               <Comment
-                comments={comments}
                 user={post.user}
                 commentsCount={post.commentsCount}
-                likeComment={likeComment}
-                addComment={addComment}
                 isVideo={true}
               />
               <Share _id={post._id} isVideo={true} />
@@ -381,11 +346,8 @@ function Page() {
             <span className="text-sm">{post.likesCount}</span>
           </button>
           <Comment
-            comments={comments}
             user={post.user}
             commentsCount={post.commentsCount}
-            likeComment={likeComment}
-            addComment={addComment}
             isVideo={true}
           />
           <Share _id={post._id} isVideo={true} />

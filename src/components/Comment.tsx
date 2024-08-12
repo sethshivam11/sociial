@@ -15,7 +15,6 @@ import {
   ShieldAlert,
   Trash2,
 } from "lucide-react";
-import Image from "next/image";
 import React from "react";
 import { useForm } from "react-hook-form";
 import {
@@ -47,38 +46,53 @@ import {
   MenubarTrigger,
 } from "./ui/menubar";
 import ReportDialog from "./ReportDialog";
+import { ScrollArea } from "./ui/scroll-area";
+import { commentSchema } from "@/schemas/postSchema";
 
 interface Props {
-  comments: {
-    user: {
-      fullName: string;
-      username: string;
-      avatar: string;
-    };
-    content: string;
-    _id: string;
-    liked: boolean;
-    likesCount: number;
-  }[];
   user: {
     fullName: string;
     username: string;
     avatar: string;
   };
   commentsCount: number;
-  likeComment: Function;
-  addComment: Function;
   isVideo?: boolean;
 }
 
-export default function Comment({
-  comments,
-  user,
-  likeComment,
-  addComment,
-  commentsCount,
-  isVideo,
-}: Props) {
+export default function Comment({ user, commentsCount, isVideo }: Props) {
+  const [comments, setComments] = React.useState([
+    {
+      _id: "12",
+      postId: "1",
+      user: {
+        _id: "",
+        fullName: "Shad",
+        username: "shadcn",
+        avatar:
+          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+      },
+      content:
+        "This is a comment which is very long and I also don't know what to write in it. So, I am just writing anything that comes to my mind. I hope you are having a good day. Bye! 😊 ",
+      liked: false,
+      likesCount: 1,
+    },
+    {
+      _id: "13",
+      postId: "1",
+      user: {
+        _id: "",
+        fullName: "Shad",
+        username: "shadcn",
+        avatar:
+          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+      },
+      content:
+        "This is a comment which is very long and I also don't know what to write in it. So, I am just writing anything that comes to my mind. I hope you are having a good day. Bye! 😊 ",
+      liked: false,
+      likesCount: 1,
+    },
+  ]);
+  const [dialogOpen, setDialogOpen] = React.useState(false);
   const [deleteComment, setDeleteComment] = React.useState({
     dialogOpen: false,
     commentId: "",
@@ -97,15 +111,36 @@ export default function Comment({
     },
   });
   const formSchema = z.object({
-    comment: z
-      .string()
-      .min(1, {
-        message: "Comment cannot be empty",
-      })
-      .max(1000, {
-        message: "Comment cannot be more than 1000 characters",
-      }),
+    comment: commentSchema,
   });
+  function addComment(content: string) {
+    setComments([
+      {
+        _id: `${Math.floor(Math.random() * 100)}`,
+        postId: comments[0].postId,
+        content,
+        user: comments[0].user,
+        liked: false,
+        likesCount: 0,
+      },
+      ...comments,
+    ]);
+  }
+  function likeComment(_id: string) {
+    setComments(
+      comments.map((comment) =>
+        comment._id === _id
+          ? {
+              ...comment,
+              liked: !comment.liked,
+              likesCount: comment.liked
+                ? comment.likesCount - 1
+                : comment.likesCount + 1,
+            }
+          : comment
+      )
+    );
+  }
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -114,12 +149,12 @@ export default function Comment({
     },
   });
   function onSubmit(values: z.infer<typeof formSchema>) {
-    addComment(values.comment, "1");
+    addComment(values.comment);
     form.setValue("comment", "");
   }
   return (
     <>
-      <Dialog>
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogTrigger asChild title="Comment">
           <div className="flex flex-col items-center justify-center">
             <MessageSquareText size="30" className="sm:hover:opacity-60" />
@@ -134,15 +169,13 @@ export default function Comment({
         >
           <div className="flex justify-between">
             <div className="flex items-center gap-2 rounded-lg">
-              <div className="w-8 h-8">
-                <Image
-                  width={32}
-                  height={32}
+              <Avatar>
+                <AvatarImage
                   src={user.avatar}
-                  alt=""
-                  className="w-full h-full rounded-full pointer-events-none select-none"
+                  className="pointer-events-none select-none"
                 />
-              </div>
+                <AvatarFallback>{nameFallback(user.fullName)}</AvatarFallback>
+              </Avatar>
               <div>
                 <p>{user.fullName}</p>
                 <p className="text-sm text-gray-500 leading-3">
@@ -152,94 +185,101 @@ export default function Comment({
             </div>
           </div>
           <hr className="bg-stone-500" />
-          <div className="h-full overflow-y-auto">
-            {comments.map((comment, index) => {
-              return (
-                <div
-                  key={index}
-                  className="flex flex-col items-start mb-3 group"
-                >
-                  <div className="flex items-start gap-2 p-1 rounded-lg">
-                    <div className="w-8 h-w-8">
-                      <Avatar>
-                        <AvatarImage src={comment.user.avatar} />
-                        <AvatarFallback>
-                          {nameFallback(comment.user.fullName)}
-                        </AvatarFallback>
-                      </Avatar>
-                    </div>
-                    <div className="px-2">
-                      <span className="text-sm font-light">
-                        <span className="font-semibold">
-                          {comment.user.username}&nbsp;
-                        </span>
-                        {comment.content}
-                      </span>
-                      <div className="flex gap-3 items-center text-xs mt-1 text-stone-500 dark:text-stone-400 select-none">
-                        <button onClick={() => likeComment(comment._id)}>
-                          <Heart
-                            size="16"
-                            className={`${
-                              comment.liked
-                                ? "text-rose-500"
-                                : "sm:hover:opacity-60"
-                            } mr-1 inline-block transition-all active:scale-110`}
-                            fill={comment.liked ? "rgb(244 63 94)" : "none"}
+          <ScrollArea className="h-full">
+            {comments.length ? (
+              comments.map((comment, index) => {
+                return (
+                  <div
+                    key={index}
+                    className="flex flex-col items-start mb-3 group"
+                  >
+                    <div className="flex items-start gap-2 p-1 rounded-lg">
+                      <div className="w-8 h-w-8">
+                        <Avatar>
+                          <AvatarImage
+                            src={comment.user.avatar}
+                            className="pointer-events-none select-none"
                           />
-                          {comment.likesCount <= 1
-                            ? "1 like"
-                            : `${comment.likesCount} likes`}
-                        </button>
-                        <Menubar className="border-0 p-0 h-0 rounded-xl">
-                          <MenubarMenu>
-                            <MenubarTrigger className="w-fit h-fit py-0.5 px-2 rounded-md invisible group-hover:visible">
-                              <MoreHorizontal size="16" />
-                            </MenubarTrigger>
-                            <MenubarContent className="rounded-xl">
-                              <MenubarItem
-                                className="rounded-lg py-2 flex gap-2 items-center text-red-600 focus:text-red-600"
-                                onClick={() =>
-                                  setDeleteComment({
-                                    dialogOpen: true,
-                                    commentId: comment._id,
-                                  })
-                                }
-                              >
-                                <Trash2 /> Delete
-                              </MenubarItem>
-                              <MenubarItem
-                                className="rounded-lg py-2 flex gap-2 items-center text-red-600 focus:text-red-600"
-                                onClick={() =>
-                                  setReportDialog({
-                                    dialogOpen: true,
-                                    commentId: comment._id,
-                                  })
-                                }
-                              >
-                                <ShieldAlert /> Report
-                              </MenubarItem>
-                              <MenubarItem
-                                className="rounded-lg py-2 flex gap-2 items-center text-red-600 focus:text-red-600"
-                                onClick={() =>
-                                  setBlockDialog({
-                                    dialogOpen: true,
-                                    commentId: comment._id,
-                                    user,
-                                  })
-                                }
-                              >
-                                <Ban /> Block
-                              </MenubarItem>
-                            </MenubarContent>
-                          </MenubarMenu>
-                        </Menubar>
+                          <AvatarFallback>
+                            {nameFallback(comment.user.fullName)}
+                          </AvatarFallback>
+                        </Avatar>
+                      </div>
+                      <div className="px-2">
+                        <span className="text-sm font-light">
+                          <span className="font-semibold">
+                            {comment.user.username}&nbsp;
+                          </span>
+                          {comment.content}
+                        </span>
+                        <div className="flex gap-3 items-center text-xs mt-1 text-stone-500 dark:text-stone-400 select-none">
+                          <button onClick={() => likeComment(comment._id)}>
+                            <Heart
+                              size="16"
+                              className={`${
+                                comment.liked
+                                  ? "text-rose-500"
+                                  : "sm:hover:opacity-60"
+                              } mr-1 inline-block transition-all active:scale-110`}
+                              fill={comment.liked ? "rgb(244 63 94)" : "none"}
+                            />
+                            {comment.likesCount <= 1
+                              ? "1 like"
+                              : `${comment.likesCount} likes`}
+                          </button>
+                          <Menubar className="border-0 p-0 h-0 rounded-xl">
+                            <MenubarMenu>
+                              <MenubarTrigger className="w-fit h-fit py-0.5 px-2 rounded-md invisible group-hover:visible">
+                                <MoreHorizontal size="16" />
+                              </MenubarTrigger>
+                              <MenubarContent className="rounded-xl">
+                                <MenubarItem
+                                  className="rounded-lg py-2 flex gap-2 items-center text-red-600 focus:text-red-600"
+                                  onClick={() =>
+                                    setDeleteComment({
+                                      dialogOpen: true,
+                                      commentId: comment._id,
+                                    })
+                                  }
+                                >
+                                  <Trash2 /> Delete
+                                </MenubarItem>
+                                <MenubarItem
+                                  className="rounded-lg py-2 flex gap-2 items-center text-red-600 focus:text-red-600"
+                                  onClick={() =>
+                                    setReportDialog({
+                                      dialogOpen: true,
+                                      commentId: comment._id,
+                                    })
+                                  }
+                                >
+                                  <ShieldAlert /> Report
+                                </MenubarItem>
+                                <MenubarItem
+                                  className="rounded-lg py-2 flex gap-2 items-center text-red-600 focus:text-red-600"
+                                  onClick={() =>
+                                    setBlockDialog({
+                                      dialogOpen: true,
+                                      commentId: comment._id,
+                                      user,
+                                    })
+                                  }
+                                >
+                                  <Ban /> Block
+                                </MenubarItem>
+                              </MenubarContent>
+                            </MenubarMenu>
+                          </Menubar>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })
+            ) : (
+              <div className=""></div>
+            )}
+          </ScrollArea>
           <hr className="bg-stone-500" />
           <DialogFooter>
             <Form {...form}>
@@ -295,7 +335,7 @@ export default function Comment({
             comment?
           </AlertDialogDescription>
           <AlertDialogFooter>
-            <AlertDialogCancel className="mt-0">Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive hover:bg-destructive/80 text-white"
               onClick={() =>
@@ -324,7 +364,7 @@ export default function Comment({
             Are you sure want to block @{blockDialog.user.username}?
           </AlertDialogDescription>
           <AlertDialogFooter>
-            <AlertDialogCancel className="mt-0">Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive hover:bg-destructive/80 text-white"
               onClick={() =>
