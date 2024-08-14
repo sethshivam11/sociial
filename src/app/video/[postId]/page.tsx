@@ -37,69 +37,11 @@ function Page() {
     caption:
       "This is a caption which is very long and I don't know what to write in it so, i am just keep going to see the results. This is just a test caption to check the functionality of the app. I hope you are having a good day. Bye! 😊",
     liked: false,
-    video: "/test-1.mp4", //"https://res.cloudinary.com/dv3qbj0bn/video/upload/f_auto:video,q_auto/v1/samples/dance-2",
+    video:
+      "https://res.cloudinary.com/dv3qbj0bn/video/upload/f_auto:video,q_auto/v1/samples/dance-2",
     likesCount: 12,
     commentsCount: 1,
   });
-  const [buffering, setBuffering] = React.useState(false);
-  const [comments, setComments] = React.useState([
-    {
-      _id: "12",
-      postId: "1",
-      user: {
-        fullName: "Shad",
-        username: "shadcn",
-        avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
-      },
-      content:
-        "This is a comment which is very long and I also don't know what to write in it. So, I am just writing anything that comes to my mind. I hope you are having a good day. Bye! 😊 ",
-      liked: false,
-      likesCount: 1,
-    },
-    {
-      _id: "13",
-      postId: "1",
-      user: {
-        fullName: "Shad",
-        username: "shadcn",
-        avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
-      },
-      content:
-        "This is a comment which is very long and I also don't know what to write in it. So, I am just writing anything that comes to my mind. I hope you are having a good day. Bye! 😊 ",
-      liked: false,
-      likesCount: 1,
-    },
-    {
-      _id: "12",
-      postId: "1",
-      user: {
-        fullName: "Shad",
-        username: "shadcn",
-        avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
-      },
-      content:
-        "This is a comment which is very long and I also don't know what to write in it. So, I am just writing anything that comes to my mind. I hope you are having a good day. Bye! 😊 ",
-      liked: false,
-      likesCount: 1,
-    },
-    {
-      _id: "12",
-      postId: "1",
-      user: {
-        fullName: "Shad",
-        username: "shadcn",
-        avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
-      },
-      content:
-        "This is a comment which is very long and I also don't know what to write in it. So, I am just writing anything that comes to my mind. I hope you are having a good day. Bye! 😊 ",
-      liked: false,
-      likesCount: 1,
-    },
-  ]);
   const [sliderValue, setSliderValue] = React.useState(0);
   const [seeking, setSeeking] = React.useState(false);
 
@@ -163,7 +105,6 @@ function Page() {
             preload="auto"
             muted={isMuted}
             onClick={() => setIsPaused(!isPaused)}
-            onWaiting={() => setBuffering(true)}
             onTimeUpdate={() => {
               if (!seeking && videoRef) {
                 setSliderValue(videoRef.currentTime || 0);
@@ -182,7 +123,6 @@ function Page() {
                 }
               });
               setVideoRef(e.currentTarget);
-              setBuffering(false);
             }}
             onEnded={() => setIsPaused(true)}
             loop
@@ -224,11 +164,6 @@ function Page() {
             username={post.user.username}
             avatar={post.user.avatar}
           />
-          {buffering && (
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-transparent/50 p-4 rounded-full animate-visible">
-              <Loader2 className="animate-spin" size="50" />
-            </div>
-          )}
           <div className="flex flex-col absolute bottom-0 left-0 w-full ">
             <div className="absolute bottom-10 right-0 max-sm:flex hidden flex-col items-center justify-start gap-4 px-3 pb-10">
               <button

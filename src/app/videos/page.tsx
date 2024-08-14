@@ -7,6 +7,7 @@ import { SliderVideo } from "@/components/ui/slider-video";
 import VideoOptions from "@/components/VideoOptions";
 import { nameFallback } from "@/lib/helpers";
 import {
+  Bookmark,
   ChevronLeft,
   Heart,
   Loader2,
@@ -59,65 +60,6 @@ function Videos() {
         "https://res.cloudinary.com/dv3qbj0bn/video/upload/f_auto:video,q_auto/v1/sociial/videos/tnw4jy33z047bskwwhyt",
       likesCount: 12,
       commentsCount: 1,
-    },
-  ]);
-  const [buffering, setBuffering] = React.useState(false);
-  const [comments, setComments] = React.useState([
-    {
-      _id: "12",
-      postId: "1",
-      user: {
-        fullName: "Shad",
-        username: "shadcn",
-        avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
-      },
-      content:
-        "This is a comment which is very long and I also don't know what to write in it. So, I am just writing anything that comes to my mind. I hope you are having a good day. Bye! 😊 ",
-      liked: false,
-      likesCount: 1,
-    },
-    {
-      _id: "13",
-      postId: "1",
-      user: {
-        fullName: "Shad",
-        username: "shadcn",
-        avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
-      },
-      content:
-        "This is a comment which is very long and I also don't know what to write in it. So, I am just writing anything that comes to my mind. I hope you are having a good day. Bye! 😊 ",
-      liked: false,
-      likesCount: 1,
-    },
-    {
-      _id: "12",
-      postId: "1",
-      user: {
-        fullName: "Shad",
-        username: "shadcn",
-        avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
-      },
-      content:
-        "This is a comment which is very long and I also don't know what to write in it. So, I am just writing anything that comes to my mind. I hope you are having a good day. Bye! 😊 ",
-      liked: false,
-      likesCount: 1,
-    },
-    {
-      _id: "12",
-      postId: "1",
-      user: {
-        fullName: "Shad",
-        username: "shadcn",
-        avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
-      },
-      content:
-        "This is a comment which is very long and I also don't know what to write in it. So, I am just writing anything that comes to my mind. I hope you are having a good day. Bye! 😊 ",
-      liked: false,
-      likesCount: 1,
     },
   ]);
   const [sliderValue, setSliderValue] = React.useState(0);
@@ -250,7 +192,6 @@ function Videos() {
               preload="auto"
               muted={isMuted}
               onClick={() => setIsPaused(!isPaused)}
-              onWaiting={() => setBuffering(true)}
               onTimeUpdate={() => {
                 if (!seeking && videoRef) {
                   setSliderValue(videoRef.currentTime || 0);
@@ -269,7 +210,6 @@ function Videos() {
                   }
                 });
                 setVideoRef(e.currentTarget);
-                setBuffering(false);
               }}
               onEnded={() => setIsPaused(true)}
               playsInline
@@ -311,11 +251,6 @@ function Videos() {
               username={post.user.username}
               avatar={post.user.avatar}
             />
-            {buffering && (
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-transparent/50 p-4 rounded-full animate-visible">
-                <Loader2 className="animate-spin" size="50" />
-              </div>
-            )}
             <div className="flex flex-col absolute bottom-0 left-0 w-full bg-gradient-to-b from-transparent via-transparent/50 to-transparent/60">
               <div className="absolute bottom-10 right-0 max-sm:flex hidden flex-col items-center justify-start gap-4 px-3 pb-10">
                 <button
@@ -338,6 +273,7 @@ function Videos() {
                   commentsCount={post.commentsCount}
                   isVideo={true}
                 />
+                <Bookmark size="32" className="mb-2" />
                 <Share _id={post._id} isVideo={true} />
               </div>
               <p className="w-full max-h-80 overflow-y-auto overflow-x-clip no-scrollbar max-sm:pr-12 pr-6 pl-6 text-sm">
@@ -440,6 +376,8 @@ function Videos() {
               commentsCount={post.commentsCount}
               isVideo={true}
             />
+                <Bookmark size="32" className="mb-2" />
+
             <Share _id={post._id} isVideo={true} />
           </div>
         </section>
