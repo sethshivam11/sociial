@@ -719,11 +719,11 @@ function Page({ params }: { params: { chatId: string } }) {
 
   return (
     <div
-      className={`md:border-l-2 border-stone-200 dark:border-stone-800 md:ml-3 md:flex flex flex-col items-start justify-start gap-1 lg:col-span-7 md:col-span-6 col-span-10 ${
+      className={`md:border-l-2 border-stone-200 dark:border-stone-800 md:flex flex flex-col items-start justify-start gap-1 lg:col-span-7 md:col-span-6 col-span-10 ${
         location !== "/messages" ? "" : "hidden"
       } `}
     >
-      <div className="flex gap-2 items-center justify-between py-2 sticky top-0 left-0 w-full md:h-20  md:ml-3 border-b-2 border-stone-200 dark:border-stone-800 bg-white dark:bg-black md:px-4 pl-1 pr-0 z-20">
+      <div className="flex gap-2 items-center justify-between py-2 sticky top-0 left-0 w-full md:h-20 border-b-2 border-stone-200 dark:border-stone-800 bg-white dark:bg-black md:px-4 pl-1 pr-0 z-20">
         <div className="flex items-center justify-center">
           <Button
             variant="ghost"

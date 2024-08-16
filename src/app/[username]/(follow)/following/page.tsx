@@ -4,11 +4,14 @@ import { Search, Users2 } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { nameFallback } from "@/lib/helpers";
-import { useAppSelector } from "@/lib/store/store";
+import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { Input } from "@/components/ui/input";
+import { getFollowings } from "@/lib/store/features/slices/followSlice";
+import { toast } from "@/components/ui/use-toast";
 
 function Page() {
-  const { followers, followings } = useAppSelector((state) => state.follow);
+  const dispatch = useAppDispatch();
+  const { followings } = useAppSelector((state) => state.follow);
   const [searchResults, setSearchResults] = React.useState(followings);
   const [search, setSearch] = React.useState("");
 
@@ -26,9 +29,20 @@ function Page() {
     }
   }, [search]);
 
+  const fetchFollowings = React.useCallback(async () => {
+    const response = await dispatch(getFollowings());
+    if (!response.payload.success) {
+      console.log(response.payload);
+    }
+  }, []);
+
+  // React.useEffect(() => {
+  //   fetchFollowings();
+  // }, [fetchFollowings]);
+
   return (
     <>
-      <div className="w-full bg-stone-100 dark:bg-stone-900 py-2 top-0 sticky z-10">
+      <div className="w-full  max-sm:px-2 sm:bg-stone-100 sm:dark:bg-stone-900 py-2 top-0 sticky z-10">
         <div className="flex items-center gap-2 bg-background rounded-lg w-full pl-3 focus-within:ring-2 focus-within:ring-stone-200 border">
           <Search />
           <Input
@@ -68,7 +82,7 @@ function Page() {
               <div className="flex items-center justify-center bg-primary-500 text-white rounded-full w-fit h-full my-auto">
                 {followings.includes(followee) ? (
                   <button className="bg-stone-500 w-20 h-7 text-center text-white rounded-full text-sm transition-colors hover:bg-stone-600 disabled:bg-stone-400 ml-4">
-                    Following
+                    Unfollow
                   </button>
                 ) : (
                   <button className="bg-blue-500 w-16 h-7 text-center text-white rounded-full text-sm transition-colors hover:bg-blue-700 disabled:bg-blue-400 ml-4">

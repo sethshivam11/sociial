@@ -70,6 +70,18 @@ function SignInPage() {
     }
   }
 
+  React.useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    const refreshToken = localStorage.getItem("refreshToken");
+    if (refreshToken) {
+      document.cookie = `refreshToken=${refreshToken};`;
+    }
+    if (token) {
+      document.cookie = `accessToken=${token};`;
+      router.push("/");
+    }
+  }, []);
+
   return (
     <div className="flex justify-center col-span-10 py-12 items-center min-h-screen bg-white dark:bg-zinc-800">
       <Image

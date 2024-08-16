@@ -31,8 +31,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { SocketProvider } from "@/context/SocketProvider";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useAppSelector } from "@/lib/store/store";
+import ChatsLoadingSkeleton from "@/components/skeletons/ChatsLoading";
+import FollowersLoadingSkeleton from "@/components/skeletons/FollowersLoading";
 
 function Messages({ children }: { children: React.ReactNode }) {
+  const chatsLoading = useAppSelector((state) => state.chat.skeletonLoading);
+  const followersLoading = useAppSelector(
+    (state) => state.follow.skeletonLoading
+  );
   const formSchema = z.object({
     name: z
       .string()
@@ -46,7 +54,7 @@ function Messages({ children }: { children: React.ReactNode }) {
   });
   const form = useForm({
     defaultValues: {
-      name: "",
+      name: "Group",
       description: "",
     },
     resolver: zodResolver(formSchema),
@@ -341,14 +349,14 @@ function Messages({ children }: { children: React.ReactNode }) {
 
   return (
     <SocketProvider>
-      <div className="grid min-h-[100dvh] max-sm:max-h-[100dvh] xl:col-span-8 sm:col-span-9 col-span-10 sm:grid-cols-10 sm:container max-md:pr-2 max-sm:pr-0">
+      <div className="grid min-h-[100dvh] max-sm:max-h-[100dvh] xl:col-span-8 pl-8 md:pl-4 sm:col-span-9 col-span-10 sm:grid-cols-10">
         <div
           className={`lg:col-span-3 md:col-span-4 col-span-10 md:flex flex-col items-start justify-start gap-2 py-6 h-full max-h-[100dvh] sm:min-h-[42rem] md:px-0 sm:px-4 px-5 sticky top-0 ${
             location === "/messages" ? "flex" : "hidden"
           }`}
         >
           <div className="flex items-center justify-between w-full mb-4 pr-2">
-            <h1 className="text-2xl tracking-tight font-bold text-left py-2.5">
+            <h1 className="text-2xl tracking-tight font-bold text-left p-2.5">
               Conversations
             </h1>
             <Dialog
@@ -369,9 +377,8 @@ function Messages({ children }: { children: React.ReactNode }) {
                 </Button>
               </DialogTrigger>
               <DialogContent
-                className={`sm:w-2/3 sm:max-h-[83%] max-h-full w-full flex flex-col bg-stone-100 dark:bg-stone-900`}
+                className={`sm:w-2/3 sm:max-h-[83%] max-h-[100dvh] w-full flex flex-col bg-stone-100 dark:bg-stone-900`}
                 onOpenAutoFocus={(e) => e.preventDefault()}
-                hideCloseIcon
               >
                 <DialogTitle>New Group Chat</DialogTitle>
                 {level === "1" ? (
@@ -384,64 +391,62 @@ function Messages({ children }: { children: React.ReactNode }) {
                       placeholder="Search"
                       onChange={(e) => setFollowersDebounced(e.target.value)}
                     />
-                    <hr className="bg-stone-500 my-2" />
-                    <div className="flex flex-col justify-start items-start gap-4 overflow-y-auto h-full">
-                      {followers.map((follower, index) => {
-                        return (
-                          <div
-                            className="flex items-center justify-between w-full px-2 gap-3 rounded-lg"
-                            key={index}
-                          >
-                            <Label
-                              htmlFor={`follower-${index}`}
-                              className="flex items-center gap-3 rounded-lg w-full cursor-pointer"
+                    <hr className="bg-stone-500" />
+                    <ScrollArea className="h-96 min-h-10 p-2">
+                      {followersLoading ? (
+                        <FollowersLoadingSkeleton />
+                      ) : (
+                        followers.map((follower, index) => {
+                          return (
+                            <div
+                              className="flex items-center justify-between w-full px-2 mb-3 gap-3 rounded-lg"
+                              key={index}
                             >
-                              <div className="w-8 h-8">
-                                <Image
-                                  width={32}
-                                  height={32}
-                                  src={follower.avatar}
-                                  alt=""
-                                  className="w-full h-full rounded-full pointer-events-none select-none"
-                                />
-                              </div>
-                              <div>
-                                <p className="text-lg leading-5">
-                                  {follower.fullName}
-                                </p>
-                                <p className="text-sm text-gray-500">
-                                  @{follower.username}
-                                </p>
-                              </div>
-                            </Label>
-                            <Checkbox
-                              id={`follower-${index}`}
-                              className="rounded-full w-5 h-5 data-[state=checked]:bg-blue-500 data-[state=checked]:text-white border-2 data-[state=checked]:border-0"
-                              onCheckedChange={(checked) => {
-                                checked
-                                  ? setParticipants([...participants, follower])
-                                  : setParticipants((prevParticipants) =>
-                                      prevParticipants.filter(
-                                        (user) =>
-                                          user.username !== follower.username
-                                      )
-                                    );
-                              }}
-                            />
-                          </div>
-                        );
-                      })}
-                    </div>
+                              <Label
+                                htmlFor={`follower-${index}`}
+                                className="flex items-center gap-3 rounded-lg w-full cursor-pointer"
+                              >
+                                <div className="w-8 h-8">
+                                  <Image
+                                    width={32}
+                                    height={32}
+                                    src={follower.avatar}
+                                    alt=""
+                                    className="w-full h-full rounded-full pointer-events-none select-none"
+                                  />
+                                </div>
+                                <div>
+                                  <p className="text-lg leading-5">
+                                    {follower.fullName}
+                                  </p>
+                                  <p className="text-sm text-gray-500">
+                                    @{follower.username}
+                                  </p>
+                                </div>
+                              </Label>
+                              <Checkbox
+                                id={`follower-${index}`}
+                                className="rounded-full w-5 h-5 data-[state=checked]:bg-blue-500 data-[state=checked]:text-white border-2 data-[state=checked]:border-0"
+                                onCheckedChange={(checked) => {
+                                  checked
+                                    ? setParticipants([
+                                        ...participants,
+                                        follower,
+                                      ])
+                                    : setParticipants((prevParticipants) =>
+                                        prevParticipants.filter(
+                                          (user) =>
+                                            user.username !== follower.username
+                                        )
+                                      );
+                                }}
+                              />
+                            </div>
+                          );
+                        })
+                      )}
+                    </ScrollArea>
                     <DialogFooter className="max-sm:gap-2">
-                      <DialogClose asChild>
-                        <Button
-                          variant="ghost"
-                          type="button"
-                          className="rounded-xl"
-                        >
-                          Cancel
-                        </Button>
-                      </DialogClose>
                       <Button
                         type="submit"
                         className="rounded-xl"
@@ -496,15 +501,6 @@ function Messages({ children }: { children: React.ReactNode }) {
                       />
 
                       <DialogFooter className="max-sm:gap-2">
-                        <DialogClose asChild>
-                          <Button
-                            variant="ghost"
-                            type="button"
-                            className="rounded-xl"
-                          >
-                            Cancel
-                          </Button>
-                        </DialogClose>
                         <Button type="submit" className="rounded-xl">
                           Create
                         </Button>
@@ -515,14 +511,16 @@ function Messages({ children }: { children: React.ReactNode }) {
               </DialogContent>
             </Dialog>
           </div>
-          <div className="space-y-1 py-3 w-full md:overflow-y-auto md:h-[100dvh] sm:pb-2 pb-20 pr-2">
-            {chats.length > 1 ? (
+          <ScrollArea className="py-3 w-full p-2.5 pb-10">
+            {chatsLoading ? (
+              <ChatsLoadingSkeleton />
+            ) : chats.length > 1 ? (
               chats.map((chat, index) => (
                 <button
                   className={`flex items-center justify-center rounded-md w-full gap-2 p-2 ${
                     location === `/messages/${chat.username}`
                       ? "bg-stone-200 dark:bg-stone-800 hover:bg-stone-100 hover:dark:bg-stone-900"
-                      : "hover:bg-stone-200 dark:hover:bg-stone-800"
+                      : "sm:hover:bg-stone-200 sm:dark:hover:bg-stone-800"
                   }`}
                   key={index}
                   title={chat.username}
@@ -571,7 +569,7 @@ function Messages({ children }: { children: React.ReactNode }) {
                 </div>
               </div>
             )}
-          </div>
+          </ScrollArea>
         </div>
         {children}
       </div>

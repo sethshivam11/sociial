@@ -151,11 +151,8 @@ export interface FollowSliceI {
   _id: string;
   followers: BasicUserI[];
   followings: BasicUserI[];
-  maxFollowers: number;
-  maxFollowings: number;
   loading: boolean;
-  loadingMore: boolean;
-  page: number;
+  skeletonLoading: boolean;
 }
 
 export interface PostSliceI {

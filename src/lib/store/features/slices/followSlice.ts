@@ -5,11 +5,8 @@ const initialState: FollowSliceI = {
   _id: "",
   followings: [],
   followers: [],
-  maxFollowers: 0,
-  maxFollowings: 0,
   loading: false,
-  loadingMore: false,
-  page: 1,
+  skeletonLoading: false,
 };
 
 export const followUser = createAsyncThunk(
@@ -39,33 +36,17 @@ export const unfollowUser = createAsyncThunk(
 );
 
 export const getFollowers = createAsyncThunk(
-  "follow/getFollowers",
+  "follow/followers",
   async () => {
-    const parsed = await fetch("/api/v1/follow/getFollowers");
-    return parsed.json();
-  }
-);
-
-export const getMoreFollowers = createAsyncThunk(
-  "follow/getMoreFollowers",
-  async (page: number) => {
-    const parsed = await fetch(`/api/v1/follow/getMoreFollowers?page=${page}`);
+    const parsed = await fetch("/api/v1/follow/followers");
     return parsed.json();
   }
 );
 
 export const getFollowings = createAsyncThunk(
-  "follow/getFollowings",
+  "follow/following",
   async () => {
-    const parsed = await fetch("/api/v1/follow/getFollowings");
-    return parsed.json();
-  }
-);
-
-export const getMoreFollowings = createAsyncThunk(
-  "follow/getMoreFollowings",
-  async (page: number) => {
-    const parsed = await fetch(`/api/v1/follow/getMoreFollowings?page=${page}`);
+    const parsed = await fetch("/api/v1/follow/following");
     return parsed.json();
   }
 );
@@ -102,63 +83,29 @@ const followSlice = createSlice({
     });
 
     builder.addCase(getFollowers.pending, (state) => {
-      state.loading = true;
+      state.skeletonLoading = true;
     });
     builder.addCase(getFollowers.fulfilled, (state, action) => {
-      state.loading = false;
+      state.skeletonLoading = false;
       if (action.payload.success) {
         state.followers = action.payload.data.followers;
-        state.maxFollowers = action.payload.data.max;
       }
     });
     builder.addCase(getFollowers.rejected, (state) => {
-      state.loading = false;
+      state.skeletonLoading = false;
     });
 
     builder.addCase(getFollowings.pending, (state) => {
-      state.loading = true;
+      state.skeletonLoading = true;
     });
     builder.addCase(getFollowings.fulfilled, (state, action) => {
-      state.loading = false;
+      state.skeletonLoading = false;
       if (action.payload.success) {
         state.followings = action.payload.data.followings;
-        state.maxFollowings = action.payload.data.max;
       }
     });
     builder.addCase(getFollowings.rejected, (state) => {
-      state.loading = false;
-    });
-
-    builder.addCase(getMoreFollowers.pending, (state) => {
-      state.loadingMore = true;
-    });
-    builder.addCase(getMoreFollowers.fulfilled, (state, action) => {
-      state.loadingMore = false;
-      if (action.payload.success) {
-        state.followers = [
-          ...state.followers,
-          ...action.payload.data.followers,
-        ];
-      }
-    });
-    builder.addCase(getMoreFollowers.rejected, (state) => {
-      state.loadingMore = false;
-    });
-
-    builder.addCase(getMoreFollowings.pending, (state) => {
-      state.loadingMore = true;
-    });
-    builder.addCase(getMoreFollowings.fulfilled, (state, action) => {
-      state.loadingMore = false;
-      if (action.payload.success) {
-        state.followings = [
-          ...state.followings,
-          ...action.payload.data.followings,
-        ];
-      }
-    });
-    builder.addCase(getMoreFollowings.rejected, (state) => {
-      state.loadingMore = false;
+      state.skeletonLoading = false;
     });
   },
 });

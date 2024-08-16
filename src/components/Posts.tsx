@@ -12,7 +12,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import PostsLoading from "./loaders/PostsLoading";
+import PostsLoading from "./skeletons/PostsLoading";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { nameFallback } from "@/lib/helpers";
 import Link from "next/link";
@@ -29,6 +29,7 @@ import {
 import { toast } from "./ui/use-toast";
 import { useAppSelector } from "@/lib/store/store";
 import LikeDialog from "./LikeDialog";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 interface Post {
   _id: string;
@@ -174,180 +175,190 @@ function Posts() {
   return (
     <>
       <div className="flex flex-col py-2 sm:px-4 px-2 gap-4 w-full sm:pb-4 pb-20">
-        {loading ? (
-          <PostsLoading />
-        ) : (
-          posts.map((post, postIndex) => {
-            return (
-              <div
-                key={postIndex}
-                className="rounded-xl bg-stone-100 dark:bg-stone-900 p-4 w-full sm:w-[85%] mx-auto min-h-64 min-w-64"
-              >
-                <div className="flex justify-between w-full">
-                  <div className="flex items-center gap-2 w-full">
-                    <Link className="w-8 h-8" href={`/${post.user.username}`}>
-                      <Avatar className="w-8 h-8">
-                        <AvatarImage
-                          src={post.user.avatar}
-                          alt=""
-                          className="pointer-events-none select-none"
-                        />
-                        <AvatarFallback>
-                          {nameFallback(post.user.fullName)}
-                        </AvatarFallback>
-                      </Avatar>
-                    </Link>
-                    <Link href={`/${post.user.username}`}>
-                      <p className="flex items-center justify-start gap-0.5">
-                        <span>{post.user.fullName}</span>
-                      </p>
-                      <p className="text-sm text-gray-500 leading-3">
-                        @{post.user.username}
-                      </p>
-                    </Link>
-                  </div>
-                  <PostOptions
-                    user={post.user}
-                    postId={post._id}
-                    isVideo={post.video ? true : false}
-                  />
-                </div>
-                {post.video ? (
-                  <Link href={`/video/${post._id}`} className="relative">
-                    <PlayIcon
-                      size="50"
-                      className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white bg-transparent/50 rounded-full p-2"
+        {/* <InfiniteScroll
+        dataLength={posts.length}
+        hasMore
+        > */}
+          {loading ? (
+            <PostsLoading />
+          ) : (
+            posts.map((post, postIndex) => {
+              return (
+                <div
+                  key={postIndex}
+                  className="rounded-xl bg-stone-100 dark:bg-stone-900 p-4 w-full sm:w-[85%] mx-auto min-h-64 min-w-64"
+                >
+                  <div className="flex justify-between w-full">
+                    <div className="flex items-center gap-2 w-full">
+                      <Link className="w-8 h-8" href={`/${post.user.username}`}>
+                        <Avatar className="w-8 h-8">
+                          <AvatarImage
+                            src={post.user.avatar}
+                            alt=""
+                            className="pointer-events-none select-none"
+                          />
+                          <AvatarFallback>
+                            {nameFallback(post.user.fullName)}
+                          </AvatarFallback>
+                        </Avatar>
+                      </Link>
+                      <Link href={`/${post.user.username}`}>
+                        <p className="flex items-center justify-start gap-0.5">
+                          <span>{post.user.fullName}</span>
+                        </p>
+                        <p className="text-sm text-gray-500 leading-3">
+                          @{post.user.username}
+                        </p>
+                      </Link>
+                    </div>
+                    <PostOptions
+                      user={post.user}
+                      postId={post._id}
+                      isVideo={post.video ? true : false}
                     />
-                    <video
-                      preload="metadata"
-                      className="w-full my-2 object-contain rounded-sm"
-                      playsInline
-                    >
-                      <source src={post.video.link} />
-                    </video>
-                  </Link>
-                ) : (
-                  <Carousel className="w-full my-2 mt-2">
-                    <CarouselContent>
-                      {post.images.map((image, index) => {
-                        return (
-                          <CarouselItem key={index} className="relative">
-                            <div className="absolute right-2 top-2 bg-transparent/60 text-white px-2 py-0.5 rounded-2xl text-sm select-none">
-                              {post.images.length > 1
-                                ? `${index + 1}/${post.images.length}`
-                                : ""}
-                            </div>
-                            <div
-                              className={`absolute w-full h-full items-center justify-center ${
-                                post.liked ? "flex" : "hidden"
-                              }`}
-                            >
-                              <Heart
-                                size="150"
-                                strokeWidth="0"
-                                fill="rgb(244 63 94)"
-                                className="animate-like"
+                  </div>
+                  {post.video ? (
+                    <Link href={`/video/${post._id}`} className="relative">
+                      <PlayIcon
+                        size="50"
+                        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white bg-transparent/50 rounded-full p-2"
+                      />
+                      <video
+                        preload="metadata"
+                        className="w-full my-2 object-contain rounded-sm"
+                        playsInline
+                      >
+                        <source src={post.video.link} />
+                      </video>
+                    </Link>
+                  ) : (
+                    <Carousel className="w-full my-2 mt-2">
+                      <CarouselContent>
+                        {post.images.map((image, index) => {
+                          return (
+                            <CarouselItem key={index} className="relative">
+                              <div className="absolute right-2 top-2 bg-transparent/60 text-white px-2 py-0.5 rounded-2xl text-sm select-none">
+                                {post.images.length > 1
+                                  ? `${index + 1}/${post.images.length}`
+                                  : ""}
+                              </div>
+                              <div
+                                className={`absolute w-full h-full items-center justify-center ${
+                                  post.liked ? "flex" : "hidden"
+                                }`}
+                              >
+                                <Heart
+                                  size="150"
+                                  strokeWidth="0"
+                                  fill="rgb(244 63 94)"
+                                  className="animate-like"
+                                />
+                              </div>
+                              <Image
+                                width={700}
+                                height={320}
+                                src={image}
+                                priority={
+                                  index === 0 && postIndex < 10 ? true : false
+                                }
+                                onDoubleClick={(e) => {
+                                  likePost(post._id);
+                                  const heartContainer = (
+                                    e.target as HTMLElement
+                                  ).parentElement?.parentElement?.childNodes;
+                                  setTimeout(
+                                    () =>
+                                      heartContainer?.forEach((child) => {
+                                        (
+                                          child.childNodes[0] as HTMLElement
+                                        ).classList.add("hidden");
+                                      }),
+                                    500
+                                  );
+                                }}
+                                alt={`Photo by ${post.user.fullName} with username ${post.user.username}`}
+                                className="object-cover select-none w-full h-full rounded-sm"
                               />
-                            </div>
-                            <Image
-                              width={700}
-                              height={320}
-                              src={image}
-                              priority={
-                                index === 0 && postIndex < 10 ? true : false
-                              }
-                              onDoubleClick={(e) => {
-                                likePost(post._id);
-                                const heartContainer = (e.target as HTMLElement)
-                                  .parentElement?.parentElement?.childNodes;
-                                setTimeout(
-                                  () =>
-                                    heartContainer?.forEach((child) => {
-                                      (
-                                        child.childNodes[0] as HTMLElement
-                                      ).classList.add("hidden");
-                                    }),
-                                  500
-                                );
-                              }}
-                              alt={`Photo by ${post.user.fullName} with username ${post.user.username}`}
-                              className="object-cover select-none w-full h-full rounded-sm"
-                            />
-                          </CarouselItem>
-                        );
-                      })}
-                    </CarouselContent>
-                    <CarouselPrevious />
-                    <CarouselNext />
-                  </Carousel>
-                )}
-                <div className="flex justify-between select-none">
-                  <div className="flex gap-3">
+                            </CarouselItem>
+                          );
+                        })}
+                      </CarouselContent>
+                      <CarouselPrevious />
+                      <CarouselNext />
+                    </Carousel>
+                  )}
+                  <div className="flex justify-between select-none">
+                    <div className="flex gap-3">
+                      <button
+                        title={post.liked ? "Unlike" : "Like"}
+                        onClick={() => {
+                          likePost(post._id);
+                        }}
+                      >
+                        <Heart
+                          size="30"
+                          className={`${
+                            post.liked ? "text-rose-500" : "sm:hover:opacity-60"
+                          } transition-all active:scale-110`}
+                          fill={post.liked ? "rgb(244 63 94)" : "none"}
+                        />
+                      </button>
+                      <Comment
+                        user={post.user}
+                        commentsCount={post.commentsCount}
+                      />
+                      <Share _id={post._id} />
+                    </div>
                     <button
-                      title={post.liked ? "Unlike" : "Like"}
-                      onClick={() => {
-                        likePost(post._id);
+                      className="mr-1"
+                      onClick={(e) => {
+                        const icon = e.target as HTMLElement;
+                        if (icon.getAttribute("fill") === "currentColor") {
+                          icon.setAttribute("fill", "none");
+                        } else {
+                          (e.target as HTMLElement).setAttribute(
+                            "fill",
+                            "currentColor"
+                          );
+                        }
                       }}
                     >
-                      <Heart
-                        size="30"
-                        className={`${
-                          post.liked ? "text-rose-500" : "sm:hover:opacity-60"
-                        } transition-all active:scale-110`}
-                        fill={post.liked ? "rgb(244 63 94)" : "none"}
-                      />
+                      <Bookmark size="30" className="w-full h-full" />
                     </button>
-                    <Comment
-                      user={post.user}
-                      commentsCount={post.commentsCount}
-                    />
-                    <Share _id={post._id} />
                   </div>
-                  <button
-                    className="mr-1"
-                    onClick={(e) => {
-                      const icon = e.target as HTMLElement;
-                      if (icon.getAttribute("fill") === "currentColor") {
-                        icon.setAttribute("fill", "none");
-                      } else {
-                        (e.target as HTMLElement).setAttribute(
-                          "fill",
-                          "currentColor"
-                        );
-                      }
-                    }}
-                  >
-                    <Bookmark size="30" className="w-full h-full" />
-                  </button>
+                  <p className="text-sm text-stone-400 mt-1 select-none">
+                    <LikeDialog
+                      likesCount={post.likesCount}
+                      postId={post._id}
+                    />
+                  </p>
+                  <p className="py-1 text-sm">
+                    <span>{post.caption.slice(0, 30)}&nbsp;</span>
+                    <button
+                      className="text-stone-500"
+                      onClick={(e) => {
+                        const btn = e.target as HTMLButtonElement;
+                        const span = btn.parentElement
+                          ?.childNodes[0] as HTMLElement;
+                        if (span.innerHTML !== post.caption) {
+                          span.innerHTML = post.caption;
+                          btn.innerHTML = "&nbsp;less";
+                        } else {
+                          span.innerHTML = post.caption.slice(0, 30);
+                          btn.innerHTML = "&nbsp;more";
+                        }
+                      }}
+                    >
+                      more
+                    </button>
+                  </p>
                 </div>
-                <p className="text-sm text-stone-400 mt-1 select-none">
-                  <LikeDialog likesCount={post.likesCount} postId={post._id} />
-                </p>
-                <p className="py-1 text-sm">
-                  <span>{post.caption.slice(0, 30)}&nbsp;</span>
-                  <button
-                    className="text-stone-500"
-                    onClick={(e) => {
-                      const btn = e.target as HTMLButtonElement;
-                      const span = btn.parentElement
-                        ?.childNodes[0] as HTMLElement;
-                      if (span.innerHTML !== post.caption) {
-                        span.innerHTML = post.caption;
-                        btn.innerHTML = "&nbsp;less";
-                      } else {
-                        span.innerHTML = post.caption.slice(0, 30);
-                        btn.innerHTML = "&nbsp;more";
-                      }
-                    }}
-                  >
-                    more
-                  </button>
-                </p>
-              </div>
-            );
-          })
-        )}
+              );
+            })
+          )}
+        {/* </InfiniteScroll> */}
       </div>
+
       <AlertDialog
         open={consentDialog}
         onOpenChange={(open) => {

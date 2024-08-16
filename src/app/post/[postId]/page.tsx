@@ -2,7 +2,7 @@
 import Comment from "@/components/Comment";
 import MobileNav from "@/components/MobileNav";
 import PostOptions from "@/components/PostOptions";
-import PostsLoading from "@/components/loaders/PostsLoading";
+import PostsLoading from "@/components/skeletons/PostsLoading";
 import Share from "@/components/Share";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {

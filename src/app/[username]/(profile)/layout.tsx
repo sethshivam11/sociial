@@ -19,6 +19,7 @@ import QRCode from "qrcode";
 import Image from "next/image";
 import ReportDialog from "@/components/ReportDialog";
 import { useAppSelector } from "@/lib/store/store";
+import Share from "@/components/Share";
 
 function Profile({
   children,
@@ -173,7 +174,27 @@ function Profile({
                     hideCloseIcon
                     onOpenAutoFocus={(e) => e.preventDefault()}
                   >
-                    <DialogClose className="w-full md:px-20 py-1">
+                    <DialogClose
+                      className="w-full md:px-20 py-1"
+                      onClick={() => {
+                        if (navigator) {
+                          navigator
+                            .share({
+                              title: profile.fullName,
+                              text: `See @${profile.username}'s profile on Sociial`,
+                              url: `${baseUrl}/${profile.username}`,
+                            })
+                            .catch((err) => console.log(err));
+                        } else {
+                          toast({
+                            title: "Share feature is not supported",
+                            description:
+                              "You can try copying the link and sharing it manually.",
+                            variant: "destructive",
+                          });
+                        }
+                      }}
+                    >
                       Share Profile
                     </DialogClose>
                     <DialogClose

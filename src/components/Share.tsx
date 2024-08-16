@@ -14,7 +14,7 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { Send, SendHorizonal, ShareIcon } from "lucide-react";
+import { Send, SendHorizontal, Share2Icon, ShareIcon } from "lucide-react";
 import Image from "next/image";
 import { Input } from "./ui/input";
 import { useForm } from "react-hook-form";
@@ -24,6 +24,9 @@ import { Label } from "./ui/label";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "./ui/use-toast";
+import { ScrollArea } from "./ui/scroll-area";
+import FollowersLoadingSkeleton from "./skeletons/FollowersLoading";
+import { useAppSelector } from "@/lib/store/store";
 
 interface Props {
   isVideo?: boolean;
@@ -31,6 +34,7 @@ interface Props {
 }
 
 export default function Share({ isVideo, _id }: Props) {
+  const { skeletonLoading } = useAppSelector((state) => state.follow);
   const formSchema = z.object({
     message: z.string().optional(),
   });
@@ -135,50 +139,54 @@ export default function Share({ isVideo, _id }: Props) {
           onChange={(e) => setSearch(e.target.value)}
         />
         <hr className="bg-stone-500 my-2" />
-        <div className="flex flex-col justify-start items-start gap-4 overflow-y-auto h-full">
-          {followers.map((follower, index) => {
-            return (
-              <div
-                className="flex items-center justify-between w-full px-2 gap-3 rounded-lg"
-                key={index}
-              >
-                <Label
-                  htmlFor={`follower-${index}`}
-                  className="flex items-center gap-3 rounded-lg w-full cursor-pointer"
+        <ScrollArea className="h-full p-2">
+          {skeletonLoading ? (
+            <FollowersLoadingSkeleton />
+          ) : (
+            followers.map((follower, index) => {
+              return (
+                <div
+                  className="flex items-center justify-between w-full px-2 gap-3 mb-3 rounded-lg"
+                  key={index}
                 >
-                  <div className="w-8 h-8">
-                    <Image
-                      width={32}
-                      height={32}
-                      src={follower.avatar}
-                      alt=""
-                      className="w-full h-full rounded-full pointer-events-none select-none"
-                    />
-                  </div>
-                  <div>
-                    <p className="text-lg leading-5">{follower.fullName}</p>
-                    <p className="text-sm text-gray-500">
-                      @{follower.username}
-                    </p>
-                  </div>
-                </Label>
-                <Checkbox
-                  id={`follower-${index}`}
-                  className="rounded-full w-5 h-5 data-[state=checked]:bg-blue-500 data-[state=checked]:text-white border-2 data-[state=checked]:border-0"
-                  onCheckedChange={(checked) => {
-                    checked
-                      ? setShareToPeople([...shareToPeople, follower])
-                      : setShareToPeople((prevPeople) =>
-                          prevPeople.filter(
-                            (user) => user.username !== follower.username
-                          )
-                        );
-                  }}
-                />
-              </div>
-            );
-          })}
-        </div>
+                  <Label
+                    htmlFor={`follower-${index}`}
+                    className="flex items-center gap-3 rounded-lg w-full cursor-pointer"
+                  >
+                    <div className="w-8 h-8">
+                      <Image
+                        width={32}
+                        height={32}
+                        src={follower.avatar}
+                        alt=""
+                        className="w-full h-full rounded-full pointer-events-none select-none"
+                      />
+                    </div>
+                    <div>
+                      <p className="text-lg leading-5">{follower.fullName}</p>
+                      <p className="text-sm text-gray-500">
+                        @{follower.username}
+                      </p>
+                    </div>
+                  </Label>
+                  <Checkbox
+                    id={`follower-${index}`}
+                    className="rounded-full w-5 h-5 data-[state=checked]:bg-blue-500 data-[state=checked]:text-white border-2 data-[state=checked]:border-0"
+                    onCheckedChange={(checked) => {
+                      checked
+                        ? setShareToPeople([...shareToPeople, follower])
+                        : setShareToPeople((prevPeople) =>
+                            prevPeople.filter(
+                              (user) => user.username !== follower.username
+                            )
+                          );
+                    }}
+                  />
+                </div>
+              );
+            })
+          )}
+        </ScrollArea>
 
         <DialogFooter>
           <Form {...form}>
@@ -218,7 +226,7 @@ export default function Share({ isVideo, _id }: Props) {
                   type="submit"
                   disabled={shareToPeople.length < 1}
                 >
-                  <SendHorizonal />
+                  <SendHorizontal />
                 </Button>
               </DialogClose>
             </form>
