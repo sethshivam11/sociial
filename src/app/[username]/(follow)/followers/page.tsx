@@ -4,11 +4,19 @@ import { Search, Users2 } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { nameFallback } from "@/lib/helpers";
-import { useAppSelector } from "@/lib/store/store";
+import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { Input } from "@/components/ui/input";
+import {
+  getFollowers,
+  getFollowings,
+} from "@/lib/store/features/slices/followSlice";
+import FriendsLoading from "@/components/skeletons/FriendsLoading";
 
 function Page() {
-  const { followers, followings } = useAppSelector((state) => state.follow);
+  const dispatch = useAppDispatch();
+  const { followers, followings, skeletonLoading } = useAppSelector(
+    (state) => state.follow
+  );
   const [searchResults, setSearchResults] = React.useState(followers);
   const [search, setSearch] = React.useState("");
 
@@ -26,6 +34,19 @@ function Page() {
     }
   }, [search]);
 
+  const fetchFollowings = React.useCallback(async () => {
+    const response1 = await dispatch(getFollowings());
+    const response2 = await dispatch(getFollowers());
+    if (!response1.payload.success || !response2.payload.success) {
+      console.log(response1.payload);
+      console.log(response2.payload);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    fetchFollowings();
+  }, [fetchFollowings]);
+
   return (
     <>
       <div className="w-full max-sm:px-2 sm:bg-stone-100 sm:dark:bg-stone-900 py-2 top-0 sticky z-10">
@@ -34,6 +55,7 @@ function Page() {
           <Input
             placeholder="Search"
             value={search}
+            name="search"
             onChange={(e) => setSearch(e.target.value)}
             inputMode="text"
             autoComplete="off"
@@ -41,7 +63,9 @@ function Page() {
           />
         </div>
       </div>
-      {searchResults.length ? (
+      {skeletonLoading ? (
+        <FriendsLoading />
+      ) : searchResults.length ? (
         <div className="flex flex-col gap-3 px-3 h-fit overflow-y-auto overflow-x-hidden pb-2">
           {searchResults.map((follower, index) => (
             <div
@@ -68,7 +92,7 @@ function Page() {
               <div className="flex items-center justify-center bg-primary-500 text-white rounded-full w-fit h-full my-auto">
                 {followings.includes(follower) ? (
                   <button className="bg-stone-500 w-20 h-7 text-center text-white rounded-full text-sm transition-colors hover:bg-stone-600 disabled:bg-stone-400 ml-4">
-                    Following
+                    Unfollow
                   </button>
                 ) : (
                   <button className="bg-blue-500 w-16 h-7 text-center text-white rounded-full text-sm transition-colors hover:bg-blue-700 disabled:bg-blue-400 ml-4">

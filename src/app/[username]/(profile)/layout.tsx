@@ -10,7 +10,6 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogFooter,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
@@ -18,8 +17,9 @@ import { toast } from "@/components/ui/use-toast";
 import QRCode from "qrcode";
 import Image from "next/image";
 import ReportDialog from "@/components/ReportDialog";
-import { useAppSelector } from "@/lib/store/store";
-import Share from "@/components/Share";
+import { useAppDispatch, useAppSelector } from "@/lib/store/store";
+import { getFollowings } from "@/lib/store/features/slices/followSlice";
+import { getProfile } from "@/lib/store/features/slices/userSlice";
 
 function Profile({
   children,
@@ -28,25 +28,16 @@ function Profile({
   children: React.ReactNode;
   params: { username: string };
 }) {
-  const { user } = useAppSelector((state) => state.user);
+  const dispatch = useAppDispatch();
+  const { user, profile, skeletonLoading } = useAppSelector(
+    (state) => state.user
+  );
+  const { followings } = useAppSelector((state) => state.follow);
   const baseUrl = process.env.NEXT_PUBLIC_LINK || "";
   const router = useRouter();
   const location = usePathname();
   const [QR, setQR] = React.useState("");
   const [reportOpen, setReportOpen] = React.useState(false);
-  const [profile, setProfile] = React.useState({
-    _id: "1",
-    avatar:
-      "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
-    fullName: "Shivam Soni",
-    email: "johndoe2gmail.com",
-    username: "sethshivam11",
-    bio: "Passionate storyteller, aspiring novelist, and dedicated coffee enthusiast ☕️ | Traveler at heart with a penchant for discovering hidden gems around the world 🌍 | Digital marketing expert by profession, helping brands tell their stories and connect with audiences in meaningful ways 💼",
-    followersCount: 20,
-    followingsCount: 12,
-    postsCount: 4,
-    follow: true,
-  });
   const username = params.username;
 
   async function copyLink(username: string) {
@@ -66,6 +57,11 @@ function Profile({
     }
   };
 
+  React.useEffect(() => {
+    dispatch(getFollowings());
+    if (username) dispatch(getProfile({ username }));
+  }, [username]);
+
   return (
     <>
       <MobileNav hideButtons />
@@ -80,13 +76,13 @@ function Profile({
               <AvatarFallback>{nameFallback(profile.fullName)}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col items-start justify-center my-4">
-              <p className="lg:text-4xl text-2xl tracking-tight font-extrabold w-full">
+              <p className="lg:text-4xl text-2xl tracking-tight font-extrabold w-full min-h-8">
                 {profile.fullName}
               </p>
               <div className="text-stone-500 lg:text-xl text-lg flex items-center justify-center">
                 @{profile.username}
               </div>
-              <div className="flex items-center justify-center gap-2 max-sm:gap-4">
+              <div className="flex items-center justify-center gap-2 max-sm:gap-4 select-none">
                 {user.username === username ? (
                   <Button
                     className="my-4 py-1.5 h-fit w-fit px-3 rounded-full"
@@ -94,22 +90,18 @@ function Profile({
                   >
                     Edit Profile
                   </Button>
-                ) : profile.follow ? (
-                  <Button
-                    className="my-4 bg-stone-500 hover:bg-stone-600 py-1.5 h-fit w-fit px-3 rounded-full text-white"
-                    onClick={() => setProfile({ ...profile, follow: false })}
-                  >
+                ) : followings.some(
+                    (following) => following.username === profile.username
+                  ) ? (
+                  <Button className="my-4 bg-stone-500 hover:bg-stone-600 py-1.5 h-fit w-fit px-3 rounded-full text-white">
                     Unfollow
                   </Button>
                 ) : (
-                  <Button
-                    className="my-4 bg-blue-500 hover:bg-blue-700 py-1.5 h-fit w-fit px-3 rounded-full text-white"
-                    onClick={() => setProfile({ ...profile, follow: true })}
-                  >
+                  <Button className="my-4 bg-blue-500 hover:bg-blue-700 py-1.5 h-fit w-fit px-3 rounded-full text-white">
                     Follow
                   </Button>
                 )}
-                {profile.username === username ? (
+                {profile.username === user.username ? (
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button
@@ -203,15 +195,19 @@ function Profile({
                     >
                       Copy link
                     </DialogClose>
-                    <DialogClose className="w-full md:px-20 py-1 text-red-500">
-                      Block
-                    </DialogClose>
-                    <DialogClose
-                      className="text-red-500 w-full md:px-20 py-1"
-                      onClick={() => setReportOpen(true)}
-                    >
-                      Report
-                    </DialogClose>
+                    {profile.username !== user.username && (
+                      <>
+                        <DialogClose className="w-full md:px-20 py-1 text-red-500">
+                          Block
+                        </DialogClose>
+                        <DialogClose
+                          className="text-red-500 w-full md:px-20 py-1"
+                          onClick={() => setReportOpen(true)}
+                        >
+                          Report
+                        </DialogClose>
+                      </>
+                    )}
                     <DialogClose>Cancel</DialogClose>
                   </DialogContent>
                 </Dialog>
@@ -244,18 +240,18 @@ function Profile({
             >
               <span className="block lg:text-xl text-lg">Following</span>
               <span className="lg:text-2xl text-lg">
-                {profile.followingsCount}
+                {profile.followingCount}
               </span>
             </button>
           </div>
         </div>
-        <div className="flex items-center justify-center sm:w-3/4 md:w-1/2 w-full lg:ml-36 md:ml-20 font-light text-sm my-2 max-sm:px-6">
+        <div className="sm:w-3/4 md:w-1/2 w-full lg:ml-36 md:ml-20 font-light text-left text-sm my-2 max-sm:px-6">
           {profile.bio}
         </div>
         <div className="flex items-center justify-evenly max-md:justify-around mt-8 sm:text-md text-sm">
           <button
             className={`flex items-center justify-center gap-2 relative after:rounded-sm sm:after:w-28 after:w-16 after:absolute after:top-8 after:border-stone-800 after:dark:border-stone-200 ${
-              location === `/${profile.username}`
+              !location.includes("/saved")
                 ? "after:border-2"
                 : "after:border-0"
             }`}

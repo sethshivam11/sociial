@@ -25,17 +25,16 @@ export interface ProfileI {
   username: string;
   avatar: string;
   bio: string;
-  followers: number;
-  following: number;
+  followersCount: number;
+  followingCount: number;
   postsCount: number;
-  isPremium: boolean;
 }
 
 export interface PostI {
   _id: string;
   user: string;
   caption: string;
-  images: string[];
+  media: string[];
   kind: "image" | "video";
   likesCount: number;
   commentsCount: number;
@@ -136,12 +135,14 @@ export interface UserSliceI {
     bio: string;
     blocked: string[];
   };
+  searchResults: BasicUserI[];
   profile: ProfileI;
   followers: BasicUserI[];
   following: BasicUserI[];
   unreadMessageCount: number;
   newNotifications: boolean;
   loading: boolean;
+  skeletonLoading: boolean;
   isLoggedIn: boolean;
   isSendingMail: boolean;
   page: number;
@@ -157,7 +158,17 @@ export interface FollowSliceI {
 
 export interface PostSliceI {
   posts: PostI[];
-  post: PostI;
+  post: {
+    _id: string;
+    user: ProfileI;
+    caption: string;
+    media: string[];
+    kind: "image" | "video";
+    liked: boolean;
+    likesCount: number;
+    commentsCount: number;
+    morePosts: PostI[];
+  };
   loading: boolean;
   skeletonLoading: boolean;
   loadingMore: boolean;

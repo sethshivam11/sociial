@@ -7,12 +7,7 @@ import { usePathname } from "next/navigation";
 import React from "react";
 
 function Layout({ children }: { children: React.ReactNode }) {
-  // const { user } = useAppSelector((state) => state.user);
-  const user = {
-    username: "sethshivam",
-    fullName: "Shivam",
-    avatar: "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
-  }
+  const { user } = useAppSelector((state) => state.user);
   const location = usePathname();
 
   return (

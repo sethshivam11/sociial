@@ -22,16 +22,17 @@ const initialState: UserSliceI = {
     username: "",
     avatar: "",
     bio: "",
-    followers: 0,
-    following: 0,
+    followersCount: 0,
+    followingCount: 0,
     postsCount: 0,
-    isPremium: false,
   },
+  searchResults: [],
   followers: [],
   following: [],
   unreadMessageCount: 0,
   newNotifications: false,
   loading: false,
+  skeletonLoading: false,
   isLoggedIn: false,
   isSendingMail: false,
   page: 1,
@@ -143,7 +144,9 @@ export const getProfile = createAsyncThunk(
       return;
     }
     const parsed = await fetch(
-      `/api/v1/users?username=${username || ""}&_id=${_id || ""}`
+      `/api/v1/users/getProfile?${
+        username ? `username=${username}` : `_id=${_id}`
+      }`
     );
     return parsed.json();
   }
@@ -251,6 +254,21 @@ export const unblockUser = createAsyncThunk(
   }
 );
 
+export const searchUsers = createAsyncThunk(
+  "users/search",
+  async (query: string) => {
+    if (query.trim() === "")
+      return {
+        data: null,
+        success: false,
+        message: "Not Found",
+        status: 404,
+      };
+    const parsed = await fetch(`/api/v1/users/search?username=${query.trim()}`);
+    return parsed.json();
+  }
+);
+
 export const userSlice = createSlice({
   name: "user",
   initialState,
@@ -260,206 +278,240 @@ export const userSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(loginUser.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(loginUser.fulfilled, (state, action) => {
-      state.loading = false;
-      if (action.payload.success) {
-        state.isLoggedIn = true;
-        state.user = action.payload.data.user;
-        localStorage.setItem("accessToken", action.payload.data.accessToken);
-        localStorage.setItem("refreshToken", action.payload.data.refreshToken);
-      }
-    });
-    builder.addCase(loginUser.rejected, (state, action) => {
-      state.loading = false;
-    });
+    builder
+      .addCase(loginUser.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(loginUser.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload.success) {
+          state.isLoggedIn = true;
+          state.user = action.payload.data.user;
+          localStorage.setItem("accessToken", action.payload.data.accessToken);
+          localStorage.setItem(
+            "refreshToken",
+            action.payload.data.refreshToken
+          );
+        }
+      })
+      .addCase(loginUser.rejected, (state, action) => {
+        state.loading = false;
+      });
 
-    builder.addCase(registerUser.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(registerUser.fulfilled, (state, action) => {
-      state.loading = false;
-      if (action.payload.success) {
-        state.user = action.payload.data;
-      }
-    });
-    builder.addCase(registerUser.rejected, (state) => {
-      state.loading = false;
-    });
+    builder
+      .addCase(registerUser.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(registerUser.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload.success) {
+          state.user = action.payload.data;
+        }
+      })
+      .addCase(registerUser.rejected, (state) => {
+        state.loading = false;
+      });
 
-    builder.addCase(verifyCode.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(verifyCode.fulfilled, (state, action) => {
-      state.loading = false;
-      if (action.payload.success) {
-        state.isLoggedIn = true;
-        state.user.isMailVerified = action.payload.isMailVerified;
-      }
-    });
-    builder.addCase(verifyCode.rejected, (state, payload) => {
-      state.loading = false;
-    });
+    builder
+      .addCase(verifyCode.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(verifyCode.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload.success) {
+          state.isLoggedIn = true;
+          state.user.isMailVerified = action.payload.isMailVerified;
+        }
+      })
+      .addCase(verifyCode.rejected, (state, payload) => {
+        state.loading = false;
+      });
 
-    builder.addCase(resendVerificationCode.pending, (state) => {
-      state.isSendingMail = true;
-    });
-    builder.addCase(resendVerificationCode.fulfilled, (state) => {
-      state.isSendingMail = false;
-    });
-    builder.addCase(resendVerificationCode.rejected, (state) => {
-      state.isSendingMail = false;
-    });
+    builder
+      .addCase(resendVerificationCode.pending, (state) => {
+        state.isSendingMail = true;
+      })
+      .addCase(resendVerificationCode.fulfilled, (state) => {
+        state.isSendingMail = false;
+      })
+      .addCase(resendVerificationCode.rejected, (state) => {
+        state.isSendingMail = false;
+      });
 
-    builder.addCase(forgotPassword.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(forgotPassword.fulfilled, (state, action) => {
-      state.loading = false;
-    });
-    builder.addCase(forgotPassword.rejected, (state) => {
-      state.loading = false;
-    });
+    builder
+      .addCase(forgotPassword.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(forgotPassword.fulfilled, (state, action) => {
+        state.loading = false;
+      })
+      .addCase(forgotPassword.rejected, (state) => {
+        state.loading = false;
+      });
 
-    builder.addCase(getProfile.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(getProfile.fulfilled, (state, action) => {
-      state.loading = false;
-      if (action.payload.success) {
-        state.profile = action.payload.data;
-      }
-    });
-    builder.addCase(getProfile.rejected, (state, action) => {
-      state.loading = false;
-    });
+    builder
+      .addCase(getProfile.pending, (state) => {
+        state.skeletonLoading = true;
+      })
+      .addCase(getProfile.fulfilled, (state, action) => {
+        state.skeletonLoading = false;
+        if (action.payload.success) {
+          state.profile = action.payload.data;
+        }
+      })
+      .addCase(getProfile.rejected, (state, action) => {
+        state.skeletonLoading = false;
+      });
 
-    builder.addCase(logOutUser.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(logOutUser.fulfilled, (state, action) => {
-      state.loading = false;
-      if (action.payload.success) {
-        state.isLoggedIn = false;
-        state.user = initialState.user;
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        localStorage.removeItem("notificationConsent");
-        localStorage.removeItem("message-theme");
-        localStorage.removeItem("recentSearches");
-      }
-    });
-    builder.addCase(logOutUser.rejected, (state) => {
-      state.loading = false;
-    });
+    builder
+      .addCase(logOutUser.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(logOutUser.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload.success) {
+          state.isLoggedIn = false;
+          state.user = initialState.user;
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+          localStorage.removeItem("notificationConsent");
+          localStorage.removeItem("message-theme");
+          localStorage.removeItem("recentSearches");
+        }
+      })
+      .addCase(logOutUser.rejected, (state) => {
+        state.loading = false;
+      });
 
-    builder.addCase(updatePassword.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(updatePassword.fulfilled, (state) => {
-      state.loading = false;
-    });
-    builder.addCase(updatePassword.rejected, (state) => {
-      state.loading = false;
-    });
+    builder
+      .addCase(updatePassword.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(updatePassword.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(updatePassword.rejected, (state) => {
+        state.loading = false;
+      });
 
-    builder.addCase(updateAvatar.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(updateAvatar.fulfilled, (state, action) => {
-      state.loading = false;
-      if (action.payload.success) {
-        state.user.avatar = action.payload.data.avatar;
-      }
-    });
-    builder.addCase(updateAvatar.rejected, (state) => {
-      state.loading = false;
-    });
+    builder
+      .addCase(updateAvatar.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(updateAvatar.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload.success) {
+          state.user.avatar = action.payload.data.avatar;
+        }
+      })
+      .addCase(updateAvatar.rejected, (state) => {
+        state.loading = false;
+      });
 
-    builder.addCase(removeAvatar.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(removeAvatar.fulfilled, (state, action) => {
-      state.loading = false;
-      if (action.payload.success) {
-        state.user.avatar = action.payload.data.avatar;
-      }
-    });
-    builder.addCase(removeAvatar.rejected, (state, action) => {
-      state.loading = false;
-    });
+    builder
+      .addCase(removeAvatar.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(removeAvatar.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload.success) {
+          state.user.avatar = action.payload.data.avatar;
+        }
+      })
+      .addCase(removeAvatar.rejected, (state, action) => {
+        state.loading = false;
+      });
 
-    builder.addCase(getLoggedInUser.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(getLoggedInUser.fulfilled, (state, action) => {
-      state.loading = false;
-      if (action.payload.success) {
-        state.isLoggedIn = true;
-        state.user = action.payload.data;
-      }
-    });
-    builder.addCase(getLoggedInUser.rejected, (state) => {
-      state.loading = false;
-    });
+    builder
+      .addCase(getLoggedInUser.pending, (state) => {
+        state.skeletonLoading = true;
+      })
+      .addCase(getLoggedInUser.fulfilled, (state, action) => {
+        state.skeletonLoading = false;
+        if (action.payload.success) {
+          state.isLoggedIn = true;
+          state.user = action.payload.data;
+        }
+      })
+      .addCase(getLoggedInUser.rejected, (state) => {
+        state.skeletonLoading = false;
+      });
 
-    builder.addCase(updateDetails.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(updateDetails.fulfilled, (state, action) => {
-      state.loading = false;
-      if (action.payload.success) {
-        state.user.fullName = action.payload.data.fullName;
-        state.user.username = action.payload.data.username;
-        state.user.bio = action.payload.data.bio;
-      }
-    });
-    builder.addCase(updateDetails.rejected, (state) => {
-      state.loading = false;
-    });
+    builder
+      .addCase(updateDetails.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(updateDetails.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload.success) {
+          state.user.fullName = action.payload.data.fullName;
+          state.user.username = action.payload.data.username;
+          state.user.bio = action.payload.data.bio;
+        }
+      })
+      .addCase(updateDetails.rejected, (state) => {
+        state.loading = false;
+      });
 
-    builder.addCase(renewAccessToken.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(renewAccessToken.fulfilled, (state, action) => {
-      state.loading = false;
-      if (action.payload.success) {
-        localStorage.setItem("accessToken", action.payload.data.accessToken);
-      }
-    });
-    builder.addCase(renewAccessToken.rejected, (state) => {
-      state.loading = false;
-    });
+    builder
+      .addCase(renewAccessToken.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(renewAccessToken.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload.success) {
+          localStorage.setItem("accessToken", action.payload.data.accessToken);
+        }
+      })
+      .addCase(renewAccessToken.rejected, (state) => {
+        state.loading = false;
+      });
 
-    builder.addCase(blockUser.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(blockUser.fulfilled, (state, action) => {
-      state.loading = false;
-      if (action.payload.success) {
-        state.user.blocked.push(action.payload.data.blocked);
-      }
-    });
-    builder.addCase(blockUser.rejected, (state) => {
-      state.loading = false;
-    });
+    builder
+      .addCase(blockUser.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(blockUser.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload.success) {
+          state.user.blocked.push(action.payload.data.blocked);
+        }
+      })
+      .addCase(blockUser.rejected, (state) => {
+        state.loading = false;
+      });
 
-    builder.addCase(unblockUser.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(unblockUser.fulfilled, (state, action) => {
-      state.loading = false;
-      if (action.payload.success) {
-        state.user.blocked = state.user.blocked.filter(
-          (user) => user !== action.payload.data.unblockUserId
-        );
-      }
-    });
-    builder.addCase(unblockUser.rejected, (state) => {
-      state.loading = false;
-    });
+    builder
+      .addCase(unblockUser.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(unblockUser.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload.success) {
+          state.user.blocked = state.user.blocked.filter(
+            (user) => user !== action.payload.data.unblockUserId
+          );
+        }
+      })
+      .addCase(unblockUser.rejected, (state) => {
+        state.loading = false;
+      });
+
+    builder
+      .addCase(searchUsers.pending, (state) => {
+        state.skeletonLoading = true;
+      })
+      .addCase(searchUsers.fulfilled, (state, action) => {
+        state.skeletonLoading = false;
+        if (action.payload.success) {
+          state.searchResults = action.payload.data;
+        } else {
+          state.searchResults = [];
+        }
+      })
+      .addCase(searchUsers.rejected, (state) => {
+        state.skeletonLoading = false;
+      });
 
     // builder.addMatcher(
     //   (action) => action.type.endsWith("fulfilled"),

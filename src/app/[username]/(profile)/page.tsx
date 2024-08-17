@@ -4,41 +4,28 @@ import Image from "next/image";
 import React from "react";
 import { Heart, MessageSquareText, Image as PostImage } from "lucide-react";
 import Link from "next/link";
+import { useAppDispatch, useAppSelector } from "@/lib/store/store";
+import { getUserPosts } from "@/lib/store/features/slices/postSlice";
 
 function Page() {
-  const [loading, setLoading] = React.useState(false);
-  const [posts, setPosts] = React.useState([
-    {
-      _id: "0",
-      link: "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_90/v1715866646/cld-sample-4.jpg",
-      likesCount: 3,
-      commentsCount: 5,
-    },
-    {
-      _id: "1",
-      link: "https://images.pexels.com/photos/2449600/pexels-photo-2449600.png?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1",
-      likesCount: 4,
-      commentsCount: 1,
-    },
-    {
-      _id: "2",
-      link: "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_90/v1715866646/cld-sample-4.jpg",
-      likesCount: 12,
-      commentsCount: 5,
-    },
-    {
-      _id: "3",
-      link: "https://images.pexels.com/photos/2449600/pexels-photo-2449600.png?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1",
-      likesCount: 20,
-      commentsCount: 10,
-    },
-  ]);
+  const dispatch = useAppDispatch();
+  const { user, skeletonLoading: userLoading } = useAppSelector(
+    (state) => state.user
+  );
+  const { posts, skeletonLoading: postLoading } = useAppSelector(
+    (state) => state.post
+  );
+
+  React.useEffect(() => {
+    if (!user._id) return;
+    dispatch(getUserPosts(user._id));
+  }, [dispatch, getUserPosts, user._id]);
   return (
     <div className="flex items-center justify-start flex-wrap flex-row w-full">
-      {loading ? (
+      {userLoading || postLoading ? (
         Array.from({ length: 6 }).map((_, i) => {
           return (
-            <div className="lg:w-1/4 w-1/3 p-1" key={i}>
+            <div className="lg:w-1/4 w-1/3 aspect-square p-1" key={i}>
               <Skeleton className="h-full w-full" />
             </div>
           );
@@ -47,11 +34,11 @@ function Page() {
         posts.map((post, index) => (
           <Link
             href={`/post/${post._id}`}
-            className="lg:w-1/4 w-1/3 p-1 aspect-square relative"
+            className="lg:w-1/4 w-1/3 p-1 aspect-square relative select-none"
             key={index}
           >
             <Image
-              src={post.link}
+              src={post.media[0]}
               width="300"
               height="300"
               className="w-full h-full object-cover rounded-sm select-none pointer-events-none"

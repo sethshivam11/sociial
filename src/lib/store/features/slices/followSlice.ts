@@ -6,50 +6,55 @@ const initialState: FollowSliceI = {
   followings: [],
   followers: [],
   loading: false,
-  skeletonLoading: false,
+  skeletonLoading: true,
 };
 
 export const followUser = createAsyncThunk(
   "follow/followUser",
-  async (userId: string) => {
-    const parsed = await fetch(`/api/v1/follow/new/${userId}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+  async ({
+    userId = "",
+    username = "",
+  }: {
+    userId?: string;
+    username?: string;
+  }) => {
+    const parsed = await fetch(
+      `/api/v1/follow/new?${
+        username ? `username=${username}` : `userId=${userId}`
+      }`
+    );
     return parsed.json();
   }
 );
 
 export const unfollowUser = createAsyncThunk(
   "follow/unfollowUser",
-  async (userId: string) => {
-    const parsed = await fetch(`/api/v1/follow/unfollow/${userId}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+  async ({
+    userId = "",
+    username = "",
+  }: {
+    userId?: string;
+    username?: string;
+  }) => {
+    if (!userId || !username) return;
+    const parsed = await fetch(
+      `/api/v1/follow/unfollow?${
+        username ? `username=${username}` : `userId=${userId}`
+      }`
+    );
     return parsed.json();
   }
 );
 
-export const getFollowers = createAsyncThunk(
-  "follow/followers",
-  async () => {
-    const parsed = await fetch("/api/v1/follow/followers");
-    return parsed.json();
-  }
-);
+export const getFollowers = createAsyncThunk("follow/followers", async () => {
+  const parsed = await fetch("/api/v1/follow/followers");
+  return parsed.json();
+});
 
-export const getFollowings = createAsyncThunk(
-  "follow/following",
-  async () => {
-    const parsed = await fetch("/api/v1/follow/following");
-    return parsed.json();
-  }
-);
+export const getFollowings = createAsyncThunk("follow/following", async () => {
+  const parsed = await fetch("/api/v1/follow/following");
+  return parsed.json();
+});
 
 const followSlice = createSlice({
   name: "follow",
@@ -61,7 +66,7 @@ const followSlice = createSlice({
     });
     builder.addCase(followUser.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload.success) {
+      if (action.payload?.success) {
         state.followings.push(action.payload.data.follow);
       }
     });
@@ -74,8 +79,12 @@ const followSlice = createSlice({
     });
     builder.addCase(unfollowUser.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload.success) {
-        state.followings.push(action.payload.data.unfollow);
+      if (action.payload?.success) {
+        state.followings = state.followings.filter(
+          (user) =>
+            user.username !== action.meta.arg.username ||
+            user._id !== action.meta.arg.userId
+        );
       }
     });
     builder.addCase(unfollowUser.rejected, (state) => {

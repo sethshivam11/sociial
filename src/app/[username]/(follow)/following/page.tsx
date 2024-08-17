@@ -1,17 +1,22 @@
 "use client";
 import React from "react";
-import { Search, Users2 } from "lucide-react";
+import { Loader2, Search, Users2 } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { nameFallback } from "@/lib/helpers";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { Input } from "@/components/ui/input";
-import { getFollowings } from "@/lib/store/features/slices/followSlice";
-import { toast } from "@/components/ui/use-toast";
+import {
+  getFollowings,
+  unfollowUser,
+} from "@/lib/store/features/slices/followSlice";
+import FriendsLoading from "@/components/skeletons/FriendsLoading";
 
 function Page() {
   const dispatch = useAppDispatch();
-  const { followings } = useAppSelector((state) => state.follow);
+  const { followings, skeletonLoading, loading } = useAppSelector(
+    (state) => state.follow
+  );
   const [searchResults, setSearchResults] = React.useState(followings);
   const [search, setSearch] = React.useState("");
 
@@ -26,6 +31,8 @@ function Page() {
             return follower;
         })
       );
+    } else {
+      setSearchResults(followings);
     }
   }, [search]);
 
@@ -36,9 +43,9 @@ function Page() {
     }
   }, []);
 
-  // React.useEffect(() => {
-  //   fetchFollowings();
-  // }, [fetchFollowings]);
+  React.useEffect(() => {
+    fetchFollowings();
+  }, [fetchFollowings]);
 
   return (
     <>
@@ -48,6 +55,7 @@ function Page() {
           <Input
             placeholder="Search"
             value={search}
+            name="search"
             onChange={(e) => setSearch(e.target.value)}
             inputMode="text"
             autoComplete="off"
@@ -55,11 +63,13 @@ function Page() {
           />
         </div>
       </div>
-      {searchResults.length ? (
+      {skeletonLoading ? (
+        <FriendsLoading />
+      ) : searchResults.length ? (
         <div className="flex flex-col gap-3 px-3 h-fit overflow-y-auto overflow-x-hidden pb-2">
           {searchResults.map((followee, index) => (
             <div
-              className="flex items-start justify-start hover:bg-stone-200 hover:dark:bg-stone-800 rounded-lg p-2"
+              className="flex items-start justify-start sm:hover:bg-stone-200 sm:hover:dark:bg-stone-800 rounded-lg p-2"
               key={index}
             >
               <Link
@@ -80,15 +90,15 @@ function Page() {
                 </div>
               </Link>
               <div className="flex items-center justify-center bg-primary-500 text-white rounded-full w-fit h-full my-auto">
-                {followings.includes(followee) ? (
-                  <button className="bg-stone-500 w-20 h-7 text-center text-white rounded-full text-sm transition-colors hover:bg-stone-600 disabled:bg-stone-400 ml-4">
-                    Unfollow
-                  </button>
-                ) : (
-                  <button className="bg-blue-500 w-16 h-7 text-center text-white rounded-full text-sm transition-colors hover:bg-blue-700 disabled:bg-blue-400 ml-4">
-                    Follow
-                  </button>
-                )}
+                <button
+                  className="bg-stone-500 w-20 h-7 text-center text-white rounded-full text-sm transition-colors hover:bg-stone-600 disabled:bg-stone-400 ml-4"
+                  onClick={() =>
+                    dispatch(unfollowUser({ username: followee.username }))
+                  }
+                  disabled={loading}
+                >
+                  {loading ? <Loader2 className="animate-spin" /> : "Unfollow"}
+                </button>
               </div>
             </div>
           ))}

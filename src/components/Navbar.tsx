@@ -54,8 +54,11 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
-import { useAppDispatch } from "@/lib/store/store";
-import { logOutUser } from "@/lib/store/features/slices/userSlice";
+import { useAppDispatch, useAppSelector } from "@/lib/store/store";
+import {
+  getLoggedInUser,
+  logOutUser,
+} from "@/lib/store/features/slices/userSlice";
 import { toast } from "./ui/use-toast";
 import ReportDialog from "./ReportDialog";
 
@@ -78,13 +81,7 @@ function Navbar() {
     "/add-story",
   ];
   const [unreadMessageCount, newNotifications] = [0, false];
-  const user = {
-    _id: "1",
-    fullName: "Shivam",
-    avatar:
-      "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
-    username: "sethshivam11",
-  };
+  const { user } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
 
   function handleLogout() {
@@ -107,12 +104,22 @@ function Navbar() {
             description: "Looks like you have slow or no internet connection",
             variant: "destructive",
           });
+        } else {
+          toast({
+            title: "Error",
+            description: err.message || "Something went wrong!",
+            variant: "destructive",
+          });
         }
       })
       .finally(() => {
         setLogOutDialog(false);
       });
   }
+
+  React.useEffect(() => {
+    dispatch(getLoggedInUser());
+  }, [getLoggedInUser, dispatch]);
 
   return (
     <nav
