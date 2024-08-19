@@ -264,7 +264,7 @@ export const searchUsers = createAsyncThunk(
         message: "Not Found",
         status: 404,
       };
-    const parsed = await fetch(`/api/v1/users/search?username=${query.trim()}`);
+    const parsed = await fetch(`/api/v1/users/search?query=${query.trim()}`);
     return parsed.json();
   }
 );
@@ -505,12 +505,13 @@ export const userSlice = createSlice({
         state.skeletonLoading = false;
         if (action.payload.success) {
           state.searchResults = action.payload.data;
-        } else {
+        } else if (action.payload.message === "No users found") {
           state.searchResults = [];
         }
       })
       .addCase(searchUsers.rejected, (state) => {
         state.skeletonLoading = false;
+        state.searchResults = [];
       });
 
     // builder.addMatcher(
@@ -537,3 +538,4 @@ export const userSlice = createSlice({
 });
 
 export default userSlice.reducer;
+export const { setPage } = userSlice.actions;

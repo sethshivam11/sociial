@@ -6,7 +6,7 @@ const initialState: FollowSliceI = {
   followings: [],
   followers: [],
   loading: false,
-  skeletonLoading: true,
+  skeletonLoading: false,
 };
 
 export const followUser = createAsyncThunk(

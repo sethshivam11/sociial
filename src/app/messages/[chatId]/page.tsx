@@ -797,6 +797,11 @@ function Page({ params }: { params: { chatId: string } }) {
                 username: "shadcn",
                 avatar: "https://github.com/shadcn.png",
               },
+              {
+                ...recipent,
+                username: "shadcn",
+                avatar: "https://github.com/shadcn.png",
+              },
             ]}
             user={user}
             chatId={chatId}

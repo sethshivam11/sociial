@@ -407,13 +407,10 @@ function Messages({ children }: { children: React.ReactNode }) {
                                 className="flex items-center gap-3 rounded-lg w-full cursor-pointer"
                               >
                                 <div className="w-8 h-8">
-                                  <Image
-                                    width={32}
-                                    height={32}
-                                    src={follower.avatar}
-                                    alt=""
-                                    className="w-full h-full rounded-full pointer-events-none select-none"
-                                  />
+                                  <Avatar className="w-full h-full rounded-full pointer-events-none select-none">
+                                    <AvatarImage src={follower.avatar} />
+                                    <AvatarFallback>{nameFallback(follower.fullName)}</AvatarFallback>
+                                  </Avatar>
                                 </div>
                                 <div>
                                   <p className="text-lg leading-5">
@@ -511,7 +508,7 @@ function Messages({ children }: { children: React.ReactNode }) {
               </DialogContent>
             </Dialog>
           </div>
-          <ScrollArea className="py-3 w-full p-2.5 pb-10">
+          <ScrollArea className="py-3 w-full p-2.5 max-sm:mb-10">
             {chatsLoading ? (
               <ChatsLoadingSkeleton />
             ) : chats.length > 1 ? (

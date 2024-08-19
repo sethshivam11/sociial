@@ -38,7 +38,7 @@ export const createFeed = createAsyncThunk("posts/createFeed", async () => {
 export const fetchMoreFeed = createAsyncThunk(
   "posts/fetchMoreFeed",
   async (page: number) => {
-    const parsed = await fetch(`/api/v1/posts/createFeed?page=${page}`);
+    const parsed = await fetch(`/api/v1/posts/feed?page=${page}`);
     return parsed.json();
   }
 );
@@ -54,7 +54,7 @@ export const exploreFeed = createAsyncThunk(
 export const getPost = createAsyncThunk(
   "posts/getPost",
   async (postId: string) => {
-    const parsed = await fetch(`/api/v1/posts/${postId}`);
+    const parsed = await fetch(`/api/v1/posts/post/${postId}`);
     return parsed.json();
   }
 );

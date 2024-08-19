@@ -3,14 +3,33 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/use-toast";
 import { useForm } from "react-hook-form";
 import { Label } from "./ui/label";
-import { Bell, MoreVertical, Palette, Users } from "lucide-react";
+import { Bell, MoreVertical, Palette, UserPlus, Users } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { nameFallback } from "@/lib/helpers";
 import Link from "next/link";
 import { Button } from "./ui/button";
-import { Dialog, DialogClose, DialogContent, DialogTrigger } from "./ui/dialog";
-import Image from "next/image";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
 import ReportDialog from "./ReportDialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "./ui/alert-dialog";
+import { ScrollArea } from "./ui/scroll-area";
+import { useAppSelector } from "@/lib/store/store";
+import { Checkbox } from "./ui/checkbox";
+import FollowersLoadingSkeleton from "./skeletons/FollowersLoading";
 
 interface Theme {
   name: string;
@@ -27,7 +46,6 @@ interface Props {
     followersCount: number;
     postsCount: number;
     followingCount: number;
-    isPremium?: boolean;
   }[];
   user: {
     id: string;
@@ -51,6 +69,10 @@ function ChatInfo({
   theme,
   setInfoOpen,
 }: Props) {
+  const { skeletonLoading, followers } = useAppSelector(
+    (state) => state.follow
+  );
+  const [participants, setParticipants] = React.useState<typeof followers>([]);
   const [switchLoading, setSwitchLoading] = React.useState(false);
   const form = useForm({
     defaultValues: {
@@ -60,6 +82,10 @@ function ChatInfo({
   const { register, watch, setValue } = form;
   const muteNotifications = watch("muteNotifications");
   const [reportDialog, setReportDialog] = React.useState(false);
+  const [removeDialog, setRemoveDialog] = React.useState({
+    open: false,
+    username: "",
+  });
   function handleSwitchChange() {
     setSwitchLoading(true);
     setTimeout(() => {
@@ -75,7 +101,7 @@ function ChatInfo({
   }
   return (
     <div className="flex flex-col items-start justify-start w-full max-h-[100svh] gap-2">
-      {recipents.length === 1 ? (
+      {recipents.length === 1 && (
         <>
           <h3 className="text-lg mx-3">Members</h3>
           <Link
@@ -89,30 +115,17 @@ function ChatInfo({
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col items-start justify-start gap-0">
-              <span className="text-lg font-medium leading-4 flex items-center justify-start gap-1">
+              <span className="text-lg font-medium leading-4">
                 {recipents[0].fullName}
-                {recipents[0].isPremium ? (
-                  <Image
-                    src="/icons/premium.svg"
-                    width="20"
-                    height="20"
-                    alt=""
-                    className="w-5"
-                  />
-                ) : (
-                  ""
-                )}
               </span>
               <span className="text-sm text-stone-500">
                 @{recipents[0].username}
               </span>
             </div>
           </Link>
-          <hr className="bg-stone-500 w-full" />
         </>
-      ) : (
-        ""
       )}
+      <hr className="bg-stone-500 w-full" />
       <div className="flex items-center justify-between text-lg w-full py-3 gap-4 px-4 hover:bg-stone-100 hover:dark:bg-stone-900 rounded-sm">
         <Label
           htmlFor="mute-notifications"
@@ -158,9 +171,7 @@ function ChatInfo({
           </div>
         </DialogContent>
       </Dialog>
-      {recipents.length === 1 ? (
-        ""
-      ) : (
+      {recipents.length !== 1 && (
         <Dialog>
           <DialogTrigger className="flex items-center justify-start text-base gap-4 py-3 px-4 w-full hover:bg-stone-100 hover:dark:bg-stone-900 rounded-sm">
             <Users /> Members
@@ -170,15 +181,82 @@ function ChatInfo({
             className="rounded-xl"
           >
             <div className="flex flex-col py-4 items-center justify-center">
-              <h3 className="text-lg font-semibold mb-4">Members</h3>
+              <h3 className="text-lg font-semibold mb-2">Members</h3>
               <div className="px-4 w-full my-2">
-                <div className="flex items-center justify-between">
-                  {recipents.length > 1 ? (
-                    <button className="text-blue-500">Add People</button>
-                  ) : (
-                    ""
-                  )}
-                </div>
+                <Dialog>
+                  <DialogTrigger className="flex items-center justify-between w-full hover:bg-stone-100 hover:dark:bg-stone-900 rounded-lg">
+                    <div className="flex items-center justify-start gap-3 w-full h-full px-5 py-3">
+                      <UserPlus size="30" />
+                      <h3 className="text-lg font-medium leading-4">
+                        Add Members
+                      </h3>
+                    </div>
+                  </DialogTrigger>
+                  <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
+                    <DialogTitle>Add Members</DialogTitle>
+                    <ScrollArea className="h-96 min-h-10 p-2">
+                      {skeletonLoading ? (
+                        <FollowersLoadingSkeleton />
+                      ) : (
+                        followers.map((follower, index) => {
+                          return (
+                            <div
+                              className="flex items-center justify-between w-full px-2 mb-3 gap-3 rounded-lg"
+                              key={index}
+                            >
+                              <Label
+                                htmlFor={`follower-${index}`}
+                                className="flex items-center gap-3 rounded-lg w-full cursor-pointer"
+                              >
+                                <Avatar className="w-full h-full rounded-full pointer-events-none select-none">
+                                  <AvatarImage src={follower.avatar} />
+                                  <AvatarFallback>
+                                    {nameFallback(follower.fullName)}
+                                  </AvatarFallback>
+                                </Avatar>
+
+                                <div>
+                                  <p className="text-lg leading-5">
+                                    {follower.fullName}
+                                  </p>
+                                  <p className="text-sm text-gray-500">
+                                    @{follower.username}
+                                  </p>
+                                </div>
+                              </Label>
+                              <Checkbox
+                                id={`follower-${index}`}
+                                className="rounded-full w-5 h-5 data-[state=checked]:bg-blue-500 data-[state=checked]:text-white border-2 data-[state=checked]:border-0"
+                                onCheckedChange={(checked) => {
+                                  checked
+                                    ? setParticipants([
+                                        ...participants,
+                                        follower,
+                                      ])
+                                    : setParticipants((prevParticipants) =>
+                                        prevParticipants.filter(
+                                          (user) =>
+                                            user.username !== follower.username
+                                        )
+                                      );
+                                }}
+                              />
+                            </div>
+                          );
+                        })
+                      )}
+                    </ScrollArea>
+                    <DialogFooter className="max-sm:gap-2">
+                      <Button
+                        type="submit"
+                        className="rounded-xl"
+                        disabled={participants.length < 1}
+                      >
+                        Add
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
                 <div className={`w-full`}>
                   {recipents.map((recipent, index) => (
                     <div
@@ -221,12 +299,10 @@ function ChatInfo({
         className="p-2 w-full bg-transparent
        flex flex-col gap-2"
       >
-        {recipents.length === 1 ? (
+        {recipents.length === 1 && (
           <Button variant="ghost" className="w-full">
             Block @{recipents[0].username}
           </Button>
-        ) : (
-          ""
         )}
         <Button
           className="w-full text-red-600  hover:text-red-600"
@@ -245,7 +321,7 @@ function ChatInfo({
           className="w-full text-red-600 hover:text-red-600"
           variant="ghost"
         >
-          Delete Conversation
+          Leave Conversation
         </Button>
       </div>
     </div>
