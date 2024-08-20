@@ -1,5 +1,5 @@
 "use client";
-import { MoreHorizontal } from "lucide-react";
+import { Loader2, MoreHorizontal } from "lucide-react";
 import React from "react";
 import {
   Dialog,
@@ -17,10 +17,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import Image from "next/image";
 import { useToast } from "./ui/use-toast";
 import { usePathname, useRouter } from "next/navigation";
 import ReportDialog from "./ReportDialog";
+import { useAppDispatch, useAppSelector } from "@/lib/store/store";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { nameFallback } from "@/lib/helpers";
+import { deletePost } from "@/lib/store/features/slices/postSlice";
+import { unfollowUser } from "@/lib/store/features/slices/followSlice";
 
 interface Props {
   user: {
@@ -35,16 +39,18 @@ interface Props {
 
 function PostOptions({ user, postId, isVideo }: Props) {
   const { toast } = useToast();
+  const dispatch = useAppDispatch();
+  const { user: currentUser, loading: userLoading } = useAppSelector(
+    (state) => state.user
+  );
+  const { loading: postLoading } = useAppSelector((state) => state.post);
   const router = useRouter();
   const location = usePathname();
   const [unfollowDialog, setUnfollowDialog] = React.useState(false);
+  const [deletePostDialog, setDeletePostDialog] = React.useState(false);
   const [reportDialog, setReportDialog] = React.useState(false);
 
-  function unfollow(username: string) {
-    console.log(`Unfollowed user ${username}`);
-  }
-
-  async function copyLink(username: string, postId: string) {
+  async function copyLink(postId: string) {
     const link = `${process.env.NEXT_PUBLIC_LINK || ""}/post/${postId}`;
     await navigator.clipboard.writeText(link);
     toast({
@@ -66,15 +72,24 @@ function PostOptions({ user, postId, isVideo }: Props) {
           >
             Report
           </DialogClose>
-          <DialogClose
-            className="text-red-500 w-full md:px-20 py-1"
-            onClick={() => setUnfollowDialog(true)}
-          >
-            Unfollow
-          </DialogClose>
+          {user._id === currentUser._id ? (
+            <DialogClose
+              className="text-red-500 w-full md:px-20 py-1"
+              onClick={() => setDeletePostDialog(true)}
+            >
+              Delete
+            </DialogClose>
+          ) : (
+            <DialogClose
+              className="text-red-500 w-full md:px-20 py-1"
+              onClick={() => setUnfollowDialog(true)}
+            >
+              Unfollow
+            </DialogClose>
+          )}
           <DialogClose
             className="w-full md:px-20 py-1"
-            onClick={() => copyLink(user.username, postId)}
+            onClick={() => copyLink(postId)}
           >
             Copy link
           </DialogClose>
@@ -99,17 +114,21 @@ function PostOptions({ user, postId, isVideo }: Props) {
           <DialogClose className="w-full md:px-20 py-1">Cancel</DialogClose>
         </DialogContent>
       </Dialog>
-      <AlertDialog open={unfollowDialog}>
+      <AlertDialog
+        open={unfollowDialog}
+        onOpenChange={(open) => {
+          if (!userLoading) {
+            setUnfollowDialog(open);
+          }
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              <Image
-                width="80"
-                height="80"
-                className="mx-auto select-none pointer-events-none"
-                src={user.avatar}
-                alt=""
-              />
+              <Avatar className="mx-auto select-none pointer-events-none w-24 h-24">
+                <AvatarImage src={user.avatar} className="" />
+                <AvatarFallback>{nameFallback(user.fullName)}</AvatarFallback>
+              </Avatar>
             </AlertDialogTitle>
             <AlertDialogDescription className="text-center">
               Unfollow&nbsp;
@@ -120,22 +139,52 @@ function PostOptions({ user, postId, isVideo }: Props) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex w-full sm:flex-col-reverse sm:gap-2 sm:justify-center items-center sm:space-x-0">
-            <AlertDialogCancel
-              autoFocus={false}
-              className="w-full"
-              onClick={() => setUnfollowDialog(false)}
-            >
+            <AlertDialogCancel className="w-full">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               className="w-full bg-destructive text-white hover:bg-destructive/90"
-              onClick={() => unfollow(user.username)}
+              onClick={() =>
+                dispatch(unfollowUser({ username: user.username }))
+              }
             >
-              Unfollow
+              {userLoading ? (
+                <Loader2 className="animate-spin mx-auto" />
+              ) : (
+                "Unfollow"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <AlertDialog
+        open={deletePostDialog}
+        onOpenChange={() => {
+          if (!postLoading) {
+            setDeletePostDialog(!deletePostDialog);
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Post</AlertDialogTitle>
+            <AlertDialogDescription className="text-center">
+              Are you sure want to delete this post? This action cannot be
+              reverted.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel autoFocus={false}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive hover:bg-destructive/80 text-white"
+              onClick={() => dispatch(deletePost(postId))}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <ReportDialog
         open={reportDialog}
         setOpen={setReportDialog}

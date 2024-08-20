@@ -32,10 +32,11 @@ export interface ProfileI {
 
 export interface PostI {
   _id: string;
-  user: string;
+  user: BasicUserI;
   caption: string;
   media: string[];
   kind: "image" | "video";
+  likes: string[];
   likesCount: number;
   commentsCount: number;
 }
@@ -158,13 +159,14 @@ export interface FollowSliceI {
 
 export interface PostSliceI {
   posts: PostI[];
-  post: {
+  explorePosts: PostI[];
+  post:  {
     _id: string;
     user: ProfileI;
     caption: string;
     media: string[];
     kind: "image" | "video";
-    liked: boolean;
+    likes: string[];
     likesCount: number;
     commentsCount: number;
     morePosts: PostI[];
@@ -173,6 +175,7 @@ export interface PostSliceI {
   skeletonLoading: boolean;
   loadingMore: boolean;
   maxPosts: number;
+  maxExplorePosts: number;
   page: number;
 }
 

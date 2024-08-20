@@ -3,6 +3,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 const initialState: PostSliceI = {
   posts: [],
+  explorePosts: [],
   post: {
     _id: "",
     user: {
@@ -15,7 +16,7 @@ const initialState: PostSliceI = {
       followersCount: 0,
       followingCount: 0,
     },
-    liked: false,
+    likes: [],
     caption: "",
     media: [],
     kind: "image",
@@ -28,15 +29,11 @@ const initialState: PostSliceI = {
   loadingMore: false,
   page: 1,
   maxPosts: 0,
+  maxExplorePosts: 0,
 };
 
-export const createFeed = createAsyncThunk("posts/createFeed", async () => {
-  const parsed = await fetch("/api/v1/posts/createFeed");
-  return parsed.json();
-});
-
-export const fetchMoreFeed = createAsyncThunk(
-  "posts/fetchMoreFeed",
+export const getFeed = createAsyncThunk(
+  "posts/getFeed",
   async (page: number) => {
     const parsed = await fetch(`/api/v1/posts/feed?page=${page}`);
     return parsed.json();
@@ -99,7 +96,7 @@ export const deletePost = createAsyncThunk(
 
 export const likePost = createAsyncThunk(
   "posts/like",
-  async (postId: string) => {
+  async ({ postId, userId }: { postId: string; userId: string }) => {
     const parsed = await fetch(`/api/v1/posts/like/${postId}`);
     return parsed.json();
   }
@@ -128,14 +125,6 @@ export const getUserPosts = createAsyncThunk(
   }
 );
 
-export const getMoreUserPosts = createAsyncThunk(
-  "posts/getMoreUserPosts",
-  async ({ userId, page }: { userId: string; page: number }) => {
-    const parsed = await fetch(`/api/v1/posts/user/${userId}?page=${page}`);
-    return parsed.json();
-  }
-);
-
 const postSlice = createSlice({
   name: "posts",
   initialState,
@@ -146,32 +135,19 @@ const postSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(createFeed.pending, (state) => {
+      .addCase(getFeed.pending, (state) => {
         state.skeletonLoading = true;
       })
-      .addCase(createFeed.fulfilled, (state, action) => {
+      .addCase(getFeed.fulfilled, (state, action) => {
         state.skeletonLoading = false;
         if (action.payload.success) {
-          state.posts = action.payload.data.posts;
+          state.posts = [...state.posts, ...action.payload.data.posts];
           state.maxPosts = action.payload.data.max;
+          state.page = action.payload.data.page;
         }
       })
-      .addCase(createFeed.rejected, (state) => {
+      .addCase(getFeed.rejected, (state) => {
         state.skeletonLoading = false;
-      });
-
-    builder
-      .addCase(fetchMoreFeed.pending, (state) => {
-        state.loadingMore = true;
-      })
-      .addCase(fetchMoreFeed.fulfilled, (state, action) => {
-        state.loadingMore = false;
-        if (action.payload.success) {
-          state.posts.push(...action.payload.data.posts);
-        }
-      })
-      .addCase(fetchMoreFeed.rejected, (state) => {
-        state.loadingMore = false;
       });
 
     builder
@@ -181,7 +157,9 @@ const postSlice = createSlice({
       .addCase(exploreFeed.fulfilled, (state, action) => {
         state.loadingMore = false;
         if (action.payload.success) {
-          state.posts.push(...action.payload.data.posts);
+          state.explorePosts = [...state.explorePosts, ...action.payload.data.posts];
+          state.maxExplorePosts = action.payload.max;
+          state.page = action.payload.data.page;
         }
       })
       .addCase(exploreFeed.rejected, (state) => {
@@ -234,22 +212,28 @@ const postSlice = createSlice({
       });
 
     builder
-      .addCase(likePost.pending, (state) => {
+      .addCase(likePost.pending, (state, action) => {
         state.loading = true;
+        state.posts.map((post) => {
+          if (post._id === action.meta.arg.postId) {
+            post.likes.push(action.meta.arg.userId);
+            post.likesCount += 1;
+          }
+          return post;
+        });
       })
-      .addCase(likePost.fulfilled, (state, action) => {
+      .addCase(likePost.fulfilled || likePost.rejected, (state, action) => {
         state.loading = false;
-        if (action.payload.success) {
-          state.posts.map((post) => {
-            if (post._id === action.payload.data._id) {
-              post.likesCount += 1;
-            }
-            return post;
-          });
-        }
-      })
-      .addCase(likePost.rejected, (state) => {
-        state.loading = false;
+        if (action.payload.success) return;
+        state.posts.map((post) => {
+          if (post._id === action.payload.data._id) {
+            post.likes = post.likes.filter(
+              (like) => like !== action.meta.arg.userId
+            );
+            post.likesCount -= 1;
+          }
+          return post;
+        });
       });
 
     builder
@@ -284,20 +268,6 @@ const postSlice = createSlice({
       })
       .addCase(getUserPosts.rejected, (state) => {
         state.skeletonLoading = false;
-      });
-
-    builder
-      .addCase(getMoreUserPosts.pending, (state) => {
-        state.loadingMore = true;
-      })
-      .addCase(getMoreUserPosts.fulfilled, (state, action) => {
-        state.loadingMore = false;
-        if (action.payload.success) {
-          state.posts.push(...action.payload.data.posts);
-        }
-      })
-      .addCase(getMoreUserPosts.rejected, (state) => {
-        state.loadingMore = false;
       });
   },
 });

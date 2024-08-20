@@ -25,6 +25,7 @@ function Page({ params }: { params: { postId: string } }) {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { post, skeletonLoading } = useAppSelector((state) => state.post);
+  const { user } = useAppSelector((state) => state.user);
 
   React.useEffect(() => {
     dispatch(getPost(params.postId));
@@ -73,7 +74,7 @@ function Page({ params }: { params: { postId: string } }) {
                     <CarouselItem key={index} className="relative">
                       <div
                         className={`absolute w-full h-full items-center justify-center ${
-                          post.liked ? "flex" : "hidden"
+                          post.likes?.includes(user._id) ? "flex" : "hidden"
                         }`}
                       >
                         <Heart
@@ -113,13 +114,19 @@ function Page({ params }: { params: { postId: string } }) {
             </Carousel>
             <div className="flex justify-between select-none">
               <div className="flex gap-3">
-                <button title={post.liked ? "Unlike" : "Like"}>
+                <button
+                  title={post.likes?.includes(user._id) ? "Unlike" : "Like"}
+                >
                   <Heart
                     size="30"
                     className={`${
-                      post.liked ? "text-rose-500" : "sm:hover:opacity-60"
+                      post.likes?.includes(user._id)
+                        ? "text-rose-500"
+                        : "sm:hover:opacity-60"
                     } transition-all active:scale-110`}
-                    fill={post.liked ? "rgb(244 63 94)" : "none"}
+                    fill={
+                      post.likes?.includes(user._id) ? "rgb(244 63 94)" : "none"
+                    }
                   />
                 </button>
                 <Comment user={post.user} commentsCount={post.commentsCount} />
@@ -158,7 +165,10 @@ function Page({ params }: { params: { postId: string } }) {
                 {nameFallback(post.user.fullName)}
               </AvatarFallback>
             </Avatar>
-            <Link href={`/${post.user.username}`} className="flex flex-col items-center justify-center gap-1">
+            <Link
+              href={`/${post.user.username}`}
+              className="flex flex-col items-center justify-center gap-1"
+            >
               <h1 className="text-2xl tracking-tight font-bold mt-4">
                 {post.user.fullName}
               </h1>
