@@ -1,3 +1,4 @@
+import StoriesLoading from "@/components/skeletons/StoriesLoading";
 import dynamic from "next/dynamic";
 
 const MobileNav = dynamic(() => import("@/components/MobileNav"));

@@ -2,11 +2,8 @@ import React from "react";
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from "./ui/dialog";
 import {
   FileIcon,
-  ImageIcon,
-  MicIcon,
   PlusCircle,
   SendHorizonal,
-  VideoIcon,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";

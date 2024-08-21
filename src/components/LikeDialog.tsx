@@ -4,10 +4,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { nameFallback } from "@/lib/helpers";
 import Link from "next/link";
 import { ScrollArea } from "./ui/scroll-area";
-import { HeartOff, Loader2 } from "lucide-react";
+import { History, Loader2 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
-import { getLikes } from "@/lib/store/features/slices/likeSlice";
 import { toast } from "./ui/use-toast";
+import { fetchLikes, resetLikes } from "@/lib/store/features/slices/postSlice";
 
 function LikeDialog({
   likesCount,
@@ -17,15 +17,15 @@ function LikeDialog({
   postId: string;
 }) {
   const [dialogOpen, setDialogOpen] = React.useState(false);
-  const { likes, loading } = useAppSelector((state) => state.like);
+  const { likes, loading } = useAppSelector((state) => state.post);
   const dispatch = useAppDispatch();
 
-  const fetchLikes = React.useCallback(async () => {
-    const response = await dispatch(getLikes(postId));
+  const getLikes = React.useCallback(async () => {
+    if(likesCount === 0) return;
+    const response = await dispatch(fetchLikes(postId));
     if (
-      !response.payload ||
-      !response.payload?.data ||
-      !response.payload?.success
+      !response.payload?.success &&
+      response.payload?.message !== "No likes found"
     ) {
       toast({
         title: "Something went wrong!",
@@ -33,17 +33,19 @@ function LikeDialog({
           response.payload?.message ||
           "Failed to fetch likes, Please try again",
       });
+    } else if (response.payload?.message === "No likes found") {
+      dispatch(resetLikes());
     }
   }, []);
 
-  // React.useEffect(() => {
-  //   if (dialogOpen) fetchLikes();
-  // }, [fetchLikes, dialogOpen]);
+  React.useEffect(() => {
+    if (dialogOpen) getLikes();
+  }, [fetchLikes, dialogOpen]);
 
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger>
-        {likesCount <= 1 ? "1 like" : `${likesCount} likes`}
+        {likesCount <= 1 ? `${likesCount} like` : `${likesCount} likes`}
       </DialogTrigger>
       <DialogContent
         className="w-fit max-sm:w-full"
@@ -55,14 +57,14 @@ function LikeDialog({
             <Loader2 className="animate-spin" size="30" />
           </div>
         ) : (
-          <ScrollArea className="h-96 p-4">
+          <ScrollArea className="h-96 sm:min-w-80 w-full px-2 pt-4">
             <div className="flex flex-col gap-2 h-full">
               {likes.length ? (
                 likes.map((like, index) => (
                   <Link
                     href={`/${like.username}`}
                     key={index}
-                    className="flex items-center space-x-2 w-full sm:hover:bg-stone-200 sm:hover:dark:bg-stone-800 p-1 rounded"
+                    className="flex items-center space-x-2 w-full sm:hover:bg-stone-200 sm:hover:dark:bg-stone-800 p-2 rounded-xl"
                   >
                     <Avatar>
                       <AvatarFallback>
@@ -80,7 +82,7 @@ function LikeDialog({
                 ))
               ) : (
                 <div className="w-full h-80 flex flex-col items-center justify-center gap-2">
-                  <HeartOff className="mx-auto" size="50" />
+                  <History className="mx-auto" size="50" />
                   <p className="text-xl font-bold tracking-tight">
                     No likes yet
                   </p>

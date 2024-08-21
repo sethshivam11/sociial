@@ -1,6 +1,7 @@
 "use client";
 import { UserSliceI } from "@/types/types";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { store, useAppDispatch } from "../../store";
 
 const initialState: UserSliceI = {
   user: {
@@ -331,23 +332,23 @@ export const userSlice = createSlice({
       .addCase(resendVerificationCode.pending, (state) => {
         state.isSendingMail = true;
       })
-      .addCase(resendVerificationCode.fulfilled, (state) => {
-        state.isSendingMail = false;
-      })
-      .addCase(resendVerificationCode.rejected, (state) => {
-        state.isSendingMail = false;
-      });
+      .addCase(
+        resendVerificationCode.fulfilled || resendVerificationCode.rejected,
+        (state) => {
+          state.isSendingMail = false;
+        }
+      );
 
     builder
       .addCase(forgotPassword.pending, (state) => {
         state.loading = true;
       })
-      .addCase(forgotPassword.fulfilled, (state, action) => {
-        state.loading = false;
-      })
-      .addCase(forgotPassword.rejected, (state) => {
-        state.loading = false;
-      });
+      .addCase(
+        forgotPassword.fulfilled || forgotPassword.rejected,
+        (state, action) => {
+          state.loading = false;
+        }
+      );
 
     builder
       .addCase(getProfile.pending, (state) => {
@@ -387,10 +388,7 @@ export const userSlice = createSlice({
       .addCase(updatePassword.pending, (state) => {
         state.loading = true;
       })
-      .addCase(updatePassword.fulfilled, (state) => {
-        state.loading = false;
-      })
-      .addCase(updatePassword.rejected, (state) => {
+      .addCase(updatePassword.fulfilled || updatePassword.rejected, (state) => {
         state.loading = false;
       });
 
@@ -432,8 +430,20 @@ export const userSlice = createSlice({
           state.isLoggedIn = true;
           state.user = action.payload.data;
         }
+        if (!action.payload?.success) {
+          switch (action.payload?.message) {
+            case "Invalid token!" || "Token expired!":
+              localStorage.getItem("refreshToken") &&
+                store.dispatch(renewAccessToken());
+              break;
+            case "User not found":
+              localStorage.removeItem("accessToken");
+              localStorage.removeItem("refreshToken");
+              break;
+          }
+        }
       })
-      .addCase(getLoggedInUser.rejected, (state) => {
+      .addCase(getLoggedInUser.rejected, (state, action) => {
         state.skeletonLoading = false;
       });
 
@@ -513,27 +523,6 @@ export const userSlice = createSlice({
         state.skeletonLoading = false;
         state.searchResults = [];
       });
-
-    // builder.addMatcher(
-    //   (action) => action.type.endsWith("fulfilled"),
-    //   (
-    //     state,
-    //     action: PayloadAction<{
-    //       data: null;
-    //       success: boolean;
-    //       message: string;
-    //     }>
-    //   ) => {
-    //     if (!action.payload.success) {
-    //       const dispatch: AppDispatch = store.dispatch;
-    //       if (action.payload.message === "Invalid token!") {
-    //         dispatch(logOutUser());
-    //       } else if (action.payload.message === "Token expired!") {
-    //         dispatch(renewAccessToken());
-    //       }
-    //     }
-    //   }
-    // );
   },
 });
 

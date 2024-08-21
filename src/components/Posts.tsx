@@ -128,7 +128,7 @@ function Posts() {
     }
     const savedExplorePostsConsent =
       localStorage.getItem("explorePostsConsent") || "false";
-    if (savedExplorePostsConsent === "true") {
+    if (savedExplorePostsConsent !== "false") {
       setShowExplorePosts(true);
     } else {
       setShowExplorePosts(false);
@@ -229,9 +229,11 @@ function Posts() {
                               priority={
                                 index === 0 && postIndex < 10 ? true : false
                               }
-                              onDoubleClick={(e) => handleDoubleTap(e, post._id)}
+                              onDoubleClick={(e) =>
+                                handleDoubleTap(e, post._id)
+                              }
                               alt={`Photo by ${post.user.fullName} with username ${post.user.username}`}
-                              className="object-cover select-none w-full h-full rounded-sm"
+                              className="object-cover select-none w-full h-full rounded-sm max-h-[600px]"
                             />
                           </CarouselItem>
                         );
@@ -294,23 +296,25 @@ function Posts() {
                 {post.caption && (
                   <p className="py-1 text-sm">
                     <span>{post.caption.slice(0, 30)}&nbsp;</span>
-                    <button
-                      className="text-stone-500"
-                      onClick={(e) => {
-                        const btn = e.target as HTMLButtonElement;
-                        const span = btn.parentElement
-                          ?.childNodes[0] as HTMLElement;
-                        if (span.innerHTML !== post.caption) {
-                          span.innerHTML = post.caption || "";
-                          btn.innerHTML = "&nbsp;less";
-                        } else {
-                          span.innerHTML = post.caption.slice(0, 30);
-                          btn.innerHTML = "&nbsp;more";
-                        }
-                      }}
-                    >
-                      more
-                    </button>
+                    {post?.caption?.length > 30 && (
+                      <button
+                        className="text-stone-500 select-none"
+                        onClick={(e) => {
+                          const btn = e.target as HTMLButtonElement;
+                          const span = btn.parentElement
+                            ?.childNodes[0] as HTMLElement;
+                          if (span.innerHTML !== post.caption) {
+                            span.innerHTML = post.caption || "";
+                            btn.innerHTML = "&nbsp;less";
+                          } else {
+                            span.innerHTML = post.caption.slice(0, 30);
+                            btn.innerHTML = "&nbsp;more";
+                          }
+                        }}
+                      >
+                        more
+                      </button>
+                    )}
                   </p>
                 )}
               </div>
@@ -484,7 +488,7 @@ function Posts() {
                                   );
                                 }}
                                 alt={`Photo by ${post.user.fullName} with username ${post.user.username}`}
-                                className="object-cover select-none w-full h-full rounded-sm"
+                                className="object-cover select-none w-full max-h-[600px] rounded-sm"
                               />
                             </CarouselItem>
                           );

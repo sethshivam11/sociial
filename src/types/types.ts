@@ -171,6 +171,7 @@ export interface PostSliceI {
     commentsCount: number;
     morePosts: PostI[];
   };
+  likes: BasicUserI[];
   loading: boolean;
   skeletonLoading: boolean;
   loadingMore: boolean;

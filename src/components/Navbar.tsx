@@ -39,21 +39,9 @@ import {
   AlertDialogContent,
   AlertDialogFooter,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useTheme } from "next-themes";
 import { nameFallback } from "@/lib/helpers";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogTitle,
-} from "./ui/dialog";
-import { Label } from "./ui/label";
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
-import { Button } from "./ui/button";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import {
   getLoggedInUser,
@@ -61,6 +49,7 @@ import {
 } from "@/lib/store/features/slices/userSlice";
 import { toast } from "./ui/use-toast";
 import ReportDialog from "./ReportDialog";
+import NavbarLoading from "./skeletons/NavbarLoading";
 
 function Navbar() {
   const location = usePathname();
@@ -81,7 +70,7 @@ function Navbar() {
     "/add-story",
   ];
   const [unreadMessageCount, newNotifications] = [0, false];
-  const { user } = useAppSelector((state) => state.user);
+  const { user, isLoggedIn } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
 
   function handleLogout() {
@@ -237,7 +226,7 @@ function Navbar() {
           <Link
             href={`/${user.username}`}
             className={`md:w-full w-fit flex items-center xl:justify-start justify-center xl:pl-4 sm:p-3 p-2 gap-3 rounded-2xl hover:ring-stone-600 dark:hover:ring-stone-400 transition-colors ${
-              location === `/${user.username}`
+              location === `/${user.username}` && isLoggedIn
                 ? "sm:bg-stone-200 sm:dark:bg-stone-800 sm:hover:ring-0"
                 : "sm:hover:ring-2"
             }`}

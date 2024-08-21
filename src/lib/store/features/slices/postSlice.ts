@@ -24,6 +24,7 @@ const initialState: PostSliceI = {
     commentsCount: 0,
     morePosts: [],
   },
+  likes: [],
   loading: false,
   skeletonLoading: false,
   loadingMore: false,
@@ -125,6 +126,21 @@ export const getUserPosts = createAsyncThunk(
   }
 );
 
+export const fetchLikes = createAsyncThunk(
+  "posts/fetchLikes",
+  async (postId: string) => {
+    if (!postId)
+      return {
+        success: false,
+        message: "No likes found",
+        status: 404,
+        data: null,
+      };
+    const parsed = await fetch(`/api/v1/posts/getLikes/${postId}`);
+    return parsed.json();
+  }
+);
+
 const postSlice = createSlice({
   name: "posts",
   initialState,
@@ -132,6 +148,9 @@ const postSlice = createSlice({
     setPage(state, action) {
       state.page = action.payload;
     },
+    resetLikes(state) {
+      state.likes = [];
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -157,7 +176,10 @@ const postSlice = createSlice({
       .addCase(exploreFeed.fulfilled, (state, action) => {
         state.loadingMore = false;
         if (action.payload.success) {
-          state.explorePosts = [...state.explorePosts, ...action.payload.data.posts];
+          state.explorePosts = [
+            ...state.explorePosts,
+            ...action.payload.data.posts,
+          ];
           state.maxExplorePosts = action.payload.max;
           state.page = action.payload.data.page;
         }
@@ -269,7 +291,22 @@ const postSlice = createSlice({
       .addCase(getUserPosts.rejected, (state) => {
         state.skeletonLoading = false;
       });
+
+    builder
+      .addCase(fetchLikes.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchLikes.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload.success) {
+          state.likes = action.payload.data;
+        }
+      })
+      .addCase(fetchLikes.rejected, (state) => {
+        state.loading = false;
+      });
   },
 });
 
 export default postSlice.reducer;
+export const { setPage, resetLikes } = postSlice.actions;
