@@ -12,7 +12,7 @@ function Stories() {
     fullName: "Shivam soni",
     username: "sethshivam",
     avatar:
-      "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+      "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
   };
   const storyAvailable = false;
   const [loading, setLoading] = React.useState(true);
@@ -38,7 +38,7 @@ function Stories() {
           >
             <Avatar
               className={`w-full h-full ring-2 ring-white dark:ring-black ${
-                user.avatar.includes("tpfx0gzsk7ywiptsb6vl.png")
+                user.avatar.includes("r5pvoicvcxtyhjkgqk8y.png")
                   ? "bg-[#cdd5d8]"
                   : "bg-white dark:bg-black"
               }`}
@@ -71,7 +71,7 @@ function Stories() {
               <div className="w-20 h-20 rounded-full bg-gradient-to-bl from-red-500 via-blue-500 to-green-500 p-1">
                 <Avatar
                   className={`w-full h-full ring-2 ring-white dark:ring-black ${
-                    story.avatar.includes("tpfx0gzsk7ywiptsb6vl.png")
+                    story.avatar.includes("r5pvoicvcxtyhjkgqk8y.png")
                       ? "bg-[#cdd5d8]"
                       : "bg-white dark:bg-black"
                   }`}

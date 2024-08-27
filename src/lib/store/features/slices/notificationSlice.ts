@@ -1,4 +1,4 @@
-import { NotificationSliceI } from "@/types/types";
+import { NotificationSliceI } from "@/types/sliceTypes";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 const initialState: NotificationSliceI = {

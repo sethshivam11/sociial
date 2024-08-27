@@ -23,7 +23,10 @@ import {
   usernameSchema,
 } from "@/schemas/userSchema";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
-import { loginUser } from "@/lib/store/features/slices/userSlice";
+import {
+  loginUser,
+  resendVerificationCode,
+} from "@/lib/store/features/slices/userSlice";
 import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/use-toast";
 
@@ -54,8 +57,13 @@ function SignInPage() {
     const response = await dispatch(
       loginUser({ email, username, password: data.password })
     );
-    if (response.payload && response.payload.success) {
-      router.push("/");
+    if (response.payload?.success) {
+      if (!response.payload.data.user.isMailVerified) {
+        await dispatch(
+          resendVerificationCode(response.payload.data.user.username)
+        );
+        router.push("/verify-code");
+      } else router.push("/");
     } else {
       if (response.payload?.message === "User not found") {
         toast({

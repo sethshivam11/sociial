@@ -35,7 +35,7 @@ function Videos() {
         fullName: "Shivam",
         username: "sethshivam11",
         avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
       },
       caption:
         "This is a caption which is very long and I don't know what to write in it so, i am just keep going to see the results. This is just a test caption to check the functionality of the app. I hope you are having a good day. Bye! 😊",
@@ -51,7 +51,7 @@ function Videos() {
         fullName: "Shivam",
         username: "sethshivam11",
         avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
       },
       caption:
         "In the vibrant world of social media, where every moment is captured and shared, we find ourselves scrolling through an endless feed of memories and stories. Among these, a post catches our eye, a video accompanied by a caption that reads: \"This is a caption which is very long and I don't know what to write in it so, I am just keep going to see the results. This is just a test caption to check the functionality of the app. I hope you are having a good day. Bye! 😊\". It's a simple yet heartfelt message from a user named Shivam, known among his followers for his engaging content and genuine interactions. His avatar, a familiar face to many, signals another piece of content ready to spark joy and provoke thought. As we delve deeper, we encounter another post, this one succinct with the words: \"This is a caption\". It's a stark contrast to the previous one, yet it holds its own charm and simplicity. Each post, with its unique caption, video, and engagement metrics, tells a story, invites interaction, and builds connections. In this digital age, where every second is documented and shared, these posts are more than just content; they are windows into the lives of others, offering glimpses of their world, their thoughts, and their moments of vulnerability and joy. As we continue to scroll, we're reminded of the power of sharing, the beauty of connection, and the endless possibilities that come with opening up to the world.",

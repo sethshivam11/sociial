@@ -1,24 +1,8 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import {
-  Menubar,
-  MenubarContent,
-  MenubarItem,
-  MenubarMenu,
-  MenubarTrigger,
-} from "@/components/ui/menubar";
-import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
-import {
-  ChevronsLeftRight,
-  CirclePlus,
-  RectangleHorizontal,
-  RectangleVertical,
-  Square,
-  X,
-} from "lucide-react";
+import { ImageIcon, Loader2, X } from "lucide-react";
 import NextImage from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -53,11 +37,15 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/lib/store/store";
+import { AppDispatch, useAppSelector } from "@/lib/store/store";
+import { createPost, setLoading } from "@/lib/store/features/slices/postSlice";
 
 function Page() {
   const router = useRouter();
   const dispatch: AppDispatch = useDispatch();
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const { user } = useAppSelector((state) => state.user);
+  const { loading } = useAppSelector((state) => state.post);
   const formSchema = z.object({
     caption: z
       .string()
@@ -102,13 +90,52 @@ function Page() {
     }
   }
 
+  function handleRemoveImage(index: number) {
+    setPosts((prevPosts) => prevPosts.filter((_, i) => i !== index));
+    if (selectedFile === posts[index]) {
+      setSelectedFile(posts[index + 1] || "");
+    }
+  }
+
   function onSubmit({ caption }: z.infer<typeof formSchema>) {
-    console.log({ caption, posts });
+    if (!user._id) return;
+    dispatch(setLoading(true));
+    let files: File[] = [];
+    Promise.all(
+      posts.map(async (post) => {
+        const response = await fetch(post);
+        const blob = await response.blob();
+        const image = new File([blob], `${Date.now()}.jpg`, {
+          type: blob.type,
+        });
+        files.push(image);
+      })
+    );
+    if (files.length === 0) return dispatch(setLoading(false));
+    dispatch(
+      createPost({
+        caption: caption || "",
+        media: files,
+        user: user._id,
+      })
+    ).then((response) => {
+      if (response.payload?.success) {
+        router.push("/");
+      } else {
+        toast({
+          title: "Error",
+          description:
+            response.payload?.message ||
+            "An error occurred while creating the post",
+          variant: "destructive",
+        });
+      }
+    });
   }
 
   return (
     <div
-      className="sm:container flex flex-col items-center justify-start h-full min-h-[100dvh] col-span-10 px-3 py-6"
+      className="sm:container flex flex-col items-center h-full min-h-[100dvh] col-span-10 px-3 py-6"
       onDragEnter={() => {
         dragContainer.current?.classList.remove(
           "border-stone-300",
@@ -134,45 +161,59 @@ function Page() {
         const droppedFiles = e.dataTransfer.files;
         handleFiles(droppedFiles);
       }}
-      onDragOver={(event) => event.preventDefault()}
+      onDragOver={(e) => e.preventDefault()}
     >
-      <AlertDialog>
-        <AlertDialogTrigger className="absolute right-2 top-2">
-          <X size="35" />
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogTitle>Discard Post</AlertDialogTitle>
-          <AlertDialogDescription>
-            Are you sure you want to discard this post? All changes will be
-            lost.
-          </AlertDialogDescription>
-          <AlertDialogFooter className="max-sm:flex-col mt-4">
-            <AlertDialogAction
-              className="bg-destructive text-white hover:bg-destructive/90"
-              onClick={() => router.push("/")}
-            >
-              Discard
-            </AlertDialogAction>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-      <div className="h-full lg:w-3/4 w-full rounded-xl sm:pt-4 md:px-16 sm:px-6 px-0 ">
-        <h1 className="font-bold text-2xl tracking-tight w-full text-center">
-          Create New Post
-        </h1>
-        {posts.length ? (
-          <div className="flex flex-col items-center justify-center w-full h-full gap-3">
+      {posts.length > 1 && (
+        <AlertDialog>
+          <AlertDialogTrigger
+            className="absolute right-2 top-2 disabled:text-stone-500 disabled:cursor-not-allowed"
+            disabled={loading}
+          >
+            <X size="35" />
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogTitle>Discard Post</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to discard this post? All changes will be
+              lost.
+            </AlertDialogDescription>
+            <AlertDialogFooter className="max-sm:flex-col mt-4">
+              <AlertDialogAction
+                className="bg-destructive text-white hover:bg-destructive/90"
+                onClick={() => router.push("/")}
+              >
+                Discard
+              </AlertDialogAction>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+      {posts.length ? (
+        <div className="lg:w-3/4 w-full rounded-xl sm:pt-4 md:px-16 sm:px-6 px-0 pb-1">
+          <h1 className="font-bold text-2xl tracking-tight w-full text-center py-2">
+            New Post
+          </h1>
+          <div className="flex flex-col items-center justify-center w-full h-full gap-3 py-2">
             <div className="w-full h-full flex max-sm:flex-col items-center justify-center relative">
               <Carousel>
                 <CarouselContent className="lg:max-w-[35vw] sm:max-w-[50vw] max-w-full aspect-square">
                   {posts.map((post, index) => (
-                    <CarouselItem key={index}>
+                    <CarouselItem key={index} className="relative">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-2 top-2 bg-transparent/30 rounded-full"
+                        onClick={() => handleRemoveImage(index)}
+                        disabled={loading}
+                      >
+                        <X />
+                      </Button>
                       <NextImage
                         src={post}
                         alt=""
-                        width="1080"
-                        height="720"
+                        width="800"
+                        height="800"
                         className="object-cover overflow-hidden h-full w-full rounded-sm"
                       />
                     </CarouselItem>
@@ -217,56 +258,76 @@ function Page() {
                   />
                 </form>
               </Form>
-              <Button
-                className="rounded-xl text-lg"
-                size="lg"
-                onClick={() => form.handleSubmit(onSubmit)()}
-              >
-                Post
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div
-            className="w-full h-full border-2 border-dashed bg-stone-100 dark:bg-stone-900 border-stone-300 dark:border-stone-700 mt-10 z-10 rounded-2xl"
-            ref={dragContainer}
-          >
-            <div className="w-full h-full flex flex-col items-center justify-center gap-3">
-              <CirclePlus size="100" />
-              <div className="flex flex-col items-center gap-2">
-                <span className="text-stone-500 text-sm">
-                  Drag and Drop Photos and Images here
-                </span>
-                <Button size="lg">
-                  <Label
-                    htmlFor="new-post"
-                    className="w-full text-center text-semibold text-lg cursor-pointer rounded-xl"
-                  >
-                    Select files
-                  </Label>
+              <div className="flex gap-2">
+                <Button
+                  type="submit"
+                  onClick={() => form.handleSubmit(onSubmit)()}
+                  disabled={loading}
+                >
+                  {loading ? <Loader2 className="animate-spin" /> : "Post"}
                 </Button>
-                <Link href="/upload-video" className="p-2">
-                  <Button variant="link" className="text-lg text-blue-500">
-                    Upload Videos
+                {posts.length < 5 && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => inputRef.current?.click()}
+                    disabled={loading}
+                  >
+                    Add more
                   </Button>
-                </Link>
+                )}
               </div>
             </div>
           </div>
-        )}
-        <input
-          type="file"
-          onChange={(e) => {
-            const inputFiles = e.target.files;
-            if (!inputFiles) return;
-            handleFiles(inputFiles);
-          }}
-          id="new-post"
-          accept="image/*"
-          className="w-0 h-0 p-0 border-0 invisible"
-          multiple
-        />
-      </div>
+        </div>
+      ) : (
+        <div
+          className="w-full h-full border-2 border-dashed bg-stone-100 dark:bg-stone-900 border-stone-300 dark:border-stone-700 z-10 rounded-2xl relative"
+          ref={dragContainer}
+        >
+          <Link href="/">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-2 top-2 max-sm:hover:bg-transparent"
+            >
+              <X size="25" />
+            </Button>
+          </Link>
+          <div className="w-full h-full flex flex-col items-center justify-center gap-3">
+            <ImageIcon size="100" />
+            <div className="flex flex-col items-center gap-2">
+              <h1 className="font-bold tracking-tighter text-2xl">
+                Post Photos
+              </h1>
+              <span className="text-stone-500 text-sm">
+                Drag and Drop Photos and Images here
+              </span>
+              <Button onClick={() => inputRef.current?.click()}>
+                Select files
+              </Button>
+              <Link href="/upload-video" className="p-2">
+                <Button variant="link" className="text-blue-500">
+                  Upload Videos
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+      <input
+        type="file"
+        onChange={(e) => {
+          const inputFiles = e.target.files;
+          if (!inputFiles) return;
+          handleFiles(inputFiles);
+        }}
+        ref={inputRef}
+        id="new-post"
+        accept="image/*"
+        className="w-0 h-0 p-0 border-0 invisible"
+        multiple
+      />
     </div>
   );
 }

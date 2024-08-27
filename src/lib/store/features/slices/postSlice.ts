@@ -1,4 +1,4 @@
-import { PostSliceI } from "@/types/types";
+import { PostSliceI } from "@/types/sliceTypes";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 const initialState: PostSliceI = {
@@ -62,23 +62,90 @@ export const createPost = createAsyncThunk(
   async ({
     caption,
     media,
-    kind,
     user,
   }: {
     caption: string;
-    media: Blob[];
-    kind: "image" | "video";
+    media: File[];
     user: string;
   }) => {
+    if (media.some((file) => !file.type.includes("image"))) {
+      return {
+        success: false,
+        message: "File type is not supported",
+        status: 400,
+        data: null,
+      };
+    }
+    const totalSize = media.reduce((acc, file) => acc + file.size, 0);
+    if (totalSize > 100000000) {
+      return {
+        success: false,
+        message: "File size is too large",
+        status: 400,
+        data: null,
+      };
+    }
     const formData = new FormData();
     formData.append("caption", caption);
     media.forEach((file) => {
       formData.append("media", file);
     });
-    formData.append("kind", kind);
     formData.append("user", user);
-    const parsed = await fetch("/api/v1/posts", {
+    const parsed = await fetch("/api/v1/posts/new", {
       method: "POST",
+      body: formData,
+    });
+    return parsed.json();
+  }
+);
+
+export const createVideoPost = createAsyncThunk(
+  "posts/createVideoPost",
+  async ({
+    caption,
+    media,
+    user,
+    thumbnail,
+  }: {
+    caption: string;
+    media: File[];
+    user: string;
+    thumbnail: File;
+  }) => {
+    const totalSize = media.reduce((acc, file) => acc + file.size, 0);
+    if (totalSize > 100000000) {
+      return {
+        success: false,
+        message: "File size is too large",
+        status: 400,
+        data: null,
+      };
+    }
+    if (media[0].type.includes("image")) {
+      return {
+        success: false,
+        message: "Only video file is required",
+        status: 400,
+        data: null,
+      };
+    }
+    if (!thumbnail.type.includes("image")) {
+      return {
+        success: false,
+        message: "Invalid thumbnail file",
+        status: 400,
+        data: null,
+      };
+    }
+    const formData = new FormData();
+    formData.append("caption", caption);
+    formData.append("media", thumbnail);
+    formData.append("media", media[0]);
+    const parsed = await fetch("/api/v1/posts/video", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: formData,
     });
     return parsed.json();
@@ -113,15 +180,19 @@ export const dislikePost = createAsyncThunk(
 
 export const getUserPosts = createAsyncThunk(
   "posts/getUserPosts",
-  async (userId: string) => {
-    if (!userId)
+  async ({ userId, username }: { userId?: string; username?: string }) => {
+    if (!userId && !username)
       return {
         success: false,
-        message: "User ID is required",
+        message: "User ID or username is required",
         status: 404,
         data: null,
       };
-    const parsed = await fetch(`/api/v1/posts/user/${userId}`);
+    const parsed = await fetch(
+      `/api/v1/posts/user?${
+        username ? `username=${username}` : `userId=${userId}`
+      }`
+    );
     return parsed.json();
   }
 );
@@ -150,7 +221,10 @@ const postSlice = createSlice({
     },
     resetLikes(state) {
       state.likes = [];
-    }
+    },
+    setLoading(state, action) {
+      state.loading = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -210,10 +284,24 @@ const postSlice = createSlice({
       .addCase(createPost.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload.success) {
-          state.posts.unshift(action.payload.data.post);
+          state.posts.unshift(action.payload.data);
         }
       })
       .addCase(createPost.rejected, (state) => {
+        state.loading = false;
+      });
+
+    builder
+      .addCase(createVideoPost.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(createVideoPost.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload.success) {
+          state.posts.unshift(action.payload.data);
+        }
+      })
+      .addCase(createVideoPost.rejected, (state) => {
         state.loading = false;
       });
 
@@ -309,4 +397,4 @@ const postSlice = createSlice({
 });
 
 export default postSlice.reducer;
-export const { setPage, resetLikes } = postSlice.actions;
+export const { setPage, resetLikes, setLoading } = postSlice.actions;

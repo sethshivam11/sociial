@@ -35,12 +35,20 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import {
   exploreFeed,
   getFeed,
+  getUserPosts,
   likePost,
 } from "@/lib/store/features/slices/postSlice";
+import { savePost } from "@/lib/store/features/slices/userSlice";
 
-function Posts() {
+interface Props {
+  feed?: boolean;
+}
+
+function Posts({ feed }: Props) {
   const dispatch = useAppDispatch();
-  const { user, loading } = useAppSelector((state) => state.user);
+  const { user, loading, profile, savedPosts } = useAppSelector(
+    (state) => state.user
+  );
   const {
     skeletonLoading,
     posts,
@@ -119,6 +127,38 @@ function Posts() {
     });
   }
 
+  function handleSave(postId: string) {
+    dispatch(savePost(postId)).then((response) => {
+      if (response.payload?.success) {
+        toast({
+          title: "Post saved",
+          description: "You can view it later in your saved posts.",
+        });
+      } else {
+        toast({
+          title: "Cannot save post",
+          description: "Please try again later.",
+        });
+      }
+    });
+  }
+  function handleUnsave (postId: string) {
+    
+  }
+
+  function checkSavedPost(postId: string) {
+    if (savedPosts.length === 0) return false;
+    savedPosts.forEach((post) => {
+      if (
+        typeof post === "string"
+          ? post === postId
+          : post.hasOwnProperty("_id") && post._id === postId
+      )
+        return true;
+    });
+    return false;
+  }
+
   React.useEffect(() => {
     const savedConsent = JSON.parse(
       localStorage.getItem("notificationConsent") || "{}"
@@ -133,8 +173,12 @@ function Posts() {
     } else {
       setShowExplorePosts(false);
     }
-    dispatch(getFeed(1)).then(() => dispatch(exploreFeed(1)));
-  }, []);
+    if (!feed) {
+      dispatch(getFeed(1)).then(() => dispatch(exploreFeed(1)));
+    } else if (profile.username) {
+      dispatch(getUserPosts({ username: profile.username }));
+    }
+  }, [profile.username, dispatch, getFeed, exploreFeed]);
 
   return (
     <>
@@ -223,8 +267,8 @@ function Posts() {
                               />
                             </div>
                             <Image
-                              width={700}
-                              height={320}
+                              width="800"
+                              height="800"
                               src={image}
                               priority={
                                 index === 0 && postIndex < 10 ? true : false
@@ -273,21 +317,12 @@ function Posts() {
                     />
                     <Share _id={post._id} />
                   </div>
-                  <button
-                    className="mr-1"
-                    onClick={(e) => {
-                      const icon = e.target as HTMLElement;
-                      if (icon.getAttribute("fill") === "currentColor") {
-                        icon.setAttribute("fill", "none");
-                      } else {
-                        (e.target as HTMLElement).setAttribute(
-                          "fill",
-                          "currentColor"
-                        );
-                      }
-                    }}
-                  >
-                    <Bookmark size="30" className="w-full h-full" />
+                  <button className="mr-1">
+                    <Bookmark
+                      size="30"
+                      className="w-full h-full"
+                      fill={checkSavedPost(post._id) ? "currentColor" : "none"}
+                    />
                   </button>
                 </div>
                 <p className="text-sm text-stone-400 mt-1 select-none">
@@ -304,7 +339,7 @@ function Posts() {
                           const span = btn.parentElement
                             ?.childNodes[0] as HTMLElement;
                           if (span.innerHTML !== post.caption) {
-                            span.innerHTML = post.caption || "";
+                            span.innerHTML = post.caption;
                             btn.innerHTML = "&nbsp;less";
                           } else {
                             span.innerHTML = post.caption.slice(0, 30);
@@ -322,7 +357,7 @@ function Posts() {
           })
         )}
       </InfiniteScroll>
-      {!skeletonLoading && (
+      {!skeletonLoading && !feed && (
         <div className="flex flex-col items-center justify-center gap-2 my-8">
           <Globe size="60" />
           <h2 className="text-xl font-bold tracking-tight">
@@ -377,7 +412,7 @@ function Posts() {
           </p>
         </div>
       )}
-      {showExplorePosts && (
+      {showExplorePosts && !feed && (
         <InfiniteScroll
           dataLength={explorePosts.length}
           hasMore={explorePosts.length < maxExplorePosts}
@@ -532,19 +567,15 @@ function Posts() {
                     </div>
                     <button
                       className="mr-1"
-                      onClick={(e) => {
-                        const icon = e.target as HTMLElement;
-                        if (icon.getAttribute("fill") === "currentColor") {
-                          icon.setAttribute("fill", "none");
-                        } else {
-                          (e.target as HTMLElement).setAttribute(
-                            "fill",
-                            "currentColor"
-                          );
-                        }
-                      }}
+                      onClick={() => handleSave(post._id)}
                     >
-                      <Bookmark size="30" className="w-full h-full" />
+                      <Bookmark
+                        size="30"
+                        className="w-full h-full"
+                        fill={
+                          checkSavedPost(post._id) ? "currentColor" : "none"
+                        }
+                      />
                     </button>
                   </div>
                   <p className="text-sm text-stone-400 mt-1 select-none">
@@ -556,23 +587,25 @@ function Posts() {
                   {post.caption && (
                     <p className="py-1 text-sm">
                       <span>{post.caption.slice(0, 30)}&nbsp;</span>
-                      <button
-                        className="text-stone-500"
-                        onClick={(e) => {
-                          const btn = e.target as HTMLButtonElement;
-                          const span = btn.parentElement
-                            ?.childNodes[0] as HTMLElement;
-                          if (span.innerHTML !== post.caption) {
-                            span.innerHTML = post.caption || "";
-                            btn.innerHTML = "&nbsp;less";
-                          } else {
-                            span.innerHTML = post.caption.slice(0, 30);
-                            btn.innerHTML = "&nbsp;more";
-                          }
-                        }}
-                      >
-                        more
-                      </button>
+                      {post?.caption?.length > 30 && (
+                        <button
+                          className="text-stone-500"
+                          onClick={(e) => {
+                            const btn = e.target as HTMLButtonElement;
+                            const span = btn.parentElement
+                              ?.childNodes[0] as HTMLElement;
+                            if (span.innerHTML !== post.caption) {
+                              span.innerHTML = post.caption || "";
+                              btn.innerHTML = "&nbsp;less";
+                            } else {
+                              span.innerHTML = post.caption.slice(0, 30);
+                              btn.innerHTML = "&nbsp;more";
+                            }
+                          }}
+                        >
+                          more
+                        </button>
+                      )}
                     </p>
                   )}
                 </div>

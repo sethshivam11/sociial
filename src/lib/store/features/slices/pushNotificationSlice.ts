@@ -1,4 +1,4 @@
-import { PushNotificationSliceI } from "@/types/types";
+import { PushNotificationSliceI } from "@/types/sliceTypes";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 const initialState: PushNotificationSliceI = {

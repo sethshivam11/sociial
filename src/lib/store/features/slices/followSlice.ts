@@ -1,4 +1,4 @@
-import { FollowSliceI } from "@/types/types";
+import { FollowSliceI } from "@/types/sliceTypes";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 const initialState: FollowSliceI = {
@@ -36,7 +36,7 @@ export const unfollowUser = createAsyncThunk(
     userId?: string;
     username?: string;
   }) => {
-    if (!userId || !username) return;
+    if (!userId && !username) return;
     const parsed = await fetch(
       `/api/v1/follow/unfollow?${
         username ? `username=${username}` : `userId=${userId}`
@@ -59,7 +59,42 @@ export const getFollowings = createAsyncThunk("follow/following", async () => {
 const followSlice = createSlice({
   name: "follow",
   initialState,
-  reducers: {},
+  reducers: {
+    setFollowersLoading(state, action) {
+      state.followers = state.followers.map((user) => {
+        if (user._id === action.payload.userId) {
+          user.loading = true;
+        }
+        return user;
+      });
+    },
+    setFollowingLoading(state, action) {
+      state.followings = state.followings.map((user) => {
+        if (user._id === action.payload.userId) {
+          user.loading = true;
+        }
+        return user;
+      });
+    },
+    setFollowerUser(state, action) {
+      state.followers = state.followers.map((user) => {
+        if (user._id === action.payload.userId) {
+          user.loading = false;
+          user.isFollowing = action.payload.isFollowing;
+        }
+        return user;
+      });
+    },
+    setFollowingUser(state, action) {
+      state.followings = state.followings.map((user) => {
+        if (user._id === action.payload.userId) {
+          user.loading = false;
+          user.isFollowing = action.payload.isFollowing;
+        }
+        return user;
+      });
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(followUser.pending, (state) => {
       state.loading = true;
@@ -80,11 +115,13 @@ const followSlice = createSlice({
     builder.addCase(unfollowUser.fulfilled, (state, action) => {
       state.loading = false;
       if (action.payload?.success) {
-        state.followings = state.followings.filter(
+        const filteredFollowings = state.followings.filter(
           (user) =>
-            user.username !== action.meta.arg.username ||
+            user.username !== action.meta.arg.username &&
             user._id !== action.meta.arg.userId
         );
+        state.followings = filteredFollowings;
+        console.log(filteredFollowings);
       }
     });
     builder.addCase(unfollowUser.rejected, (state) => {
@@ -120,3 +157,9 @@ const followSlice = createSlice({
 });
 
 export default followSlice.reducer;
+export const {
+  setFollowersLoading,
+  setFollowingLoading,
+  setFollowerUser,
+  setFollowingUser,
+} = followSlice.actions;

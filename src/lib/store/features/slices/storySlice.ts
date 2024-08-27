@@ -1,4 +1,4 @@
-import { StorySliceI } from "@/types/types";
+import { StorySliceI } from "@/types/sliceTypes";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 const initialState: StorySliceI = {

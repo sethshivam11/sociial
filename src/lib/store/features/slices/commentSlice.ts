@@ -1,4 +1,4 @@
-import { CommentSliceI } from "@/types/types";
+import { CommentSliceI } from "@/types/sliceTypes";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 const initialState: CommentSliceI = {

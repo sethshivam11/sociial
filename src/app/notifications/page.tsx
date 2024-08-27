@@ -31,7 +31,7 @@ function Page() {
       isNew: true,
       user: {
         avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
         username: "johndoe",
         fullName: "John Doe",
         isFollow: true,
@@ -57,7 +57,7 @@ function Page() {
       link: "/post/1",
       user: {
         avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
         username: "johndoe",
         fullName: "John Doe",
       },
@@ -70,7 +70,7 @@ function Page() {
       link: "/post/1",
       user: {
         avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
         username: "johndoe",
         fullName: "John Doe",
       },
@@ -83,7 +83,7 @@ function Page() {
       link: "/post/1",
       user: {
         avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
         username: "johndoe",
         fullName: "John Doe",
       },
@@ -96,7 +96,7 @@ function Page() {
       link: "/post/1",
       user: {
         avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
         username: "johndoe",
         fullName: "John Doe",
       },
@@ -109,7 +109,7 @@ function Page() {
       link: "/post/1",
       user: {
         avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
         username: "janedoe",
         fullName: "Jane Doe",
       },
@@ -122,7 +122,7 @@ function Page() {
       link: "/post/1",
       user: {
         avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
         username: "johndoe",
         fullName: "John Doe",
       },
@@ -135,7 +135,7 @@ function Page() {
       link: "/post/1",
       user: {
         avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
         username: "johndoe",
         fullName: "John Doe",
       },
@@ -148,7 +148,7 @@ function Page() {
       link: "/post/1",
       user: {
         avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
         username: "johndoe",
         fullName: "John Doe",
       },
@@ -161,7 +161,7 @@ function Page() {
       link: "/post/1",
       user: {
         avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
         username: "janedoe",
         fullName: "Jane Doe",
       },
@@ -174,7 +174,7 @@ function Page() {
       link: "/post/1",
       user: {
         avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
         username: "alexsmith",
         fullName: "Alex Smith",
       },
@@ -187,7 +187,7 @@ function Page() {
       link: "/post/1",
       user: {
         avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
         username: "johndoe",
         fullName: "John Doe",
       },
@@ -200,7 +200,7 @@ function Page() {
       link: "/post/1",
       user: {
         avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
         username: "emilyjones",
         fullName: "Emily Jones",
       },
@@ -213,7 +213,7 @@ function Page() {
       link: "/post/1",
       user: {
         avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
         username: "johndoe",
         fullName: "John Doe",
       },
@@ -226,7 +226,7 @@ function Page() {
       link: "/post/1",
       user: {
         avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
         username: "johndoe",
         fullName: "John Doe",
       },
@@ -239,7 +239,7 @@ function Page() {
       link: "/post/1",
       user: {
         avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
         username: "gamerpro",
         fullName: "Gamer Pro",
       },
@@ -252,7 +252,7 @@ function Page() {
       link: "/post/1",
       user: {
         avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
         username: "johndoe",
         fullName: "John Doe",
       },

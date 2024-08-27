@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import React from "react";
 
 function Layout({ children }: { children: React.ReactNode }) {
-  const { user } = useAppSelector((state) => state.user);
+  const { profile } = useAppSelector((state) => state.user);
   const location = usePathname();
 
   return (
@@ -15,7 +15,7 @@ function Layout({ children }: { children: React.ReactNode }) {
       <div className="h-fit lg:w-3/4 w-full rounded-xl sm:bg-stone-100 sm:dark:bg-stone-900 sm:pt-4 sm:px-6 px-0 min-h-full relative">
         <div className="sm:bg-stone-100 sm:dark:bg-stone-900 bg-background w-full pt-2">
           <div className="w-full flex items-center justify-start text-center max-sm:mb-5 max-sm:px-2">
-            <Link href={`/${user.username}`}>
+            <Link href={`/${profile.username}`}>
               <Button
                 variant="ghost"
                 size="icon"
@@ -25,12 +25,12 @@ function Layout({ children }: { children: React.ReactNode }) {
               </Button>
             </Link>
             <h1 className="sm:text-2xl text-lg tracking-tight font-bold text-center w-full mr-12">
-              {user.fullName}
+              {profile.fullName}
             </h1>
           </div>
           <div className="flex items-center justify-around max-md:justify-around sm:mt-8 sm:text-md text-sm w-full">
             <Link
-              href={`/${user.username}/followers`}
+              href={`/${profile.username}/followers`}
               className={`flex items-center justify-center gap-2 relative after:rounded-sm sm:after:w-40 after:w-32 after:absolute after:top-8 after:border-stone-800 after:dark:border-stone-200 sm:after:mt-1.5 after:-mt-0.5 sm:text-xl ${
                 location.includes("/followers")
                   ? "after:border-2"
@@ -40,7 +40,7 @@ function Layout({ children }: { children: React.ReactNode }) {
               Followers
             </Link>
             <Link
-              href={`/${user.username}/following`}
+              href={`/${profile.username}/following`}
               className={`flex items-center justify-center gap-2 relative after:rounded-sm sm:after:w-40 after:w-32 after:absolute after:top-8 after:border-stone-800 after:dark:border-stone-200 sm:after:mt-1.5 after:-mt-0.5 sm:text-xl ${
                 location.includes("/following")
                   ? "after:border-2"

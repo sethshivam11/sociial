@@ -174,7 +174,7 @@ function Messages({ children }: { children: React.ReactNode }) {
       message:
         "Hi there! This is a very long message and I also don't know what I am writing",
       avatar:
-        "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+        "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
     },
     {
       id: "3",
@@ -190,7 +190,7 @@ function Messages({ children }: { children: React.ReactNode }) {
       username: "sambrown",
       message: "How's it going?",
       avatar:
-        "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+        "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
       unreadMessages: true,
     },
     {
@@ -206,7 +206,7 @@ function Messages({ children }: { children: React.ReactNode }) {
       username: "michaelgreen",
       message: "Looking forward to it!",
       avatar:
-        "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+        "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
     },
     {
       id: "7",
@@ -221,7 +221,7 @@ function Messages({ children }: { children: React.ReactNode }) {
       username: "davidwilson",
       message: "See you soon!",
       avatar:
-        "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+        "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
     },
     {
       id: "9",
@@ -236,7 +236,7 @@ function Messages({ children }: { children: React.ReactNode }) {
       username: "marksmith",
       message: "Let's do this!",
       avatar:
-        "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+        "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
     },
     {
       id: "11",
@@ -251,7 +251,7 @@ function Messages({ children }: { children: React.ReactNode }) {
       username: "garywhite",
       message: "Sounds great!",
       avatar:
-        "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+        "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
     },
     {
       id: "13",
@@ -266,7 +266,7 @@ function Messages({ children }: { children: React.ReactNode }) {
       username: "briandavis",
       message: "What's up?",
       avatar:
-        "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+        "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
     },
     {
       id: "15",
@@ -281,7 +281,7 @@ function Messages({ children }: { children: React.ReactNode }) {
       username: "stevenmoore",
       message: "Happy Birthday!",
       avatar:
-        "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+        "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
     },
     {
       id: "17",
@@ -296,7 +296,7 @@ function Messages({ children }: { children: React.ReactNode }) {
       username: "danielanderson",
       message: "Interesting...",
       avatar:
-        "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+        "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
     },
     {
       id: "19",
@@ -311,7 +311,7 @@ function Messages({ children }: { children: React.ReactNode }) {
       username: "jamesjohnson",
       message: "See you later!",
       avatar:
-        "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+        "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
     },
     {
       id: "21",
@@ -349,9 +349,9 @@ function Messages({ children }: { children: React.ReactNode }) {
 
   return (
     <SocketProvider>
-      <div className="grid min-h-[100dvh] max-sm:max-h-[100dvh] xl:col-span-8 pl-8 md:pl-4 sm:col-span-9 col-span-10 sm:grid-cols-10">
+      <div className="grid min-h-[100dvh] max-sm:max-h-[100dvh] xl:col-span-8 pl-8 md:pl-4 max-sm:pl-0 sm:col-span-9 col-span-10 sm:grid-cols-10">
         <div
-          className={`lg:col-span-3 md:col-span-4 col-span-10 md:flex flex-col items-start justify-start gap-2 py-6 h-full max-h-[100dvh] sm:min-h-[42rem] md:px-0 sm:px-4 px-5 sticky top-0 ${
+          className={`lg:col-span-3 md:col-span-4 col-span-10 md:flex flex-col items-start justify-start gap-2 py-6 h-full max-h-[100dvh] sm:min-h-[42rem] md:px-0 px-4 sticky top-0 ${
             location === "/messages" ? "flex" : "hidden"
           }`}
         >
@@ -409,7 +409,9 @@ function Messages({ children }: { children: React.ReactNode }) {
                                 <div className="w-8 h-8">
                                   <Avatar className="w-full h-full rounded-full pointer-events-none select-none">
                                     <AvatarImage src={follower.avatar} />
-                                    <AvatarFallback>{nameFallback(follower.fullName)}</AvatarFallback>
+                                    <AvatarFallback>
+                                      {nameFallback(follower.fullName)}
+                                    </AvatarFallback>
                                   </Avatar>
                                 </div>
                                 <div>
@@ -508,7 +510,7 @@ function Messages({ children }: { children: React.ReactNode }) {
               </DialogContent>
             </Dialog>
           </div>
-          <ScrollArea className="py-3 w-full p-2.5 max-sm:mb-10">
+          <ScrollArea className="py-3 w-full h-full p-2.5 max-sm:hidden">
             {chatsLoading ? (
               <ChatsLoadingSkeleton />
             ) : chats.length > 1 ? (
@@ -567,6 +569,65 @@ function Messages({ children }: { children: React.ReactNode }) {
               </div>
             )}
           </ScrollArea>
+          <div className="sm:hidden pb-16 w-full">
+            {chatsLoading ? (
+              <ChatsLoadingSkeleton />
+            ) : chats.length > 1 ? (
+              chats.map((chat, index) => (
+                <button
+                  className={`flex items-center justify-center rounded-md w-full gap-2 p-2 ${
+                    location === `/messages/${chat.username}`
+                      ? "bg-stone-200 dark:bg-stone-800 hover:bg-stone-100 hover:dark:bg-stone-900"
+                      : "sm:hover:bg-stone-200 sm:dark:hover:bg-stone-800"
+                  }`}
+                  key={index}
+                  title={chat.username}
+                  onClick={() => {
+                    router.push(`/messages/${chat.username}`);
+                  }}
+                >
+                  <Avatar className="w-10 h-10">
+                    <AvatarImage
+                      src={chat.avatar}
+                      alt=""
+                      className="pointer-events-none select-none"
+                    />
+                    <AvatarFallback>
+                      {nameFallback(chat.fullName)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col items-start justify-center w-full">
+                    <p>{chat.fullName}</p>
+                    <p className="text-sm md:w-40 sm:w-80 w-40 text-left text-stone-500 text-ellipsis whitespace-nowrap overflow-x-hidden">
+                      {chat.message}
+                    </p>
+                  </div>
+                  {chat.unreadMessages ? (
+                    <Circle
+                      fill="rgb(14 165 233)"
+                      color="rgb(14 165 233)"
+                      size="16"
+                      className="mr-2"
+                    />
+                  ) : (
+                    ""
+                  )}
+                </button>
+              ))
+            ) : (
+              <div className="w-full flex flex-col items-center justify-center gap-4 text-center h-full">
+                <History size="60" />
+                <div>
+                  <h2 className="text-2xl tracking-tight font-bold">
+                    No Chats yet
+                  </h2>
+                  <p className="text-stone-500">
+                    Start a conversation with someone!
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
         {children}
       </div>

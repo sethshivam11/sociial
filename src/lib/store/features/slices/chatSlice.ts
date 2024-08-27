@@ -1,4 +1,4 @@
-import { ChatSliceI } from "@/types/types";
+import { ChatSliceI } from "@/types/sliceTypes";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 const initialState: ChatSliceI = {

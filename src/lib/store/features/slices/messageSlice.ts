@@ -1,4 +1,4 @@
-import { MessageSliceI } from "@/types/types";
+import { MessageSliceI } from "@/types/sliceTypes";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 const initialState: MessageSliceI = {

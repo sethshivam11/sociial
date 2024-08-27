@@ -1,7 +1,8 @@
 "use client";
-import { UserSliceI } from "@/types/types";
+import { UserSliceI } from "@/types/sliceTypes";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { store, useAppDispatch } from "../../store";
+import { store } from "../../store";
+import { BasicUserI } from "@/types/types";
 
 const initialState: UserSliceI = {
   user: {
@@ -28,12 +29,14 @@ const initialState: UserSliceI = {
     postsCount: 0,
   },
   searchResults: [],
+  suggestions: [],
+  savedPosts: [],
   followers: [],
   following: [],
   unreadMessageCount: 0,
   newNotifications: false,
   loading: false,
-  skeletonLoading: false,
+  skeletonLoading: true,
   isLoggedIn: false,
   isSendingMail: false,
   page: 1,
@@ -58,6 +61,7 @@ export const loginUser = createAsyncThunk(
       body: JSON.stringify({ username, email, password }),
     });
     return parsed.json();
+    // return axios.post("/api/v1/users/login", { username, email, password });
   }
 );
 
@@ -85,6 +89,7 @@ export const registerUser = createAsyncThunk(
     formData.append("password", password);
     formData.append("fullName", fullName);
     if (avatar) formData.append("avatar", avatar);
+    // return axios.post("/api/v1/users/register", formData);
     const parsed = await fetch("/api/v1/users/register", {
       method: "POST",
       body: formData,
@@ -200,7 +205,39 @@ export const removeAvatar = createAsyncThunk("users/removeAvatar", async () => {
 
 export const getLoggedInUser = createAsyncThunk("users/getUser", async () => {
   const parsed = await fetch("/api/v1/users/get");
-  return parsed.json();
+  const response = await parsed.json();
+  if (!response?.success) {
+    if (
+      response?.message === "Invalid token!" ||
+      response?.message === "Token expired!" ||
+      response?.message === "Token is required"
+    ) {
+      store.dispatch(renewAccessToken()).then((response) => {
+        if (response.payload?.success) {
+          store.dispatch(getLoggedInUser()).then((response) => {
+            return response.payload;
+          });
+        } else {
+          console.log("Deleting refresh and access token");
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+          return {
+            success: false,
+            message: "Something went wrong, Please login again",
+            status: 401,
+          };
+        }
+      });
+    } else if (response?.message === "User not found") {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      return {
+        success: false,
+        message: "Something went wrong, Please login again",
+        status: 401,
+      };
+    }
+  } else return response;
 });
 
 export const updateDetails = createAsyncThunk(
@@ -235,7 +272,24 @@ export const renewAccessToken = createAsyncThunk(
         refreshToken: localStorage.getItem("refreshToken"),
       }),
     });
-    return parsed.json();
+    const response = await parsed.json();
+    if (
+      !response?.success &&
+      (response?.message === "Invalid token!" ||
+        response?.message === "Refresh token mismatch" ||
+        response?.message === "User not found")
+    ) {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      return {
+        success: false,
+        message: "Something went wrong, Please login again",
+        status: 401,
+      };
+    } else {
+      localStorage.setItem("accessToken", response.data.accessToken);
+      return response;
+    }
   }
 );
 
@@ -270,12 +324,61 @@ export const searchUsers = createAsyncThunk(
   }
 );
 
+export const getSavedPosts = createAsyncThunk(
+  "users/getSavedPosts",
+  async () => {
+    const parsed = await fetch("/api/v1/users/saved");
+    return parsed.json();
+  }
+);
+
+export const savePost = createAsyncThunk(
+  "users/savePost",
+  async (postId: string) => {
+    const parsed = await fetch(`/api/v1/users/save/${postId}`);
+    return parsed.json();
+  }
+);
+
+export const unsavePost = createAsyncThunk(
+  "users/unsavePost",
+  async (postId: string) => {
+    const parsed = await fetch(`/api/v1/users/unsave/${postId}`);
+    return parsed.json();
+  }
+);
+
+export const getUserSuggestions = createAsyncThunk(
+  "users/suggestions",
+  async () => {
+    const parsed = await fetch("/api/v1/users/suggestions");
+    return parsed.json();
+  }
+);
+
 export const userSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
     setPage(state, action) {
       state.page = action.payload;
+    },
+    setSuggestionLoading(state, action) {
+      state.suggestions = state.suggestions.map((suggestion) => {
+        if (suggestion._id === action.payload) {
+          suggestion.loading = true;
+        }
+        return suggestion;
+      });
+    },
+    setFollowing(state, action) {
+      state.suggestions = state.suggestions.map((suggestion) => {
+        if (suggestion._id === action.payload.userId) {
+          suggestion.loading = false;
+          suggestion.isFollowing = action.payload.isFollowing;
+        }
+        return suggestion;
+      });
     },
   },
   extraReducers: (builder) => {
@@ -285,7 +388,7 @@ export const userSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload.success) {
+        if (action.payload?.success) {
           state.isLoggedIn = true;
           state.user = action.payload.data.user;
           localStorage.setItem("accessToken", action.payload.data.accessToken);
@@ -319,7 +422,7 @@ export const userSlice = createSlice({
       })
       .addCase(verifyCode.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload.success) {
+        if (action.payload?.success) {
           state.isLoggedIn = true;
           state.user.isMailVerified = action.payload.isMailVerified;
         }
@@ -356,7 +459,7 @@ export const userSlice = createSlice({
       })
       .addCase(getProfile.fulfilled, (state, action) => {
         state.skeletonLoading = false;
-        if (action.payload.success) {
+        if (action.payload?.success) {
           state.profile = action.payload.data;
         }
       })
@@ -370,7 +473,7 @@ export const userSlice = createSlice({
       })
       .addCase(logOutUser.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload.success) {
+        if (action.payload?.success) {
           state.isLoggedIn = false;
           state.user = initialState.user;
           localStorage.removeItem("accessToken");
@@ -398,7 +501,7 @@ export const userSlice = createSlice({
       })
       .addCase(updateAvatar.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload.success) {
+        if (action.payload?.success) {
           state.user.avatar = action.payload.data.avatar;
         }
       })
@@ -412,7 +515,7 @@ export const userSlice = createSlice({
       })
       .addCase(removeAvatar.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload.success) {
+        if (action.payload?.success) {
           state.user.avatar = action.payload.data.avatar;
         }
       })
@@ -426,21 +529,9 @@ export const userSlice = createSlice({
       })
       .addCase(getLoggedInUser.fulfilled, (state, action) => {
         state.skeletonLoading = false;
-        if (action.payload.success) {
+        if (action.payload?.success) {
           state.isLoggedIn = true;
           state.user = action.payload.data;
-        }
-        if (!action.payload?.success) {
-          switch (action.payload?.message) {
-            case "Invalid token!" || "Token expired!":
-              localStorage.getItem("refreshToken") &&
-                store.dispatch(renewAccessToken());
-              break;
-            case "User not found":
-              localStorage.removeItem("accessToken");
-              localStorage.removeItem("refreshToken");
-              break;
-          }
         }
       })
       .addCase(getLoggedInUser.rejected, (state, action) => {
@@ -453,7 +544,7 @@ export const userSlice = createSlice({
       })
       .addCase(updateDetails.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload.success) {
+        if (action.payload?.success) {
           state.user.fullName = action.payload.data.fullName;
           state.user.username = action.payload.data.username;
           state.user.bio = action.payload.data.bio;
@@ -469,7 +560,7 @@ export const userSlice = createSlice({
       })
       .addCase(renewAccessToken.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload.success) {
+        if (action.payload?.success) {
           localStorage.setItem("accessToken", action.payload.data.accessToken);
         }
       })
@@ -483,7 +574,7 @@ export const userSlice = createSlice({
       })
       .addCase(blockUser.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload.success) {
+        if (action.payload?.success) {
           state.user.blocked.push(action.payload.data.blocked);
         }
       })
@@ -497,7 +588,7 @@ export const userSlice = createSlice({
       })
       .addCase(unblockUser.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload.success) {
+        if (action.payload?.success) {
           state.user.blocked = state.user.blocked.filter(
             (user) => user !== action.payload.data.unblockUserId
           );
@@ -513,7 +604,7 @@ export const userSlice = createSlice({
       })
       .addCase(searchUsers.fulfilled, (state, action) => {
         state.skeletonLoading = false;
-        if (action.payload.success) {
+        if (action.payload?.success) {
           state.searchResults = action.payload.data;
         } else if (action.payload.message === "No users found") {
           state.searchResults = [];
@@ -523,8 +614,55 @@ export const userSlice = createSlice({
         state.skeletonLoading = false;
         state.searchResults = [];
       });
+
+    builder
+      .addCase(getSavedPosts.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getSavedPosts.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload?.success) {
+          state.savedPosts = action.payload.data;
+        } else if (!action.payload?.success) {
+          state.savedPosts = [];
+        }
+      })
+      .addCase(getSavedPosts.rejected, (state) => {
+        state.loading = false;
+      });
+
+    builder
+      .addCase(savePost.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(savePost.fulfilled || savePost.rejected, (state, action) => {
+        state.loading = false;
+      });
+
+    builder
+      .addCase(unsavePost.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(unsavePost.fulfilled || unsavePost.rejected, (state, action) => {
+        state.loading = false;
+      });
+
+    builder
+      .addCase(getUserSuggestions.pending, (state) => {
+        state.skeletonLoading = true;
+      })
+      .addCase(getUserSuggestions.fulfilled, (state, action) => {
+        state.skeletonLoading = false;
+        if (action.payload?.success) {
+          state.suggestions = action.payload.data;
+        }
+      })
+      .addCase(getUserSuggestions.rejected, (state) => {
+        state.skeletonLoading = false;
+      });
   },
 });
 
 export default userSlice.reducer;
-export const { setPage } = userSlice.actions;
+export const { setPage, setSuggestionLoading, setFollowing } =
+  userSlice.actions;

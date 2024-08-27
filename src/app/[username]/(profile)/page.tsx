@@ -2,24 +2,26 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
 import React from "react";
-import { Heart, MessageSquareText, Image as PostImage } from "lucide-react";
+import { Heart, MessageSquareText, ImageIcon } from "lucide-react";
 import Link from "next/link";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { getUserPosts } from "@/lib/store/features/slices/postSlice";
 
 function Page() {
   const dispatch = useAppDispatch();
-  const { user, skeletonLoading: userLoading } = useAppSelector(
-    (state) => state.user
-  );
+  const {
+    user,
+    profile,
+    skeletonLoading: userLoading,
+  } = useAppSelector((state) => state.user);
   const { posts, skeletonLoading: postLoading } = useAppSelector(
     (state) => state.post
   );
 
   React.useEffect(() => {
-    if (!user._id) return;
-    dispatch(getUserPosts(user._id));
-  }, [dispatch, getUserPosts, user._id]);
+    if (!profile.username) return;
+    dispatch(getUserPosts({ username: profile.username }));
+  }, [dispatch, getUserPosts, profile.username]);
   return (
     <div className="flex items-center justify-start flex-wrap flex-row w-full">
       {userLoading || postLoading ? (
@@ -64,12 +66,14 @@ function Page() {
         ))
       ) : (
         <div className="flex flex-col items-center justify-center w-full min-h-96 h-full">
-          <PostImage size="100" className="my-4" />
+          <ImageIcon size="100" className="my-4" />
           <span className="sm:text-3xl text-xl font-bold tracking-tight">
             Nothing Here
           </span>
           <span className="sm:text-lg text-base text-stone-500">
-            Share your first post now
+            {user.username === profile.username
+              ? "Share your first post now"
+              : "No posts yet"}
           </span>
         </div>
       )}

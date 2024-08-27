@@ -1,16 +1,21 @@
 "use client";
 import React from "react";
-import { Search, Users2 } from "lucide-react";
+import { Loader2, Search, Users2 } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { nameFallback } from "@/lib/helpers";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { Input } from "@/components/ui/input";
 import {
+  followUser,
   getFollowers,
   getFollowings,
+  setFollowersLoading,
+  setFollowerUser,
+  unfollowUser,
 } from "@/lib/store/features/slices/followSlice";
 import FriendsLoading from "@/components/skeletons/FriendsLoading";
+import { toast } from "@/components/ui/use-toast";
 
 function Page() {
   const dispatch = useAppDispatch();
@@ -19,6 +24,7 @@ function Page() {
   );
   const [searchResults, setSearchResults] = React.useState(followers);
   const [search, setSearch] = React.useState("");
+  const [followingsIds, setFollowingsIds] = React.useState<string[]>([]);
 
   React.useEffect(() => {
     if (search) {
@@ -35,13 +41,50 @@ function Page() {
   }, [search]);
 
   const fetchFollowings = React.useCallback(async () => {
-    const response1 = await dispatch(getFollowings());
-    const response2 = await dispatch(getFollowers());
-    if (!response1.payload.success || !response2.payload.success) {
-      console.log(response1.payload);
-      console.log(response2.payload);
-    }
-  }, []);
+    dispatch(getFollowings()).then((response) => {
+      if (response.payload?.success) {
+        const ids: Set<string> = new Set();
+        if (response.payload?.success) {
+          response.payload.data.followings.forEach(
+            (following: { _id: string }) => {
+              ids.add(following._id);
+            }
+          );
+        }
+        setFollowingsIds(Array.from(ids));
+      }
+      dispatch(getFollowers());
+    });
+  }, [dispatch, getFollowings, getFollowers]);
+
+  function handleFollow(userId: string) {
+    dispatch(setFollowersLoading(userId));
+    dispatch(followUser({ userId }))
+      .then((response) => {
+        if (!response.payload?.success) {
+          toast({
+            title: "Failed to follow user",
+            description: "Please try again later",
+            variant: "destructive",
+          });
+        }
+      })
+      .finally(() => dispatch(setFollowerUser({ userId, isFollowing: true })));
+  }
+  function handleUnfollow(userId: string) {
+    dispatch(setFollowersLoading(userId));
+    dispatch(unfollowUser({ userId }))
+      .then((response) => {
+        if (!response.payload?.success) {
+          toast({
+            title: "Failed to unfollow user",
+            description: "Please try again later",
+            variant: "destructive",
+          });
+        }
+      })
+      .finally(() => dispatch(setFollowerUser({ userId, isFollowing: false })));
+  }
 
   React.useEffect(() => {
     fetchFollowings();
@@ -90,13 +133,29 @@ function Page() {
                 </div>
               </Link>
               <div className="flex items-center justify-center bg-primary-500 text-white rounded-full w-fit h-full my-auto">
-                {followings.includes(follower) ? (
-                  <button className="bg-stone-500 w-20 h-7 text-center text-white rounded-full text-sm transition-colors hover:bg-stone-600 disabled:bg-stone-400 ml-4">
-                    Unfollow
+                {followingsIds.includes(follower._id) ? (
+                  <button
+                    className="bg-stone-500 w-20 h-7 text-center text-white rounded-full text-sm transition-colors hover:bg-stone-600 disabled:bg-stone-400 ml-4"
+                    onClick={() => handleUnfollow(follower._id)}
+                    disabled={follower?.loading}
+                  >
+                    {follower?.loading ? (
+                      <Loader2 className="animate-spin" />
+                    ) : (
+                      "Unfollow"
+                    )}
                   </button>
                 ) : (
-                  <button className="bg-blue-500 w-16 h-7 text-center text-white rounded-full text-sm transition-colors hover:bg-blue-700 disabled:bg-blue-400 ml-4">
-                    Follow
+                  <button
+                    className="bg-blue-500 w-16 h-7 text-center text-white rounded-full text-sm transition-colors hover:bg-blue-700 disabled:bg-blue-400 ml-4"
+                    onClick={() => handleFollow(follower._id)}
+                    disabled={follower?.loading}
+                  >
+                    {follower?.loading ? (
+                      <Loader2 className="animate-spin" />
+                    ) : (
+                      "Follow"
+                    )}
                   </button>
                 )}
               </div>

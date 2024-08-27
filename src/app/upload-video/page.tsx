@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
-import { MonitorPlay, X } from "lucide-react";
+import { Loader2, MonitorPlay, X } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { z } from "zod";
@@ -30,9 +30,15 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
 import { captionSchema } from "@/schemas/postSchema";
+import generateMediaThumbnail from "browser-thumbnail-generator";
+import { useAppDispatch, useAppSelector } from "@/lib/store/store";
+import { createPost, setLoading } from "@/lib/store/features/slices/postSlice";
 
 function Page() {
   const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { loading } = useAppSelector((state) => state.post);
+  const { user } = useAppSelector((state) => state.user);
   const formSchema = z.object({
     caption: captionSchema,
   });
@@ -43,14 +49,67 @@ function Page() {
     },
   });
 
-  const [videoFile, setVideoFile] = React.useState("");
+  const [video, setVideo] = React.useState("");
+  const [videoFile, setVideoFile] = React.useState<File | null>(null);
   const dragContainer = React.useRef<HTMLDivElement>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
-  function onSubmit(values: z.infer<typeof formSchema>) {}
+  function onSubmit({ caption }: z.infer<typeof formSchema>) {
+    if (!videoFile) return;
+    if (!user._id) return;
+    generateMediaThumbnail({
+      file: videoFile,
+      width: 800,
+      height: 800,
+      maintainAspectRatio: true,
+    }).then(async (response) => {
+      dispatch(setLoading(true));
+      const url = URL.createObjectURL(response.thumbnail);
+      let thumbnailFile: File | null = null;
+      let videoFile: File | null = null;
+      await Promise.all(
+        [video, url].map(async (post) => {
+          const res = await fetch(post);
+          const blob = await res.blob();
+          const file = new File(
+            [blob],
+            `${Date.now()}.${blob.type.split("/")[1]}`,
+            {
+              type: blob.type,
+            }
+          );
+          if(blob.type.includes("video")) videoFile = file;
+          else thumbnailFile = file;
+        })
+      );
+      if(!thumbnailFile || !videoFile) return dispatch(setLoading(false));
+      console.log(thumbnailFile, videoFile);
+      dispatch(setLoading(false));
+      // dispatch(
+      //   createPost({
+      //     caption: caption || "",
+      //     media: [videoFile, url],
+      //     user: user._id,
+      //   })
+      // ).then((response) => {
+      //   if (response.payload?.success) {
+      //     router.push("/");
+      //   } else {
+      //     toast({
+      //       title: "Error",
+      //       description:
+      //         response.payload?.message ||
+      //         "An error occurred while creating the post",
+      //       variant: "destructive",
+      //     });
+      //   }
+      // });
+    });
+  }
 
   return (
     <div
-      className="sm:container flex flex-col items-center justify-start h-full min-h-[100dvh] col-span-10 px-3 py-6"
+      className="sm:container flex flex-col items-center justify-start min-h-[100dvh] h-fit col-span-10 px-3 py-6"
       onDragEnter={() => {
         dragContainer.current?.classList.remove(
           "border-stone-300",
@@ -85,43 +144,48 @@ function Page() {
         reader.onload = (event) => {
           const video = event.target?.result;
           if (video) {
-            setVideoFile(video.toString());
+            setVideo(video.toString());
           }
         };
         reader.readAsDataURL(droppedFile);
       }}
-      onDragOver={(event) => event.preventDefault()}
+      onDragOver={(e) => e.preventDefault()}
     >
-      <AlertDialog>
-        <AlertDialogTrigger className="absolute right-2 top-2">
-          <X size="35" />
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogTitle>Discard Post</AlertDialogTitle>
-          <AlertDialogDescription>
-            Are you sure you want to discard this post? All changes will be
-            lost.
-          </AlertDialogDescription>
-          <AlertDialogFooter className="max-sm:flex-col mt-4">
-            <AlertDialogAction
-              className="bg-destructive text-white hover:bg-destructive/90"
-              onClick={() => router.push("/")}
-            >
-              Discard
-            </AlertDialogAction>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-      <div className="h-full lg:w-3/4 w-full rounded-xl sm:pt-4 md:px-16 sm:px-6 px-0 pb-28">
-        <h1 className="font-bold text-2xl tracking-tight w-full text-center mb-6">
-          Create Video Post
-        </h1>
-        {videoFile.length ? (
-          <div className="flex flex-col items-center justify-center w-full h-full gap-3">
-            <div className="w-full h-full flex max-sm:flex-col items-center justify-center relative">
+      {video.length > 1 && (
+        <AlertDialog>
+          <AlertDialogTrigger
+            className="absolute right-2 top-2 disabled:text-stone-500 disabled:cursor-not-allowed"
+            disabled={loading}
+          >
+            <X size="35" />
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogTitle>Discard Post</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to discard this post? All changes will be
+              lost.
+            </AlertDialogDescription>
+            <AlertDialogFooter className="max-sm:flex-col mt-4">
+              <AlertDialogAction
+                className="bg-destructive text-white hover:bg-destructive/90"
+                onClick={() => router.push("/")}
+              >
+                Discard
+              </AlertDialogAction>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+      {video.length ? (
+        <div className="lg:w-3/4 w-full rounded-xl sm:pt-4 md:px-16 sm:px-6 px-0 pb-2">
+          <h1 className="font-bold text-2xl tracking-tight w-full text-center py-2">
+            Video Post
+          </h1>
+          <div className="flex flex-col items-center justify-center w-full h-full gap-3 py-2">
+            <div className="flex max-sm:flex-col items-center justify-center relative h-full w-full py-6">
               <video
-                src={videoFile}
+                src={video}
                 className="min-h-40 min-w-40 sm:max-w-[70%] max-w-full rounded-sm"
                 autoPlay
                 controls
@@ -163,67 +227,85 @@ function Page() {
                   />
                 </form>
               </Form>
-              <Button
-                className="rounded-xl text-lg"
-                size="lg"
-                onClick={() => form.handleSubmit(onSubmit)()}
-              >
-                Post
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div
-            className="w-full h-full border-2 border-dashed bg-stone-100 dark:bg-stone-900 border-stone-300 dark:border-stone-700 mt-10 z-10 rounded-2xl"
-            ref={dragContainer}
-          >
-            <div className="w-full h-full flex flex-col items-center justify-center gap-3">
-              <MonitorPlay size="100" />
-              <div className="flex flex-col items-center gap-2">
-                <span className="text-stone-500 text-sm">
-                  Drag and Drop Video files Here
-                </span>
-                <Button size="lg">
-                  <Label
-                    htmlFor="new-post"
-                    className="w-full text-center text-semibold text-lg cursor-pointer rounded-xl"
-                  >
-                    Select files
-                  </Label>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => form.handleSubmit(onSubmit)()}
+                  disabled={loading}
+                >
+                  {loading ? <Loader2 className="animate-spin" /> : "Post"}
                 </Button>
-                <Link href="/new-post" className="p-2">
-                  <Button variant="link" className="text-lg text-blue-500">
-                    Upload Photos
-                  </Button>
-                </Link>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setVideo("")}
+                  disabled={loading}
+                >
+                  Clear
+                </Button>
               </div>
             </div>
           </div>
-        )}
-        <input
-          type="file"
-          onChange={(e) => {
-            const inputFiles = e.target.files;
-            if (inputFiles === null) return;
-            const file = inputFiles[0];
-            const reader = new FileReader();
-            reader.onload = (event) => {
-              const video = event.target?.result;
-              if (video) {
-                const videoElement = document.getElementById("videoElement");
-                if (videoElement) {
-                  videoElement.setAttribute("src", video.toString());
-                }
-                setVideoFile(video.toString());
+        </div>
+      ) : (
+        <div
+          className="w-full h-full border-2 border-dashed bg-stone-100 dark:bg-stone-900 border-stone-300 dark:border-stone-700 z-10 rounded-2xl relative"
+          ref={dragContainer}
+        >
+          <Link href="/">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-2 top-2 max-sm:hover:bg-transparent"
+            >
+              <X size="25" />
+            </Button>
+          </Link>
+          <div className="w-full h-full flex flex-col items-center justify-center gap-3">
+            <MonitorPlay size="100" />
+            <div className="flex flex-col items-center gap-2">
+              <h1 className="font-bold tracking-tighter text-2xl">
+                Post Videos
+              </h1>
+              <span className="text-stone-500 text-sm">
+                Drag and Drop Video file here
+              </span>
+              <Button onClick={() => inputRef.current?.click()}>
+                Select file
+              </Button>
+              <Link href="/new-post" className="p-2">
+                <Button variant="link" className="text-blue-500">
+                  Upload Photos
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+      <input
+        type="file"
+        ref={inputRef}
+        onChange={(e) => {
+          const inputFiles = e.target.files;
+          if (inputFiles === null) return;
+          const file = inputFiles[0];
+          setVideoFile(file);
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const video = event.target?.result;
+            if (video) {
+              const videoElement = document.getElementById("videoElement");
+              if (videoElement) {
+                videoElement.setAttribute("src", video.toString());
               }
-            };
-            reader.readAsDataURL(file);
-          }}
-          id="new-post"
-          accept="video/*"
-          className="w-0 h-0 p-0 border-0 invisible"
-        />
-      </div>
+              setVideo(video.toString());
+            }
+          };
+          reader.readAsDataURL(file);
+        }}
+        id="new-post"
+        accept="video/mp4"
+        className="w-0 h-0 p-0 border-0 invisible"
+      />
     </div>
   );
 }

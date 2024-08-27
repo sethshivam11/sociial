@@ -9,7 +9,7 @@ export const stories = [
     fullName: "John Doe",
     username: "johndoe0",
     avatar:
-      "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+      "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
 
     liked: false,
   },
@@ -47,7 +47,7 @@ export const stories = [
     fullName: "Shivam Soni",
     username: "sethshivam",
     avatar:
-      "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+      "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
     liked: false,
   },
   {
@@ -60,7 +60,7 @@ export const stories = [
     fullName: "John Doe",
     username: "johndoe3",
     avatar:
-      "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+      "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
     liked: false,
   },
 ];

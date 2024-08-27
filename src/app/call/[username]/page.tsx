@@ -20,7 +20,7 @@ function Page() {
   const query = useSearchParams();
   const user = {
     avatar:
-      "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+      "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
     fullName: "Shivam Soni",
     username: "sethshivam",
   };

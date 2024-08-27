@@ -117,7 +117,6 @@ function Navbar() {
         .map((path) => {
           if (location.includes(path) || location.startsWith(path))
             return "hidden";
-          else return "";
         })
         .join("")} ${
         location.includes("/messages/") ||
@@ -366,7 +365,10 @@ function Navbar() {
               </p>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleLogout}>
+                <AlertDialogAction
+                  onClick={handleLogout}
+                  className="bg-destructive text-white sm:hover:bg-destructive/80"
+                >
                   Confirm
                 </AlertDialogAction>
               </AlertDialogFooter>
