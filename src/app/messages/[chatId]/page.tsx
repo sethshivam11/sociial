@@ -57,6 +57,7 @@ import MediaDialog from "@/components/MediaDialog";
 import AudioDialog from "@/components/AudioDialog";
 import Link from "next/link";
 import DocumentDialog from "@/components/DocumentDialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface Message {
   id: string;
@@ -104,7 +105,7 @@ function Page({ params }: { params: { chatId: string } }) {
     fullName: "John Doe",
     username: "johndoe",
     avatar:
-      "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+      "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
     followersCount: 24,
     followingCount: 12,
     postsCount: 4,
@@ -114,7 +115,7 @@ function Page({ params }: { params: { chatId: string } }) {
     fullName: "John Doe",
     username: "johndoe",
     avatar:
-      "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+      "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
   });
   const themes = [
     {
@@ -167,7 +168,7 @@ function Page({ params }: { params: { chatId: string } }) {
           username: "johndoe",
           fullName: "John Doe",
           avatar:
-            "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+            "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
         },
         {
           id: "2",
@@ -175,7 +176,7 @@ function Page({ params }: { params: { chatId: string } }) {
           username: "johndoe",
           fullName: "John Doe",
           avatar:
-            "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+            "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
         },
         {
           id: "2",
@@ -183,7 +184,7 @@ function Page({ params }: { params: { chatId: string } }) {
           username: "johndoe",
           fullName: "John Doe",
           avatar:
-            "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+            "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
         },
       ],
     },
@@ -336,7 +337,7 @@ function Page({ params }: { params: { chatId: string } }) {
           username: "johndoe",
           fullName: "John Doe",
           avatar:
-            "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+            "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
         },
       ],
     },
@@ -352,7 +353,7 @@ function Page({ params }: { params: { chatId: string } }) {
           username: "johndoe",
           fullName: "John Doe",
           avatar:
-            "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+            "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
         },
         {
           id: "1",
@@ -360,7 +361,7 @@ function Page({ params }: { params: { chatId: string } }) {
           username: "johndoe",
           fullName: "John Doe",
           avatar:
-            "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+            "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
         },
       ],
     },
@@ -381,7 +382,7 @@ function Page({ params }: { params: { chatId: string } }) {
           username: "johndoe",
           fullName: "John Doe",
           avatar:
-            "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+            "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
         },
         {
           id: "3",
@@ -389,7 +390,7 @@ function Page({ params }: { params: { chatId: string } }) {
           username: "johndoe",
           fullName: "John Doe",
           avatar:
-            "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+            "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
         },
         {
           id: "1",
@@ -397,7 +398,7 @@ function Page({ params }: { params: { chatId: string } }) {
           username: "johndoe",
           fullName: "John Doe",
           avatar:
-            "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+            "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
         },
       ],
     },
@@ -411,7 +412,7 @@ function Page({ params }: { params: { chatId: string } }) {
     {
       id: "33",
       content:
-        "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+        "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
       type: "sent",
       time: "12:45 PM",
       kind: "image",
@@ -435,7 +436,7 @@ function Page({ params }: { params: { chatId: string } }) {
     {
       id: "36",
       content:
-        "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+        "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
       type: "sent",
       time: "12:45 PM",
       kind: "document",
@@ -443,7 +444,7 @@ function Page({ params }: { params: { chatId: string } }) {
     {
       id: "37",
       content:
-        "https://res.cloudinary.com/dv3qbj0bn/image/upload/q_auto/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
+        "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
       type: "reply",
       time: "12:45 PM",
       kind: "document",
@@ -719,7 +720,7 @@ function Page({ params }: { params: { chatId: string } }) {
 
   return (
     <div
-      className={`md:border-l-2 border-stone-200 dark:border-stone-800 md:flex flex flex-col items-start justify-start gap-1 lg:col-span-7 md:col-span-6 col-span-10 ${
+      className={`md:border-l-2 border-stone-200 dark:border-stone-800 md:flex flex flex-col items-start justify-start gap-1 lg:col-span-7 md:col-span-6 col-span-10 overflow-x-hidden h-screen ${
         location !== "/messages" ? "" : "hidden"
       } `}
     >
@@ -786,7 +787,7 @@ function Page({ params }: { params: { chatId: string } }) {
         </div>
       </div>
       <div
-        className="flex flex-col items-start justify-start w-full mr-0 py-2 px-3"
+        className="flex flex-col items-start justify-start w-full mr-0 py-2"
         ref={messageScrollElement}
       >
         {infoOpen ? (
@@ -811,8 +812,8 @@ function Page({ params }: { params: { chatId: string } }) {
             setInfoOpen={(open) => setInfoOpen(open)}
           />
         ) : (
-          <>
-            <div className="flex flex-col items-center justify-center w-full py-2 gap-2 mb-8">
+          <ScrollArea className="h-[80dvh] min-w-40 px-3">
+            <div className="flex flex-col-reverse items-center justify-center w-full py-2 gap-2 mb-8">
               <Avatar className="w-28 h-28 select-none pointer-events-none">
                 <AvatarImage src={recipent.avatar} alt="" />
                 <AvatarFallback>
@@ -953,7 +954,7 @@ function Page({ params }: { params: { chatId: string } }) {
                   }}
                 >
                   <div
-                    className={`flex flex-col2 gap-0 ${
+                    className={`flex flex-col gap-0 ${
                       message.type === "reply" ? "items-start" : "items-end"
                     }`}
                   >
@@ -1021,12 +1022,10 @@ function Page({ params }: { params: { chatId: string } }) {
                 </div>
               )
             )}
-          </>
+          </ScrollArea>
         )}
       </div>
-      {infoOpen ? (
-        ""
-      ) : (
+      {!infoOpen && (
         <div className="sticky bg-white dark:bg-black bottom-0 left-0 w-full px-2.5 flex items-center justify-center z-20">
           <Form {...form}>
             <form

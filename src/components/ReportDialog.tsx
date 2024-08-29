@@ -1,4 +1,4 @@
-import React, { use } from "react";
+import React from "react";
 import {
   Dialog,
   DialogClose,
@@ -10,11 +10,7 @@ import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import { z } from "zod";
-import {
-  descriptionSchema,
-  imageSchema,
-  titleSchema,
-} from "@/schemas/reportSchema";
+import { descriptionSchema, titleSchema } from "@/schemas/reportSchema";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -26,7 +22,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
-import { createReport } from "@/lib/store/features/slices/reportSlice";
+import { submitReport } from "@/lib/store/features/slices/reportSlice";
 import { toast } from "./ui/use-toast";
 import { Info, Loader2 } from "lucide-react";
 
@@ -40,30 +36,29 @@ interface Props {
 function ReportDialog({ open, setOpen, entityId, type }: Props) {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.user);
+  const [image, setImage] = React.useState<File | null>(null);
   const { loading, submitted } = useAppSelector((state) => state.report);
   const formSchema = z.object({
     title: titleSchema,
     description: descriptionSchema,
-    image: imageSchema,
   });
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
       description: "",
-      image: "",
     },
   });
 
   function onSubmit(data: z.infer<typeof formSchema>) {
     dispatch(
-      createReport({
+      submitReport({
         title: data.title,
         description: data.description,
-        type,
+        kind: type,
         user: user._id,
         entityId,
-        image: data.image,
+        image,
       })
     )
       .then(({ payload }) => {
@@ -85,7 +80,12 @@ function ReportDialog({ open, setOpen, entityId, type }: Props) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(open) => {
+        if (!loading) setOpen(open);
+      }}
+    >
       <DialogContent className="sm:w-2/3 w-full h-fit flex flex-col bg-stone-100 dark:bg-stone-900">
         {submitted ? (
           <>
@@ -94,9 +94,10 @@ function ReportDialog({ open, setOpen, entityId, type }: Props) {
             </DialogTitle>
             <Info size="100" className="mx-auto" />
             <p className="opacity-90 text-justify">
-              We&apos;re very sorry for your bad experience with us. Thank you for
-              reporting this issue. We will look into it as soon as possible. We
-              will inform you about the status of your report via email.
+              We&apos;re very sorry for your bad experience with us. Thank you
+              for reporting this issue. We will look into it as soon as
+              possible. We will inform you about the status of your report via
+              email.
             </p>
             <DialogFooter>
               <DialogClose asChild>
@@ -149,16 +150,18 @@ function ReportDialog({ open, setOpen, entityId, type }: Props) {
                   )}
                 />
                 <FormField
-                  control={form.control}
                   name="image"
-                  render={({ field }) => (
+                  render={() => (
                     <FormItem>
                       <FormLabel>Image (Optional)</FormLabel>
                       <FormControl>
                         <Input
                           type="file"
                           placeholder="Describe the issue in detail"
-                          {...field}
+                          accept="image/png,image/jpg,image/jpeg,image/webp"
+                          onChange={(e) =>
+                            setImage(e.target.files?.[0] || null)
+                          }
                         />
                       </FormControl>
                       <FormMessage />

@@ -14,6 +14,4 @@ const descriptionSchema = z
   .min(2, { message: "Description must be at least 2 characters long" })
   .max(500, { message: "Description must be at most 500 characters long" });
 
-const imageSchema = z.string().url().optional();
-
-export { titleSchema, descriptionSchema, imageSchema };
+export { titleSchema, descriptionSchema };

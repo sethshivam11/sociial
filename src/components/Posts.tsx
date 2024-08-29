@@ -1,5 +1,5 @@
 "use client";
-import { Bookmark, Globe, Heart, Loader2, PlayIcon } from "lucide-react";
+import { Globe, Heart, Loader2, PlayIcon } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import Comment from "./Comment";
@@ -38,7 +38,8 @@ import {
   getUserPosts,
   likePost,
 } from "@/lib/store/features/slices/postSlice";
-import { savePost } from "@/lib/store/features/slices/userSlice";
+import SavePost from "./SavePost";
+import PostCaption from "./PostCaption";
 
 interface Props {
   feed?: boolean;
@@ -127,38 +128,6 @@ function Posts({ feed }: Props) {
     });
   }
 
-  function handleSave(postId: string) {
-    dispatch(savePost(postId)).then((response) => {
-      if (response.payload?.success) {
-        toast({
-          title: "Post saved",
-          description: "You can view it later in your saved posts.",
-        });
-      } else {
-        toast({
-          title: "Cannot save post",
-          description: "Please try again later.",
-        });
-      }
-    });
-  }
-  function handleUnsave (postId: string) {
-    
-  }
-
-  function checkSavedPost(postId: string) {
-    if (savedPosts.length === 0) return false;
-    savedPosts.forEach((post) => {
-      if (
-        typeof post === "string"
-          ? post === postId
-          : post.hasOwnProperty("_id") && post._id === postId
-      )
-        return true;
-    });
-    return false;
-  }
-
   React.useEffect(() => {
     const savedConsent = JSON.parse(
       localStorage.getItem("notificationConsent") || "{}"
@@ -182,182 +151,162 @@ function Posts({ feed }: Props) {
 
   return (
     <>
-      <InfiniteScroll
-        dataLength={posts.length}
-        hasMore={posts.length < maxPosts}
-        loader={<Loader2 className="animate-spin mx-auto" />}
-        next={() => dispatch(getFeed(page + 1))}
-        className="flex flex-col py-2 sm:px-4 px-2 gap-4 w-full sm:pb-4 pb-20"
-      >
-        {skeletonLoading ? (
-          <PostsLoading />
-        ) : (
-          posts.map((post, postIndex) => {
-            return (
-              <div
-                key={postIndex}
-                className="rounded-xl bg-stone-100 dark:bg-stone-900 p-4 w-full sm:w-[85%] mx-auto min-h-64 min-w-64"
-              >
-                <div className="flex justify-between w-full">
-                  <div className="flex items-center gap-2 w-full">
-                    <Link className="w-8 h-8" href={`/${post.user.username}`}>
-                      <Avatar className="w-8 h-8">
-                        <AvatarImage
-                          src={post.user.avatar}
-                          alt=""
-                          className="pointer-events-none select-none"
-                        />
-                        <AvatarFallback>
-                          {nameFallback(post.user.fullName)}
-                        </AvatarFallback>
-                      </Avatar>
-                    </Link>
-                    <Link href={`/${post.user.username}`}>
-                      <p className="flex items-center justify-start gap-0.5">
-                        <span>{post.user.fullName}</span>
-                      </p>
-                      <p className="text-sm text-gray-500 leading-3">
-                        @{post.user.username}
-                      </p>
-                    </Link>
+      {posts.length > 0 && (
+        <InfiniteScroll
+          dataLength={posts.length}
+          hasMore={posts.length < maxPosts}
+          loader={<Loader2 className="animate-spin mx-auto" />}
+          next={() => dispatch(getFeed(page + 1))}
+          className="flex flex-col py-2 sm:px-4 px-2 gap-4 w-full sm:pb-4 pb-20"
+        >
+          {skeletonLoading ? (
+            <PostsLoading />
+          ) : (
+            posts.map((post, postIndex) => {
+              return (
+                <div
+                  key={postIndex}
+                  className="rounded-xl bg-stone-100 dark:bg-stone-900 p-4 w-full sm:w-[85%] mx-auto min-h-64 min-w-64"
+                >
+                  <div className="flex justify-between w-full">
+                    <div className="flex items-center gap-2 w-full">
+                      <Link className="w-8 h-8" href={`/${post.user.username}`}>
+                        <Avatar className="w-8 h-8">
+                          <AvatarImage
+                            src={post.user.avatar}
+                            alt=""
+                            className="pointer-events-none select-none"
+                          />
+                          <AvatarFallback>
+                            {nameFallback(post.user.fullName)}
+                          </AvatarFallback>
+                        </Avatar>
+                      </Link>
+                      <Link href={`/${post.user.username}`}>
+                        <p className="flex items-center justify-start gap-0.5">
+                          <span>{post.user.fullName}</span>
+                        </p>
+                        <p className="text-sm text-gray-500 leading-3">
+                          @{post.user.username}
+                        </p>
+                      </Link>
+                    </div>
+                    <PostOptions
+                      user={post.user}
+                      postId={post._id}
+                      isVideo={post.kind === "video"}
+                    />
                   </div>
-                  <PostOptions
-                    user={post.user}
-                    postId={post._id}
-                    isVideo={post.kind === "video"}
+                  {post.kind === "video" ? (
+                    <Link href={`/video/${post._id}`} className="relative">
+                      <PlayIcon
+                        size="50"
+                        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white bg-transparent/50 rounded-full p-2"
+                      />
+                      <Image
+                        src={post?.thumbnail || ""}
+                        alt=""
+                        width="800"
+                        height="800"
+                      />
+                    </Link>
+                  ) : (
+                    <Carousel className="w-full my-2 mt-2">
+                      <CarouselContent>
+                        {post.media.map((image, index) => {
+                          return (
+                            <CarouselItem key={index} className="relative">
+                              {post.media?.length < 1 && (
+                                <div className="absolute right-2 top-2 bg-transparent/60 text-white px-2 py-0.5 rounded-2xl text-sm select-none">
+                                  {index + 1}/{post.media.length}
+                                </div>
+                              )}
+                              <div
+                                className={`absolute w-full h-full items-center justify-center ${
+                                  post.likes?.includes(user._id)
+                                    ? "flex"
+                                    : "hidden"
+                                }`}
+                              >
+                                <Heart
+                                  size="150"
+                                  strokeWidth="0"
+                                  fill="rgb(244 63 94)"
+                                  className="animate-like"
+                                />
+                              </div>
+                              <Image
+                                width="800"
+                                height="800"
+                                src={image}
+                                priority={
+                                  index === 0 && postIndex < 10 ? true : false
+                                }
+                                onDoubleClick={(e) =>
+                                  handleDoubleTap(e, post._id)
+                                }
+                                alt={`Photo by ${post.user.fullName} with username ${post.user.username}`}
+                                className="object-cover select-none w-full h-full rounded-sm max-h-[600px]"
+                              />
+                            </CarouselItem>
+                          );
+                        })}
+                      </CarouselContent>
+                      <CarouselPrevious />
+                      <CarouselNext />
+                    </Carousel>
+                  )}
+                  <div className="flex justify-between select-none">
+                    <div className="flex gap-3">
+                      <button
+                        title={
+                          post.likes?.includes(user._id) ? "Unlike" : "Like"
+                        }
+                        onClick={() =>
+                          dispatch(
+                            likePost({ postId: post._id, userId: user._id })
+                          )
+                        }
+                      >
+                        <Heart
+                          size="30"
+                          className={`${
+                            post.likes?.includes(user._id)
+                              ? "text-rose-500"
+                              : "sm:hover:opacity-60"
+                          } transition-all active:scale-110`}
+                          fill={
+                            post.likes?.includes(user._id)
+                              ? "rgb(244 63 94)"
+                              : "none"
+                          }
+                        />
+                      </button>
+                      <Comment
+                        user={post.user}
+                        commentsCount={post.commentsCount}
+                      />
+                      <Share _id={post._id} />
+                    </div>
+                    <SavePost post={post} />
+                  </div>
+                  <p className="text-sm text-stone-400 mt-1 select-none">
+                    <LikeDialog
+                      likesCount={post.likesCount}
+                      postId={post._id}
+                    />
+                  </p>
+                  <PostCaption
+                    caption={post.caption}
+                    createdAt={post.createdAt}
                   />
                 </div>
-                {post.kind === "video" ? (
-                  <Link href={`/video/${post._id}`} className="relative">
-                    <PlayIcon
-                      size="50"
-                      className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white bg-transparent/50 rounded-full p-2"
-                    />
-                    <video
-                      preload="metadata"
-                      className="w-full my-2 object-contain rounded-sm"
-                      playsInline
-                    >
-                      <source src={post.media[0]} />
-                    </video>
-                  </Link>
-                ) : (
-                  <Carousel className="w-full my-2 mt-2">
-                    <CarouselContent>
-                      {post.media.map((image, index) => {
-                        return (
-                          <CarouselItem key={index} className="relative">
-                            {post.media?.length < 1 && (
-                              <div className="absolute right-2 top-2 bg-transparent/60 text-white px-2 py-0.5 rounded-2xl text-sm select-none">
-                                {index + 1}/{post.media.length}
-                              </div>
-                            )}
-                            <div
-                              className={`absolute w-full h-full items-center justify-center ${
-                                post.likes?.includes(user._id)
-                                  ? "flex"
-                                  : "hidden"
-                              }`}
-                            >
-                              <Heart
-                                size="150"
-                                strokeWidth="0"
-                                fill="rgb(244 63 94)"
-                                className="animate-like"
-                              />
-                            </div>
-                            <Image
-                              width="800"
-                              height="800"
-                              src={image}
-                              priority={
-                                index === 0 && postIndex < 10 ? true : false
-                              }
-                              onDoubleClick={(e) =>
-                                handleDoubleTap(e, post._id)
-                              }
-                              alt={`Photo by ${post.user.fullName} with username ${post.user.username}`}
-                              className="object-cover select-none w-full h-full rounded-sm max-h-[600px]"
-                            />
-                          </CarouselItem>
-                        );
-                      })}
-                    </CarouselContent>
-                    <CarouselPrevious />
-                    <CarouselNext />
-                  </Carousel>
-                )}
-                <div className="flex justify-between select-none">
-                  <div className="flex gap-3">
-                    <button
-                      title={post.likes?.includes(user._id) ? "Unlike" : "Like"}
-                      onClick={() =>
-                        dispatch(
-                          likePost({ postId: post._id, userId: user._id })
-                        )
-                      }
-                    >
-                      <Heart
-                        size="30"
-                        className={`${
-                          post.likes?.includes(user._id)
-                            ? "text-rose-500"
-                            : "sm:hover:opacity-60"
-                        } transition-all active:scale-110`}
-                        fill={
-                          post.likes?.includes(user._id)
-                            ? "rgb(244 63 94)"
-                            : "none"
-                        }
-                      />
-                    </button>
-                    <Comment
-                      user={post.user}
-                      commentsCount={post.commentsCount}
-                    />
-                    <Share _id={post._id} />
-                  </div>
-                  <button className="mr-1">
-                    <Bookmark
-                      size="30"
-                      className="w-full h-full"
-                      fill={checkSavedPost(post._id) ? "currentColor" : "none"}
-                    />
-                  </button>
-                </div>
-                <p className="text-sm text-stone-400 mt-1 select-none">
-                  <LikeDialog likesCount={post.likesCount} postId={post._id} />
-                </p>
-                {post.caption && (
-                  <p className="py-1 text-sm">
-                    <span>{post.caption.slice(0, 30)}&nbsp;</span>
-                    {post?.caption?.length > 30 && (
-                      <button
-                        className="text-stone-500 select-none"
-                        onClick={(e) => {
-                          const btn = e.target as HTMLButtonElement;
-                          const span = btn.parentElement
-                            ?.childNodes[0] as HTMLElement;
-                          if (span.innerHTML !== post.caption) {
-                            span.innerHTML = post.caption;
-                            btn.innerHTML = "&nbsp;less";
-                          } else {
-                            span.innerHTML = post.caption.slice(0, 30);
-                            btn.innerHTML = "&nbsp;more";
-                          }
-                        }}
-                      >
-                        more
-                      </button>
-                    )}
-                  </p>
-                )}
-              </div>
-            );
-          })
-        )}
-      </InfiniteScroll>
-      {!skeletonLoading && !feed && (
+              );
+            })
+          )}
+        </InfiniteScroll>
+      )}
+      {!skeletonLoading && !feed && posts.length !== 0 && (
         <div className="flex flex-col items-center justify-center gap-2 my-8">
           <Globe size="60" />
           <h2 className="text-xl font-bold tracking-tight">
@@ -456,6 +405,7 @@ function Posts({ feed }: Props) {
                       user={post.user}
                       postId={post._id}
                       isVideo={post.kind === "video"}
+                      explorePosts
                     />
                   </div>
                   {post.kind === "video" ? (
@@ -478,11 +428,11 @@ function Posts({ feed }: Props) {
                         {post.media.map((image, index) => {
                           return (
                             <CarouselItem key={index} className="relative">
-                              <div className="absolute right-2 top-2 bg-transparent/60 text-white px-2 py-0.5 rounded-2xl text-sm select-none">
-                                {post.media.length > 1
-                                  ? `${index + 1}/${post.media.length}`
-                                  : ""}
-                              </div>
+                              {post.media.length > 1 && (
+                                <div className="absolute right-2 top-2 bg-transparent/60 text-white px-2 py-0.5 rounded-2xl text-sm select-none">
+                                  {index + 1}/{post.media.length}
+                                </div>
+                              )}
                               <div
                                 className={`absolute w-full h-full items-center justify-center ${
                                   post.likes?.includes(user._id)
@@ -565,18 +515,7 @@ function Posts({ feed }: Props) {
                       />
                       <Share _id={post._id} />
                     </div>
-                    <button
-                      className="mr-1"
-                      onClick={() => handleSave(post._id)}
-                    >
-                      <Bookmark
-                        size="30"
-                        className="w-full h-full"
-                        fill={
-                          checkSavedPost(post._id) ? "currentColor" : "none"
-                        }
-                      />
-                    </button>
+                    <SavePost post={post} />
                   </div>
                   <p className="text-sm text-stone-400 mt-1 select-none">
                     <LikeDialog
@@ -584,30 +523,10 @@ function Posts({ feed }: Props) {
                       postId={post._id}
                     />
                   </p>
-                  {post.caption && (
-                    <p className="py-1 text-sm">
-                      <span>{post.caption.slice(0, 30)}&nbsp;</span>
-                      {post?.caption?.length > 30 && (
-                        <button
-                          className="text-stone-500"
-                          onClick={(e) => {
-                            const btn = e.target as HTMLButtonElement;
-                            const span = btn.parentElement
-                              ?.childNodes[0] as HTMLElement;
-                            if (span.innerHTML !== post.caption) {
-                              span.innerHTML = post.caption || "";
-                              btn.innerHTML = "&nbsp;less";
-                            } else {
-                              span.innerHTML = post.caption.slice(0, 30);
-                              btn.innerHTML = "&nbsp;more";
-                            }
-                          }}
-                        >
-                          more
-                        </button>
-                      )}
-                    </p>
-                  )}
+                  <PostCaption
+                    caption={post.caption}
+                    createdAt={post.createdAt}
+                  />
                 </div>
               );
             })

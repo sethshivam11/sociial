@@ -80,7 +80,7 @@ const pushNotificationSlice = createSlice({
     });
     builder.addCase(saveToken.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload.success) {
+      if (action.payload?.success) {
         state.token = action.payload.token;
       }
     });
@@ -93,7 +93,7 @@ const pushNotificationSlice = createSlice({
     });
     builder.addCase(getPreferences.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload.success) {
+      if (action.payload?.success) {
         state.pushNotifications = action.payload.data.pushNotifications;
         state.emailNotifications = action.payload.data.emails;
       }
@@ -107,7 +107,7 @@ const pushNotificationSlice = createSlice({
     });
     builder.addCase(updatePreferences.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload.success) {
+      if (action.payload?.success) {
         state.pushNotifications = action.payload.data.pushNotifications;
         state.emailNotifications = action.payload.data.emails;
       }

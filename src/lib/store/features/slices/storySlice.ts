@@ -86,7 +86,7 @@ const storySlice = createSlice({
     });
     builder.addCase(createStory.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload.success) {
+      if (action.payload?.success) {
         state.userStory = action.payload.data;
       }
     });
@@ -99,7 +99,7 @@ const storySlice = createSlice({
     });
     builder.addCase(getStories.fulfilled, (state, action) => {
       state.skeletonLoading = false;
-      if (action.payload.success) {
+      if (action.payload?.success) {
         state.stories = action.payload.data;
       }
     });
@@ -112,7 +112,7 @@ const storySlice = createSlice({
     });
     builder.addCase(getStory.fulfilled, (state, action) => {
       state.skeletonLoading = false;
-      if (action.payload.success) {
+      if (action.payload?.success) {
         state.story = action.payload.data;
       }
     });
@@ -125,7 +125,7 @@ const storySlice = createSlice({
     });
     builder.addCase(deleteStory.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload.success) {
+      if (action.payload?.success) {
         state.stories = state.stories.filter(
           (story) => story._id !== action.payload.data._id
         );
@@ -140,7 +140,7 @@ const storySlice = createSlice({
     });
     builder.addCase(seenStory.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload.success) {
+      if (action.payload?.success) {
         state.stories = state.stories.map((story) => {
           if (story._id === action.payload.data._id) {
             story.seenBy = action.payload.data.seenBy;
@@ -158,7 +158,7 @@ const storySlice = createSlice({
     });
     builder.addCase(likeStory.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload.success) {
+      if (action.payload?.success) {
         state.stories = state.stories.map((story) => {
           if (story._id === action.payload.data._id) {
             story.likes = action.payload.data.likes;
@@ -177,7 +177,7 @@ const storySlice = createSlice({
     });
     builder.addCase(unlikeStory.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload.success) {
+      if (action.payload?.success) {
         state.stories = state.stories.map((story) => {
           if (story._id === action.payload.data._id) {
             story.likes = action.payload.data.likes;

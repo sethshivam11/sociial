@@ -151,7 +151,7 @@ const messageSlice = createSlice({
     });
     builder.addCase(sendMessage.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload.success) {
+      if (action.payload?.success) {
         state.messages = [...state.messages, action.payload.data];
       }
     });
@@ -164,7 +164,7 @@ const messageSlice = createSlice({
     });
     builder.addCase(getMessages.fulfilled, (state, action) => {
       state.skeletonLoading = false;
-      if (action.payload.success) {
+      if (action.payload?.success) {
         state.messages = action.payload.data;
       }
     });
@@ -177,7 +177,7 @@ const messageSlice = createSlice({
     });
     builder.addCase(getMoreMessages.fulfilled, (state, action) => {
       state.loadingMore = false;
-      if (action.payload.success) {
+      if (action.payload?.success) {
         state.messages = [...state.messages, ...action.payload.data];
       }
     });
@@ -190,7 +190,7 @@ const messageSlice = createSlice({
     });
     builder.addCase(reactMessage.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload.success) {
+      if (action.payload?.success) {
         state.messages = state.messages.map((message) => {
           if (message._id === action.payload.data._id) {
             message.reacts = [action.payload.data.reacts, ...message.reacts];
@@ -207,7 +207,7 @@ const messageSlice = createSlice({
       state.loading = true;
     });
     builder.addCase(unreactMessage.fulfilled, (state, action) => {
-      if (action.payload.success) {
+      if (action.payload?.success) {
         state.messages = state.messages.map((message) => {
           if (message._id === action.payload.data._id) {
             message.reacts = message.reacts.filter(
@@ -227,7 +227,7 @@ const messageSlice = createSlice({
     });
     builder.addCase(editMessage.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload.success) {
+      if (action.payload?.success) {
         state.messages = state.messages.map((message) => {
           if (message._id === action.payload.data._id) {
             message.content = action.payload.data.content;
@@ -245,7 +245,7 @@ const messageSlice = createSlice({
     });
     builder.addCase(deleteMessage.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload.success) {
+      if (action.payload?.success) {
         state.messages = state.messages.filter(
           (message) => message._id !== action.payload.data._id
         );

@@ -97,11 +97,11 @@ function Page() {
     }
   }
 
-  function onSubmit({ caption }: z.infer<typeof formSchema>) {
+  async function onSubmit({ caption }: z.infer<typeof formSchema>) {
     if (!user._id) return;
     dispatch(setLoading(true));
     let files: File[] = [];
-    Promise.all(
+    await Promise.all(
       posts.map(async (post) => {
         const response = await fetch(post);
         const blob = await response.blob();
@@ -111,6 +111,7 @@ function Page() {
         files.push(image);
       })
     );
+    console.log(files);
     if (files.length === 0) return dispatch(setLoading(false));
     dispatch(
       createPost({

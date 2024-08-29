@@ -5,12 +5,12 @@ const initialState = {
   submitted: false,
 };
 
-export const createReport = createAsyncThunk(
-  "reports/create",
+export const submitReport = createAsyncThunk(
+  "report/submit",
   async ({
     title,
     description,
-    type,
+    kind,
     user,
     entityId,
     image,
@@ -18,20 +18,20 @@ export const createReport = createAsyncThunk(
     title: string;
     description: string;
     user: string;
-    type: "post" | "comment" | "user" | "chat" | "problem" | "story";
+    kind: "post" | "comment" | "user" | "chat" | "problem" | "story";
     entityId?: string;
-    image?: string;
+    image?: File | null;
   }) => {
     const formData = new FormData();
     formData.append("title", title);
     formData.append("description", description);
-    formData.append("type", type);
+    formData.append("kind", kind);
     formData.append("user", user);
 
     if (entityId) formData.append("entityId", entityId);
     if (image) formData.append("image", image);
 
-    const parsed = await fetch("/api/v1/report", {
+    const parsed = await fetch("/api/v1/report/submit", {
       method: "POST",
       body: formData,
     });
@@ -44,15 +44,17 @@ const reportSlice = createSlice({
   initialState,
   reducers: {},
   extraReducers: (builder) => {
-    builder.addCase(createReport.pending, (state) => {
+    builder.addCase(submitReport.pending, (state) => {
       state.loading = true;
       state.submitted = false;
     });
-    builder.addCase(createReport.fulfilled, (state) => {
+    builder.addCase(submitReport.fulfilled, (state, action) => {
       state.loading = false;
-      state.submitted = true;
+      if (action.payload?.success) {
+        state.submitted = true;
+      }
     });
-    builder.addCase(createReport.rejected, (state) => {
+    builder.addCase(submitReport.rejected, (state) => {
       state.loading = false;
     });
   },

@@ -88,7 +88,7 @@ const commentSlice = createSlice({
     });
     builder.addCase(createComment.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload.success) {
+      if (action.payload?.success) {
         state.comments = [action.payload.data, ...state.comments];
       }
     });
@@ -101,7 +101,7 @@ const commentSlice = createSlice({
     });
     builder.addCase(getComments.fulfilled, (state, action) => {
       state.skeletonLoading = false;
-      if (action.payload.success) {
+      if (action.payload?.success) {
         state.comments = action.payload.data;
       }
     });
@@ -114,7 +114,7 @@ const commentSlice = createSlice({
     });
     builder.addCase(getMoreComments.fulfilled, (state, action) => {
       state.loadingMore = false;
-      if (action.payload.success && action.payload.data.length === 0) {
+      if (action.payload?.success && action.payload.data.length === 0) {
         state.comments = [...state.comments, ...action.payload.data];
         state.page += 1;
       }

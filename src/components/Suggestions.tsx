@@ -16,9 +16,11 @@ import {
 } from "@/lib/store/features/slices/followSlice";
 import { toast } from "./ui/use-toast";
 import SuggestionsLoading from "./skeletons/SuggestionsLoading";
+import { usePathname } from "next/navigation";
 
 function Suggestions() {
   const dispatch = useAppDispatch();
+  const location = usePathname();
   const { suggestions, user, skeletonLoading } = useAppSelector(
     (state) => state.user
   );
@@ -53,12 +55,12 @@ function Suggestions() {
   }
 
   React.useEffect(() => {
-    if (user._id) return;
+    if (!user._id) return;
     dispatch(getUserSuggestions());
-  }, [dispatch, getUserSuggestions, user._id]);
+  }, [dispatch, getUserSuggestions, user._id, location]);
 
   return (
-    <div className="py-4 px-2 lg:flex hidden flex-col gap-4 lg:col-span-3">
+    <div className="py-4 px-2 lg:flex hidden h-fit sticky top-0 flex-col gap-4 lg:col-span-3">
       <div className="bg-stone-100 dark:bg-stone-900 pt-4 p-6 rounded-2xl">
         <h1 className="font-semibold text-xl">Suggestions</h1>
         <div className="flex flex-col w-full p-1 mt-4 gap-5">

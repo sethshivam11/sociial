@@ -1,14 +1,20 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { useAppSelector } from "@/lib/store/store";
+import { getProfile } from "@/lib/store/features/slices/userSlice";
+import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
 
 function Layout({ children }: { children: React.ReactNode }) {
+  const dispatch = useAppDispatch();
   const { profile } = useAppSelector((state) => state.user);
   const location = usePathname();
+
+  React.useEffect(() => {
+    dispatch(getProfile({ username: location.split("/")[1] }));
+  }, [dispatch, getProfile, location]);
 
   return (
     <div className="sm:container flex flex-col items-center justify-start xl:col-span-8 sm:col-span-9 col-span-10 sm:py-6">

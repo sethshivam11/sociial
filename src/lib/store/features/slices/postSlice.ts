@@ -22,6 +22,8 @@ const initialState: PostSliceI = {
     kind: "image",
     likesCount: 0,
     commentsCount: 0,
+    createdAt: "",
+    updatedAt: "",
     morePosts: [],
   },
   likes: [],
@@ -233,7 +235,7 @@ const postSlice = createSlice({
       })
       .addCase(getFeed.fulfilled, (state, action) => {
         state.skeletonLoading = false;
-        if (action.payload.success) {
+        if (action.payload?.success) {
           state.posts = [...state.posts, ...action.payload.data.posts];
           state.maxPosts = action.payload.data.max;
           state.page = action.payload.data.page;
@@ -249,7 +251,7 @@ const postSlice = createSlice({
       })
       .addCase(exploreFeed.fulfilled, (state, action) => {
         state.loadingMore = false;
-        if (action.payload.success) {
+        if (action.payload?.success) {
           state.explorePosts = [
             ...state.explorePosts,
             ...action.payload.data.posts,
@@ -268,7 +270,7 @@ const postSlice = createSlice({
       })
       .addCase(getPost.fulfilled, (state, action) => {
         state.skeletonLoading = false;
-        if (action.payload.success) {
+        if (action.payload?.success) {
           state.post = action.payload.data.post;
           state.posts = action.payload.data.relatedPosts;
         }
@@ -283,7 +285,7 @@ const postSlice = createSlice({
       })
       .addCase(createPost.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload.success) {
+        if (action.payload?.success) {
           state.posts.unshift(action.payload.data);
         }
       })
@@ -297,7 +299,7 @@ const postSlice = createSlice({
       })
       .addCase(createVideoPost.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload.success) {
+        if (action.payload?.success) {
           state.posts.unshift(action.payload.data);
         }
       })
@@ -311,7 +313,7 @@ const postSlice = createSlice({
       })
       .addCase(deletePost.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload.success) {
+        if (action.payload?.success) {
           state.posts = state.posts.filter(
             (post) => post._id !== action.payload.data._id
           );
@@ -334,7 +336,7 @@ const postSlice = createSlice({
       })
       .addCase(likePost.fulfilled || likePost.rejected, (state, action) => {
         state.loading = false;
-        if (action.payload.success) return;
+        if (action.payload?.success) return;
         state.posts.map((post) => {
           if (post._id === action.payload.data._id) {
             post.likes = post.likes.filter(
@@ -352,7 +354,7 @@ const postSlice = createSlice({
       })
       .addCase(dislikePost.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload.success) {
+        if (action.payload?.success) {
           state.posts.map((post) => {
             if (post._id === action.payload.data._id && post.likesCount > 0) {
               post.likesCount -= 1;
@@ -371,7 +373,7 @@ const postSlice = createSlice({
       })
       .addCase(getUserPosts.fulfilled, (state, action) => {
         state.skeletonLoading = false;
-        if (action.payload.success) {
+        if (action.payload?.success) {
           state.posts = action.payload.data;
           state.maxPosts = action.payload.data;
         }
@@ -386,7 +388,7 @@ const postSlice = createSlice({
       })
       .addCase(fetchLikes.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload.success) {
+        if (action.payload?.success) {
           state.likes = action.payload.data;
         }
       })

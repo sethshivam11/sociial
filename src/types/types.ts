@@ -40,6 +40,8 @@ export interface PostI {
   likes: string[];
   likesCount: number;
   commentsCount: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ChatI {

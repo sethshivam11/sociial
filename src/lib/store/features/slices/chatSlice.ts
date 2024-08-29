@@ -219,7 +219,7 @@ const chatSlice = createSlice({
     });
     builder.addCase(getChats.fulfilled, (state, action) => {
       state.skeletonLoading = false;
-      if (action.payload.success) {
+      if (action.payload?.success) {
         state.chats = action.payload.data;
       }
     });
@@ -232,7 +232,7 @@ const chatSlice = createSlice({
     });
     builder.addCase(getMoreChats.fulfilled, (state, action) => {
       state.loadingMore = false;
-      if (action.payload.success) {
+      if (action.payload?.success) {
         state.chats = [...state.chats, ...action.payload.data];
       }
     });
@@ -245,7 +245,7 @@ const chatSlice = createSlice({
     });
     builder.addCase(newChat.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload.success) {
+      if (action.payload?.success) {
         state.chats = [action.payload.data, ...state.chats];
       }
     });
@@ -258,7 +258,7 @@ const chatSlice = createSlice({
     });
     builder.addCase(newGroupChat.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload.success) {
+      if (action.payload?.success) {
         state.chats = [action.payload.data, ...state.chats];
       }
     });
@@ -271,7 +271,7 @@ const chatSlice = createSlice({
     });
     builder.addCase(addParticipants.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload.success) {
+      if (action.payload?.success) {
         state.chat.users = action.payload.data.users;
       }
     });
@@ -284,7 +284,7 @@ const chatSlice = createSlice({
     });
     builder.addCase(removeParticipants.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload.success) {
+      if (action.payload?.success) {
         state.chat.users = action.payload.data.users;
       }
     });
@@ -297,7 +297,7 @@ const chatSlice = createSlice({
     });
     builder.addCase(updateGroupChat.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload.success) {
+      if (action.payload?.success) {
         state.chat.groupIcon = action.payload.data.groupIcon;
         state.chat.groupName = action.payload.data.groupName;
       }
@@ -311,7 +311,7 @@ const chatSlice = createSlice({
     });
     builder.addCase(removeGroupImage.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload.success) {
+      if (action.payload?.success) {
         state.chat.groupIcon = action.payload.data.groupIcon;
       }
     });
@@ -324,7 +324,7 @@ const chatSlice = createSlice({
     });
     builder.addCase(leaveGroupChat.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload.success) {
+      if (action.payload?.success) {
         state.chats = state.chats.filter(
           (chat) => chat._id !== action.payload.data
         );
@@ -339,7 +339,7 @@ const chatSlice = createSlice({
     });
     builder.addCase(deleteGroupChat.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload.success) {
+      if (action.payload?.success) {
         state.chats = state.chats.filter(
           (chat) => chat._id !== action.payload.data
         );
@@ -354,7 +354,7 @@ const chatSlice = createSlice({
     });
     builder.addCase(makeAdmin.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload.success) {
+      if (action.payload?.success) {
         state.chat.admin = action.payload.data.admin;
       }
     });
@@ -367,7 +367,7 @@ const chatSlice = createSlice({
     });
     builder.addCase(removeAdmin.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload.success) {
+      if (action.payload?.success) {
         state.chat.admin = action.payload.data.admin;
       }
     });

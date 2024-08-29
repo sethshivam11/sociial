@@ -12,14 +12,15 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { nameFallback } from "@/lib/helpers";
-import { Bookmark, Heart } from "lucide-react";
+import { getTimeDifference, nameFallback } from "@/lib/helpers";
+import { Bookmark, Heart, History } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { getPost } from "@/lib/store/features/slices/postSlice";
+import SavePost from "@/components/SavePost";
 
 function Page({ params }: { params: { postId: string } }) {
   const router = useRouter();
@@ -132,29 +133,22 @@ function Page({ params }: { params: { postId: string } }) {
                 <Comment user={post.user} commentsCount={post.commentsCount} />
                 <Share _id={post._id} />
               </div>
-              <button
-                className="mr-1"
-                onClick={(e) => {
-                  const icon = e.target as HTMLElement;
-                  if (icon.getAttribute("fill") === "currentColor") {
-                    icon.setAttribute("fill", "none");
-                  } else {
-                    (e.target as HTMLElement).setAttribute(
-                      "fill",
-                      "currentColor"
-                    );
-                  }
-                }}
-              >
-                <Bookmark size="30" className="w-full h-full" />
-              </button>
+              <SavePost post={post} />
             </div>
             <p className="text-sm text-stone-400 mt-1 select-none">
               {post.likesCount <= 1 ? "1 like" : `${post.likesCount} likes`}
             </p>
-            <p className="py-1 text-sm">
-              <span>{post.caption}</span>
-            </p>
+            <p
+              className="py-1 text-sm"
+              dangerouslySetInnerHTML={{
+                __html: post.caption.split("\n").join("<br/>"),
+              }}
+            ></p>
+            {post.createdAt && (
+              <div className="text-stone-500 flex gap-1 mt-1">
+                <History size="20" /> {getTimeDifference(post.createdAt)}
+              </div>
+            )}
           </main>
         )}
         <div className="flex flex-col gap-4 lg:w-1/3 md:w-2/3 sm:w-5/6 w-full sm:mx-auto lg:mx-4">

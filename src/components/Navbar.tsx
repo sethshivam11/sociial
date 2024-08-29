@@ -42,18 +42,18 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useTheme } from "next-themes";
 import { nameFallback } from "@/lib/helpers";
-import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import {
   getLoggedInUser,
   logOutUser,
 } from "@/lib/store/features/slices/userSlice";
 import { toast } from "./ui/use-toast";
 import ReportDialog from "./ReportDialog";
-import NavbarLoading from "./skeletons/NavbarLoading";
+import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 
 function Navbar() {
   const location = usePathname();
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const { theme, setTheme } = useTheme();
   const [reportDialog, setReportDialog] = React.useState(false);
   const [logOutDialog, setLogOutDialog] = React.useState(false);
@@ -71,17 +71,16 @@ function Navbar() {
   ];
   const [unreadMessageCount, newNotifications] = [0, false];
   const { user, isLoggedIn } = useAppSelector((state) => state.user);
-  const dispatch = useAppDispatch();
 
   function handleLogout() {
     dispatch(logOutUser())
       .then(({ payload }) => {
-        if (payload.success) {
+        if (payload?.success) {
           router.push("/sign-in");
         } else {
           toast({
             title: "Error",
-            description: payload.message || "Something went wrong!",
+            description: payload?.message || "Something went wrong!",
             variant: "destructive",
           });
         }
@@ -186,13 +185,39 @@ function Navbar() {
             </span>
             <span className="xl:inline hidden">Messages</span>
           </Link>
-          <Link
-            href="/new-post"
-            className="bg-stone-800 dark:bg-stone-100 text-white dark:text-black md:w-full w-fit sm:hidden flex items-center justify-start xl:pl-4 px-2 py-2 gap-3 rounded-full hover:ring-stone-600 dark:hover:ring-stone-400 sm:hover:ring-2"
-            title="New post"
-          >
-            <Plus className="inline" />
-          </Link>
+          <Menubar className="w-fit sm:hidden bg-transparent border-transparent xl:justify-start justify-center">
+            <MenubarMenu>
+              <MenubarTrigger
+                className="bg-tranparent w-fit flex items-center justify-center sm:p-3 p-2 gap-3 rounded-2xl hover:ring-stone-900 bg-stone-800 dark:bg-stone-100 text-white dark:text-black"
+                title="Create"
+              >
+                <Plus />
+              </MenubarTrigger>
+              <MenubarContent className="rounded-xl" align="center">
+                <MenubarItem
+                  className="py-2.5 rounded-lg pl-2.5"
+                  onClick={() => router.push("/new-post")}
+                >
+                  <Grid2X2 />
+                  &nbsp;&nbsp;Post
+                </MenubarItem>
+                <MenubarItem
+                  className="py-2.5 rounded-lg pl-2.5"
+                  onClick={() => router.push("/upload-video")}
+                >
+                  <Tv />
+                  &nbsp;&nbsp;Video
+                </MenubarItem>
+                <MenubarItem
+                  className="py-2.5 rounded-lg pl-2.5"
+                  onClick={() => router.push("/add-story")}
+                >
+                  <CircleFadingPlusIcon />
+                  &nbsp;&nbsp; Story
+                </MenubarItem>
+              </MenubarContent>
+            </MenubarMenu>
+          </Menubar>
           <Link
             href="/videos"
             className={`md:w-full w-fit flex items-center xl:justify-start justify-center xl:pl-4 sm:p-3 p-2 gap-3 rounded-2xl hover:ring-stone-600 dark:hover:ring-stone-400 transition-colors ${

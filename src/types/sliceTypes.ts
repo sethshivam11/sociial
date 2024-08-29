@@ -26,8 +26,8 @@ export interface UserSliceI {
     blocked: string[];
   };
   searchResults: BasicUserI[];
-  savedPosts: PostI[] | string[];
-  suggestions: (BasicUserI & { loading?: boolean; isFollowing?: boolean })[];
+  savedPosts: PostI[];
+  suggestions: (BasicUserI & { loading: boolean; isFollowing: boolean })[];
   profile: ProfileI;
   followers: BasicUserI[];
   following: BasicUserI[];
@@ -42,10 +42,10 @@ export interface UserSliceI {
 
 export interface FollowSliceI {
   _id: string;
-  followers: (BasicUserI & { loading?: boolean; isFollowing?: boolean })[];
-  followings: (BasicUserI & { loading?: boolean; isFollowing?: boolean })[];
-  loading: boolean;
+  followers: (BasicUserI & { loading: boolean })[];
+  followings: (BasicUserI & { loading: boolean })[];
   skeletonLoading: boolean;
+  loading: boolean;
 }
 
 export interface PostSliceI {
@@ -61,6 +61,8 @@ export interface PostSliceI {
     likesCount: number;
     commentsCount: number;
     morePosts: PostI[];
+    createdAt: string;
+    updatedAt: string;
   };
   likes: BasicUserI[];
   loading: boolean;
@@ -100,8 +102,6 @@ export interface NotificationSliceI {
   notifications: NotificationI[];
   loading: boolean;
   skeletonLoading: boolean;
-  loadingMore: boolean;
-  page: number;
 }
 
 export interface StorySliceI {

@@ -10,8 +10,6 @@ import {
   followUser,
   getFollowers,
   getFollowings,
-  setFollowersLoading,
-  setFollowerUser,
   unfollowUser,
 } from "@/lib/store/features/slices/followSlice";
 import FriendsLoading from "@/components/skeletons/FriendsLoading";
@@ -19,12 +17,84 @@ import { toast } from "@/components/ui/use-toast";
 
 function Page() {
   const dispatch = useAppDispatch();
-  const { followers, followings, skeletonLoading } = useAppSelector(
+  const { profile } = useAppSelector((state) => state.user);
+  const { followers, skeletonLoading } = useAppSelector(
     (state) => state.follow
   );
-  const [searchResults, setSearchResults] = React.useState(followers);
+  const [searchResults, setSearchResults] = React.useState<typeof followers>(
+    []
+  );
   const [search, setSearch] = React.useState("");
   const [followingsIds, setFollowingsIds] = React.useState<string[]>([]);
+
+  const fetchFollowings = React.useCallback(
+    async (username: string) => {
+      dispatch(getFollowings({ username })).then((response) => {
+        if (response.payload?.success) {
+          setFollowingsIds(
+            response.payload.data.followings.map(
+              (following: { _id: string }) => following._id
+            )
+          );
+        }
+        dispatch(getFollowers({ username })).then((response) => {
+          if (response.payload?.success) {
+            setSearchResults(response.payload.data.followers);
+          }
+        });
+      });
+    },
+    [dispatch, getFollowings, getFollowers]
+  );
+
+  function setLoading(userId: string, loading: boolean) {
+    setSearchResults((prev) =>
+      prev.map((follower) => {
+        if (follower._id === userId) {
+          return { ...follower, loading };
+        }
+        return follower;
+      })
+    );
+  }
+
+  function handleFollow(userId: string) {
+    setLoading(userId, true);
+    dispatch(followUser({ userId }))
+      .then((response) => {
+        if (response.payload?.success) {
+          setFollowingsIds([...followingsIds, userId]);
+        } else if (!response.payload?.success) {
+          toast({
+            title: "Failed to follow user",
+            description: "Please try again later",
+            variant: "destructive",
+          });
+        }
+      })
+      .finally(() => setLoading(userId, false));
+  }
+  function handleUnfollow(userId: string) {
+    setLoading(userId, true);
+    dispatch(unfollowUser({ userId }))
+      .then((response) => {
+        if (response.payload?.success) {
+          setFollowingsIds(followingsIds.filter((id) => id !== userId));
+        } else if (!response.payload?.success) {
+          toast({
+            title: "Failed to unfollow user",
+            description: "Please try again later",
+            variant: "destructive",
+          });
+        }
+      })
+      .finally(() => setLoading(userId, false));
+  }
+
+  React.useEffect(() => {
+    if (!profile.username) return;
+    fetchFollowings(profile.username);
+  }, [fetchFollowings, profile.username]);
 
   React.useEffect(() => {
     if (search) {
@@ -37,58 +107,10 @@ function Page() {
             return follower;
         })
       );
+    } else {
+      setSearchResults(followers);
     }
   }, [search]);
-
-  const fetchFollowings = React.useCallback(async () => {
-    dispatch(getFollowings()).then((response) => {
-      if (response.payload?.success) {
-        const ids: Set<string> = new Set();
-        if (response.payload?.success) {
-          response.payload.data.followings.forEach(
-            (following: { _id: string }) => {
-              ids.add(following._id);
-            }
-          );
-        }
-        setFollowingsIds(Array.from(ids));
-      }
-      dispatch(getFollowers());
-    });
-  }, [dispatch, getFollowings, getFollowers]);
-
-  function handleFollow(userId: string) {
-    dispatch(setFollowersLoading(userId));
-    dispatch(followUser({ userId }))
-      .then((response) => {
-        if (!response.payload?.success) {
-          toast({
-            title: "Failed to follow user",
-            description: "Please try again later",
-            variant: "destructive",
-          });
-        }
-      })
-      .finally(() => dispatch(setFollowerUser({ userId, isFollowing: true })));
-  }
-  function handleUnfollow(userId: string) {
-    dispatch(setFollowersLoading(userId));
-    dispatch(unfollowUser({ userId }))
-      .then((response) => {
-        if (!response.payload?.success) {
-          toast({
-            title: "Failed to unfollow user",
-            description: "Please try again later",
-            variant: "destructive",
-          });
-        }
-      })
-      .finally(() => dispatch(setFollowerUser({ userId, isFollowing: false })));
-  }
-
-  React.useEffect(() => {
-    fetchFollowings();
-  }, [fetchFollowings]);
 
   return (
     <>
@@ -109,7 +131,7 @@ function Page() {
       {skeletonLoading ? (
         <FriendsLoading />
       ) : searchResults.length ? (
-        <div className="flex flex-col gap-3 px-3 h-fit overflow-y-auto overflow-x-hidden pb-2">
+        <div className="flex flex-col gap-1 px-3 h-fit overflow-y-auto overflow-x-hidden pb-2">
           {searchResults.map((follower, index) => (
             <div
               className="flex items-start justify-start hover:bg-stone-200 hover:dark:bg-stone-800 rounded-lg p-2"
@@ -137,10 +159,10 @@ function Page() {
                   <button
                     className="bg-stone-500 w-20 h-7 text-center text-white rounded-full text-sm transition-colors hover:bg-stone-600 disabled:bg-stone-400 ml-4"
                     onClick={() => handleUnfollow(follower._id)}
-                    disabled={follower?.loading}
+                    disabled={follower.loading}
                   >
-                    {follower?.loading ? (
-                      <Loader2 className="animate-spin" />
+                    {follower.loading ? (
+                      <Loader2 className="animate-spin mx-auto" />
                     ) : (
                       "Unfollow"
                     )}
@@ -149,10 +171,10 @@ function Page() {
                   <button
                     className="bg-blue-500 w-16 h-7 text-center text-white rounded-full text-sm transition-colors hover:bg-blue-700 disabled:bg-blue-400 ml-4"
                     onClick={() => handleFollow(follower._id)}
-                    disabled={follower?.loading}
+                    disabled={follower.loading}
                   >
-                    {follower?.loading ? (
-                      <Loader2 className="animate-spin" />
+                    {follower.loading ? (
+                      <Loader2 className="animate-spin mx-auto" />
                     ) : (
                       "Follow"
                     )}

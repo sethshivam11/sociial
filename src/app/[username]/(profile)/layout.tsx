@@ -34,7 +34,7 @@ import {
 } from "@/lib/store/features/slices/followSlice";
 import { getProfile } from "@/lib/store/features/slices/userSlice";
 import ProfileLoading from "@/components/skeletons/ProfileLoading";
-import Link from "next/link";
+import { Metadata } from "next";
 
 function Profile({
   children,
@@ -106,7 +106,7 @@ function Profile({
   }
 
   React.useEffect(() => {
-    dispatch(getFollowings());
+    dispatch(getFollowings({ username }));
     if (username) dispatch(getProfile({ username }));
   }, [username]);
 

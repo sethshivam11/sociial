@@ -2,7 +2,6 @@
 import { UserSliceI } from "@/types/sliceTypes";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { store } from "../../store";
-import { BasicUserI } from "@/types/types";
 
 const initialState: UserSliceI = {
   user: {
@@ -205,39 +204,7 @@ export const removeAvatar = createAsyncThunk("users/removeAvatar", async () => {
 
 export const getLoggedInUser = createAsyncThunk("users/getUser", async () => {
   const parsed = await fetch("/api/v1/users/get");
-  const response = await parsed.json();
-  if (!response?.success) {
-    if (
-      response?.message === "Invalid token!" ||
-      response?.message === "Token expired!" ||
-      response?.message === "Token is required"
-    ) {
-      store.dispatch(renewAccessToken()).then((response) => {
-        if (response.payload?.success) {
-          store.dispatch(getLoggedInUser()).then((response) => {
-            return response.payload;
-          });
-        } else {
-          console.log("Deleting refresh and access token");
-          localStorage.removeItem("accessToken");
-          localStorage.removeItem("refreshToken");
-          return {
-            success: false,
-            message: "Something went wrong, Please login again",
-            status: 401,
-          };
-        }
-      });
-    } else if (response?.message === "User not found") {
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
-      return {
-        success: false,
-        message: "Something went wrong, Please login again",
-        status: 401,
-      };
-    }
-  } else return response;
+  return parsed.json();
 });
 
 export const updateDetails = createAsyncThunk(
@@ -408,7 +375,7 @@ export const userSlice = createSlice({
       })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload.success) {
+        if (action.payload?.success) {
           state.user = action.payload.data;
         }
       })
@@ -622,7 +589,13 @@ export const userSlice = createSlice({
       .addCase(getSavedPosts.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload?.success) {
-          state.savedPosts = action.payload.data;
+          state.savedPosts = action.payload.data.map(
+            (user: { loading: boolean; isFollowing: boolean }) => ({
+              ...user,
+              loading: false,
+              isFollowing: false,
+            })
+          );
         } else if (!action.payload?.success) {
           state.savedPosts = [];
         }
@@ -655,6 +628,8 @@ export const userSlice = createSlice({
         state.skeletonLoading = false;
         if (action.payload?.success) {
           state.suggestions = action.payload.data;
+        } else if (action.payload.message === "No users found") {
+          state.suggestions = [];
         }
       })
       .addCase(getUserSuggestions.rejected, (state) => {

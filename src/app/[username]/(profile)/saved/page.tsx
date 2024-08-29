@@ -9,8 +9,7 @@ import { getSavedPosts } from "@/lib/store/features/slices/userSlice";
 
 function Page() {
   const dispatch = useAppDispatch();
-  const { skeletonLoading, posts } = useAppSelector((state) => state.post);
-  const { user } = useAppSelector((state) => state.user);
+  const { user, skeletonLoading, savedPosts } = useAppSelector((state) => state.user);
 
   React.useEffect(() => {
     if (!user._id) return;
@@ -27,8 +26,8 @@ function Page() {
             </div>
           );
         })
-      ) : posts.length ? (
-        posts.map((post, index) => (
+      ) : savedPosts.length ? (
+        savedPosts.map((post, index) => (
           <Link
             href={`/post/${post._id}`}
             className="lg:w-1/4 w-1/3 aspect-square p-1 relative"

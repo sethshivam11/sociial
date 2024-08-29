@@ -4,23 +4,13 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 const initialState: NotificationSliceI = {
   notifications: [],
   loading: false,
-  skeletonLoading: false,
-  loadingMore: false,
-  page: 1,
+  skeletonLoading: true,
 };
 
 export const getNotifications = createAsyncThunk(
   "notifications/get",
   async () => {
     const parsed = await fetch("/api/v1/notifications");
-    return parsed.json();
-  }
-);
-
-export const getMoreNotfications = createAsyncThunk(
-  "notifications/getMore",
-  async (page: number) => {
-    const parsed = await fetch(`/api/v1/notifications?page=${page}`);
     return parsed.json();
   }
 );
@@ -48,62 +38,45 @@ const notificationSlice = createSlice({
   initialState,
   reducers: {},
   extraReducers: (builder) => {
-    builder.addCase(getNotifications.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(getNotifications.fulfilled, (state, action) => {
-      state.loading = false;
-      if (action.payload.success) {
-        state.notifications = action.payload.data;
-      }
-    });
-    builder.addCase(getNotifications.rejected, (state) => {
-      state.loading = false;
-    });
+    builder
+      .addCase(getNotifications.pending, (state) => {
+        state.skeletonLoading = true;
+      })
+      .addCase(getNotifications.fulfilled, (state, action) => {
+        state.skeletonLoading = false;
+        if (action.payload?.success) {
+          state.notifications = action.payload.data;
+        }
+      })
+      .addCase(getNotifications.rejected, (state) => {
+        state.skeletonLoading = false;
+      });
 
-    builder.addCase(getMoreNotfications.pending, (state) => {
-      state.loadingMore = true;
-    });
-    builder.addCase(getMoreNotfications.fulfilled, (state, action) => {
-      state.loadingMore = false;
-      if (action.payload.success) {
-        state.notifications = [...state.notifications, ...action.payload.data];
-      }
-    });
-    builder.addCase(getMoreNotfications.rejected, (state) => {
-      state.loadingMore = false;
-    });
-
-    builder.addCase(readNotification.pending, (state) => {
-      state.loading = true;
-    });
     builder.addCase(readNotification.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload.success) {
+      if (action.payload?.success) {
         state.notifications = state.notifications.map((notification) => {
           notification.read = true;
           return notification;
         });
       }
     });
-    builder.addCase(readNotification.rejected, (state) => {
-      state.loading = false;
-    });
 
-    builder.addCase(deleteNotification.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(deleteNotification.fulfilled, (state, action) => {
-      state.loading = false;
-      if (action.payload.success) {
-        state.notifications = state.notifications.filter(
-          (notification) => notification._id !== action.payload.data._id
-        );
-      }
-    });
-    builder.addCase(deleteNotification.rejected, (state) => {
-      state.loading = false;
-    });
+    builder
+      .addCase(deleteNotification.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(deleteNotification.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload?.success) {
+          state.notifications = state.notifications.filter(
+            (notification) => notification._id !== action.payload.data._id
+          );
+        }
+      })
+      .addCase(deleteNotification.rejected, (state) => {
+        state.loading = false;
+      });
   },
 });
 

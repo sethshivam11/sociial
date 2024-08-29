@@ -109,7 +109,7 @@ function Page() {
 
   return (
     <div
-      className="sm:container flex flex-col items-center justify-start min-h-[100dvh] h-fit col-span-10 px-3 py-6"
+      className="sm:container flex flex-col items-center justify-start min-h-[100dvh] h-full col-span-10 px-3 py-6"
       onDragEnter={() => {
         dragContainer.current?.classList.remove(
           "border-stone-300",
