@@ -1,4 +1,5 @@
 import { PostSliceI } from "@/types/sliceTypes";
+import { PostI } from "@/types/types";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 const initialState: PostSliceI = {
@@ -166,15 +167,30 @@ export const deletePost = createAsyncThunk(
 
 export const likePost = createAsyncThunk(
   "posts/like",
-  async ({ postId, userId }: { postId: string; userId: string }) => {
+  async ({
+    postId,
+    userId,
+    type,
+  }: {
+    postId: string;
+    userId: string;
+    type: "explore" | "posts" | "post";
+  }) => {
     const parsed = await fetch(`/api/v1/posts/like/${postId}`);
     return parsed.json();
   }
 );
 
-export const dislikePost = createAsyncThunk(
+export const unlikePost = createAsyncThunk(
   "posts/dislike",
-  async (postId: string) => {
+  async ({
+    postId,
+    userId,
+  }: {
+    postId: string;
+    userId: string;
+    type: "explore" | "posts" | "post";
+  }) => {
     const parsed = await fetch(`/api/v1/posts/dislike/${postId}`);
     return parsed.json();
   }
@@ -236,7 +252,15 @@ const postSlice = createSlice({
       .addCase(getFeed.fulfilled, (state, action) => {
         state.skeletonLoading = false;
         if (action.payload?.success) {
-          state.posts = [...state.posts, ...action.payload.data.posts];
+          const existingPosts = state.posts;
+          const postsMap = new Map(
+            existingPosts.map((post) => [post._id, post])
+          );
+
+          action.payload.data.posts.forEach((post: PostI) =>
+            postsMap.set(post._id, post)
+          );
+          state.posts = Array.from(postsMap.values());
           state.maxPosts = action.payload.data.max;
           state.page = action.payload.data.page;
         }
@@ -252,11 +276,16 @@ const postSlice = createSlice({
       .addCase(exploreFeed.fulfilled, (state, action) => {
         state.loadingMore = false;
         if (action.payload?.success) {
-          state.explorePosts = [
-            ...state.explorePosts,
-            ...action.payload.data.posts,
-          ];
-          state.maxExplorePosts = action.payload.max;
+          const existingPosts = state.explorePosts;
+          const postsMap = new Map(
+            existingPosts.map((post) => [post._id, post])
+          );
+
+          action.payload.data.posts.forEach((post: PostI) =>
+            postsMap.set(post._id, post)
+          );
+          state.explorePosts = Array.from(postsMap.values());
+          state.maxExplorePosts = action.payload.data.max;
           state.page = action.payload.data.page;
         }
       })
@@ -324,46 +353,103 @@ const postSlice = createSlice({
       });
 
     builder
-      .addCase(likePost.pending, (state, action) => {
+      .addCase(likePost.pending, (state) => {
         state.loading = true;
-        state.posts.map((post) => {
-          if (post._id === action.meta.arg.postId) {
-            post.likes.push(action.meta.arg.userId);
-            post.likesCount += 1;
-          }
-          return post;
-        });
       })
-      .addCase(likePost.fulfilled || likePost.rejected, (state, action) => {
+      .addCase(likePost.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload?.success) return;
-        state.posts.map((post) => {
-          if (post._id === action.payload.data._id) {
-            post.likes = post.likes.filter(
-              (like) => like !== action.meta.arg.userId
-            );
-            post.likesCount -= 1;
+        if (action.payload?.success) {
+          switch (action.meta.arg.type) {
+            case "post": {
+              state.post = {
+                ...state.post,
+                likes: [...state.post.likes, action.meta.arg.userId],
+                likesCount: state.post.likesCount + 1,
+              };
+            }
+            case "posts": {
+              state.posts = state.posts.map((post) => {
+                if (post._id === action.meta.arg.postId) {
+                  return {
+                    ...post,
+                    likes: [...post.likes, action.meta.arg.userId],
+                    likesCount: post.likesCount + 1,
+                  };
+                }
+                return post;
+              });
+            }
+            case "explore": {
+              state.explorePosts = state.explorePosts.map((post) => {
+                if (post._id === action.meta.arg.postId) {
+                  return {
+                    ...post,
+                    likes: [...post.likes, action.meta.arg.userId],
+                    likesCount: post.likesCount + 1,
+                  };
+                }
+                return post;
+              });
+            }
           }
-          return post;
-        });
+        }
+      })
+      .addCase(likePost.rejected, (state) => {
+        state.loading = false;
       });
 
     builder
-      .addCase(dislikePost.pending, (state) => {
+      .addCase(unlikePost.pending, (state) => {
         state.loading = true;
       })
-      .addCase(dislikePost.fulfilled, (state, action) => {
+      .addCase(unlikePost.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload?.success) {
-          state.posts.map((post) => {
-            if (post._id === action.payload.data._id && post.likesCount > 0) {
-              post.likesCount -= 1;
+          switch (action.meta.arg.type) {
+            case "post": {
+              state.post = {
+                ...state.post,
+                likes: state.post.likes.filter(
+                  (like) => like !== action.meta.arg.userId
+                ),
+                likesCount:
+                  state.post.likesCount > 0 ? state.post.likesCount - 1 : 0,
+              };
             }
-            return post;
-          });
+            case "posts": {
+              state.posts = state.posts.map((post) => {
+                if (post._id === action.meta.arg.postId) {
+                  return {
+                    ...post,
+                    likes: state.post.likes.filter(
+                      (like) => like !== action.meta.arg.userId
+                    ),
+                    likesCount:
+                      state.post.likesCount > 0 ? state.post.likesCount - 1 : 0,
+                  };
+                }
+                return post;
+              });
+            }
+            case "explore": {
+              state.explorePosts = state.explorePosts.map((post) => {
+                if (post._id === action.meta.arg.postId) {
+                  return {
+                    ...post,
+                    likes: state.post.likes.filter(
+                      (like) => like !== action.meta.arg.userId
+                    ),
+                    likesCount:
+                      state.post.likesCount > 0 ? state.post.likesCount - 1 : 0,
+                  };
+                }
+                return post;
+              });
+            }
+          }
         }
       })
-      .addCase(dislikePost.rejected, (state) => {
+      .addCase(unlikePost.rejected, (state) => {
         state.loading = false;
       });
 

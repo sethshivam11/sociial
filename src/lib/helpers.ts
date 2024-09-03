@@ -15,24 +15,24 @@ export function getTimeDifference(createdAt: string) {
   const differenceInMinutes = Math.floor(differenceInMs / (1000 * 60));
 
   if (differenceInMinutes < 60) {
-    return `${differenceInMinutes}mins ago`;
+    return `${differenceInMinutes} mins ago`;
   }
 
   const differenceInHours = Math.floor(differenceInMinutes / 60);
   if (differenceInHours < 24) {
-    return `${differenceInHours}h ago`;
+    return `${differenceInHours} hours ago`;
   }
 
   const differenceInDays = Math.floor(differenceInHours / 24);
   if (differenceInDays < 7) {
-    return `${differenceInDays}days ago`;
+    return `${differenceInDays} days ago`;
   }
 
   const differenceInWeeks = Math.floor(differenceInDays / 7);
   if (differenceInWeeks < 52) {
-    return `${differenceInWeeks}weeks ago`;
+    return `${differenceInWeeks} weeks ago`;
   }
 
   const differenceInYears = Math.floor(differenceInWeeks / 52);
-  return `${differenceInYears}years ago`;
+  return `${differenceInYears} years ago`;
 }

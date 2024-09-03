@@ -19,14 +19,56 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
-import { getPost } from "@/lib/store/features/slices/postSlice";
+import {
+  getPost,
+  likePost,
+  unlikePost,
+} from "@/lib/store/features/slices/postSlice";
 import SavePost from "@/components/SavePost";
+import { toast } from "@/components/ui/use-toast";
+import LikeDialog from "@/components/LikeDialog";
 
 function Page({ params }: { params: { postId: string } }) {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { post, skeletonLoading } = useAppSelector((state) => state.post);
+  const { post, loading, skeletonLoading } = useAppSelector(
+    (state) => state.post
+  );
   const { user } = useAppSelector((state) => state.user);
+
+  function handleLike(postId: string) {
+    dispatch(
+      likePost({
+        postId: postId,
+        userId: user._id,
+        type: "post"
+      })
+    ).then((response) => {
+      if (!response.payload?.success) {
+        toast({
+          title: "Cannot like post",
+          description: "Please try again later.",
+        });
+      }
+    });
+  }
+
+  function handleUnlike(postId: string) {
+    dispatch(
+      unlikePost({
+        postId: postId,
+        userId: user._id,
+        type: "post"
+      })
+    ).then((response) => {
+      if (!response.payload?.success) {
+        toast({
+          title: "Cannot unlike post",
+          description: "Please try again later.",
+        });
+      }
+    });
+  }
 
   React.useEffect(() => {
     dispatch(getPost(params.postId));
@@ -74,15 +116,25 @@ function Page({ params }: { params: { postId: string } }) {
                   return (
                     <CarouselItem key={index} className="relative">
                       <div
-                        className={`absolute w-full h-full items-center justify-center ${
-                          post.likes?.includes(user._id) ? "flex" : "hidden"
-                        }`}
+                        className="flex absolute w-full h-full items-center justify-center"
+                        onDoubleClick={(e) => {
+                          if (loading) return;
+                          if (post.likes?.includes(user._id)) {
+                            handleUnlike(post._id);
+                          } else {
+                            handleLike(post._id);
+                          }
+                        }}
                       >
                         <Heart
                           size="150"
                           strokeWidth="0"
                           fill="rgb(244 63 94)"
-                          className="animate-like"
+                          className={
+                            post.likes.includes(user._id)
+                              ? "animate-like"
+                              : "hidden"
+                          }
                         />
                       </div>
                       <Image
@@ -90,19 +142,6 @@ function Page({ params }: { params: { postId: string } }) {
                         height={500}
                         src={image}
                         priority={index === 0 ? true : false}
-                        onDoubleClick={(e) => {
-                          const heartContainer = (e.target as HTMLElement)
-                            .parentElement?.parentElement?.childNodes;
-                          setTimeout(
-                            () =>
-                              heartContainer?.forEach((child) => {
-                                (
-                                  child.childNodes[0] as HTMLElement
-                                ).classList.add("hidden");
-                              }),
-                            500
-                          );
-                        }}
                         alt={`Photo by ${post.user.fullName} with username ${post.user.username}`}
                         className="object-cover select-none w-full h-full rounded-sm"
                       />
@@ -128,6 +167,13 @@ function Page({ params }: { params: { postId: string } }) {
                     fill={
                       post.likes?.includes(user._id) ? "rgb(244 63 94)" : "none"
                     }
+                    onClick={() => {
+                      if (post.likes?.includes(user._id)) {
+                        handleUnlike(post._id);
+                      } else {
+                        handleLike(post._id);
+                      }
+                    }}
                   />
                 </button>
                 <Comment user={post.user} commentsCount={post.commentsCount} />
@@ -135,8 +181,8 @@ function Page({ params }: { params: { postId: string } }) {
               </div>
               <SavePost post={post} />
             </div>
-            <p className="text-sm text-stone-400 mt-1 select-none">
-              {post.likesCount <= 1 ? "1 like" : `${post.likesCount} likes`}
+            <p className="text-sm text-stone-500 mt-1 select-none">
+              <LikeDialog likesCount={post.likesCount} postId={post._id} />
             </p>
             <p
               className="py-1 text-sm"
@@ -145,7 +191,7 @@ function Page({ params }: { params: { postId: string } }) {
               }}
             ></p>
             {post.createdAt && (
-              <div className="text-stone-500 flex gap-1 mt-1">
+              <div className="text-stone-500 flex gap-1 mt-1 select-none">
                 <History size="20" /> {getTimeDifference(post.createdAt)}
               </div>
             )}

@@ -37,6 +37,7 @@ import {
   getFeed,
   getUserPosts,
   likePost,
+  unlikePost,
 } from "@/lib/store/features/slices/postSlice";
 import SavePost from "./SavePost";
 import PostCaption from "./PostCaption";
@@ -46,22 +47,23 @@ interface Props {
 }
 
 function Posts({ feed }: Props) {
+  const [savingToken, setSavingToken] = React.useState(false);
   const dispatch = useAppDispatch();
-  const { user, loading, profile, savedPosts } = useAppSelector(
-    (state) => state.user
-  );
+  const { user, profile } = useAppSelector((state) => state.user);
   const {
     skeletonLoading,
     posts,
     explorePosts,
     page,
     maxPosts,
+    loading,
     maxExplorePosts,
   } = useAppSelector((state) => state.post);
   const [consentDialog, setConsentDialog] = React.useState(false);
   const [showExplorePosts, setShowExplorePosts] = React.useState(false);
 
   async function handleConsent() {
+    setSavingToken(true);
     await Notification.requestPermission().then(async (result) => {
       if (result === "granted") {
         await getToken(messaging, {
@@ -72,6 +74,7 @@ function Posts({ feed }: Props) {
               "notificationConsent",
               `{"consent": "true","expiry": "null"}`
             );
+            setConsentDialog(false);
           })
           .catch((err) => {
             console.log(err);
@@ -83,7 +86,8 @@ function Posts({ feed }: Props) {
               "notificationConsent",
               `{"consent": "false","expiry": "${Date.now()}"}`
             );
-          });
+          })
+          .finally(() => setSavingToken(false));
       } else {
         localStorage.setItem(
           "notificationConsent",
@@ -98,30 +102,34 @@ function Posts({ feed }: Props) {
     });
   }
 
-  async function handleDoubleTap(
-    e: React.MouseEvent<HTMLImageElement, MouseEvent>,
-    postId: string
-  ) {
-    const heartContainer = (e.target as HTMLElement).parentElement
-      ?.parentElement?.childNodes;
-    setTimeout(
-      () =>
-        heartContainer?.forEach((child) => {
-          (child.childNodes[0] as HTMLElement).classList.add("hidden");
-        }),
-      500
-    );
+  function handleLike(postId: string, type: "posts" | "explore") {
     dispatch(
       likePost({
         postId: postId,
         userId: user._id,
+        type,
       })
     ).then((response) => {
-      if (response.payload?.success) {
-        return;
-      } else {
+      if (!response.payload?.success) {
         toast({
           title: "Cannot like post",
+          description: "Please try again later.",
+        });
+      }
+    });
+  }
+
+  function handleUnlike(postId: string, type: "posts" | "explore") {
+    dispatch(
+      unlikePost({
+        postId: postId,
+        userId: user._id,
+        type,
+      })
+    ).then((response) => {
+      if (!response.payload?.success) {
+        toast({
+          title: "Cannot unlike post",
           description: "Please try again later.",
         });
       }
@@ -222,17 +230,29 @@ function Posts({ feed }: Props) {
                                 </div>
                               )}
                               <div
-                                className={`absolute w-full h-full items-center justify-center ${
-                                  post.likes?.includes(user._id)
-                                    ? "flex"
-                                    : "hidden"
-                                }`}
+                                className="flex absolute w-full h-full items-center justify-center z-0"
+                                onDoubleClick={async (e) => {
+                                  if (loading) return;
+                                  console.log(
+                                    post.likes.includes(user._id),
+                                    user._id
+                                  );
+                                  if (post.likes.includes(user._id)) {
+                                    handleUnlike(post._id, "posts");
+                                  } else {
+                                    handleLike(post._id, "posts");
+                                  }
+                                }}
                               >
                                 <Heart
                                   size="150"
                                   strokeWidth="0"
                                   fill="rgb(244 63 94)"
-                                  className="animate-like"
+                                  className={
+                                    post.likes.includes(user._id)
+                                      ? "animate-like"
+                                      : "hidden"
+                                  }
                                 />
                               </div>
                               <Image
@@ -242,11 +262,8 @@ function Posts({ feed }: Props) {
                                 priority={
                                   index === 0 && postIndex < 10 ? true : false
                                 }
-                                onDoubleClick={(e) =>
-                                  handleDoubleTap(e, post._id)
-                                }
                                 alt={`Photo by ${post.user.fullName} with username ${post.user.username}`}
-                                className="object-cover select-none w-full h-full rounded-sm max-h-[600px]"
+                                className="object-cover select-none w-full h-full rounded-sm z-10 max-h-[600px]"
                               />
                             </CarouselItem>
                           );
@@ -260,23 +277,26 @@ function Posts({ feed }: Props) {
                     <div className="flex gap-3">
                       <button
                         title={
-                          post.likes?.includes(user._id) ? "Unlike" : "Like"
+                          post.likes.includes(user._id) ? "Unlike" : "Like"
                         }
-                        onClick={() =>
-                          dispatch(
-                            likePost({ postId: post._id, userId: user._id })
-                          )
-                        }
+                        disabled={loading}
+                        onClick={() => {
+                          if (post.likes.includes(user._id)) {
+                            handleUnlike(post._id, "posts");
+                          } else {
+                            handleLike(post._id, "posts");
+                          }
+                        }}
                       >
                         <Heart
                           size="30"
                           className={`${
-                            post.likes?.includes(user._id)
+                            post.likes.includes(user._id)
                               ? "text-rose-500"
                               : "sm:hover:opacity-60"
                           } transition-all active:scale-110`}
                           fill={
-                            post.likes?.includes(user._id)
+                            post.likes.includes(user._id)
                               ? "rgb(244 63 94)"
                               : "none"
                           }
@@ -434,17 +454,25 @@ function Posts({ feed }: Props) {
                                 </div>
                               )}
                               <div
-                                className={`absolute w-full h-full items-center justify-center ${
-                                  post.likes?.includes(user._id)
-                                    ? "flex"
-                                    : "hidden"
-                                }`}
+                                className="absolute w-full h-full items-center justify-center"
+                                onDoubleClick={(e) => {
+                                  if (loading) return;
+                                  if (post.likes.includes(user._id)) {
+                                    handleUnlike(post._id, "explore");
+                                  } else {
+                                    handleLike(post._id, "explore");
+                                  }
+                                }}
                               >
                                 <Heart
                                   size="150"
                                   strokeWidth="0"
                                   fill="rgb(244 63 94)"
-                                  className="animate-like"
+                                  className={
+                                    post.likes.includes(user._id)
+                                      ? "animate-like"
+                                      : "hidden"
+                                  }
                                 />
                               </div>
                               <Image
@@ -454,24 +482,6 @@ function Posts({ feed }: Props) {
                                 priority={
                                   index === 0 && postIndex < 10 ? true : false
                                 }
-                                onDoubleClick={(e) => {
-                                  likePost({
-                                    postId: post._id,
-                                    userId: user._id,
-                                  });
-                                  const heartContainer = (
-                                    e.target as HTMLElement
-                                  ).parentElement?.parentElement?.childNodes;
-                                  setTimeout(
-                                    () =>
-                                      heartContainer?.forEach((child) => {
-                                        (
-                                          child.childNodes[0] as HTMLElement
-                                        ).classList.add("hidden");
-                                      }),
-                                    500
-                                  );
-                                }}
                                 alt={`Photo by ${post.user.fullName} with username ${post.user.username}`}
                                 className="object-cover select-none w-full max-h-[600px] rounded-sm"
                               />
@@ -487,23 +497,24 @@ function Posts({ feed }: Props) {
                     <div className="flex gap-3">
                       <button
                         title={
-                          post.likes?.includes(user._id) ? "Unlike" : "Like"
+                          post.likes.includes(user._id) ? "Unlike" : "Like"
                         }
+                        disabled={loading}
                         onClick={() =>
-                          dispatch(
-                            likePost({ postId: post._id, userId: user._id })
-                          )
+                          post.likes.includes(user._id)
+                            ? handleUnlike(post._id, "explore")
+                            : handleLike(post._id, "explore")
                         }
                       >
                         <Heart
                           size="30"
                           className={`${
-                            post.likes?.includes(user._id)
+                            post.likes.includes(user._id)
                               ? "text-rose-500"
                               : "sm:hover:opacity-60"
                           } transition-all active:scale-110`}
                           fill={
-                            post.likes?.includes(user._id)
+                            post.likes.includes(user._id)
                               ? "rgb(244 63 94)"
                               : "none"
                           }
@@ -533,14 +544,7 @@ function Posts({ feed }: Props) {
           )}
         </InfiniteScroll>
       )}
-      <AlertDialog
-        open={consentDialog}
-        onOpenChange={(open) => {
-          if (!loading) {
-            setConsentDialog(open);
-          }
-        }}
-      >
+      <AlertDialog open={consentDialog}>
         <AlertDialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
           <AlertDialogTitle>Recieve Notifications</AlertDialogTitle>
           <p className="dark:text-stone-400">
@@ -550,23 +554,24 @@ function Posts({ feed }: Props) {
           <AlertDialogFooter>
             <AlertDialogCancel
               className="rounded-lg"
-              onClick={() =>
+              onClick={() => {
                 localStorage.setItem(
                   "notificationConsent",
                   `{"consent": "false","expiry": "${
                     Date.now() + 1000 * 60 * 60 * 24 * 10
                   }"}`
-                )
-              }
+                );
+                setConsentDialog(false);
+              }}
             >
               No
             </AlertDialogCancel>
             <AlertDialogAction
               className="rounded-lg"
               onClick={handleConsent}
-              disabled={loading}
+              disabled={savingToken}
             >
-              {loading ? <Loader2 className="animate-spin" /> : "Yes"}
+              {savingToken ? <Loader2 className="animate-spin" /> : "Yes"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

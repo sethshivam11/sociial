@@ -39,7 +39,7 @@ function PostCaption({
             more
           </button>
         )}
-        <span className="flex gap-1 text-stone-500 mt-1">
+        <span className="flex gap-1 text-stone-500 mt-1 select-none">
           {createdAt && (
             <>
               <History size="20" />
