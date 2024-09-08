@@ -122,7 +122,7 @@ export default function Share({ isVideo, _id }: Props) {
 
   return (
     <Dialog>
-      <DialogTrigger asChild title="Share">
+      <DialogTrigger title="Share">
         <Send size="30" className="sm:hover:opacity-60 rotate-12" />
       </DialogTrigger>
       <DialogContent

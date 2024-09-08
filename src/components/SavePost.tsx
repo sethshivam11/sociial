@@ -88,7 +88,7 @@ function SavePost({ post }: Props) {
         }
       }}
     >
-      <DialogTrigger>
+      <DialogTrigger title="Save">
         <Bookmark size="30" />
       </DialogTrigger>
       <DialogContent>

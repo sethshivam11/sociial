@@ -155,7 +155,7 @@ export default function Comment({ user, commentsCount, isVideo }: Props) {
   return (
     <>
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogTrigger asChild title="Comment">
+        <DialogTrigger title="Comment">
           <div className="flex flex-col items-center justify-center">
             <MessageSquareText size="30" className="sm:hover:opacity-60" />
             <span className={`text-sm ${isVideo ? "" : "hidden"}`}>

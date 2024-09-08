@@ -51,6 +51,11 @@ export interface ChatI {
   groupName: string;
   groupIcon: string;
   isGroupChat: boolean;
+  lastMessage: null | {
+    _id: string;
+    content: string;
+    createdAt: string;
+  };
 }
 
 export interface CommentI {

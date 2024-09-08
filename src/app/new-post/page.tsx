@@ -111,7 +111,6 @@ function Page() {
         files.push(image);
       })
     );
-    console.log(files);
     if (files.length === 0) return dispatch(setLoading(false));
     dispatch(
       createPost({

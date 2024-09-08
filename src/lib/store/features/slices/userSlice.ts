@@ -1,7 +1,6 @@
 "use client";
 import { UserSliceI } from "@/types/sliceTypes";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { store } from "../../store";
 
 const initialState: UserSliceI = {
   user: {
@@ -203,6 +202,14 @@ export const removeAvatar = createAsyncThunk("users/removeAvatar", async () => {
 });
 
 export const getLoggedInUser = createAsyncThunk("users/getUser", async () => {
+  const token = localStorage.getItem("accessToken");
+  if (!token)
+    return {
+      success: false,
+      data: null,
+      message: "No token found",
+      status: 401,
+    };
   const parsed = await fetch("/api/v1/users/get");
   return parsed.json();
 });

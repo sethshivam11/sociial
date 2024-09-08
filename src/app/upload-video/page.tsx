@@ -32,7 +32,11 @@ import { useRouter } from "next/navigation";
 import { captionSchema } from "@/schemas/postSchema";
 import generateMediaThumbnail from "browser-thumbnail-generator";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
-import { createPost, setLoading } from "@/lib/store/features/slices/postSlice";
+import {
+  createPost,
+  createVideoPost,
+  setLoading,
+} from "@/lib/store/features/slices/postSlice";
 
 function Page() {
   const router = useRouter();
@@ -65,8 +69,13 @@ function Page() {
     }).then(async (response) => {
       dispatch(setLoading(true));
       const url = URL.createObjectURL(response.thumbnail);
-      let thumbnailFile: File | null = null;
-      let videoFile: File | null = null;
+      let files: {
+        video: File | null;
+        thumbnail: File | null;
+      } = {
+        video: null,
+        thumbnail: null,
+      };
       await Promise.all(
         [video, url].map(async (post) => {
           const res = await fetch(post);
@@ -78,32 +87,30 @@ function Page() {
               type: blob.type,
             }
           );
-          if(blob.type.includes("video")) videoFile = file;
-          else thumbnailFile = file;
+          if (blob.type.includes("video")) files.video = file;
+          else files.thumbnail = file;
         })
       );
-      if(!thumbnailFile || !videoFile) return dispatch(setLoading(false));
-      console.log(thumbnailFile, videoFile);
-      dispatch(setLoading(false));
-      // dispatch(
-      //   createPost({
-      //     caption: caption || "",
-      //     media: [videoFile, url],
-      //     user: user._id,
-      //   })
-      // ).then((response) => {
-      //   if (response.payload?.success) {
-      //     router.push("/");
-      //   } else {
-      //     toast({
-      //       title: "Error",
-      //       description:
-      //         response.payload?.message ||
-      //         "An error occurred while creating the post",
-      //       variant: "destructive",
-      //     });
-      //   }
-      // });
+      if (!files.thumbnail || !files.video) return dispatch(setLoading(false));
+      dispatch(
+        createVideoPost({
+          caption: caption || "",
+          media: [files.video, files.thumbnail],
+          user: user._id,
+        })
+      ).then((response) => {
+        if (response.payload?.success) {
+          router.push("/");
+        } else {
+          toast({
+            title: "Error",
+            description:
+              response.payload?.message ||
+              "An error occurred while creating the post",
+            variant: "destructive",
+          });
+        }
+      });
     });
   }
 

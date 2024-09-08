@@ -10,6 +10,11 @@ const initialState: ChatSliceI = {
     isGroupChat: false,
     groupName: "",
     groupIcon: "",
+    lastMessage: {
+      _id: "",
+      content: "",
+      createdAt: "",
+    }
   },
   skeletonLoading: false,
   loadingMore: false,
@@ -17,12 +22,12 @@ const initialState: ChatSliceI = {
   page: 1,
 };
 
-const getChats = createAsyncThunk("chats/getChats", async () => {
+export const getChats = createAsyncThunk("chats/getChats", async () => {
   const parsed = await fetch("/api/v1/chats/get");
   return parsed.json();
 });
 
-const getMoreChats = createAsyncThunk(
+export const getMoreChats = createAsyncThunk(
   "chats/getMoreChats",
   async (page: number) => {
     const parsed = await fetch(`/api/v1/chats/get?page=${page}`);
@@ -30,7 +35,7 @@ const getMoreChats = createAsyncThunk(
   }
 );
 
-const newChat = createAsyncThunk("chats/newChat", async (userId: string) => {
+export const newChat = createAsyncThunk("chats/newChat", async (userId: string) => {
   const parsed = await fetch("/api/v1/chats/new", {
     method: "POST",
     headers: {
@@ -41,7 +46,7 @@ const newChat = createAsyncThunk("chats/newChat", async (userId: string) => {
   return parsed.json();
 });
 
-const newGroupChat = createAsyncThunk(
+export const newGroupChat = createAsyncThunk(
   "chats/newGroupChat",
   async ({
     participants,
@@ -66,7 +71,7 @@ const newGroupChat = createAsyncThunk(
   }
 );
 
-const addParticipants = createAsyncThunk(
+export const addParticipants = createAsyncThunk(
   "chats/addParticipants",
   async (participants: string[]) => {
     const parsed = await fetch("/api/v1/addParticipants", {
@@ -80,7 +85,7 @@ const addParticipants = createAsyncThunk(
   }
 );
 
-const removeParticipants = createAsyncThunk(
+export const removeParticipants = createAsyncThunk(
   "chats/removeParticipants",
   async (participants: string[]) => {
     const parsed = await fetch("/api/v1/removeParticipants", {
@@ -94,7 +99,7 @@ const removeParticipants = createAsyncThunk(
   }
 );
 
-const updateGroupChat = createAsyncThunk(
+export const updateGroupChat = createAsyncThunk(
   "chats/updateGroupChat",
   async ({
     chatId,
@@ -117,7 +122,7 @@ const updateGroupChat = createAsyncThunk(
   }
 );
 
-const removeGroupImage = createAsyncThunk(
+export const removeGroupImage = createAsyncThunk(
   "chats/removeGroupImage",
   async (chatId: string) => {
     const parsed = await fetch(`/api/v1/chats/removeGroupImage/${chatId}`, {
@@ -127,7 +132,7 @@ const removeGroupImage = createAsyncThunk(
   }
 );
 
-const leaveGroupChat = createAsyncThunk(
+export const leaveGroupChat = createAsyncThunk(
   "chats/leaveGroupChat",
   async (chatId: string) => {
     const parsed = await fetch(`/api/v1/chats/leaveGroup/${chatId}`);
@@ -135,7 +140,7 @@ const leaveGroupChat = createAsyncThunk(
   }
 );
 
-const deleteGroupChat = createAsyncThunk(
+export const deleteGroupChat = createAsyncThunk(
   "chats/deleteGroupChat",
   async (chatId: string) => {
     const parsed = await fetch(`/api/v1/chats/deleteGroup/${chatId}`, {
@@ -145,7 +150,7 @@ const deleteGroupChat = createAsyncThunk(
   }
 );
 
-const makeAdmin = createAsyncThunk(
+export const makeAdmin = createAsyncThunk(
   "chats/makeAdmin",
   async ({ chatId, userId }: { userId: string; chatId: string }) => {
     const parsed = await fetch("/api/v1/chats/makeAdmin", {
@@ -159,7 +164,7 @@ const makeAdmin = createAsyncThunk(
   }
 );
 
-const removeAdmin = createAsyncThunk(
+export const removeAdmin = createAsyncThunk(
   "chats/removeAdmin",
   async ({ chatId, userId }: { userId: string; chatId: string }) => {
     const parsed = await fetch("/api/v1/chats/removeAdmin", {

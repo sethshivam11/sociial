@@ -39,15 +39,39 @@ const initialState: PostSliceI = {
 export const getFeed = createAsyncThunk(
   "posts/getFeed",
   async (page: number) => {
-    const parsed = await fetch(`/api/v1/posts/feed?page=${page}`);
+    const parsed = await fetch(
+      `/api/v1/posts/feed?${page ? `page=${page}` : ""}`
+    );
     return parsed.json();
   }
 );
 
 export const exploreFeed = createAsyncThunk(
   "posts/exploreFeed",
-  async (page: number) => {
-    const parsed = await fetch(`/api/v1/posts/exploreFeed?page=${page}`);
+  async ({ page, userId }: { page: number; userId?: string }) => {
+    const parsed = await fetch(
+      `/api/v1/posts/exploreFeed?page=${page}${
+        userId ? `&userId=${userId}` : ""
+      }`
+    );
+    return parsed.json();
+  }
+);
+
+export const videoFeed = createAsyncThunk(
+  "posts/videoFeed",
+  async ({ page, userId }: { page: number; userId?: string }) => {
+    const parsed = await fetch(
+      `/api/v1/posts/videoFeed?page=${page}${userId ? `&userId=${userId}` : ""}`
+    );
+    return parsed.json();
+  }
+);
+
+export const getVideoPost = createAsyncThunk(
+  "posts/getVideoPost",
+  async (postId: string) => {
+    const parsed = await fetch(`/api/v1/posts/videoPost/${postId}`);
     return parsed.json();
   }
 );
@@ -108,12 +132,10 @@ export const createVideoPost = createAsyncThunk(
     caption,
     media,
     user,
-    thumbnail,
   }: {
     caption: string;
     media: File[];
     user: string;
-    thumbnail: File;
   }) => {
     const totalSize = media.reduce((acc, file) => acc + file.size, 0);
     if (totalSize > 100000000) {
@@ -124,31 +146,11 @@ export const createVideoPost = createAsyncThunk(
         data: null,
       };
     }
-    if (media[0].type.includes("image")) {
-      return {
-        success: false,
-        message: "Only video file is required",
-        status: 400,
-        data: null,
-      };
-    }
-    if (!thumbnail.type.includes("image")) {
-      return {
-        success: false,
-        message: "Invalid thumbnail file",
-        status: 400,
-        data: null,
-      };
-    }
     const formData = new FormData();
     formData.append("caption", caption);
-    formData.append("media", thumbnail);
-    formData.append("media", media[0]);
+    media.forEach((file) => formData.append("media", file));
     const parsed = await fetch("/api/v1/posts/video", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: formData,
     });
     return parsed.json();
@@ -305,6 +307,42 @@ const postSlice = createSlice({
         }
       })
       .addCase(getPost.rejected, (state) => {
+        state.skeletonLoading = false;
+      });
+
+    builder
+      .addCase(getVideoPost.pending, (state) => {
+        state.skeletonLoading = true;
+      })
+      .addCase(getVideoPost.fulfilled, (state, action) => {
+        if (action.payload?.success) {
+          state.posts = action.payload.data.posts;
+        }
+      })
+      .addCase(getVideoPost.rejected, (state) => {
+        state.skeletonLoading = false;
+      });
+
+    builder
+      .addCase(videoFeed.pending, (state) => {
+        state.skeletonLoading = true;
+      })
+      .addCase(videoFeed.fulfilled, (state, action) => {
+        if (action.payload?.success) {
+          const existingPosts = state.posts;
+          const postsMap = new Map(
+            existingPosts.map((post) => [post._id, post])
+          );
+
+          action.payload.data.posts.forEach((post: PostI) =>
+            postsMap.set(post._id, post)
+          );
+          state.posts = Array.from(postsMap.values());
+          state.maxPosts = action.payload.data.max;
+          state.page = action.payload.data.page;
+        }
+      })
+      .addCase(videoFeed.rejected, (state) => {
         state.skeletonLoading = false;
       });
 

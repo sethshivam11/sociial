@@ -41,15 +41,21 @@ import {
 } from "@/lib/store/features/slices/postSlice";
 import SavePost from "./SavePost";
 import PostCaption from "./PostCaption";
+import { useRouter } from "next/navigation";
 
 interface Props {
   feed?: boolean;
 }
 
 function Posts({ feed }: Props) {
+  const router = useRouter();
   const [savingToken, setSavingToken] = React.useState(false);
   const dispatch = useAppDispatch();
-  const { user, profile } = useAppSelector((state) => state.user);
+  const {
+    user,
+    profile,
+    skeletonLoading: userLoading,
+  } = useAppSelector((state) => state.user);
   const {
     skeletonLoading,
     posts,
@@ -60,7 +66,7 @@ function Posts({ feed }: Props) {
     maxExplorePosts,
   } = useAppSelector((state) => state.post);
   const [consentDialog, setConsentDialog] = React.useState(false);
-  const [showExplorePosts, setShowExplorePosts] = React.useState(false);
+  const [showExplorePosts, setShowExplorePosts] = React.useState(true);
 
   async function handleConsent() {
     setSavingToken(true);
@@ -144,18 +150,24 @@ function Posts({ feed }: Props) {
       setConsentDialog(true);
     }
     const savedExplorePostsConsent =
-      localStorage.getItem("explorePostsConsent") || "false";
+      localStorage.getItem("explorePostsConsent") || "true";
     if (savedExplorePostsConsent !== "false") {
       setShowExplorePosts(true);
     } else {
       setShowExplorePosts(false);
     }
     if (!feed) {
-      dispatch(getFeed(1)).then(() => dispatch(exploreFeed(1)));
+      dispatch(getFeed(1));
     } else if (profile.username) {
       dispatch(getUserPosts({ username: profile.username }));
     }
   }, [profile.username, dispatch, getFeed, exploreFeed]);
+
+  React.useEffect(() => {
+    if (!userLoading) {
+      dispatch(exploreFeed({ page: 1, userId: user._id }));
+    }
+  }, [user._id, userLoading, exploreFeed, dispatch]);
 
   return (
     <>
@@ -205,74 +217,78 @@ function Posts({ feed }: Props) {
                       isVideo={post.kind === "video"}
                     />
                   </div>
-                  {post.kind === "video" ? (
-                    <Link href={`/video/${post._id}`} className="relative">
-                      <PlayIcon
-                        size="50"
-                        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white bg-transparent/50 rounded-full p-2"
-                      />
-                      <Image
-                        src={post?.thumbnail || ""}
-                        alt=""
-                        width="800"
-                        height="800"
-                      />
-                    </Link>
-                  ) : (
-                    <Carousel className="w-full my-2 mt-2">
-                      <CarouselContent>
-                        {post.media.map((image, index) => {
-                          return (
-                            <CarouselItem key={index} className="relative">
-                              {post.media?.length < 1 && (
-                                <div className="absolute right-2 top-2 bg-transparent/60 text-white px-2 py-0.5 rounded-2xl text-sm select-none">
-                                  {index + 1}/{post.media.length}
-                                </div>
-                              )}
-                              <div
-                                className="flex absolute w-full h-full items-center justify-center z-0"
-                                onDoubleClick={async (e) => {
-                                  if (loading) return;
-                                  console.log(
-                                    post.likes.includes(user._id),
-                                    user._id
-                                  );
-                                  if (post.likes.includes(user._id)) {
-                                    handleUnlike(post._id, "posts");
-                                  } else {
-                                    handleLike(post._id, "posts");
-                                  }
-                                }}
-                              >
-                                <Heart
-                                  size="150"
-                                  strokeWidth="0"
-                                  fill="rgb(244 63 94)"
-                                  className={
-                                    post.likes.includes(user._id)
-                                      ? "animate-like"
-                                      : "hidden"
-                                  }
-                                />
+                  <Carousel
+                    className={`w-full my-2 mt-2 ${
+                      post.kind === "video" ? "cursor-pointer" : ""
+                    }`}
+                    onClick={() =>
+                      post.kind === "video"
+                        ? router.push(`/video/${post._id}`)
+                        : null
+                    }
+                  >
+                    <CarouselContent>
+                      {post.media.map((image, index) => {
+                        return (
+                          <CarouselItem key={index} className="relative">
+                            {post.media?.length < 1 && (
+                              <div className="absolute right-2 top-2 bg-transparent/60 text-white px-2 py-0.5 rounded-2xl text-sm select-none">
+                                {index + 1}/{post.media.length}
                               </div>
-                              <Image
-                                width="800"
-                                height="800"
-                                src={image}
-                                priority={
-                                  index === 0 && postIndex < 10 ? true : false
+                            )}
+                            <div
+                              className="flex absolute w-full h-full items-center justify-center z-0"
+                              onDoubleClick={async (e) => {
+                                if (loading || post.kind === "video") return;
+                                console.log(
+                                  post.likes.includes(user._id),
+                                  user._id
+                                );
+                                if (post.likes.includes(user._id)) {
+                                  handleUnlike(post._id, "posts");
+                                } else {
+                                  handleLike(post._id, "posts");
                                 }
-                                alt={`Photo by ${post.user.fullName} with username ${post.user.username}`}
-                                className="object-cover select-none w-full h-full rounded-sm z-10 max-h-[600px]"
+                              }}
+                            >
+                              <Heart
+                                size="150"
+                                strokeWidth="0"
+                                fill="rgb(244 63 94)"
+                                className={
+                                  post.likes.includes(user._id)
+                                    ? "animate-like"
+                                    : "hidden"
+                                }
                               />
-                            </CarouselItem>
-                          );
-                        })}
-                      </CarouselContent>
-                      <CarouselPrevious />
-                      <CarouselNext />
-                    </Carousel>
-                  )}
+                            </div>
+                            {post.kind === "video" && (
+                              <PlayIcon
+                                size="50"
+                                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white bg-transparent/50 rounded-full p-2"
+                              />
+                            )}
+                            <Image
+                              width="800"
+                              height="800"
+                              src={
+                                post.kind === "image"
+                                  ? image
+                                  : post.thumbnail || ""
+                              }
+                              priority={
+                                index === 0 && postIndex < 10 ? true : false
+                              }
+                              alt={`Photo by ${post.user.fullName} with username ${post.user.username}`}
+                              className="object-cover select-none w-full h-full rounded-sm z-10 max-h-[600px]"
+                            />
+                          </CarouselItem>
+                        );
+                      })}
+                    </CarouselContent>
+                    <CarouselPrevious />
+                    <CarouselNext />
+                  </Carousel>
                   <div className="flex justify-between select-none">
                     <div className="flex gap-3">
                       <button
@@ -386,7 +402,9 @@ function Posts({ feed }: Props) {
           dataLength={explorePosts.length}
           hasMore={explorePosts.length < maxExplorePosts}
           loader={<Loader2 className="animate-spin mx-auto" />}
-          next={() => dispatch(exploreFeed(page + 1))}
+          next={() =>
+            dispatch(exploreFeed({ page: page + 1, userId: user._id }))
+          }
           className="flex flex-col py-2 sm:px-4 px-2 gap-4 w-full sm:pb-4 pb-20"
         >
           {skeletonLoading ? (
@@ -428,71 +446,78 @@ function Posts({ feed }: Props) {
                       explorePosts
                     />
                   </div>
-                  {post.kind === "video" ? (
-                    <Link href={`/video/${post._id}`} className="relative">
-                      <PlayIcon
-                        size="50"
-                        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white bg-transparent/50 rounded-full p-2"
-                      />
-                      <video
-                        preload="metadata"
-                        className="w-full my-2 object-contain rounded-sm"
-                        playsInline
-                      >
-                        <source src={post.media[0]} />
-                      </video>
-                    </Link>
-                  ) : (
-                    <Carousel className="w-full my-2 mt-2">
-                      <CarouselContent>
-                        {post.media.map((image, index) => {
-                          return (
-                            <CarouselItem key={index} className="relative">
-                              {post.media.length > 1 && (
-                                <div className="absolute right-2 top-2 bg-transparent/60 text-white px-2 py-0.5 rounded-2xl text-sm select-none">
-                                  {index + 1}/{post.media.length}
-                                </div>
-                              )}
-                              <div
-                                className="absolute w-full h-full items-center justify-center"
-                                onDoubleClick={(e) => {
-                                  if (loading) return;
-                                  if (post.likes.includes(user._id)) {
-                                    handleUnlike(post._id, "explore");
-                                  } else {
-                                    handleLike(post._id, "explore");
-                                  }
-                                }}
-                              >
-                                <Heart
-                                  size="150"
-                                  strokeWidth="0"
-                                  fill="rgb(244 63 94)"
-                                  className={
-                                    post.likes.includes(user._id)
-                                      ? "animate-like"
-                                      : "hidden"
-                                  }
-                                />
+                  <Carousel
+                    className={`w-full my-2 mt-2 ${
+                      post.kind === "video" ? "cursor-pointer" : ""
+                    }`}
+                    onClick={() =>
+                      post.kind === "video"
+                        ? router.push(`/video/${post._id}`)
+                        : null
+                    }
+                  >
+                    <CarouselContent>
+                      {post.media.map((image, index) => {
+                        return (
+                          <CarouselItem key={index} className="relative">
+                            {post.media?.length < 1 && (
+                              <div className="absolute right-2 top-2 bg-transparent/60 text-white px-2 py-0.5 rounded-2xl text-sm select-none">
+                                {index + 1}/{post.media.length}
                               </div>
-                              <Image
-                                width={700}
-                                height={320}
-                                src={image}
-                                priority={
-                                  index === 0 && postIndex < 10 ? true : false
+                            )}
+                            <div
+                              className="flex absolute w-full h-full items-center justify-center z-0"
+                              onDoubleClick={async (e) => {
+                                if (loading || post.kind === "video") return;
+                                console.log(
+                                  post.likes.includes(user._id),
+                                  user._id
+                                );
+                                if (post.likes.includes(user._id)) {
+                                  handleUnlike(post._id, "posts");
+                                } else {
+                                  handleLike(post._id, "posts");
                                 }
-                                alt={`Photo by ${post.user.fullName} with username ${post.user.username}`}
-                                className="object-cover select-none w-full max-h-[600px] rounded-sm"
+                              }}
+                            >
+                              <Heart
+                                size="150"
+                                strokeWidth="0"
+                                fill="rgb(244 63 94)"
+                                className={
+                                  post.likes.includes(user._id)
+                                    ? "animate-like"
+                                    : "hidden"
+                                }
                               />
-                            </CarouselItem>
-                          );
-                        })}
-                      </CarouselContent>
-                      <CarouselPrevious />
-                      <CarouselNext />
-                    </Carousel>
-                  )}
+                            </div>
+                            {post.kind === "video" && (
+                              <PlayIcon
+                                size="50"
+                                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white bg-transparent/50 rounded-full p-2"
+                              />
+                            )}
+                            <Image
+                              width="800"
+                              height="800"
+                              src={
+                                post.kind === "image"
+                                  ? image
+                                  : post.thumbnail || ""
+                              }
+                              priority={
+                                index === 0 && postIndex < 10 ? true : false
+                              }
+                              alt={`Photo by ${post.user.fullName} with username ${post.user.username}`}
+                              className="object-cover select-none w-full h-full rounded-sm z-10 max-h-[600px]"
+                            />
+                          </CarouselItem>
+                        );
+                      })}
+                    </CarouselContent>
+                    <CarouselPrevious />
+                    <CarouselNext />
+                  </Carousel>
                   <div className="flex justify-between select-none">
                     <div className="flex gap-3">
                       <button

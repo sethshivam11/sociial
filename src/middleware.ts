@@ -2,10 +2,20 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export const config = {
-    matcher: [
-      "/((?!api|_next/static|_next/image|android-chrome-192x192.png|android-chrome-512x512.png|apple-touch-icon.png|bg-doodle-dark.jpg|bg-doodle-light.jpg|favicon-16x16.png|favicon-32x32.png|favicon.ico|firebase-messaging-sw.js|logo.svg|opengraph-image.png|site.webmanifest|swEnv.js).*)",
-    ],
-  };
+  matcher: [
+    "/sign-in",
+    "/sign-up",
+    "/verify-code",
+    "/upload-video",
+    "/forgot-password",
+    "/new-post",
+    "/add-story",
+    "/call/:path",
+    "/story/:path",
+    "/messages/:path",
+    "/settings/:path",
+  ],
+};
 
 export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
