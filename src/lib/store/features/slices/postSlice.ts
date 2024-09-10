@@ -29,7 +29,7 @@ const initialState: PostSliceI = {
   },
   likes: [],
   loading: false,
-  skeletonLoading: false,
+  skeletonLoading: true,
   loadingMore: false,
   page: 1,
   maxPosts: 0,

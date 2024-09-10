@@ -57,6 +57,7 @@ export interface PostSliceI {
     caption: string;
     media: string[];
     kind: "image" | "video";
+    thumbnail?: string;
     likes: string[];
     likesCount: number;
     commentsCount: number;
