@@ -106,6 +106,18 @@ function Navbar() {
   }
 
   React.useEffect(() => {
+    if (!document.cookie) {
+      const token = localStorage.getItem("accessToken");
+      const refreshToken = localStorage.getItem("refreshToken");
+      if (refreshToken) {
+        document.cookie = `refreshToken=${refreshToken};`;
+      }
+      if (token) {
+        document.cookie = `accessToken=${token};`;
+      } else if (!token && !refreshToken) {
+        document.cookie = "refreshToken=; accessToken=;";
+      }
+    }
     dispatch(getLoggedInUser());
   }, [getLoggedInUser, dispatch]);
 
@@ -248,7 +260,7 @@ function Navbar() {
             <span className="xl:inline hidden">Notifications</span>
           </Link>
           <Link
-            href={`/${user.username}`}
+            href={isLoggedIn ? `/${user.username}` : "/sign-in"}
             className={`md:w-full w-fit flex items-center xl:justify-start justify-center xl:pl-4 sm:p-3 p-2 gap-3 rounded-2xl hover:ring-stone-600 dark:hover:ring-stone-400 transition-colors ${
               location === `/${user.username}` && isLoggedIn
                 ? "sm:bg-stone-200 sm:dark:bg-stone-800 sm:hover:ring-0"
@@ -258,7 +270,11 @@ function Navbar() {
           >
             <Avatar className="w-6 h-6">
               <AvatarImage
-                src={user.avatar}
+                src={
+                  isLoggedIn
+                    ? user.avatar
+                    : "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png"
+                }
                 loading="eager"
                 alt=""
                 className="pointer-events-none select-none"

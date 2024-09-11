@@ -22,6 +22,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+// Layout
 import { toast } from "@/components/ui/use-toast";
 import QRCode from "qrcode";
 import Image from "next/image";
@@ -44,7 +45,7 @@ function Profile({
   params: { username: string };
 }) {
   const dispatch = useAppDispatch();
-  const { user, profile, skeletonLoading } = useAppSelector(
+  const { user, profile, skeletonLoading, isLoggedIn } = useAppSelector(
     (state) => state.user
   );
   const { followings, loading } = useAppSelector((state) => state.follow);
@@ -73,6 +74,15 @@ function Profile({
   }
 
   function handleFollow(username: string) {
+    if (!isLoggedIn) {
+      return toast({
+        title: "Please login!",
+        description: "You need to be logged in to follow users.",
+        action: (
+          <Button onClick={() => router.push("/sign-in")}>Sign In</Button>
+        ),
+      });
+    }
     dispatch(followUser({ username })).then((response) => {
       if (!response.payload?.success) {
         toast({
@@ -204,7 +214,22 @@ function Profile({
                         variant="outline"
                         size="icon"
                         className="rounded-full"
-                        onClick={() => router.push(`/messages/${profile._id}`)}
+                        onClick={() => {
+                          if (!isLoggedIn) {
+                            toast({
+                              title: "Please login!",
+                              description:
+                                "You need to login to chat to the user.",
+                              action: (
+                                <Button onClick={() => router.push("/sign-in")}>
+                                  Sign In
+                                </Button>
+                              ),
+                            });
+                          } else {
+                            router.push(`/messages/${profile._id}`);
+                          }
+                        }}
                       >
                         <Mail />
                       </Button>
@@ -254,12 +279,45 @@ function Profile({
                         </DialogClose>
                         {profile.username !== user.username && (
                           <>
-                            <DialogClose className="w-full md:px-20 py-1 text-red-500">
+                            <DialogClose
+                              className="w-full md:px-20 py-1 text-red-500"
+                              onClick={() => {
+                                if (!isLoggedIn) {
+                                  toast({
+                                    title: "Please login!",
+                                    description:
+                                      "You need to login to report this user.",
+                                    action: (
+                                      <Button
+                                        onClick={() => router.push("/sign-in")}
+                                      >
+                                        Sign In
+                                      </Button>
+                                    ),
+                                  });
+                                }
+                              }}
+                            >
                               Block
                             </DialogClose>
                             <DialogClose
                               className="text-red-500 w-full md:px-20 py-1"
-                              onClick={() => setReportOpen(true)}
+                              onClick={() => {
+                                if (!isLoggedIn) {
+                                  toast({
+                                    title: "Please login!",
+                                    description:
+                                      "You need to login to report this user.",
+                                    action: (
+                                      <Button
+                                        onClick={() => router.push("/sign-in")}
+                                      >
+                                        Sign In
+                                      </Button>
+                                    ),
+                                  });
+                                } else setReportOpen(true);
+                              }}
                             >
                               Report
                             </DialogClose>

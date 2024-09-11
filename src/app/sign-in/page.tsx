@@ -29,9 +29,11 @@ import {
 } from "@/lib/store/features/slices/userSlice";
 import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/use-toast";
+import { useSearchParams } from "next/navigation";
 
 function SignInPage() {
   const router = useRouter();
+  const query = useSearchParams();
   const formSchema = z.object({
     identifier: emailSchema.or(usernameSchema),
     password: passwordSchema,
@@ -63,7 +65,11 @@ function SignInPage() {
           resendVerificationCode(response.payload.data.user.username)
         );
         router.push("/verify-code");
-      } else router.push("/");
+      } else {
+        const next = query.get("next");
+        const nextUrl = next?.replaceAll("%2F", "/");
+        router.push(nextUrl || "/");
+      }
     } else {
       if (response.payload?.message === "User not found") {
         toast({
@@ -138,7 +144,15 @@ function SignInPage() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <div className="flex gap-2 items-center justify-between">
+                    <FormLabel>Password</FormLabel>
+                    <Link
+                      href="/forgot-password"
+                      className="text-sm hover:opacity-80 underline"
+                    >
+                      Forgot Password
+                    </Link>
+                  </div>
                   <FormControl>
                     <Input
                       placeholder="password"
@@ -164,18 +178,13 @@ function SignInPage() {
             </div>
           </form>
         </Form>
-        <p className="mb-2 text-center">
-          <Link
-            href="/forgot-password"
-            className="text-blue-500 text-sm hover:opacity-80"
-          >
-            Forgot Password
-          </Link>
-        </p>
         <p className="text-center mt-2">
           Don&apos;t have an account?&nbsp;
-          <Link href="/sign-up" className="text-blue-500 hover:opacity-80">
-            Sign up
+          <Link
+            href="/sign-up"
+            className="text-blue-500 hover:opacity-80 underline underline-offset-2"
+          >
+            Sign Up
           </Link>
         </p>
       </div>

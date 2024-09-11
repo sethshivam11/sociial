@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 
 export const config = {
   matcher: [
+    "/",
     "/sign-in",
     "/sign-up",
     "/verify-code",
@@ -14,6 +15,8 @@ export const config = {
     "/story/:path",
     "/messages/:path",
     "/settings/:path",
+    "/notifications/:path",
+    "/videos"
   ],
 };
 
@@ -28,7 +31,7 @@ export function middleware(request: NextRequest) {
   ];
 
   if (!token && !publicPaths.includes(path)) {
-    return NextResponse.redirect(new URL("/sign-in", request.url));
+    return NextResponse.redirect(new URL(`/sign-in?next=${path}`, request.url));
   }
 
   if (token && publicPaths.includes(path)) {

@@ -304,7 +304,7 @@ function SignUpPage() {
           Already have an account?&nbsp;
           <Link
             href="/sign-in"
-            className="text-blue-500 hover:opacity-80"
+            className="text-blue-500 hover:opacity-80 underline underline-offset-2"
             type="button"
           >
             Sign In

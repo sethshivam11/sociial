@@ -2,7 +2,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { getUserPosts } from "@/lib/store/features/slices/postSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
-import { Tv } from "lucide-react";
+import { PlayIcon, Tv } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -34,6 +34,9 @@ function Page() {
               className="lg:w-1/4 w-1/3 aspect-square p-1 relative"
               key={index}
             >
+              <div className="bg-transparent/50 backdrop-blur-sm rounded-full absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-2">
+                <PlayIcon size="40" />
+              </div>
               <Image
                 src={post.thumbnail || ""}
                 width="300"

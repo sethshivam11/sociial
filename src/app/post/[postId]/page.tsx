@@ -39,7 +39,7 @@ function Page({ params }: { params: { postId: string } }) {
   function handleLike(postId: string) {
     dispatch(
       likePost({
-        postId: postId,
+        postId,
         userId: user._id,
         type: "post"
       })
@@ -56,7 +56,7 @@ function Page({ params }: { params: { postId: string } }) {
   function handleUnlike(postId: string) {
     dispatch(
       unlikePost({
-        postId: postId,
+        postId,
         userId: user._id,
         type: "post"
       })
@@ -156,6 +156,7 @@ function Page({ params }: { params: { postId: string } }) {
               <div className="flex gap-3">
                 <button
                   title={post.likes?.includes(user._id) ? "Unlike" : "Like"}
+                  disabled={loading}
                 >
                   <Heart
                     size="30"

@@ -156,7 +156,7 @@ function Posts({ feed }: Props) {
     } else {
       setShowExplorePosts(false);
     }
-    if (!feed) {
+    if (!feed && user._id) {
       dispatch(getFeed(1));
     } else if (profile.username) {
       dispatch(getUserPosts({ username: profile.username }));
@@ -265,7 +265,7 @@ function Posts({ feed }: Props) {
                             {post.kind === "video" && (
                               <PlayIcon
                                 size="50"
-                                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white bg-transparent/50 rounded-full p-2"
+                                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white bg-transparent/50 rounded-full p-2 backdrop-blur-sm"
                               />
                             )}
                             <Image
@@ -494,7 +494,7 @@ function Posts({ feed }: Props) {
                             {post.kind === "video" && (
                               <PlayIcon
                                 size="50"
-                                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white bg-transparent/50 rounded-full p-2"
+                                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white bg-transparent/50 rounded-full p-2 backdrop-blur-sm"
                               />
                             )}
                             <Image

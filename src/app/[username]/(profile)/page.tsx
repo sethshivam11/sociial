@@ -2,7 +2,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
 import React from "react";
-import { Heart, MessageSquareText, ImageIcon } from "lucide-react";
+import { Heart, MessageSquareText, ImageIcon, PlayIcon } from "lucide-react";
 import Link from "next/link";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { getUserPosts } from "@/lib/store/features/slices/postSlice";
@@ -39,8 +39,14 @@ function Page() {
             className="lg:w-1/4 w-1/3 p-1 aspect-square relative select-none"
             key={index}
           >
+            {post.kind === "video" && (
+              <div className="bg-transparent/50 backdrop-blur-sm rounded-full absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-2">
+                <PlayIcon size="40" />
+
+              </div>
+            )}
             <Image
-              src={post.media[0]}
+              src={post.kind === "video" ? post.thumbnail || "" : post.media[0]}
               width="300"
               height="300"
               className="w-full h-full object-cover rounded-sm select-none pointer-events-none"

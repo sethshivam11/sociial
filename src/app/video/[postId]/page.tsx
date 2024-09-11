@@ -6,9 +6,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SliderVideo } from "@/components/ui/slider-video";
+import { toast } from "@/components/ui/use-toast";
 import VideoOptions from "@/components/VideoOptions";
 import { nameFallback } from "@/lib/helpers";
-import { getPost } from "@/lib/store/features/slices/postSlice";
+import {
+  getPost,
+  likePost,
+  unlikePost,
+} from "@/lib/store/features/slices/postSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import {
   ChevronLeft,
@@ -28,7 +33,9 @@ function Page({ params }: { params: { postId: string } }) {
   const router = useRouter();
   const containerRef = React.useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
-  const { post, skeletonLoading } = useAppSelector((state) => state.post);
+  const { post, skeletonLoading, loading } = useAppSelector(
+    (state) => state.post
+  );
   const { user } = useAppSelector((state) => state.user);
 
   const [videoRef, setVideoRef] = React.useState<HTMLVideoElement | null>(null);
@@ -37,12 +44,38 @@ function Page({ params }: { params: { postId: string } }) {
   const [sliderValue, setSliderValue] = React.useState(0);
   const [seeking, setSeeking] = React.useState(false);
 
-  function likePost(_id: string) {
-    // setPost({
-    //   ...post,
-    //   liked: !post.liked,
-    //   likesCount: post.liked ? post.likesCount - 1 : post.likesCount + 1,
-    // });
+  function handleLike(postId: string) {
+    dispatch(
+      likePost({
+        postId,
+        userId: user._id,
+        type: "post",
+      })
+    ).then((response) => {
+      if (!response.payload?.success) {
+        toast({
+          title: "Cannot like post",
+          description: "Please try again later.",
+        });
+      }
+    });
+  }
+
+  function handleUnlike(postId: string) {
+    dispatch(
+      unlikePost({
+        postId,
+        userId: user._id,
+        type: "post",
+      })
+    ).then((response) => {
+      if (!response.payload?.success) {
+        toast({
+          title: "Cannot unlike post",
+          description: "Please try again later.",
+        });
+      }
+    });
   }
 
   const handleKeys = React.useCallback(
@@ -159,7 +192,7 @@ function Page({ params }: { params: { postId: string } }) {
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col items-start justify-center gap-0 mx-2">
-                  <h1 className="text-xl tracking-tight font-semibold leading-4">
+                  <h1 className="text-lg tracking-tight font-semibold leading-4">
                     {post.user.fullName}
                   </h1>
                   <p className="text-stone-500 text-sm">
@@ -183,8 +216,13 @@ function Page({ params }: { params: { postId: string } }) {
             <div className="absolute bottom-10 right-0 max-sm:flex hidden flex-col items-center justify-start gap-4 px-3 pb-10">
               <button
                 title={post.likes.includes(user._id) ? "Unlike" : "Like"}
+                disabled={loading}
                 onClick={() => {
-                  likePost(post._id);
+                  if (post.likes?.includes(user._id)) {
+                    handleUnlike(post._id);
+                  } else {
+                    handleLike(post._id);
+                  }
                 }}
               >
                 <Heart
@@ -208,12 +246,12 @@ function Page({ params }: { params: { postId: string } }) {
               <Share _id={post._id} isVideo={true} />
             </div>
             <div className="flex flex-col items-center justify-start h-fit bg-gradient-to-b from-transparent via-transparent/50 to-transparent/60">
-              <p className="w-full max-h-80 overflow-y-auto overflow-x-clip no-scrollbar max-sm:pr-12 pr-6 pl-6 text-lg">
+              <div className="w-full max-h-80 overflow-y-auto overflow-x-clip no-scrollbar max-sm:pr-12 pr-6 pl-6 text-lg">
                 <PostCaption
                   caption={post.caption}
                   createdAt={post.createdAt}
                 />
-              </p>
+              </div>
               <div className="flex items-center px-2 justify-start h-fit w-full">
                 <Button
                   variant="ghost"
@@ -273,8 +311,13 @@ function Page({ params }: { params: { postId: string } }) {
         <div className="sm:flex hidden flex-col items-center justify-end gap-4 px-3 pb-12 h-full">
           <button
             title={post.likes.includes(user._id) ? "Unlike" : "Like"}
+            disabled={loading}
             onClick={() => {
-              likePost(post._id);
+              if (post.likes?.includes(user._id)) {
+                handleUnlike(post._id);
+              } else {
+                handleLike(post._id);
+              }
             }}
           >
             <Heart
