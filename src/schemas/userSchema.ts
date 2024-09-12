@@ -54,9 +54,14 @@ const verificationCodeSchema = z.coerce
     message: "Invalid verification code",
   });
 
+const bioSchema = z.string().max(160, {
+  message: "Bio must be less than 160 characters",
+});
+
 export {
-  usernameSchema,
+  bioSchema,
   emailSchema,
+  usernameSchema,
   passwordSchema,
   fullNameSchema,
   verificationCodeSchema,

@@ -16,44 +16,30 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import {
+  bioSchema,
+  fullNameSchema,
+  usernameSchema,
+} from "@/schemas/userSchema";
+import { useAppSelector } from "@/lib/store/store";
+import { useDebounceCallback } from "usehooks-ts";
+import { isUsernameAvailable } from "@/lib/helpers";
 
 function Page() {
   const router = useRouter();
   const formSchema = z.object({
-    bio: z.string().max(200, {
-      message: "Bio must be less than 200 characters",
-    }),
-    fullName: z
-      .string()
-      .min(2, {
-        message: "Name must be more than 2 characters",
-      })
-      .max(20, {
-        message: "Name must be less than 20 characters",
-      }),
-    username: z
-      .string()
-      .min(2, {
-        message: "Username must be more than 2 characters",
-      })
-      .max(20, {
-        message: "Username must be less than 20 characters",
-      }),
+    bio: bioSchema,
+    fullName: fullNameSchema,
+    username: usernameSchema,
   });
 
-  const user = {
-    fullName: "Shivam Soni",
-    username: "sethshivam11",
-    avatar:
-      "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
-    bio: "I am a full stack developer and a tech enthusiast. I love to build things that make a difference.",
-  };
-
+  const { user } = useAppSelector((state) => state.user);
   const [username, setUsername] = React.useState(user.username);
-
-  // const debouned = setUsername;
+  const [isFetchingUsername, setIsFetchingUsername] = React.useState(false);
+  const [usernameMessage, setUsernameMessage] = React.useState("");
+  const debounced = useDebounceCallback(setUsername, 300);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -68,10 +54,46 @@ function Page() {
     console.log(data);
   }
 
+  React.useEffect(() => {
+    if (user.bio) form.setValue("bio", user.bio);
+    if (user.fullName) form.setValue("fullName", user.fullName);
+    if (user.username) {
+      setUsername(user.username);
+      form.setValue("username", user.username);
+    }
+  }, [user]);
+
+  React.useEffect(() => {
+    if (username === user.username) return setUsernameMessage("");
+    try {
+      if (username) {
+        usernameSchema.parse(username);
+        isUsernameAvailable(
+          username,
+          setUsernameMessage,
+          setIsFetchingUsername
+        );
+      } else {
+        setUsernameMessage("");
+      }
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        setUsernameMessage(error.errors[0].message);
+      } else {
+        console.log(error);
+      }
+    }
+  }, [username]);
+
   return (
     <div className="flex flex-col items-center justify-start">
       <h1 className="text-lg tracking-tight font-semibold w-full text-left sm:my-4 my-2 flex items-center gap-4 sm:hidden">
-        <Button variant="ghost" size="icon" className="ml-2 rounded-xl hover:bg-background" onClick={() => router.push("/settings")}>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="ml-2 rounded-xl hover:bg-background"
+          onClick={() => router.push("/settings")}
+        >
           <ArrowLeft />
         </Button>
         Edit Profile
@@ -118,8 +140,22 @@ function Page() {
                     inputMode="text"
                     autoComplete="username"
                     {...field}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      debounced(e.target.value);
+                    }}
                   />
                 </FormControl>
+                <span
+                  className={`text-sm ${
+                    usernameMessage === "Username available"
+                      ? "text-green-400"
+                      : "text-red-400"
+                  }`}
+                >
+                  {!isFetchingUsername && usernameMessage}
+                </span>
+                {isFetchingUsername && <Loader2 className="animate-spin" />}
                 <FormMessage />
               </FormItem>
             )}
@@ -146,9 +182,9 @@ function Page() {
             type="submit"
             size="lg"
             disabled={
-              form.getValues("username") === user.username &&
-              form.getValues("fullName") === user.fullName &&
-              form.getValues("bio") === user.bio
+              form.watch("username") === user.username &&
+              form.watch("fullName") === user.fullName &&
+              form.watch("bio") === user.bio
             }
           >
             Submit

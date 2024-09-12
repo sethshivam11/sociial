@@ -36,3 +36,24 @@ export function getTimeDifference(createdAt: string) {
   const differenceInYears = Math.floor(differenceInWeeks / 52);
   return `${differenceInYears} years ago`;
 }
+
+export function isUsernameAvailable(
+  username: string,
+  setMessage: (message: string) => void,
+  setLoading: (isFetching: boolean) => void
+) {
+  if (!username?.trim()) {
+    return;
+  }
+  setLoading(true);
+  fetch(`/api/v1/users/usernameAvailable/${username}`)
+    .then((parsed) => parsed.json())
+    .then((response) => {
+      setMessage(response.message);
+    })
+    .catch((err) => {
+      console.error(err);
+      setMessage("Something went wrong");
+    })
+    .finally(() => setLoading(false));
+}

@@ -34,10 +34,13 @@ import { useSearchParams } from "next/navigation";
 function SignInPage() {
   const router = useRouter();
   const query = useSearchParams();
+  const dispatch = useAppDispatch();
+
   const formSchema = z.object({
     identifier: emailSchema.or(usernameSchema),
     password: passwordSchema,
   });
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -45,9 +48,10 @@ function SignInPage() {
       password: "",
     },
   });
-  const dispatch = useAppDispatch();
+  
   const { loading } = useAppSelector((state) => state.user);
   const [showPwd, setShowPwd] = React.useState(false);
+
   async function onSubmit(data: z.infer<typeof formSchema>) {
     let username = "";
     let email = "";
@@ -61,14 +65,13 @@ function SignInPage() {
     );
     if (response.payload?.success) {
       if (!response.payload.data.user.isMailVerified) {
+        router.prefetch("/verify-code");
         await dispatch(
           resendVerificationCode(response.payload.data.user.username)
         );
-        router.push("/verify-code");
+        return router.push(`/verify-code?username=${response.payload.data.user.username}`);
       } else {
-        const next = query.get("next");
-        const nextUrl = next?.replaceAll("%2F", "/");
-        router.push(nextUrl || "/");
+        router.push("/");
       }
     } else {
       if (response.payload?.message === "User not found") {
@@ -83,18 +86,6 @@ function SignInPage() {
       }
     }
   }
-
-  React.useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    const refreshToken = localStorage.getItem("refreshToken");
-    if (refreshToken) {
-      document.cookie = `refreshToken=${refreshToken};`;
-    }
-    if (token) {
-      document.cookie = `accessToken=${token};`;
-      router.push("/");
-    }
-  }, []);
 
   return (
     <div className="flex justify-center col-span-10 py-12 items-center min-h-screen bg-white dark:bg-zinc-800">

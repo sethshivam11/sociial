@@ -161,7 +161,7 @@ function Posts({ feed }: Props) {
     } else if (profile.username) {
       dispatch(getUserPosts({ username: profile.username }));
     }
-  }, [profile.username, dispatch, getFeed, exploreFeed]);
+  }, [profile.username, dispatch, getFeed, exploreFeed, user._id]);
 
   React.useEffect(() => {
     if (!userLoading) {

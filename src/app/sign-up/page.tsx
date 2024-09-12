@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { useDebounceCallback } from "usehooks-ts";
@@ -27,6 +27,7 @@ import {
 } from "@/schemas/userSchema";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { registerUser } from "@/lib/store/features/slices/userSlice";
+import { isUsernameAvailable } from "@/lib/helpers";
 import { useRouter } from "next/navigation";
 
 function SignUpPage() {
@@ -81,28 +82,15 @@ function SignUpPage() {
     }
   }
 
-  function isUsernameAvailable(username: string) {
-    if (!username?.trim()) {
-      return;
-    }
-    setIsFetchingUsername(true);
-    fetch(`/api/v1/users/usernameAvailable/${username}`)
-      .then((parsed) => parsed.json())
-      .then((response) => {
-        setUsernameMessage(response.message);
-      })
-      .catch((err) => {
-        console.error(err);
-        setUsernameMessage("Something went wrong");
-      })
-      .finally(() => setIsFetchingUsername(false));
-  }
-
   React.useEffect(() => {
     try {
       if (username) {
         usernameSchema.parse(username);
-        isUsernameAvailable(username);
+        isUsernameAvailable(
+          username,
+          setUsernameMessage,
+          setIsFetchingUsername
+        );
       } else {
         setUsernameMessage("");
       }
@@ -207,11 +195,7 @@ function SignUpPage() {
                   >
                     {!isFetchingUsername && usernameMessage}
                   </span>
-                  {isFetchingUsername ? (
-                    <Loader2 className="animate-spin" />
-                  ) : (
-                    ""
-                  )}
+                  {isFetchingUsername && <Loader2 className="animate-spin" />}
                   <FormMessage />
                 </FormItem>
               )}

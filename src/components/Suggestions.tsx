@@ -98,7 +98,7 @@ function Suggestions() {
                   </Link>
                   {user?.isFollowing ? (
                     <button
-                      className="bg-stone-500 w-28 h-7 text-center text-white rounded-full text-sm transition-colors hover:bg-stone-700 disabled:bg-stone-400"
+                      className="bg-stone-500 w-28 h-7 text-center text-white rounded-full text-xs transition-colors hover:bg-stone-700 disabled:bg-stone-400"
                       onClick={() => handleUnfollow(user._id)}
                       disabled={user?.loading}
                     >
@@ -110,7 +110,7 @@ function Suggestions() {
                     </button>
                   ) : (
                     <button
-                      className="bg-blue-500 w-28 h-7 text-center text-white rounded-full text-sm transition-colors hover:bg-blue-700 disabled:bg-blue-400"
+                      className="bg-blue-500 w-28 h-7 text-center text-white rounded-full text-xs transition-colors hover:bg-blue-700 disabled:bg-blue-400"
                       onClick={() => handleFollow(user._id)}
                       disabled={user?.loading}
                     >

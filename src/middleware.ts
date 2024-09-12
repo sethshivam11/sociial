@@ -16,7 +16,7 @@ export const config = {
     "/messages/:path",
     "/settings/:path",
     "/notifications/:path",
-    "/videos"
+    "/videos",
   ],
 };
 
@@ -31,11 +31,15 @@ export function middleware(request: NextRequest) {
   ];
 
   if (!token && !publicPaths.includes(path)) {
-    return NextResponse.redirect(new URL(`/sign-in?next=${path}`, request.url));
+    return NextResponse.redirect(new URL("/sign-in", request.url));
   }
 
   if (token && publicPaths.includes(path)) {
-    return NextResponse.redirect(new URL("/", request.url));
+    if (path !== "/verify-code" && !request.nextUrl.searchParams.has("username")) {
+      return NextResponse.redirect(new URL("/", request.url));
+    } else {
+      return NextResponse.next()
+    }
   }
 
   return NextResponse.next();
