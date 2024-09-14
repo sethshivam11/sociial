@@ -369,7 +369,7 @@ function Profile({
               <button
                 className={`flex items-center justify-center gap-2 relative after:rounded-sm sm:after:w-28 after:w-16 after:absolute after:top-8 after:border-stone-800 after:dark:border-stone-200 ${
                   !location.includes("/saved") &&
-                  !location.includes("/videos") &&
+                  !location.includes("/vids") &&
                   !location.includes("/feed")
                     ? "after:border-2"
                     : "after:border-0"
@@ -400,15 +400,15 @@ function Profile({
               </button>
               <button
                 className={`flex items-center justify-center gap-2 relative after:rounded-sm sm:after:w-28 after:w-16 after:absolute after:top-8 after:border-stone-800 after:dark:border-stone-200 ${
-                  location.includes("/videos")
+                  location.includes("/vids")
                     ? "after:border-2"
                     : "after:border-0"
                 }`}
-                onClick={() => router.push(`/${profile.username}/videos`)}
+                onClick={() => router.push(`/${profile.username}/vids`)}
               >
                 <Tv
                   strokeWidth={
-                    location === `/${profile.username}/videos` ? "2.5" : "1"
+                    location === `/${profile.username}/vids` ? "2.5" : "1"
                   }
                 />
                 <span className="max-sm:hidden">Videos</span>

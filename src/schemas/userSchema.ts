@@ -13,6 +13,12 @@ const usernameSchema = z
   })
   .refine((value) => !value.startsWith("."), {
     message: "Username cannot start with .",
+  })
+  .refine((value) => !/^\d/.test(value), {
+    message: "Username cannot start with a number",
+  })
+  .refine((value) => /[a-z]/.test(value), {
+    message: "Username must contain at least one letter",
   });
 
 const emailSchema = z

@@ -14,10 +14,8 @@ import {
 } from "@/components/ui/carousel";
 import PostsLoading from "./skeletons/PostsLoading";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { nameFallback } from "@/lib/helpers";
+import { handleConsent, nameFallback } from "@/lib/helpers";
 import Link from "next/link";
-import { getToken } from "firebase/messaging";
-import { messaging } from "@/lib/firebase";
 import {
   AlertDialog,
   AlertDialogTitle,
@@ -42,6 +40,7 @@ import {
 import SavePost from "./SavePost";
 import PostCaption from "./PostCaption";
 import { useRouter } from "next/navigation";
+import { saveToken } from "@/lib/store/features/slices/pushNotificationSlice";
 
 interface Props {
   feed?: boolean;
@@ -49,6 +48,7 @@ interface Props {
 
 function Posts({ feed }: Props) {
   const router = useRouter();
+  const timerRef = React.useRef<NodeJS.Timeout>();
   const [savingToken, setSavingToken] = React.useState(false);
   const dispatch = useAppDispatch();
   const {
@@ -68,44 +68,13 @@ function Posts({ feed }: Props) {
   const [consentDialog, setConsentDialog] = React.useState(false);
   const [showExplorePosts, setShowExplorePosts] = React.useState(true);
 
-  async function handleConsent() {
-    setSavingToken(true);
-    await Notification.requestPermission().then(async (result) => {
-      if (result === "granted") {
-        await getToken(messaging, {
-          vapidKey: process.env.NEXT_PUBLIC_VAPID_KEY,
-        })
-          .then(() => {
-            localStorage.setItem(
-              "notificationConsent",
-              `{"consent": "true","expiry": "null"}`
-            );
-            setConsentDialog(false);
-          })
-          .catch((err) => {
-            console.log(err);
-            toast({
-              title: "Something went wrong",
-              description: "Please try again later.",
-            });
-            localStorage.setItem(
-              "notificationConsent",
-              `{"consent": "false","expiry": "${Date.now()}"}`
-            );
-          })
-          .finally(() => setSavingToken(false));
-      } else {
-        localStorage.setItem(
-          "notificationConsent",
-          `{"consent": "false","expiry": "null"}`
-        );
-        toast({
-          title: "Notification Permission Denied",
-          description: "Please allow it in order to recieve notifications.",
-          variant: "destructive",
-        });
-      }
-    });
+  async function handleSaveToken() {
+    const response = await handleConsent(setSavingToken, setConsentDialog);
+    if (response?.toast) {
+      toast(response.toast);
+    } else if (response.token) {
+      dispatch(saveToken(response.token));
+    }
   }
 
   function handleLike(postId: string, type: "posts" | "explore") {
@@ -144,10 +113,18 @@ function Posts({ feed }: Props) {
 
   React.useEffect(() => {
     const savedConsent = JSON.parse(
-      localStorage.getItem("notificationConsent") || "{}"
+      localStorage.getItem("notificationConsent") ||
+        '{"consent": false,"expiry": 0}'
     );
-    if (!savedConsent.consent || savedConsent.expiry < Date.now()) {
-      setConsentDialog(true);
+
+    if (!savedConsent?.consent && savedConsent?.expiry < Date.now()) {
+      timerRef.current = setTimeout(() => setConsentDialog(true), 5000);
+    } else if (savedConsent?.consent && Notification.permission !== "granted") {
+      localStorage.setItem(
+        "notificationConsent",
+        '{"consent": false,"expiry": 0}'
+      );
+      timerRef.current = setTimeout(() => setConsentDialog(true), 5000);
     }
     const savedExplorePostsConsent =
       localStorage.getItem("explorePostsConsent") || "true";
@@ -161,6 +138,8 @@ function Posts({ feed }: Props) {
     } else if (profile.username) {
       dispatch(getUserPosts({ username: profile.username }));
     }
+
+    return () => clearTimeout(timerRef.current);
   }, [profile.username, dispatch, getFeed, exploreFeed, user._id]);
 
   React.useEffect(() => {
@@ -177,7 +156,7 @@ function Posts({ feed }: Props) {
           hasMore={posts.length < maxPosts}
           loader={<Loader2 className="animate-spin mx-auto" />}
           next={() => dispatch(getFeed(page + 1))}
-          className="flex flex-col py-2 sm:px-4 px-2 gap-4 w-full sm:pb-4 pb-20"
+          className="flex flex-col py-2 sm:px-4 px-2 gap-4 w-full sm:pb-4"
         >
           {skeletonLoading ? (
             <PostsLoading />
@@ -343,7 +322,11 @@ function Posts({ feed }: Props) {
         </InfiniteScroll>
       )}
       {!skeletonLoading && !feed && posts.length !== 0 && (
-        <div className="flex flex-col items-center justify-center gap-2 my-8">
+        <div
+          className={`flex flex-col items-center justify-center gap-2 sm:my-8 ${
+            showExplorePosts ? "my-5" : "mt-5 mb-20"
+          }`}
+        >
           <Globe size="60" />
           <h2 className="text-xl font-bold tracking-tight">
             You&apos;ve got to the end of your scroll
@@ -582,9 +565,9 @@ function Posts({ feed }: Props) {
               onClick={() => {
                 localStorage.setItem(
                   "notificationConsent",
-                  `{"consent": "false","expiry": "${
+                  `{"consent": false,"expiry": ${
                     Date.now() + 1000 * 60 * 60 * 24 * 10
-                  }"}`
+                  }}`
                 );
                 setConsentDialog(false);
               }}
@@ -593,7 +576,7 @@ function Posts({ feed }: Props) {
             </AlertDialogCancel>
             <AlertDialogAction
               className="rounded-lg"
-              onClick={handleConsent}
+              onClick={handleSaveToken}
               disabled={savingToken}
             >
               {savingToken ? <Loader2 className="animate-spin" /> : "Yes"}

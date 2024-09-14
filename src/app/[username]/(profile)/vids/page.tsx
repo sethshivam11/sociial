@@ -10,11 +10,14 @@ import React from "react";
 function Page() {
   const dispatch = useAppDispatch();
   const { skeletonLoading, posts } = useAppSelector((state) => state.post);
-  const { profile } = useAppSelector((state) => state.user);
+  const { profile, skeletonLoading: userLoading } = useAppSelector(
+    (state) => state.user
+  );
 
   React.useEffect(() => {
+    if (userLoading || !profile.username) return;
     dispatch(getUserPosts({ username: profile.username }));
-  }, [dispatch]);
+  }, [dispatch, getUserPosts, profile.username, userLoading]);
   return (
     <div className="flex items-center justify-start flex-wrap flex-row w-full">
       {skeletonLoading ? (
@@ -34,8 +37,8 @@ function Page() {
               className="lg:w-1/4 w-1/3 aspect-square p-1 relative"
               key={index}
             >
-              <div className="bg-transparent/50 backdrop-blur-sm rounded-full absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-2">
-                <PlayIcon size="40" />
+              <div className="bg-transparent/50 text-sm text-white backdrop-blur-sm rounded-full absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-2">
+                <PlayIcon className="w-6 h-6 sm:w-7 sm:h-7 md:w-10 md:h-1" />
               </div>
               <Image
                 src={post.thumbnail || ""}

@@ -225,7 +225,13 @@ export const updateDetails = createAsyncThunk(
     username?: string;
     bio?: string;
   }) => {
-    if (!fullName && !username && !bio) return;
+    if (!fullName && !username && !bio)
+      return {
+        success: false,
+        message: "Atleast one field is required",
+        data: null,
+        status: 400,
+      };
     const parsed = await fetch("/api/v1/users/updateDetails", {
       method: "PUT",
       headers: {
@@ -493,7 +499,7 @@ export const userSlice = createSlice({
           state.user.avatar = action.payload.data.avatar;
         }
       })
-      .addCase(removeAvatar.rejected, (state, action) => {
+      .addCase(removeAvatar.rejected, (state) => {
         state.loading = false;
       });
 
@@ -519,9 +525,10 @@ export const userSlice = createSlice({
       .addCase(updateDetails.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload?.success) {
-          state.user.fullName = action.payload.data.fullName;
-          state.user.username = action.payload.data.username;
-          state.user.bio = action.payload.data.bio;
+          const { username, fullName, bio } = action.meta.arg;
+          if (fullName) state.user.fullName = fullName;
+          if (username) state.user.username = username;
+          if (bio) state.user.bio = bio;
         }
       })
       .addCase(updateDetails.rejected, (state) => {

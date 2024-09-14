@@ -1,7 +1,5 @@
 "use client";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { nameFallback } from "@/lib/helpers";
-import { ArrowLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -16,24 +14,13 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { emailSchema, verificationCodeSchema } from "@/schemas/userSchema";
 
 function Page() {
-  const router = useRouter();
   const formSchema = z.object({
-    email: z.string().email({
-      message: "Invalid email address",
-    }),
-    otp: z.coerce
-      .number({
-        message: "Invalid OTP",
-      })
-      .min(100000, {
-        message: "Invalid OTP",
-      })
-      .max(999999, {
-        message: "Invalid OTP",
-      }),
+    email: emailSchema,
+    otp: verificationCodeSchema,
   });
 
   const [user, setUser] = React.useState({
@@ -61,15 +48,10 @@ function Page() {
 
   return (
     <div className="flex flex-col items-center justify-start">
-      <h1 className="sm:w-2/3 text-lg tracking-tight font-semibold w-full text-left my-4 flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="ml-2 rounded-xl sm:hidden hover:bg-background"
-          onClick={() => router.push("/settings")}
-        >
-          <ArrowLeft />
-        </Button>
+      <h1 className="sm:w-2/3 text-lg tracking-tight font-semibold w-full text-left my-2 flex items-center gap-4">
+        <Link className="sm:hidden ml-2 p-2" href="/settings/security">
+          <ChevronLeft />
+        </Link>
         Update Email
       </h1>
       <Form {...form}>

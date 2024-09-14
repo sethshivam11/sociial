@@ -1,7 +1,6 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
@@ -19,10 +18,8 @@ function Page() {
   return (
     <div className="flex flex-col items-center justify-start overflow-y-auto max-h-[100dvh] h-full xl:col-span-8 sm:col-span-9 col-span-10 w-full">
       <h1 className="text-lg tracking-tight font-semibold sm:w-2/3 w-full text-left sm:my-4 my-2 flex items-center gap-4">
-        <Link href="/settings/notifications" className="sm:hidden">
-          <Button variant="ghost" size="icon" className="rounded-xl ml-2 hover:bg-background">
-            <ArrowLeft />
-          </Button>
+        <Link className="sm:hidden ml-2 p-2" href="/settings/notifications">
+          <ChevronLeft />
         </Link>
         Email Notifications
       </h1>

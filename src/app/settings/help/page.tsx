@@ -1,11 +1,11 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { useForm } from "react-hook-form";
-import { set, z } from "zod";
+import { z } from "zod";
 import {
   Form,
   FormControl,
@@ -16,26 +16,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { descriptionSchema, titleSchema } from "@/schemas/reportSchema";
 
 function Page() {
   const [image, setImage] = React.useState<File | null>(null);
   const formSchema = z.object({
-    title: z
-      .string()
-      .min(10, {
-        message: "Title must be more than 10 characters",
-      })
-      .max(100, {
-        message: "Title must be less than 100 characters",
-      }),
-    description: z
-      .string()
-      .min(50, {
-        message: "Description must be more than 50 characters",
-      })
-      .max(1000, {
-        message: "Description must be less than 1000 characters",
-      }),
+    title: titleSchema,
+    description: descriptionSchema,
   });
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -52,14 +39,8 @@ function Page() {
   return (
     <div className="flex flex-col items-center justify-start overflow-y-auto max-h-[100dvh] h-full xl:col-span-8 sm:col-span-9 col-span-10 w-full max-sm:pb-10">
       <h1 className="text-lg tracking-tight font-semibold sm:w-2/3 w-full text-left sm:my-2 my-2 flex items-center gap-4">
-        <Link href="/settings" className="sm:hidden">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-xl ml-2 hover:bg-background"
-          >
-            <ArrowLeft />
-          </Button>
+        <Link className="sm:hidden ml-2 p-2" href="/settings">
+          <ChevronLeft />
         </Link>
         Help & Support
       </h1>

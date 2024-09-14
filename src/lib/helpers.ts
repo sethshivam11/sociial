@@ -1,3 +1,7 @@
+import { getToken } from "firebase/messaging";
+import { messaging } from "./store/provider";
+import { FirebaseError } from "firebase/app";
+
 export function nameFallback(name: string): string {
   const split = name.toUpperCase().split(" ");
   if (split.length >= 2) {
@@ -56,4 +60,70 @@ export function isUsernameAvailable(
       setMessage("Something went wrong");
     })
     .finally(() => setLoading(false));
+}
+
+export async function handleConsent(
+  setSavingToken: (arg: boolean) => void,
+  setConsentDialog: (arg: boolean) => void
+): Promise<{
+  token: string | null;
+  toast?: {
+    title: string;
+    description: string;
+    variant: "default" | "destructive" | null;
+  };
+}> {
+  try {
+    setSavingToken(true);
+    const result = await Notification.requestPermission();
+    if (result === "granted") {
+      const token = await getToken(messaging, {
+        vapidKey: process.env.NEXT_PUBLIC_VAPID_KEY,
+      });
+      localStorage.setItem(
+        "notificationConsent",
+        `{"consent": true,"expiry": null}`
+      );
+      return {
+        token,
+      };
+    } else {
+      localStorage.setItem(
+        "notificationConsent",
+        `{"consent": false,"expiry": null}`
+      );
+
+      return {
+        token: null,
+        toast: {
+          title: "Notification Permission Denied",
+          description: "Please allow it in order to recieve notifications.",
+          variant: "destructive",
+        },
+      };
+    }
+  } catch (err) {
+    console.log(err);
+    let description = "Please try again later.";
+    if (err instanceof FirebaseError) {
+      description = err.message;
+    }
+
+    localStorage.setItem(
+      "notificationConsent",
+      `{"consent": false,"expiry": ${Date.now()}}`
+    );
+
+    return {
+      token: null,
+      toast: {
+        title: "Something went wrong",
+        description,
+        variant: null,
+      },
+    };
+  } finally {
+    setSavingToken(false);
+    setConsentDialog(false);
+  }
 }

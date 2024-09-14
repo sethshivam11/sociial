@@ -1,4 +1,5 @@
 "use client";
+import { useAppSelector } from "@/lib/store/store";
 import { Bell, Mail, Settings, Tv } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -9,13 +10,11 @@ interface Props {
   hideButtons?: boolean;
 }
 
-function MobileNav({
-  hideButtons,
-}: Props) {
+function MobileNav({ hideButtons }: Props) {
   const unreadMessageCount = 0;
   const newNotifications = false;
   const location = usePathname();
-  const username = "sethshivam11";
+  const { username } = useAppSelector((state) => state.user.user);
   return (
     <div className="bg-stone-100 dark:bg-stone-900 h-16 p-3 top-0 left-0 col-span-10 sm:static sticky w-full sm:hidden flex items-center justify-between z-20">
       <div className="flex items-center gap-2 text-2xl tracking-tighter font-extrabold">

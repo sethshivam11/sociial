@@ -183,7 +183,7 @@ function Page() {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center h-full w-full gap-6">
+          <div className="flex flex-col items-center justify-center min-h-[40rem] w-full gap-6">
             <BellRing size="80" />
             <div className="flex flex-col items-center justify-center gap-1">
               <h1 className="text-3xl tracking-tight font-bold">

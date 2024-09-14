@@ -8,11 +8,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+import { useAppSelector } from "@/lib/store/store";
 import {
-  ArrowLeft,
   Ban,
   Bell,
+  ChevronLeft,
   KeySquare,
   LogOut,
   Palette,
@@ -26,7 +26,7 @@ import React from "react";
 function Page({ children }: React.PropsWithChildren) {
   const location = usePathname();
   const router = useRouter();
-  const username = "sethshivam11";
+  const { username } = useAppSelector((state) => state.user.user);
 
   React.useEffect(() => {
     const checkScreenWidthAndRedirect = () => {
@@ -44,22 +44,17 @@ function Page({ children }: React.PropsWithChildren) {
   }, [router, location]);
 
   return (
-    <div className="sm:container flex items-start justify-start max-h-[100dvh] min-h-[100dvh] xl:col-span-8 sm:col-span-9 col-span-10 sm:py-6">
+    <div className="md:container flex items-start justify-start xl:col-span-8 sm:col-span-9 col-span-10 sm:py-6">
       <div
-        className={`lg:w-1/4 sm:w-1/3 w-full h-full lg:max-h-full sm:border-r-2 border-stone-200 dark:border-stone-800 ${
-          location === "/settings" ? "block" : "max-sm:hidden"
+        className={`lg:w-1/4 md:w-1/3 max-md:ml-6 w-full max-h-[100dvh]  ${
+          location === "/settings" ? "block" : "max-md:hidden"
         }`}
       >
         <div className="sm:text-3xl text-xl tracking-tighter font-bold text-center w-full sm:py-6 py-2 flex items-center">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="sm:hidden ml-2 hover:bg-background"
-            onClick={() => router.push(`/${username}`)}
-          >
-            <ArrowLeft />
-          </Button>
-          <h1 className="w-full pr-14">Settings</h1>
+          <Link className="sm:hidden ml-2 p-2" href={`/${username}`}>
+            <ChevronLeft />
+          </Link>
+          <h1 className="w-full max-sm:pr-14">Settings</h1>
         </div>
         <hr className="w-full bg-stone-500 mb-4" />
         <div className="flex flex-col sm:px-1 px-4 overflow-y-auto gap-2">
@@ -148,6 +143,7 @@ function Page({ children }: React.PropsWithChildren) {
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
+                className="text-white bg-destructive hover:bg-destructive/80"
                   onClick={() => {
                     localStorage.clear();
                     router.push("/sign-in");
@@ -161,7 +157,7 @@ function Page({ children }: React.PropsWithChildren) {
         </div>
       </div>
       <div
-        className={`h-full md:max-h-full ${
+        className={`h-full md:max-h-full md:border-l-2 border-stone-200 dark:border-stone-800 ${
           location === "/settings" ? "lg:w-3/4 w-0" : "lg:w-3/4 w-full"
         }`}
       >

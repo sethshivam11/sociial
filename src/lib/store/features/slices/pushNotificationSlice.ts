@@ -29,7 +29,7 @@ export const saveToken = createAsyncThunk(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ token }),
-    });
+    })
     return parsed.json();
   }
 );

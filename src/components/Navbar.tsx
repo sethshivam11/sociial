@@ -123,7 +123,7 @@ function Navbar() {
 
   return (
     <nav
-      className={`xl:px-4 xl:py-6 p-3 sm:sticky fixed sm:top-0 left-0 sm:h-screen h-fit bottom-0 xl:col-span-2 sm:col-span-1 col-span-10 sm:min-h-[42rem] max-h-[55rem] z-10 w-full min-w-max block 
+      className={`xl:px-4 xl:py-6 p-3 sm:sticky fixed sm:top-0 sm:left-0 sm:h-screen h-fit max-sm:bottom-0 xl:col-span-2 sm:col-span-1 col-span-10 sm:min-h-[42rem] max-h-[55rem] z-10 w-full min-w-max block 
       ${hideNav
         .map((path) => {
           if (location.includes(path) || location.startsWith(path))
