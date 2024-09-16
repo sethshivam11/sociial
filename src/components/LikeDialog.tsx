@@ -21,7 +21,6 @@ function LikeDialog({
   const dispatch = useAppDispatch();
 
   const getLikes = React.useCallback(async () => {
-    if(likesCount === 0) return;
     const response = await dispatch(fetchLikes(postId));
     if (
       !response.payload?.success &&
@@ -40,7 +39,7 @@ function LikeDialog({
 
   React.useEffect(() => {
     if (dialogOpen) getLikes();
-  }, [fetchLikes, dialogOpen]);
+  }, [dialogOpen]);
 
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -53,14 +52,14 @@ function LikeDialog({
       >
         <DialogTitle className="text-center max-h-10">Likes</DialogTitle>
         {loading ? (
-          <div className="min-w-80 min-h-20 flex items-center justify-center">
+          <div className="min-w-80 min-h-96 flex items-center justify-center">
             <Loader2 className="animate-spin" size="30" />
           </div>
         ) : (
-          <ScrollArea className="h-96 sm:min-w-80 w-full px-2 pt-4">
-            <div className="flex flex-col gap-2 h-full">
-              {likes.length ? (
-                likes.map((like, index) => (
+          <div className="flex flex-col gap-2 h-full">
+            {likes.length ? (
+              <ScrollArea className="h-96 sm:min-w-80 w-full px-2 pt-4">
+                {likes.map((like, index) => (
                   <Link
                     href={`/${like.username}`}
                     key={index}
@@ -79,20 +78,18 @@ function LikeDialog({
                       </span>
                     </div>
                   </Link>
-                ))
-              ) : (
-                <div className="w-full h-80 flex flex-col items-center justify-center gap-2">
-                  <History className="mx-auto" size="50" />
-                  <p className="text-xl font-bold tracking-tight">
-                    No likes yet
-                  </p>
-                  <span className="text-center text-stone-500">
-                    Be the first one to like this post
-                  </span>
-                </div>
-              )}
-            </div>
-          </ScrollArea>
+                ))}
+              </ScrollArea>
+            ) : (
+              <div className="w-full sm:min-w-80 h-96 flex flex-col items-center justify-center gap-2">
+                <History className="mx-auto" size="50" />
+                <p className="text-xl font-bold tracking-tight">No likes yet</p>
+                <span className="text-center text-stone-500">
+                  Be the first one to like this post
+                </span>
+              </div>
+            )}
+          </div>
         )}
       </DialogContent>
     </Dialog>

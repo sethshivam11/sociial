@@ -94,6 +94,7 @@ export interface CommentSliceI {
   comments: CommentI[];
   comment: CommentI;
   loading: boolean;
+  likes: BasicUserI[];
   skeletonLoading: boolean;
   loadingMore: boolean;
   page: number;

@@ -41,7 +41,7 @@ function Page({ params }: { params: { postId: string } }) {
       likePost({
         postId,
         userId: user._id,
-        type: "post"
+        type: "post",
       })
     ).then((response) => {
       if (!response.payload?.success) {
@@ -58,7 +58,7 @@ function Page({ params }: { params: { postId: string } }) {
       unlikePost({
         postId,
         userId: user._id,
-        type: "post"
+        type: "post",
       })
     ).then((response) => {
       if (!response.payload?.success) {
@@ -177,7 +177,11 @@ function Page({ params }: { params: { postId: string } }) {
                     }}
                   />
                 </button>
-                <Comment user={post.user} commentsCount={post.commentsCount} />
+                <Comment
+                  postId={post._id}
+                  user={post.user}
+                  commentsCount={post.commentsCount}
+                />
                 <Share _id={post._id} />
               </div>
               <SavePost post={post} />

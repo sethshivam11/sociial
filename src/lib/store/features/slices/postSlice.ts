@@ -60,10 +60,8 @@ export const exploreFeed = createAsyncThunk(
 
 export const videoFeed = createAsyncThunk(
   "posts/videoFeed",
-  async ({ page, userId }: { page: number; userId?: string }) => {
-    const parsed = await fetch(
-      `/api/v1/posts/videoFeed?page=${page}${userId ? `&userId=${userId}` : ""}`
-    );
+  async (page: number) => {
+    const parsed = await fetch(`/api/v1/posts/videoFeed?page=${page}`);
     return parsed.json();
   }
 );
@@ -328,6 +326,7 @@ const postSlice = createSlice({
         state.skeletonLoading = true;
       })
       .addCase(videoFeed.fulfilled, (state, action) => {
+        state.skeletonLoading = false;
         if (action.payload?.success) {
           const existingPosts = state.posts;
           const postsMap = new Map(

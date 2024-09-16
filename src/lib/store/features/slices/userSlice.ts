@@ -34,7 +34,7 @@ const initialState: UserSliceI = {
   unreadMessageCount: 0,
   newNotifications: false,
   loading: false,
-  skeletonLoading: true,
+  skeletonLoading: false,
   isLoggedIn: false,
   isSendingMail: false,
   page: 1,
@@ -157,7 +157,12 @@ export const getProfile = createAsyncThunk(
 );
 
 export const logOutUser = createAsyncThunk("users/logout", async () => {
-  const parsed = await fetch("/api/v1/users/logout");
+  const token = JSON.parse(
+    localStorage.getItem("notificationConsent") || '{"token": null}'
+  ).token;
+  const parsed = await fetch(
+    `/api/v1/users/logout${token ? `?firebaseToken=${token}` : ""}`
+  );
   return parsed.json();
 });
 

@@ -298,6 +298,7 @@ function Posts({ feed }: Props) {
                         />
                       </button>
                       <Comment
+                        postId={post._id}
                         user={post.user}
                         commentsCount={post.commentsCount}
                       />
@@ -529,6 +530,7 @@ function Posts({ feed }: Props) {
                         />
                       </button>
                       <Comment
+                        postId={post._id}
                         user={post.user}
                         commentsCount={post.commentsCount}
                       />

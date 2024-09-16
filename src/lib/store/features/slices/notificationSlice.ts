@@ -4,7 +4,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 const initialState: NotificationSliceI = {
   notifications: [],
   loading: false,
-  skeletonLoading: true,
+  skeletonLoading: false,
 };
 
 export const getNotifications = createAsyncThunk(

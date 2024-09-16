@@ -61,9 +61,9 @@ export interface ChatI {
 export interface CommentI {
   _id: string;
   user: BasicUserI;
-  comment: string;
+  content: string;
   post: string;
-  likes: BasicUserI[];
+  likes: string[];
   likesCount: number;
 }
 

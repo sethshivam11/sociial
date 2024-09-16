@@ -3,12 +3,15 @@ import {
   Dialog,
   DialogContent,
   DialogFooter,
+  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
   Ban,
   Heart,
+  History,
+  Loader2,
   MessageSquareText,
   MoreHorizontal,
   SendHorizonal,
@@ -48,52 +51,49 @@ import {
 import ReportDialog from "./ReportDialog";
 import { ScrollArea } from "./ui/scroll-area";
 import { commentSchema } from "@/schemas/postSchema";
+import { useAppDispatch, useAppSelector } from "@/lib/store/store";
+import {
+  createComment,
+  deleteComment,
+  dislikeComment,
+  getComments,
+  getLikes,
+  likeComment,
+} from "@/lib/store/features/slices/commentSlice";
+import Link from "next/link";
+import { toast } from "./ui/use-toast";
+import CommentsLoading from "./skeletons/CommentsLoading";
+import { blockUser } from "@/lib/store/features/slices/userSlice";
 
 interface Props {
   user: {
+    _id: string;
     fullName: string;
     username: string;
     avatar: string;
   };
+  postId: string;
   commentsCount: number;
   isVideo?: boolean;
 }
 
-export default function Comment({ user, commentsCount, isVideo }: Props) {
-  const [comments, setComments] = React.useState([
-    {
-      _id: "12",
-      postId: "1",
-      user: {
-        _id: "",
-        fullName: "Shad",
-        username: "shadcn",
-        avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
-      },
-      content:
-        "This is a comment which is very long and I also don't know what to write in it. So, I am just writing anything that comes to my mind. I hope you are having a good day. Bye! 😊 ",
-      liked: false,
-      likesCount: 1,
-    },
-    {
-      _id: "13",
-      postId: "1",
-      user: {
-        _id: "",
-        fullName: "Shad",
-        username: "shadcn",
-        avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1708096087/sociial/tpfx0gzsk7ywiptsb6vl.png",
-      },
-      content:
-        "This is a comment which is very long and I also don't know what to write in it. So, I am just writing anything that comes to my mind. I hope you are having a good day. Bye! 😊 ",
-      liked: false,
-      likesCount: 1,
-    },
-  ]);
+export default function Comment({
+  user,
+  commentsCount,
+  postId,
+  isVideo,
+}: Props) {
+  const dispatch = useAppDispatch();
+  const { user: currentUser } = useAppSelector((state) => state.user);
+  const { likes, loading, comments, skeletonLoading } = useAppSelector(
+    (state) => state.comment
+  );
   const [dialogOpen, setDialogOpen] = React.useState(false);
-  const [deleteComment, setDeleteComment] = React.useState({
+  const [likesDialog, setLikesDialog] = React.useState({
+    open: false,
+    commentId: "",
+  });
+  const [deleteDialog, setDeleteDialog] = React.useState({
     dialogOpen: false,
     commentId: "",
   });
@@ -103,8 +103,8 @@ export default function Comment({ user, commentsCount, isVideo }: Props) {
   });
   const [blockDialog, setBlockDialog] = React.useState({
     dialogOpen: false,
-    commentId: "",
     user: {
+      _id: "",
       username: "",
       fullName: "",
       avatar: "",
@@ -113,33 +113,80 @@ export default function Comment({ user, commentsCount, isVideo }: Props) {
   const formSchema = z.object({
     comment: commentSchema,
   });
-  function addComment(content: string) {
-    setComments([
-      {
-        _id: `${Math.floor(Math.random() * 100)}`,
-        postId: comments[0].postId,
-        content,
-        user: comments[0].user,
-        liked: false,
-        likesCount: 0,
-      },
-      ...comments,
-    ]);
+
+  function handleComment(content: string) {
+    dispatch(createComment({ postId, content })).then((response) => {
+      if (!response.payload?.success) {
+        toast({
+          title: "Cannot comment",
+          description: response.payload?.message || "An error occurred",
+          variant: "destructive",
+        });
+      }
+    });
   }
-  function likeComment(_id: string) {
-    setComments(
-      comments.map((comment) =>
-        comment._id === _id
-          ? {
-              ...comment,
-              liked: !comment.liked,
-              likesCount: comment.liked
-                ? comment.likesCount - 1
-                : comment.likesCount + 1,
-            }
-          : comment
-      )
-    );
+
+  function handleLike(commentId: string) {
+    dispatch(likeComment(commentId)).then((response) => {
+      if (!response.payload?.success) {
+        toast({
+          title: "Cannot like comment",
+          description: response.payload?.message || "An error occurred",
+          variant: "destructive",
+        });
+      }
+    });
+  }
+
+  function handleUnlike(commentId: string) {
+    dispatch(dislikeComment(commentId)).then((response) => {
+      if (!response.payload?.success) {
+        toast({
+          title: "Cannot like comment",
+          description: response.payload?.message || "An error occurred",
+          variant: "destructive",
+        });
+      }
+    });
+  }
+
+  function handleDelete() {
+    dispatch(deleteComment(deleteDialog.commentId)).then((response) => {
+      if (response.payload?.success) {
+        setDeleteDialog({
+          dialogOpen: false,
+          commentId: "",
+        });
+      } else {
+        toast({
+          title: "Cannot delete comment",
+          description: response.payload?.message || "An error occurred",
+          variant: "destructive",
+        });
+      }
+    });
+  }
+
+  function handleBlock() {
+    dispatch(blockUser(blockDialog.user._id)).then((response) => {
+      if (response.payload?.success) {
+        setBlockDialog({
+          dialogOpen: false,
+          user: {
+            _id: "",
+            username: "",
+            fullName: "",
+            avatar: "",
+          },
+        });
+      } else {
+        toast({
+          title: "Cannot delete comment",
+          description: response.payload?.message || "An error occurred",
+          variant: "destructive",
+        });
+      }
+    });
   }
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -149,9 +196,20 @@ export default function Comment({ user, commentsCount, isVideo }: Props) {
     },
   });
   function onSubmit(values: z.infer<typeof formSchema>) {
-    addComment(values.comment);
+    handleComment(values.comment);
     form.setValue("comment", "");
   }
+
+  React.useEffect(() => {
+    if (dialogOpen) dispatch(getComments({ postId }));
+  }, [dispatch, dialogOpen, getComments, postId]);
+
+  React.useEffect(() => {
+    if (likesDialog.open && likesDialog.commentId)
+      dispatch(getLikes(likesDialog.commentId));
+    console.log(likesDialog.commentId);
+  }, [dispatch, getLikes, likesDialog.open, likesDialog.commentId]);
+
   return (
     <>
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -185,65 +243,150 @@ export default function Comment({ user, commentsCount, isVideo }: Props) {
             </div>
           </div>
           <hr className="bg-stone-500" />
-          <ScrollArea className="h-full">
-            {comments.length ? (
-              comments.map((comment, index) => {
-                return (
-                  <div
-                    key={index}
-                    className="flex flex-col items-start mb-3 group"
-                  >
-                    <div className="flex items-start gap-2 p-1 rounded-lg">
-                      <div className="w-8 h-w-8">
-                        <Avatar>
-                          <AvatarImage
-                            src={comment.user.avatar}
-                            className="pointer-events-none select-none"
-                          />
-                          <AvatarFallback>
-                            {nameFallback(comment.user.fullName)}
-                          </AvatarFallback>
-                        </Avatar>
-                      </div>
-                      <div className="px-2">
-                        <span className="text-sm font-light">
-                          <span className="font-semibold">
-                            {comment.user.username}&nbsp;
-                          </span>
-                          {comment.content}
-                        </span>
-                        <div className="flex gap-3 items-center text-xs mt-1 text-stone-500 dark:text-stone-400 select-none">
-                          <button onClick={() => likeComment(comment._id)}>
-                            <Heart
-                              size="16"
-                              className={`${
-                                comment.liked
-                                  ? "text-rose-500"
-                                  : "sm:hover:opacity-60"
-                              } mr-1 inline-block transition-all active:scale-110`}
-                              fill={comment.liked ? "rgb(244 63 94)" : "none"}
-                            />
-                            {comment.likesCount <= 1
-                              ? "1 like"
-                              : `${comment.likesCount} likes`}
-                          </button>
-                          <Menubar className="border-0 p-0 h-0 rounded-xl">
-                            <MenubarMenu>
-                              <MenubarTrigger className="w-fit h-fit py-0.5 px-2 rounded-md invisible group-hover:visible">
-                                <MoreHorizontal size="16" />
-                              </MenubarTrigger>
-                              <MenubarContent className="rounded-xl">
-                                <MenubarItem
-                                  className="rounded-lg py-2 flex gap-2 items-center text-red-600 focus:text-red-600"
-                                  onClick={() =>
-                                    setDeleteComment({
-                                      dialogOpen: true,
-                                      commentId: comment._id,
-                                    })
-                                  }
-                                >
-                                  <Trash2 /> Delete
-                                </MenubarItem>
+          {skeletonLoading ? (
+            <CommentsLoading />
+          ) : comments.length ? (
+            <ScrollArea className="h-full px-2">
+              {comments.map((comment, index) => (
+                <div
+                  key={index}
+                  className="flex items-start gap-2 p-1 mb-3 group"
+                >
+                  <Avatar>
+                    <AvatarImage
+                      src={comment.user.avatar}
+                      className="pointer-events-none select-none"
+                    />
+                    <AvatarFallback>
+                      {nameFallback(comment.user.fullName)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="px-2">
+                    <div className="text-sm font-light">
+                      <span className="font-semibold">
+                        {comment.user.username}&nbsp;
+                      </span>
+                      {comment.content}
+                    </div>
+                    <div className="flex gap-3 items-center text-xs mt-1 text-stone-500 dark:text-stone-400 select-none">
+                      <button
+                        onClick={() => {
+                          if (comment.likes.includes(currentUser.username)) {
+                            handleUnlike(comment._id);
+                          } else {
+                            handleLike(comment._id);
+                          }
+                        }}
+                      >
+                        <Heart
+                          size="16"
+                          className={`${
+                            comment.likes.includes(currentUser.username)
+                              ? "text-rose-500"
+                              : "sm:hover:opacity-60"
+                          } mr-1 inline-block transition-all active:scale-110`}
+                          fill={
+                            comment.likes.includes(currentUser.username)
+                              ? "rgb(244 63 94)"
+                              : "none"
+                          }
+                        />
+                      </button>
+                      <Dialog
+                        open={likesDialog.open}
+                        onOpenChange={(open) => {
+                          if (open) {
+                            setLikesDialog({
+                              open: true,
+                              commentId: comment._id,
+                            });
+                          } else {
+                            setLikesDialog({
+                              open: false,
+                              commentId: "",
+                            });
+                          }
+                        }}
+                      >
+                        <DialogTrigger>
+                          {comment.likesCount <= 1
+                            ? `${comment.likesCount} like`
+                            : `${comment.likesCount} likes`}
+                        </DialogTrigger>
+                        <DialogContent
+                          onOpenAutoFocus={(e) => e.preventDefault()}
+                        >
+                          <DialogTitle className="text-center max-h-10">
+                            Likes
+                          </DialogTitle>
+                          {loading ? (
+                            <div className="min-w-80 min-h-96 flex items-center justify-center">
+                              <Loader2 className="animate-spin" size="30" />
+                            </div>
+                          ) : (
+                            <div className="flex flex-col gap-2 h-full">
+                              {likes.length ? (
+                                <ScrollArea className="h-96 sm:min-w-80 w-full px-2 pt-4">
+                                  {likes.map((like, index) => (
+                                    <Link
+                                      href={`/${like.username}`}
+                                      key={index}
+                                      className="flex items-center space-x-2 w-full sm:hover:bg-stone-200 sm:hover:dark:bg-stone-800 p-2 rounded-xl"
+                                    >
+                                      <Avatar>
+                                        <AvatarFallback>
+                                          {nameFallback(like.fullName)}
+                                        </AvatarFallback>
+                                        <AvatarImage
+                                          src={like.avatar}
+                                          alt={like.fullName}
+                                        />
+                                      </Avatar>
+                                      <div className="flex flex-col leading-4">
+                                        <span>{like.fullName}</span>
+                                        <span className="text-stone-500 leading-4 text-sm">
+                                          @{like.username}
+                                        </span>
+                                      </div>
+                                    </Link>
+                                  ))}
+                                </ScrollArea>
+                              ) : (
+                                <div className="w-full sm:min-w-80 h-96 flex flex-col items-center justify-center gap-2">
+                                  <History className="mx-auto" size="50" />
+                                  <p className="text-xl font-bold tracking-tight">
+                                    No likes yet
+                                  </p>
+                                  <span className="text-center text-stone-500">
+                                    Be the first one to like this post
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </DialogContent>
+                      </Dialog>
+                      <Menubar className="border-0 p-0 h-0 rounded-xl">
+                        <MenubarMenu>
+                          <MenubarTrigger className="w-fit h-fit py-0.5 px-2 rounded-md invisible group-hover:visible">
+                            <MoreHorizontal size="16" />
+                          </MenubarTrigger>
+                          <MenubarContent className="rounded-xl">
+                            {user.username === currentUser.username ||
+                            comment.user._id === currentUser._id ? (
+                              <MenubarItem
+                                className="rounded-lg py-2 flex gap-2 items-center text-red-600 focus:text-red-600"
+                                onClick={() =>
+                                  setDeleteDialog({
+                                    dialogOpen: true,
+                                    commentId: comment._id,
+                                  })
+                                }
+                              >
+                                <Trash2 /> Delete
+                              </MenubarItem>
+                            ) : (
+                              <>
                                 <MenubarItem
                                   className="rounded-lg py-2 flex gap-2 items-center text-red-600 focus:text-red-600"
                                   onClick={() =>
@@ -260,26 +403,33 @@ export default function Comment({ user, commentsCount, isVideo }: Props) {
                                   onClick={() =>
                                     setBlockDialog({
                                       dialogOpen: true,
-                                      commentId: comment._id,
                                       user,
                                     })
                                   }
                                 >
                                   <Ban /> Block
                                 </MenubarItem>
-                              </MenubarContent>
-                            </MenubarMenu>
-                          </Menubar>
-                        </div>
-                      </div>
+                              </>
+                            )}
+                          </MenubarContent>
+                        </MenubarMenu>
+                      </Menubar>
                     </div>
                   </div>
-                );
-              })
-            ) : (
-              <div className=""></div>
-            )}
-          </ScrollArea>
+                </div>
+              ))}
+            </ScrollArea>
+          ) : (
+            <div className="flex flex-col h-full items-center justify-center">
+              <History size="70" />
+              <p className="text-xl font-bold tracking-tight">
+                No comments yet
+              </p>
+              <span className="text-center text-stone-500">
+                Start the conversation now
+              </span>
+            </div>
+          )}
           <hr className="bg-stone-500" />
           <DialogFooter>
             <Form {...form}>
@@ -321,10 +471,12 @@ export default function Comment({ user, commentsCount, isVideo }: Props) {
         </DialogContent>
       </Dialog>
       <AlertDialog
-        open={deleteComment.dialogOpen}
-        onOpenChange={(open) =>
-          setDeleteComment({ ...deleteComment, dialogOpen: open })
-        }
+        open={deleteDialog.dialogOpen}
+        onOpenChange={(open) => {
+          if (!loading) {
+            setDeleteDialog({ ...deleteDialog, dialogOpen: open });
+          }
+        }}
       >
         <AlertDialogContent>
           <AlertDialogTitle className="text-center">
@@ -338,23 +490,20 @@ export default function Comment({ user, commentsCount, isVideo }: Props) {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive hover:bg-destructive/80 text-white"
-              onClick={() =>
-                setDeleteComment({
-                  dialogOpen: false,
-                  commentId: "",
-                })
-              }
+              onClick={handleDelete}
             >
-              Delete
+              {loading ? <Loader2 /> : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
       <AlertDialog
         open={blockDialog.dialogOpen}
-        onOpenChange={(open) =>
-          setBlockDialog({ ...blockDialog, dialogOpen: open })
-        }
+        onOpenChange={(open) => {
+          if (!loading) {
+            setBlockDialog({ ...blockDialog, dialogOpen: open });
+          }
+        }}
       >
         <AlertDialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
           <AlertDialogTitle className="text-center">
@@ -367,19 +516,9 @@ export default function Comment({ user, commentsCount, isVideo }: Props) {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive hover:bg-destructive/80 text-white"
-              onClick={() =>
-                setBlockDialog({
-                  dialogOpen: false,
-                  commentId: "",
-                  user: {
-                    username: "",
-                    fullName: "",
-                    avatar: "",
-                  },
-                })
-              }
+              onClick={handleBlock}
             >
-              Delete
+              {loading ? <Loader2 /> : "Block"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

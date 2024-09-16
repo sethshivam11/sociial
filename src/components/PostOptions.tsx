@@ -106,12 +106,6 @@ function PostOptions({ user, postId, isVideo, explorePosts }: Props) {
           <MoreHorizontal />
         </DialogTrigger>
         <DialogContent className="w-full md:w-fit" hideCloseIcon>
-          <DialogClose
-            className="text-red-500 w-full md:px-20 py-1"
-            onClick={() => setReportDialog(true)}
-          >
-            Report
-          </DialogClose>
           {user._id === currentUser._id ? (
             <DialogClose
               className="text-red-500 w-full md:px-20 py-1"
@@ -119,41 +113,54 @@ function PostOptions({ user, postId, isVideo, explorePosts }: Props) {
             >
               Delete
             </DialogClose>
-          ) : explorePosts ? (
-            <DialogClose
-              className="text-blue-500 w-full md:px-20 py-1"
-              onClick={() =>
-                dispatch(followUser({ userId: user._id })).then((response) => {
-                  if (response.payload?.success) {
-                    toast({
-                      title: `You started following ${user.username}`,
-                    });
-                  } else if (
-                    response.payload?.message === "Follower already followed"
-                  ) {
-                    toast({
-                      title: `You already follow ${user.username}`,
-                      description: "You can unfollow them if you want",
-                    });
-                  } else if (!response.payload?.success) {
-                    toast({
-                      title: `Cannot follow ${user.username}`,
-                      description: "Please try again later",
-                      variant: "destructive",
-                    });
-                  }
-                })
-              }
-            >
-              Follow
-            </DialogClose>
           ) : (
-            <DialogClose
-              className="text-red-500 w-full md:px-20 py-1"
-              onClick={() => setUnfollowDialog(true)}
-            >
-              Unfollow
-            </DialogClose>
+            <>
+              <DialogClose
+                className="text-red-500 w-full md:px-20 py-1"
+                onClick={() => setReportDialog(true)}
+              >
+                Report
+              </DialogClose>
+              {explorePosts ? (
+                <DialogClose
+                  className="text-blue-500 w-full md:px-20 py-1"
+                  onClick={() =>
+                    dispatch(followUser({ userId: user._id })).then(
+                      (response) => {
+                        if (response.payload?.success) {
+                          toast({
+                            title: `You started following ${user.username}`,
+                          });
+                        } else if (
+                          response.payload?.message ===
+                          "Follower already followed"
+                        ) {
+                          toast({
+                            title: `You already follow ${user.username}`,
+                            description: "You can unfollow them if you want",
+                          });
+                        } else if (!response.payload?.success) {
+                          toast({
+                            title: `Cannot follow ${user.username}`,
+                            description: "Please try again later",
+                            variant: "destructive",
+                          });
+                        }
+                      }
+                    )
+                  }
+                >
+                  Follow
+                </DialogClose>
+              ) : (
+                <DialogClose
+                  className="text-red-500 w-full md:px-20 py-1"
+                  onClick={() => setUnfollowDialog(true)}
+                >
+                  Unfollow
+                </DialogClose>
+              )}
+            </>
           )}
           <DialogClose
             className="w-full md:px-20 py-1"

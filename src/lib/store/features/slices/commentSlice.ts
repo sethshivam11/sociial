@@ -5,7 +5,7 @@ const initialState: CommentSliceI = {
   comments: [],
   comment: {
     _id: "",
-    comment: "",
+    content: "",
     user: {
       _id: "",
       username: "",
@@ -16,6 +16,7 @@ const initialState: CommentSliceI = {
     likes: [],
     likesCount: 0,
   },
+  likes: [],
   loading: false,
   skeletonLoading: false,
   loadingMore: false,
@@ -24,13 +25,13 @@ const initialState: CommentSliceI = {
 
 export const createComment = createAsyncThunk(
   "comments/createComment",
-  async ({ postId, comment }: { postId: string; comment: string }) => {
+  async ({ postId, content }: { postId: string; content: string }) => {
     const parsed = await fetch("/api/v1/comments/new", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ postId, comment }),
+      body: JSON.stringify({ postId, content }),
     });
     return parsed.json();
   }
@@ -40,14 +41,6 @@ export const getComments = createAsyncThunk(
   "comments/get",
   async ({ postId }: { postId: string }) => {
     const parsed = await fetch(`/api/v1/comments/${postId}`);
-    return parsed.json();
-  }
-);
-
-export const getMoreComments = createAsyncThunk(
-  "comments/getMore",
-  async ({ postId, page }: { postId: string; page: number }) => {
-    const parsed = await fetch(`/api/v1/comments/${postId}?page=${page}`);
     return parsed.json();
   }
 );
@@ -68,6 +61,14 @@ export const dislikeComment = createAsyncThunk(
   }
 );
 
+export const getLikes = createAsyncThunk(
+  "comments/likes",
+  async (commentId: string) => {
+    const parsed = await fetch(`/api/v1/comments/likes/${commentId}`);
+    return parsed.json();
+  }
+);
+
 export const deleteComment = createAsyncThunk(
   "comments/delete",
   async (commentId: string) => {
@@ -83,87 +84,94 @@ const commentSlice = createSlice({
   initialState,
   reducers: {},
   extraReducers: (builder) => {
-    builder.addCase(createComment.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(createComment.fulfilled, (state, action) => {
-      state.loading = false;
-      if (action.payload?.success) {
-        state.comments = [action.payload.data, ...state.comments];
-      }
-    });
-    builder.addCase(createComment.rejected, (state) => {
-      state.loading = false;
-    });
-
-    builder.addCase(getComments.pending, (state) => {
-      state.skeletonLoading = true;
-    });
-    builder.addCase(getComments.fulfilled, (state, action) => {
-      state.skeletonLoading = false;
-      if (action.payload?.success) {
-        state.comments = action.payload.data;
-      }
-    });
-    builder.addCase(getComments.rejected, (state) => {
-      state.skeletonLoading = false;
-    });
-
-    builder.addCase(getMoreComments.pending, (state) => {
-      state.loadingMore = true;
-    });
-    builder.addCase(getMoreComments.fulfilled, (state, action) => {
-      state.loadingMore = false;
-      if (action.payload?.success && action.payload.data.length === 0) {
-        state.comments = [...state.comments, ...action.payload.data];
-        state.page += 1;
-      }
-    });
-    builder.addCase(getMoreComments.rejected, (state) => {
-      state.loadingMore = false;
-    });
-
-    builder.addCase(likeComment.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(likeComment.fulfilled, (state, action) => {
-      state.comments = state.comments.map((comment) => {
-        if (comment._id === action.payload._id) {
-          return action.payload.data;
+    builder
+      .addCase(createComment.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(createComment.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload?.success) {
+          state.comments = [action.payload.data, ...state.comments];
         }
-        return comment;
+      })
+      .addCase(createComment.rejected, (state) => {
+        state.loading = false;
       });
-    });
-    builder.addCase(likeComment.rejected, (state) => {
-      state.loading = false;
-    });
 
-    builder.addCase(dislikeComment.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(dislikeComment.fulfilled, (state, action) => {
-      state.comments = state.comments.map((comment) => {
-        if (comment._id === action.payload._id) {
-          return action.payload.data;
+    builder
+      .addCase(getComments.pending, (state) => {
+        state.skeletonLoading = true;
+      })
+      .addCase(getComments.fulfilled, (state, action) => {
+        state.skeletonLoading = false;
+        if (action.payload?.success) {
+          state.comments = action.payload.data;
+        } else if (action.payload?.message === "No comments found") {
+          state.comments = [];
         }
-        return comment;
+      })
+      .addCase(getComments.rejected, (state) => {
+        state.skeletonLoading = false;
       });
-    });
-    builder.addCase(dislikeComment.rejected, (state) => {
-      state.loading = false;
-    });
 
-    builder.addCase(deleteComment.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(deleteComment.fulfilled, (state, action) => {
-      state.comments = state.comments.filter(
-        (comment) => comment._id !== action.payload._id
-      );
-    });
-    builder.addCase(deleteComment.rejected, (state) => {
-      state.loading = false;
-    });
+    builder
+      .addCase(likeComment.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(likeComment.fulfilled, (state, action) => {
+        state.comments = state.comments.map((comment) => {
+          if (comment._id === action.payload._id) {
+            return action.payload.data;
+          }
+          return comment;
+        });
+      })
+      .addCase(likeComment.rejected, (state) => {
+        state.loading = false;
+      });
+
+    builder
+      .addCase(dislikeComment.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(dislikeComment.fulfilled, (state, action) => {
+        state.comments = state.comments.map((comment) => {
+          if (comment._id === action.payload._id) {
+            return action.payload.data;
+          }
+          return comment;
+        });
+      })
+      .addCase(dislikeComment.rejected, (state) => {
+        state.loading = false;
+      });
+
+    builder
+      .addCase(getLikes.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getLikes.fulfilled, (state, action) => {
+        if (action.payload?.success) {
+          state.likes = action.payload.data;
+        }
+        state.loading = false;
+      })
+      .addCase(getLikes.rejected, (state) => {
+        state.loading = false;
+      });
+
+    builder
+      .addCase(deleteComment.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(deleteComment.fulfilled, (state, action) => {
+        state.comments = state.comments.filter(
+          (comment) => comment._id !== action.meta.arg
+        );
+      })
+      .addCase(deleteComment.rejected, (state) => {
+        state.loading = false;
+      });
   },
 });
 

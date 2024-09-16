@@ -14,7 +14,7 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { Send, SendHorizontal, Share2Icon, ShareIcon } from "lucide-react";
+import { SendHorizontal, ShareIcon } from "lucide-react";
 import Image from "next/image";
 import { Input } from "./ui/input";
 import { useForm } from "react-hook-form";
@@ -122,8 +122,8 @@ export default function Share({ isVideo, _id }: Props) {
 
   return (
     <Dialog>
-      <DialogTrigger title="Share">
-        <Send size="30" className="sm:hover:opacity-60 rotate-12" />
+      <DialogTrigger title="Share" className="sm:hover:opacity-60">
+        <Image src="/share.svg" width={30} height={30} alt="Share" />
       </DialogTrigger>
       <DialogContent
         className="sm:w-2/3 w-full sm:h-5/6 h-full flex flex-col bg-stone-100 dark:bg-stone-900"

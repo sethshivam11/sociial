@@ -55,9 +55,8 @@ function VideoOptions({ username, fullName, avatar, postId }: Props) {
     <>
       <Dialog>
         <DialogTrigger
-          className="w-fit h-fit absolute top-2 right-2 rounded-full hover:bg-stone-800 p-2"
+          className="w-fit h-fit absolute top-2 right-2 rounded-full p-2"
           title="Options"
-          asChild
         >
           <MoreVerticalIcon />
         </DialogTrigger>

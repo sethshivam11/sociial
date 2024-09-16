@@ -82,7 +82,7 @@ export async function handleConsent(
       });
       localStorage.setItem(
         "notificationConsent",
-        `{"consent": true,"expiry": null}`
+        `{"consent": true,"expiry": null, "token": "${token}"}`
       );
       return {
         token,
