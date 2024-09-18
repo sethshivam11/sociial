@@ -70,7 +70,7 @@ function Navbar() {
     "/add-story",
   ];
   const [unreadMessageCount, newNotifications] = [0, false];
-  const { user, isLoggedIn } = useAppSelector((state) => state.user);
+  const { user, isLoggedIn, skeletonLoading } = useAppSelector((state) => state.user);
 
   function handleLogout() {
     dispatch(logOutUser())

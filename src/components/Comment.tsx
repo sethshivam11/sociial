@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
-  Ban,
   Heart,
   History,
   Loader2,
@@ -31,7 +30,7 @@ import EmojiKeyboard from "./EmojiKeyboard";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { nameFallback } from "@/lib/helpers";
+import { getTimeDifference, nameFallback } from "@/lib/helpers";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -55,7 +54,7 @@ import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import {
   createComment,
   deleteComment,
-  dislikeComment,
+  unlikeComment,
   getComments,
   getLikes,
   likeComment,
@@ -63,7 +62,12 @@ import {
 import Link from "next/link";
 import { toast } from "./ui/use-toast";
 import CommentsLoading from "./skeletons/CommentsLoading";
-import { blockUser } from "@/lib/store/features/slices/userSlice";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface Props {
   user: {
@@ -84,7 +88,9 @@ export default function Comment({
   isVideo,
 }: Props) {
   const dispatch = useAppDispatch();
-  const { user: currentUser } = useAppSelector((state) => state.user);
+  const { user: currentUser, loading: userLoading } = useAppSelector(
+    (state) => state.user
+  );
   const { likes, loading, comments, skeletonLoading } = useAppSelector(
     (state) => state.comment
   );
@@ -127,57 +133,46 @@ export default function Comment({
   }
 
   function handleLike(commentId: string) {
-    dispatch(likeComment(commentId)).then((response) => {
-      if (!response.payload?.success) {
-        toast({
-          title: "Cannot like comment",
-          description: response.payload?.message || "An error occurred",
-          variant: "destructive",
-        });
+    dispatch(likeComment({ commentId, userId: currentUser._id })).then(
+      (response) => {
+        if (
+          !response.payload?.success &&
+          response.payload?.message !== "You have already liked this comment"
+        ) {
+          toast({
+            title: "Cannot like comment",
+            description: response.payload?.message || "An error occurred",
+            variant: "destructive",
+          });
+        }
       }
-    });
+    );
   }
 
   function handleUnlike(commentId: string) {
-    dispatch(dislikeComment(commentId)).then((response) => {
-      if (!response.payload?.success) {
-        toast({
-          title: "Cannot like comment",
-          description: response.payload?.message || "An error occurred",
-          variant: "destructive",
-        });
+    dispatch(unlikeComment({ commentId, userId: currentUser._id })).then(
+      (response) => {
+        if (
+          !response.payload?.success &&
+          response.payload?.message !== "You have already unliked this comment"
+        ) {
+          toast({
+            title: "Cannot like comment",
+            description: response.payload?.message || "An error occurred",
+            variant: "destructive",
+          });
+        }
       }
-    });
+    );
   }
 
   function handleDelete() {
     dispatch(deleteComment(deleteDialog.commentId)).then((response) => {
       if (response.payload?.success) {
         setDeleteDialog({
-          dialogOpen: false,
+          ...deleteDialog,
           commentId: "",
-        });
-      } else {
-        toast({
-          title: "Cannot delete comment",
-          description: response.payload?.message || "An error occurred",
-          variant: "destructive",
-        });
-      }
-    });
-  }
-
-  function handleBlock() {
-    dispatch(blockUser(blockDialog.user._id)).then((response) => {
-      if (response.payload?.success) {
-        setBlockDialog({
           dialogOpen: false,
-          user: {
-            _id: "",
-            username: "",
-            fullName: "",
-            avatar: "",
-          },
         });
       } else {
         toast({
@@ -195,6 +190,7 @@ export default function Comment({
       comment: "",
     },
   });
+
   function onSubmit(values: z.infer<typeof formSchema>) {
     handleComment(values.comment);
     form.setValue("comment", "");
@@ -207,7 +203,6 @@ export default function Comment({
   React.useEffect(() => {
     if (likesDialog.open && likesDialog.commentId)
       dispatch(getLikes(likesDialog.commentId));
-    console.log(likesDialog.commentId);
   }, [dispatch, getLikes, likesDialog.open, likesDialog.commentId]);
 
   return (
@@ -222,7 +217,7 @@ export default function Comment({
           </div>
         </DialogTrigger>
         <DialogContent
-          className="sm:w-4/5 max-w-[800px] w-full sm:h-3/4 h-full flex flex-col bg-stone-100 dark:bg-stone-900 focus:ring-0 focus:border-0"
+          className="sm:w-4/5 max-w-[800px] w-full sm:h-3/4 h-full flex flex-col bg-stone-100 dark:bg-stone-900"
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <div className="flex justify-between">
@@ -261,17 +256,32 @@ export default function Comment({
                       {nameFallback(comment.user.fullName)}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="px-2">
-                    <div className="text-sm font-light">
-                      <span className="font-semibold">
-                        {comment.user.username}&nbsp;
-                      </span>
-                      {comment.content}
+                  <div className="flex flex-col gap-1">
+                    <div className="font-semibold">
+                      {comment.user.username}&nbsp;
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger className="text-stone-500 text-xs font-normal">
+                            &#183;&nbsp;
+                            {getTimeDifference(comment.createdAt)}
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>
+                              {new Date(comment.createdAt).toLocaleString(
+                                "en-IN"
+                              )}
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </div>
-                    <div className="flex gap-3 items-center text-xs mt-1 text-stone-500 dark:text-stone-400 select-none">
+                    <div className="text-sm font-light">{comment.content}</div>
+                    <div className="flex gap-2 items-center text-xs mt-1 text-stone-500 dark:text-stone-400 select-none">
                       <button
+                        disabled={loading}
                         onClick={() => {
-                          if (comment.likes.includes(currentUser.username)) {
+                          if (loading) return;
+                          if (comment.likes.includes(currentUser._id)) {
                             handleUnlike(comment._id);
                           } else {
                             handleLike(comment._id);
@@ -284,11 +294,14 @@ export default function Comment({
                             comment.likes.includes(currentUser.username)
                               ? "text-rose-500"
                               : "sm:hover:opacity-60"
-                          } mr-1 inline-block transition-all active:scale-110`}
+                          } inline-block transition-all active:scale-110`}
                           fill={
-                            comment.likes.includes(currentUser.username)
+                            comment.likes.includes(currentUser._id)
                               ? "rgb(244 63 94)"
                               : "none"
+                          }
+                          strokeWidth={
+                            comment.likes.includes(currentUser._id) ? "0" : "2"
                           }
                         />
                       </button>
@@ -386,30 +399,17 @@ export default function Comment({
                                 <Trash2 /> Delete
                               </MenubarItem>
                             ) : (
-                              <>
-                                <MenubarItem
-                                  className="rounded-lg py-2 flex gap-2 items-center text-red-600 focus:text-red-600"
-                                  onClick={() =>
-                                    setReportDialog({
-                                      dialogOpen: true,
-                                      commentId: comment._id,
-                                    })
-                                  }
-                                >
-                                  <ShieldAlert /> Report
-                                </MenubarItem>
-                                <MenubarItem
-                                  className="rounded-lg py-2 flex gap-2 items-center text-red-600 focus:text-red-600"
-                                  onClick={() =>
-                                    setBlockDialog({
-                                      dialogOpen: true,
-                                      user,
-                                    })
-                                  }
-                                >
-                                  <Ban /> Block
-                                </MenubarItem>
-                              </>
+                              <MenubarItem
+                                className="rounded-lg py-2 flex gap-2 items-center text-red-600 focus:text-red-600"
+                                onClick={() =>
+                                  setReportDialog({
+                                    dialogOpen: true,
+                                    commentId: comment._id,
+                                  })
+                                }
+                              >
+                                <ShieldAlert /> Report
+                              </MenubarItem>
                             )}
                           </MenubarContent>
                         </MenubarMenu>
@@ -456,14 +456,19 @@ export default function Comment({
                           inputMode="text"
                           autoComplete="off"
                           placeholder="Add a comment..."
+                          autoFocus
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <Button size="sm" type="submit">
-                  <SendHorizonal />
+                <Button size="sm" type="submit" disabled={loading}>
+                  {loading ? (
+                    <Loader2 className="animate-spin" />
+                  ) : (
+                    <SendHorizonal />
+                  )}
                 </Button>
               </form>
             </Form>
@@ -491,34 +496,9 @@ export default function Comment({
             <AlertDialogAction
               className="bg-destructive hover:bg-destructive/80 text-white"
               onClick={handleDelete}
+              disabled={loading}
             >
-              {loading ? <Loader2 /> : "Delete"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-      <AlertDialog
-        open={blockDialog.dialogOpen}
-        onOpenChange={(open) => {
-          if (!loading) {
-            setBlockDialog({ ...blockDialog, dialogOpen: open });
-          }
-        }}
-      >
-        <AlertDialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
-          <AlertDialogTitle className="text-center">
-            Block {blockDialog.user.fullName}
-          </AlertDialogTitle>
-          <AlertDialogDescription>
-            Are you sure want to block @{blockDialog.user.username}?
-          </AlertDialogDescription>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive hover:bg-destructive/80 text-white"
-              onClick={handleBlock}
-            >
-              {loading ? <Loader2 /> : "Block"}
+              {loading ? <Loader2 className="animate-spin" /> : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

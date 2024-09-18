@@ -8,6 +8,7 @@ import {
   CircleFadingPlus,
   CirclePlus,
   Eraser,
+  Loader2,
   Paintbrush,
   Pencil,
   Plus,
@@ -47,10 +48,9 @@ import {
   DialogContent,
   DialogFooter,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { set, z } from "zod";
+import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -61,6 +61,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Label } from "@/components/ui/label";
+import { useAppDispatch, useAppSelector } from "@/lib/store/store";
+import { getLoggedInUser } from "@/lib/store/features/slices/userSlice";
+import {
+  createStory,
+  setLoading,
+} from "@/lib/store/features/slices/storySlice";
 
 interface TextItem {
   id: number;
@@ -105,6 +111,9 @@ function Page() {
     resolver: zodResolver(formSchema),
   });
   const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { user, loading: userLoading } = useAppSelector((state) => state.user);
+  const { loading } = useAppSelector((state) => state.story);
   const dragContainer = React.useRef<HTMLDivElement>(null);
   const timerRef = React.useRef<NodeJS.Timeout | null>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -224,6 +233,38 @@ function Page() {
       };
     });
   }
+
+  async function handlePost() {
+    dispatch(setLoading(true));
+    let files: File[] = [];
+    await Promise.all(
+      stories.map(async (story) => {
+        const response = await fetch(story);
+        const blob = await response.blob();
+        const image = new File([blob], `${Date.now()}.jpg`, {
+          type: blob.type,
+        });
+        files.push(image);
+      })
+    );
+    if (files.length === 0) return dispatch(setLoading(false));
+    dispatch(createStory(files)).then((response) => {
+      if (response.payload?.success) {
+        router.push("/");
+      } else {
+        toast({
+          title: "Cannot post",
+          description: response.payload?.message || "Something went wrong",
+          variant: "destructive",
+        });
+      }
+    });
+  }
+
+  React.useEffect(() => {
+    if (userLoading) return;
+    if (!user._id) dispatch(getLoggedInUser());
+  }, [user._id, dispatch, getLoggedInUser]);
 
   return (
     <div
@@ -408,8 +449,8 @@ function Page() {
                   Are you sure you want to post this story?
                 </AlertDialogDescription>
                 <AlertDialogFooter className="max-sm:flex-col mt-4">
-                  <AlertDialogAction onClick={() => router.push("/")}>
-                    Post
+                  <AlertDialogAction onClick={handlePost}>
+                    {loading ? <Loader2 className="animate-spin" /> : "Post"}
                   </AlertDialogAction>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
                 </AlertDialogFooter>

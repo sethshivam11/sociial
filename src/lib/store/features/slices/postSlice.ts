@@ -339,6 +339,8 @@ const postSlice = createSlice({
           state.posts = Array.from(postsMap.values());
           state.maxPosts = action.payload.data.max;
           state.page = action.payload.data.page;
+        } else if(action.payload.message === "No posts found") {
+          state.posts = [];
         }
       })
       .addCase(videoFeed.rejected, (state) => {

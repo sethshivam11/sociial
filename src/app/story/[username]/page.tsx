@@ -23,11 +23,7 @@ import {
   DialogClose,
   DialogContent,
   DialogTrigger,
-  DialogFooter,
-  DialogTitle,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
 import EmojiKeyboard from "@/components/EmojiKeyboard";
 import { stories } from "@/lib/storiesData";

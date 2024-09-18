@@ -10,12 +10,14 @@ import chatSlice from "./features/slices/chatSlice";
 import messageSlice from "./features/slices/messageSlice";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import reportSlice from "./features/slices/reportSlice";
+import storySlice from "./features/slices/storySlice";
 
 export const store = configureStore({
   reducer: {
     user: userSlice,
     post: postSlice,
     chat: chatSlice,
+    story: storySlice,
     follow: followSlice,
     report: reportSlice,
     message: messageSlice,

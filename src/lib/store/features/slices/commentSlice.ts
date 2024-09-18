@@ -15,6 +15,7 @@ const initialState: CommentSliceI = {
     post: "",
     likes: [],
     likesCount: 0,
+    createdAt: "",
   },
   likes: [],
   loading: false,
@@ -47,16 +48,16 @@ export const getComments = createAsyncThunk(
 
 export const likeComment = createAsyncThunk(
   "comments/like",
-  async (commentId: string) => {
+  async ({ commentId, userId }: { commentId: string; userId: string }) => {
     const parsed = await fetch(`/api/v1/comments/like/${commentId}`);
     return parsed.json();
   }
 );
 
-export const dislikeComment = createAsyncThunk(
-  "comments/dislike",
-  async (commentId: string) => {
-    const parsed = await fetch(`/api/v1/comments/dislike/${commentId}`);
+export const unlikeComment = createAsyncThunk(
+  "comments/unlike",
+  async ({ commentId, userId }: { commentId: string; userId: string }) => {
+    const parsed = await fetch(`/api/v1/comments/unlike/${commentId}`);
     return parsed.json();
   }
 );
@@ -119,30 +120,42 @@ const commentSlice = createSlice({
         state.loading = true;
       })
       .addCase(likeComment.fulfilled, (state, action) => {
-        state.comments = state.comments.map((comment) => {
-          if (comment._id === action.payload._id) {
-            return action.payload.data;
-          }
-          return comment;
-        });
+        state.loading = false;
+        if (action.payload?.success) {
+          state.comments = state.comments.map((comment) => {
+            if (comment._id === action.meta.arg.commentId) {
+              comment.likes.push(action.meta.arg.userId);
+              comment.likesCount = comment.likes.length;
+              return comment;
+            }
+            return comment;
+          });
+        }
       })
       .addCase(likeComment.rejected, (state) => {
         state.loading = false;
       });
 
     builder
-      .addCase(dislikeComment.pending, (state) => {
+      .addCase(unlikeComment.pending, (state) => {
         state.loading = true;
       })
-      .addCase(dislikeComment.fulfilled, (state, action) => {
-        state.comments = state.comments.map((comment) => {
-          if (comment._id === action.payload._id) {
-            return action.payload.data;
-          }
-          return comment;
-        });
+      .addCase(unlikeComment.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload?.success) {
+          state.comments = state.comments.map((comment) => {
+            if (comment._id === action.meta.arg.commentId) {
+              comment.likes = comment.likes.filter(
+                (like) => like !== action.meta.arg.userId
+              );
+              comment.likesCount = comment.likes.length;
+              return comment;
+            }
+            return comment;
+          });
+        }
       })
-      .addCase(dislikeComment.rejected, (state) => {
+      .addCase(unlikeComment.rejected, (state) => {
         state.loading = false;
       });
 
@@ -151,10 +164,10 @@ const commentSlice = createSlice({
         state.loading = true;
       })
       .addCase(getLikes.fulfilled, (state, action) => {
+        state.loading = false;
         if (action.payload?.success) {
           state.likes = action.payload.data;
         }
-        state.loading = false;
       })
       .addCase(getLikes.rejected, (state) => {
         state.loading = false;
@@ -165,6 +178,7 @@ const commentSlice = createSlice({
         state.loading = true;
       })
       .addCase(deleteComment.fulfilled, (state, action) => {
+        state.loading = false;
         state.comments = state.comments.filter(
           (comment) => comment._id !== action.meta.arg
         );

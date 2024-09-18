@@ -66,12 +66,11 @@ function PostOptions({ user, postId, isVideo, explorePosts }: Props) {
     setDeleting(true);
     dispatch(deletePost(postId))
       .then((response) => {
-        console.log(response.payload?.message);
         if (response.payload?.success) setDeletePostDialog(false);
         else if (!response.payload?.success) {
           toast({
             title: "Cannot delete post",
-            description: "Please try again later",
+            description: response.payload?.message || "Please try again later",
           });
         }
       })

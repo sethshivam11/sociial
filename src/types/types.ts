@@ -65,6 +65,7 @@ export interface CommentI {
   post: string;
   likes: string[];
   likesCount: number;
+  createdAt: string;
 }
 
 export interface StoryI {

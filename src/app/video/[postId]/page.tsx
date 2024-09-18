@@ -1,6 +1,7 @@
 "use client";
 import Comment from "@/components/Comment";
 import PostCaption from "@/components/PostCaption";
+import SavePost from "@/components/SavePost";
 import Share from "@/components/Share";
 import VideoLoading from "@/components/skeletons/VideoLoading";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -16,6 +17,7 @@ import {
 } from "@/lib/store/features/slices/postSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import {
+  Bookmark,
   ChevronLeft,
   Heart,
   Pause,
@@ -24,7 +26,7 @@ import {
   VolumeXIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import React from "react";
 
 function Page({ params }: { params: { postId: string } }) {
@@ -122,6 +124,10 @@ function Page({ params }: { params: { postId: string } }) {
     dispatch(getPost(postId));
   }, [dispatch, params]);
 
+  React.useEffect(() => {
+    if(!loading && !post._id) notFound();
+  }, [loading, post._id]);
+
   return (
     <div
       className="max-h-[100dvh] h-[100dvh] xl:col-span-8 sm:col-span-9 col-span-10 snap-y snap-mandatory overflow-auto relative no-scrollbar"
@@ -165,14 +171,12 @@ function Page({ params }: { params: { postId: string } }) {
               {post.media[0] && <source src={post.media[0]} />}
             </video>
             <div className="flex items-center justify-start px-3 absolute top-0 left-0 w-full h-16 bg-gradient-to-b from-transparent/80 via-transparent/60 to-transparent">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="p-1 rounded-xl sm:hidden mr-1 hover:bg-background"
+              <button
+                className="px-1 py-2 rounded-xl sm:hidden mx-1 hover:bg-transparent"
                 onClick={() => router.push("/")}
               >
-                <ChevronLeft size="25" color="white" />
-              </Button>
+                <ChevronLeft color="white" />
+              </button>
               <Link
                 href={`/${post.user.username}`}
                 className="flex items-center justify-start"
@@ -231,6 +235,7 @@ function Page({ params }: { params: { postId: string } }) {
                   commentsCount={post.commentsCount}
                   isVideo={true}
                 />
+                <SavePost post={post} isVideo />
                 <Share _id={post._id} isVideo={true} />
               </div>
               <div className="flex flex-col items-center justify-start h-fit bg-gradient-to-b from-transparent via-transparent/50 to-transparent/60">
@@ -241,11 +246,7 @@ function Page({ params }: { params: { postId: string } }) {
                   />
                 </div>
                 <div className="flex items-center px-2 justify-start h-fit w-full">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="rounded-full p-1 z-10"
-                  >
+                  <button className="rounded-full p-1 z-10">
                     {isPaused ? (
                       <Play
                         size="30"
@@ -261,10 +262,8 @@ function Page({ params }: { params: { postId: string } }) {
                         onClick={() => setIsPaused(!isPaused)}
                       />
                     )}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
+                  </button>
+                  <button
                     className="rounded-full p-1 z-10"
                     onClick={() => setIsMuted(!isMuted)}
                   >
@@ -273,7 +272,7 @@ function Page({ params }: { params: { postId: string } }) {
                     ) : (
                       <Volume2Icon size="30" />
                     )}
-                  </Button>
+                  </button>
                   <div className="mx-3 w-full z-10">
                     <SliderVideo
                       value={[sliderValue]}
@@ -325,6 +324,7 @@ function Page({ params }: { params: { postId: string } }) {
               commentsCount={post.commentsCount}
               isVideo={true}
             />
+            <SavePost post={post} isVideo />
             <Share _id={post._id} isVideo={true} />
           </div>
         </section>

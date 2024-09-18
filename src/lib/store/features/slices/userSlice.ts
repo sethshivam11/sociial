@@ -1,6 +1,7 @@
 "use client";
 import { UserSliceI } from "@/types/sliceTypes";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { store } from "../../store";
 
 const initialState: UserSliceI = {
   user: {
@@ -280,16 +281,38 @@ export const renewAccessToken = createAsyncThunk(
 
 export const blockUser = createAsyncThunk(
   "users/blockUser",
-  async (userId: string) => {
-    const parsed = await fetch(`/api/v1/users/block/${userId}`);
+  async ({ userId, username }: { userId?: string; username?: string }) => {
+    if (!userId && !username)
+      return {
+        success: false,
+        message: "userId or username is required",
+        status: 404,
+        data: null,
+      };
+    const parsed = await fetch(
+      `/api/v1/users/block?${
+        userId ? `userId=${userId}` : `username=${username}`
+      }`
+    );
     return parsed.json();
   }
 );
 
 export const unblockUser = createAsyncThunk(
-  "usrers/unblockUser",
-  async (userId: string) => {
-    const parsed = await fetch(`/api/v1/users/unblock/${userId}`);
+  "users/unblockUser",
+  async ({ userId, username }: { userId?: string; username?: string }) => {
+    if (!userId && !username)
+      return {
+        success: false,
+        message: "userId or username is required",
+        status: 404,
+        data: null,
+      };
+    const parsed = await fetch(
+      `/api/v1/users/unblock?${
+        userId ? `userId=${userId}` : `username=${username}`
+      }`
+    );
     return parsed.json();
   }
 );
@@ -517,6 +540,9 @@ export const userSlice = createSlice({
         if (action.payload?.success) {
           state.isLoggedIn = true;
           state.user = action.payload.data;
+          if (action.payload.data.isMailVerified) {
+            state.isLoggedIn = false;
+          }
         }
       })
       .addCase(getLoggedInUser.rejected, (state, action) => {

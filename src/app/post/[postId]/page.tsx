@@ -13,10 +13,9 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { getTimeDifference, nameFallback } from "@/lib/helpers";
-import { Bookmark, Heart, History } from "lucide-react";
+import { Heart, History } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import React from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import {
@@ -27,9 +26,9 @@ import {
 import SavePost from "@/components/SavePost";
 import { toast } from "@/components/ui/use-toast";
 import LikeDialog from "@/components/LikeDialog";
+import { notFound } from "next/navigation";
 
 function Page({ params }: { params: { postId: string } }) {
-  const router = useRouter();
   const dispatch = useAppDispatch();
   const { post, loading, skeletonLoading } = useAppSelector(
     (state) => state.post
@@ -73,6 +72,11 @@ function Page({ params }: { params: { postId: string } }) {
   React.useEffect(() => {
     dispatch(getPost(params.postId));
   }, []);
+
+  React.useEffect(() => {
+    if (!post._id && !skeletonLoading) notFound();
+  }, [post._id, skeletonLoading]);
+
   return (
     <>
       <MobileNav />

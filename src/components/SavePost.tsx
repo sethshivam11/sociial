@@ -7,7 +7,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
-import { Bookmark, Link, Loader2, PlayIcon } from "lucide-react";
+import { Bookmark, Loader2, PlayIcon } from "lucide-react";
 import {
   Carousel,
   CarouselContent,
@@ -28,13 +28,14 @@ import { PostI } from "@/types/types";
 
 interface Props {
   post: PostI;
+  isVideo?: boolean;
 }
 
-function SavePost({ post }: Props) {
+function SavePost({ post, isVideo }: Props) {
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [savedPostIds, setSavedPostIds] = React.useState<string[]>([]);
   const dispatch = useAppDispatch();
-  const { loading, user, savedPosts } = useAppSelector((state) => state.user);
+  const { loading, user } = useAppSelector((state) => state.user);
 
   function handleSave() {
     dispatch(savePost(post._id)).then((response) => {
@@ -89,7 +90,7 @@ function SavePost({ post }: Props) {
       }}
     >
       <DialogTrigger title="Save">
-        <Bookmark size="30" />
+        <Bookmark size="30" className={isVideo ? "mb-1" : ""} />
       </DialogTrigger>
       <DialogContent>
         <DialogTitle>Save Post</DialogTitle>
@@ -98,45 +99,36 @@ function SavePost({ post }: Props) {
             ? "Do you want to unsave it?"
             : "Do you want to save this post for future references?"}
         </DialogDescription>
-        {post.kind === "video" ? (
-          <Link href={`/video/${post._id}`} className="relative">
-            <PlayIcon
-              size="50"
-              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white bg-transparent/50 rounded-full p-2"
-            />
-            <Image
-              src={post?.thumbnail || ""}
-              alt=""
-              width="800"
-              height="800"
-            />
-          </Link>
-        ) : (
-          <Carousel className="w-full my-2 mt-2">
-            <CarouselContent>
-              {post.media.map((image, index) => {
-                return (
-                  <CarouselItem key={index} className="relative">
-                    {post.media?.length < 1 && (
-                      <div className="absolute right-2 top-2 bg-transparent/60 text-white px-2 py-0.5 rounded-2xl text-sm select-none">
-                        {index + 1}/{post.media.length}
-                      </div>
-                    )}
-                    <Image
-                      width="800"
-                      height="800"
-                      src={image}
-                      alt={`Photo by ${post.user.fullName} with username ${post.user.username}`}
-                      className="object-cover select-none w-full h-full rounded-sm max-h-[600px]"
+        <Carousel className="w-full my-2">
+          <CarouselContent>
+            {post.media.map((image, index) => {
+              return (
+                <CarouselItem key={index} className="relative">
+                  {post.media?.length < 1 && (
+                    <div className="absolute right-2 top-2 bg-transparent/60 text-white px-2 py-0.5 rounded-2xl text-sm select-none">
+                      {index + 1}/{post.media.length}
+                    </div>
+                  )}
+                  {post.kind === "video" && (
+                    <PlayIcon
+                      size="50"
+                      className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white bg-transparent/50 rounded-full p-2 backdrop-blur-sm"
                     />
-                  </CarouselItem>
-                );
-              })}
-            </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
-          </Carousel>
-        )}
+                  )}
+                  <Image
+                    width="800"
+                    height="800"
+                    src={post.kind === "video" ? post?.thumbnail || "" : image}
+                    alt={`Photo by ${post.user.fullName} with username ${post.user.username}`}
+                    className="object-cover select-none w-full h-full rounded-sm max-h-[600px]"
+                  />
+                </CarouselItem>
+              );
+            })}
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
         <DialogFooter>
           {savedPostIds.includes(post._id) ? (
             <Button onClick={handleUnsave}>

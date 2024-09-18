@@ -123,7 +123,7 @@ function Page() {
         router.push("/");
       } else {
         toast({
-          title: "Error",
+          title: "Cannot post",
           description:
             response.payload?.message ||
             "An error occurred while creating the post",

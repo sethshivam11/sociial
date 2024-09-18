@@ -1,6 +1,7 @@
 "use client";
 import Comment from "@/components/Comment";
 import PostCaption from "@/components/PostCaption";
+import SavePost from "@/components/SavePost";
 import Share from "@/components/Share";
 import VideoLoading from "@/components/skeletons/VideoLoading";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -293,11 +294,10 @@ function Videos() {
                       postId={post._id}
                       user={post.user}
                       commentsCount={post.commentsCount}
-                      isVideo={true}
+                      isVideo
                     />
-                    <Share _id={post._id} isVideo={true} />
-                    <Bookmark size="32" className="mb-2" />
-
+                    <SavePost post={post} isVideo />
+                    <Share _id={post._id} isVideo />
                   </div>
                   <div className="px-6">
                     <PostCaption
@@ -353,7 +353,6 @@ function Videos() {
                         }`}
                       />
                     </div>
-                    <Bookmark size="32" />
                   </div>
                 </div>
               </div>
@@ -382,13 +381,13 @@ function Videos() {
                   <span className="text-sm">{post.likesCount}</span>
                 </button>
                 <Comment
-                      postId={post._id}
+                  postId={post._id}
                   user={post.user}
                   commentsCount={post.commentsCount}
-                  isVideo={true}
+                  isVideo
                 />
-                <Share _id={post._id} isVideo={true} />
-                  <Bookmark size="32" className="mb-2" />
+                <SavePost post={post} isVideo />
+                <Share _id={post._id} isVideo />
               </div>
             </section>
           ))

@@ -1,6 +1,12 @@
 import { getTimeDifference } from "@/lib/helpers";
 import { History } from "lucide-react";
 import React from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 function PostCaption({
   caption,
@@ -36,10 +42,17 @@ function PostCaption({
         </p>
       )}
       {createdAt && (
-        <span className="flex gap-1 text-sm text-stone-500 mt-1 select-none">
-          <History size="20" />
-          {getTimeDifference(createdAt)}
-        </span>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger className="flex gap-1 text-sm text-stone-500 mt-1 select-none">
+              <History size="20" />
+              {getTimeDifference(createdAt)}
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{new Date(createdAt).toLocaleString("en-IN")}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       )}
     </>
   );

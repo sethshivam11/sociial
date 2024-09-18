@@ -134,19 +134,15 @@ function Posts({ feed }: Props) {
       setShowExplorePosts(false);
     }
     if (!feed && user._id) {
-      dispatch(getFeed(1));
+      dispatch(getFeed(1)).then(() => {
+        dispatch(exploreFeed({ page: 1, userId: user._id }));
+      });
     } else if (profile.username) {
       dispatch(getUserPosts({ username: profile.username }));
     }
 
     return () => clearTimeout(timerRef.current);
   }, [profile.username, dispatch, getFeed, exploreFeed, user._id]);
-
-  React.useEffect(() => {
-    if (!userLoading) {
-      dispatch(exploreFeed({ page: 1, userId: user._id }));
-    }
-  }, [user._id, userLoading, exploreFeed, dispatch]);
 
   return (
     <>
@@ -219,10 +215,6 @@ function Posts({ feed }: Props) {
                               className="flex absolute w-full h-full items-center justify-center z-0"
                               onDoubleClick={async (e) => {
                                 if (loading || post.kind === "video") return;
-                                console.log(
-                                  post.likes.includes(user._id),
-                                  user._id
-                                );
                                 if (post.likes.includes(user._id)) {
                                   handleUnlike(post._id, "posts");
                                 } else {
@@ -311,6 +303,10 @@ function Posts({ feed }: Props) {
                       likesCount={post.likesCount}
                       postId={post._id}
                     />
+                    &nbsp;&&nbsp;
+                    {post.commentsCount <= 1
+                      ? `${post.commentsCount} comment`
+                      : `${post.commentsCount} comments`}
                   </p>
                   <PostCaption
                     caption={post.caption}
@@ -453,10 +449,6 @@ function Posts({ feed }: Props) {
                               className="flex absolute w-full h-full items-center justify-center z-0"
                               onDoubleClick={async (e) => {
                                 if (loading || post.kind === "video") return;
-                                console.log(
-                                  post.likes.includes(user._id),
-                                  user._id
-                                );
                                 if (post.likes.includes(user._id)) {
                                   handleUnlike(post._id, "posts");
                                 } else {
@@ -543,6 +535,10 @@ function Posts({ feed }: Props) {
                       likesCount={post.likesCount}
                       postId={post._id}
                     />
+                    &nbsp;&&nbsp;
+                    {post.commentsCount <= 1
+                      ? `${post.commentsCount} comment`
+                      : `${post.commentsCount} comments`}
                   </p>
                   <PostCaption
                     caption={post.caption}

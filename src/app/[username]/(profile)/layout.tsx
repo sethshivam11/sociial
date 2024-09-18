@@ -10,7 +10,7 @@ import {
   Tv,
   GalleryVertical,
 } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
+import { notFound, usePathname, useRouter } from "next/navigation";
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { nameFallback } from "@/lib/helpers";
@@ -33,7 +33,10 @@ import {
   getFollowings,
   unfollowUser,
 } from "@/lib/store/features/slices/followSlice";
-import { getProfile } from "@/lib/store/features/slices/userSlice";
+import {
+  getLoggedInUser,
+  getProfile,
+} from "@/lib/store/features/slices/userSlice";
 import ProfileLoading from "@/components/skeletons/ProfileLoading";
 import { Metadata } from "next";
 
@@ -53,6 +56,7 @@ function Profile({
   const router = useRouter();
   const location = usePathname();
   const [QR, setQR] = React.useState("");
+  const [userNotFound, setUserNotFound] = React.useState(false);
   const [reportOpen, setReportOpen] = React.useState(false);
   const username = params.username;
 
@@ -117,8 +121,15 @@ function Profile({
 
   React.useEffect(() => {
     dispatch(getFollowings({ username }));
-    if (username) dispatch(getProfile({ username }));
-  }, [username]);
+
+    if (username) dispatch(getProfile({ username })).then((response) => {
+      if(response.payload?.message === "User not found") setUserNotFound(true);
+    })
+  }, [username, dispatch, getFollowings, getProfile]);
+
+  React.useEffect(() => {
+    if(userNotFound) notFound();
+  },[userNotFound]);
 
   return (
     <>
