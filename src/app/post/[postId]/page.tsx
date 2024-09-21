@@ -34,6 +34,7 @@ function Page({ params }: { params: { postId: string } }) {
     (state) => state.post
   );
   const { user } = useAppSelector((state) => state.user);
+  const [error, setError] = React.useState(false);
 
   function handleLike(postId: string) {
     dispatch(
@@ -70,12 +71,19 @@ function Page({ params }: { params: { postId: string } }) {
   }
 
   React.useEffect(() => {
-    dispatch(getPost(params.postId));
-  }, []);
+    dispatch(getPost(params.postId)).then((response) => {
+      if (
+        response.payload?.message === "Post not found" ||
+        !response.payload?.success
+      ) {
+        setError(true);
+      }
+    });
+  }, [dispatch, getPost, params.postId]);
 
-  React.useEffect(() => {
-    if (!post._id && !skeletonLoading) notFound();
-  }, [post._id, skeletonLoading]);
+  if (error) {
+    notFound();
+  }
 
   return (
     <>

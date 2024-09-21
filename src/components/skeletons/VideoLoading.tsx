@@ -24,6 +24,7 @@ function VideoLoading({ length = 1 }) {
             <Skeleton className="w-10 h-10" />
             <Skeleton className="w-10 h-10" />
             <Skeleton className="w-10 h-10" />
+            <Skeleton className="w-10 h-10" />
           </div>
           <div className="space-y-2 mx-5">
             <Skeleton className="w-1/2 h-5" />
@@ -37,6 +38,7 @@ function VideoLoading({ length = 1 }) {
         </div>
       </div>
       <div className="sm:flex hidden flex-col items-center justify-end gap-4 px-3 pb-12 h-full">
+        <Skeleton className="w-10 h-10" />
         <Skeleton className="w-10 h-10" />
         <Skeleton className="w-10 h-10" />
         <Skeleton className="w-10 h-10" />

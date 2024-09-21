@@ -330,16 +330,17 @@ const postSlice = createSlice({
         if (action.payload?.success) {
           const existingPosts = state.posts;
           const postsMap = new Map(
-            existingPosts.map((post) => [post._id, post])
+            existingPosts
+              .filter((post) => post.kind === "video")
+              .map((post) => [post._id, post])
           );
-
           action.payload.data.posts.forEach((post: PostI) =>
             postsMap.set(post._id, post)
           );
           state.posts = Array.from(postsMap.values());
           state.maxPosts = action.payload.data.max;
           state.page = action.payload.data.page;
-        } else if(action.payload.message === "No posts found") {
+        } else if (action.payload.message === "No posts found") {
           state.posts = [];
         }
       })

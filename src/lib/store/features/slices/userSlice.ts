@@ -540,12 +540,12 @@ export const userSlice = createSlice({
         if (action.payload?.success) {
           state.isLoggedIn = true;
           state.user = action.payload.data;
-          if (action.payload.data.isMailVerified) {
+          if (!action.payload.data.isMailVerified) {
             state.isLoggedIn = false;
           }
         }
       })
-      .addCase(getLoggedInUser.rejected, (state, action) => {
+      .addCase(getLoggedInUser.rejected, (state) => {
         state.skeletonLoading = false;
       });
 

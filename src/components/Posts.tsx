@@ -212,7 +212,7 @@ function Posts({ feed }: Props) {
                               </div>
                             )}
                             <div
-                              className="flex absolute w-full h-full items-center justify-center z-0"
+                              className="flex absolute w-full h-full items-center justify-center z-10"
                               onDoubleClick={async (e) => {
                                 if (loading || post.kind === "video") return;
                                 if (post.likes.includes(user._id)) {
@@ -446,7 +446,7 @@ function Posts({ feed }: Props) {
                               </div>
                             )}
                             <div
-                              className="flex absolute w-full h-full items-center justify-center z-0"
+                              className="flex absolute w-full h-full items-center justify-center z-10"
                               onDoubleClick={async (e) => {
                                 if (loading || post.kind === "video") return;
                                 if (post.likes.includes(user._id)) {

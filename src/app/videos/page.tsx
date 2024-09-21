@@ -5,7 +5,6 @@ import SavePost from "@/components/SavePost";
 import Share from "@/components/Share";
 import VideoLoading from "@/components/skeletons/VideoLoading";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { SliderVideo } from "@/components/ui/slider-video";
 import { toast } from "@/components/ui/use-toast";
 import VideoOptions from "@/components/VideoOptions";
@@ -17,20 +16,16 @@ import {
 } from "@/lib/store/features/slices/postSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import {
-  Bookmark,
   ChevronLeft,
   Heart,
-  Loader2,
   Pause,
   Play,
   Volume2Icon,
   VolumeXIcon,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useCallback } from "react";
-import InfiniteScroll from "react-infinite-scroll-component";
 import { useDebounceCallback } from "usehooks-ts";
 
 function Videos() {

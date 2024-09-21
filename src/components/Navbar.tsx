@@ -62,7 +62,8 @@ function Navbar() {
     "/sign-up",
     "/forgot-password",
     "/verify-code",
-    "/story/",
+    "/story",
+    "/stories",
     "/get-premium",
     "/call",
     "/new-post",
@@ -70,7 +71,9 @@ function Navbar() {
     "/add-story",
   ];
   const [unreadMessageCount, newNotifications] = [0, false];
-  const { user, isLoggedIn, skeletonLoading } = useAppSelector((state) => state.user);
+  const { user, isLoggedIn } = useAppSelector(
+    (state) => state.user
+  );
 
   function handleLogout() {
     dispatch(logOutUser())
@@ -260,7 +263,7 @@ function Navbar() {
             <span className="xl:inline hidden">Notifications</span>
           </Link>
           <Link
-            href={isLoggedIn ? `/${user.username}` : "/sign-in"}
+            href={user.username ? `/${user.username}` : "/sign-in"}
             className={`md:w-full w-fit flex items-center xl:justify-start justify-center xl:pl-4 sm:p-3 p-2 gap-3 rounded-2xl hover:ring-stone-600 dark:hover:ring-stone-400 transition-colors ${
               location === `/${user.username}` && isLoggedIn
                 ? "sm:bg-stone-200 sm:dark:bg-stone-800 sm:hover:ring-0"

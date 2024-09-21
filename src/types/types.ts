@@ -80,6 +80,7 @@ export interface StoryI {
   seenBy: string[];
   likes: string[];
   blockedTo: string[];
+  createdAt: string;
 }
 
 export interface NotificationI {

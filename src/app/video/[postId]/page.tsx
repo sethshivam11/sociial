@@ -5,7 +5,6 @@ import SavePost from "@/components/SavePost";
 import Share from "@/components/Share";
 import VideoLoading from "@/components/skeletons/VideoLoading";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { SliderVideo } from "@/components/ui/slider-video";
 import { toast } from "@/components/ui/use-toast";
 import VideoOptions from "@/components/VideoOptions";
@@ -17,7 +16,6 @@ import {
 } from "@/lib/store/features/slices/postSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import {
-  Bookmark,
   ChevronLeft,
   Heart,
   Pause,
@@ -125,7 +123,7 @@ function Page({ params }: { params: { postId: string } }) {
   }, [dispatch, params]);
 
   React.useEffect(() => {
-    if(!loading && !post._id) notFound();
+    if (!loading && !post._id) notFound();
   }, [loading, post._id]);
 
   return (

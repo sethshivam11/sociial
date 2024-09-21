@@ -1,20 +1,22 @@
 import { StorySliceI } from "@/types/sliceTypes";
+import { StoryI } from "@/types/types";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 const initialState: StorySliceI = {
   stories: [],
-  story: {
+  userStory: {
     _id: "",
     user: {
       _id: "",
-      username: "",
-      fullName: "",
       avatar: "",
+      fullName: "",
+      username: "",
     },
     media: [],
-    likes: [],
     seenBy: [],
+    likes: [],
     blockedTo: [],
+    createdAt: "",
   },
   loading: false,
   skeletonLoading: false,
@@ -40,10 +42,12 @@ export const getStories = createAsyncThunk("stories/all", async () => {
   return parsed.json();
 });
 
-export const getStory = createAsyncThunk(
-  "stories/get",
-  async (storyId: string) => {
-    const parsed = await fetch(`/api/v1/stories/${storyId}`);
+export const getUserStory = createAsyncThunk(
+  "stories/user",
+  async (username?: string) => {
+    const parsed = await fetch(
+      `/api/v1/stories/user${username ? `/${username}` : ""}`
+    );
     return parsed.json();
   }
 );
@@ -60,7 +64,7 @@ export const deleteStory = createAsyncThunk(
 
 export const seenStory = createAsyncThunk(
   "stories/seen",
-  async (storyId: string) => {
+  async ({ storyId, userId }: { storyId: string; userId: string }) => {
     const parsed = await fetch(`/api/v1/stories/seen/${storyId}`);
     return parsed.json();
   }
@@ -68,16 +72,20 @@ export const seenStory = createAsyncThunk(
 
 export const likeStory = createAsyncThunk(
   "stories/like",
-  async (storyId: string) => {
-    const parsed = await fetch(`/api/v1/stories/like/${storyId}`);
+  async ({ storyId, userId }: { storyId: string; userId: string }) => {
+    const parsed = await fetch(`/api/v1/stories/like/${storyId}`, {
+      method: "PATCH",
+    });
     return parsed.json();
   }
 );
 
 export const unlikeStory = createAsyncThunk(
   "stories/unlike",
-  async (storyId: string) => {
-    const parsed = await fetch(`/api/v1/stories/unlike/${storyId}`);
+  async ({ storyId, userId }: { storyId: string; userId: string }) => {
+    const parsed = await fetch(`/api/v1/stories/unlike/${storyId}`, {
+      method: "PATCH",
+    });
     return parsed.json();
   }
 );
@@ -88,7 +96,7 @@ const storySlice = createSlice({
   reducers: {
     setLoading: (state, action) => {
       state.loading = action.payload;
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -112,26 +120,26 @@ const storySlice = createSlice({
       .addCase(getStories.fulfilled, (state, action) => {
         state.skeletonLoading = false;
         if (action.payload?.success) {
-          state.stories = action.payload.data;
+          const existingStories = state.stories;
+          const storiesMap = new Map(
+            existingStories.map((story) => [story._id, story])
+          );
+
+          action.payload.data.forEach((story: StoryI) =>
+            storiesMap.set(story._id, story)
+          );
+          state.stories = Array.from(storiesMap.values());
         }
       })
       .addCase(getStories.rejected, (state) => {
         state.skeletonLoading = false;
       });
 
-    builder
-      .addCase(getStory.pending, (state) => {
-        state.skeletonLoading = true;
-      })
-      .addCase(getStory.fulfilled, (state, action) => {
-        state.skeletonLoading = false;
-        if (action.payload?.success) {
-          state.story = action.payload.data;
-        }
-      })
-      .addCase(getStory.rejected, (state) => {
-        state.skeletonLoading = false;
-      });
+    builder.addCase(getUserStory.fulfilled, (state, action) => {
+      if (action.payload?.success) {
+        state.userStory = action.payload.data;
+      }
+    });
 
     builder
       .addCase(deleteStory.pending, (state) => {
@@ -141,7 +149,7 @@ const storySlice = createSlice({
         state.loading = false;
         if (action.payload?.success) {
           state.stories = state.stories.filter(
-            (story) => story._id !== action.payload.data._id
+            (story) => story._id !== action.meta.arg
           );
         }
       })
@@ -157,8 +165,8 @@ const storySlice = createSlice({
         state.loading = false;
         if (action.payload?.success) {
           state.stories = state.stories.map((story) => {
-            if (story._id === action.payload.data._id) {
-              story.seenBy = action.payload.data.seenBy;
+            if (story._id === action.meta.arg.storyId) {
+              story.seenBy.push(action.meta.arg.userId);
             }
             return story;
           });
@@ -176,12 +184,11 @@ const storySlice = createSlice({
         state.loading = false;
         if (action.payload?.success) {
           state.stories = state.stories.map((story) => {
-            if (story._id === action.payload.data._id) {
-              story.likes = action.payload.data.likes;
+            if (story._id === action.meta.arg.storyId) {
+              story.likes.push(action.meta.arg.userId);
             }
             return story;
           });
-          state.story.likes.push(action.payload.data);
         }
       })
       .addCase(likeStory.rejected, (state) => {
@@ -196,12 +203,13 @@ const storySlice = createSlice({
         state.loading = false;
         if (action.payload?.success) {
           state.stories = state.stories.map((story) => {
-            if (story._id === action.payload.data._id) {
-              story.likes = action.payload.data.likes;
+            if (story._id === action.meta.arg.storyId) {
+              story.likes = story.likes.filter(
+                (like) => like !== action.meta.arg.userId
+              );
             }
             return story;
           });
-          state.story.likes = action.payload.data.likes;
         }
       })
       .addCase(unlikeStory.rejected, (state) => {

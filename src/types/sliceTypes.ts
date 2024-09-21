@@ -108,8 +108,20 @@ export interface NotificationSliceI {
 
 export interface StorySliceI {
   stories: StoryI[];
-  story: StoryI;
-  userStory?: StoryI;
+  userStory?: {
+    _id: string;
+    user: {
+      _id: string;
+      avatar: string;
+      fullName: string;
+      username: string;
+    };
+    media: string[];
+    seenBy: BasicUserI[];
+    likes: BasicUserI[];
+    blockedTo: string[];
+    createdAt: string;
+  };
   loading: boolean;
   skeletonLoading: boolean;
 }

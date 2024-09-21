@@ -26,26 +26,21 @@ import {
 } from "@/components/ui/dialog";
 import Image from "next/image";
 import EmojiKeyboard from "@/components/EmojiKeyboard";
-import { stories } from "@/lib/storiesData";
 import { nameFallback } from "@/lib/helpers";
-import { useAppSelector } from "@/lib/store/store";
+import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import ReportDialog from "@/components/ReportDialog";
+import { StoryI } from "@/types/types";
+import {
+  getStories,
+  likeStory,
+  unlikeStory,
+} from "@/lib/store/features/slices/storySlice";
+import { toast } from "@/components/ui/use-toast";
 
 interface Props {
   params: {
     username: string;
   };
-}
-
-interface Story {
-  _id: string;
-  images: {
-    link: string;
-  }[];
-  fullName: string;
-  avatar: string;
-  liked: boolean;
-  username: string;
 }
 
 interface LinkedStories {
@@ -62,6 +57,7 @@ interface LinkedStories {
 
 function Story({ params }: Props) {
   const query = useSearchParams();
+  const dispatch = useAppDispatch();
   const form = useForm<{
     reply: string;
   }>({
@@ -71,7 +67,8 @@ function Story({ params }: Props) {
   });
   const router = useRouter();
   const { username } = params;
-  const { user } = useAppSelector((state) => state.user);
+  const { user, loading: userLoading } = useAppSelector((state) => state.user);
+  const { stories, skeletonLoading } = useAppSelector((state) => state.story);
   const nextRef = React.useRef<HTMLButtonElement>(null);
   const prevRef = React.useRef<HTMLButtonElement>(null);
   const closeRef1 = React.useRef<HTMLButtonElement>(null);
@@ -84,7 +81,7 @@ function Story({ params }: Props) {
 
   const [index, setIndex] = React.useState(0);
   const [reportDialog, setReportDialog] = React.useState(false);
-  const [currentStory, setCurrentStory] = React.useState<Story | null>(null);
+  const [currentStory, setCurrentStory] = React.useState<StoryI | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [linkedStories, setLinkedStories] = React.useState<LinkedStories>({
     prevStory2: null,
@@ -132,6 +129,30 @@ function Story({ params }: Props) {
     }
   }
 
+  function handleLike(storyId: string) {
+    dispatch(likeStory({ storyId, userId: user._id })).then((response) => {
+      if (!response.payload?.success) {
+        toast({
+          title: "Cannot like story",
+          description: "Please try again later",
+          variant: "destructive",
+        });
+      }
+    });
+  }
+
+  function handleUnlike(storyId: string) {
+    dispatch(unlikeStory({ storyId, userId: user._id })).then((response) => {
+      if (!response.payload?.success) {
+        toast({
+          title: "Cannot unlike story",
+          description: "Please try again later",
+          variant: "destructive",
+        });
+      }
+    });
+  }
+
   class Timer {
     private timerId: NodeJS.Timeout | undefined;
     private start: number;
@@ -170,13 +191,17 @@ function Story({ params }: Props) {
   }
 
   React.useEffect(() => {
+    if (!userLoading && !stories.length) dispatch(getStories());
+  }, [dispatch, userLoading, stories.length, getStories]);
+
+  React.useEffect(() => {
     function getStory() {
       setLoading(true);
       stories.map((story) => {
-        if (username === story.username) {
+        if (username === story.user.username) {
           setCurrentStory(story);
           if (query.get("previous")) {
-            setIndex(story.images.length - 1);
+            setIndex(story.media.length - 1);
           }
         }
       });
@@ -212,16 +237,12 @@ function Story({ params }: Props) {
 
     getStory();
 
-    // const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
     const handleFullscreenChange = () => {
       const isFullscreen = document.fullscreenElement !== null;
       alert(isFullscreen);
-      // if (!isFullscreen && containerRef.current) {
       containerRef.current?.requestFullscreen().catch((err) => {
         alert("Failed to enter fullscreen:" + err);
       });
-      // }
     };
 
     document.addEventListener("keydown", handleKeyDown);
@@ -231,13 +252,18 @@ function Story({ params }: Props) {
       document.removeEventListener("keydown", handleKeyDown);
       document.removeEventListener("DOMContentLoaded", handleFullscreenChange);
     };
-  }, []);
+  }, [stories]);
 
   React.useEffect(() => {
-    if (!loading && !currentStory) {
+    if (
+      !loading &&
+      !currentStory?.media.length &&
+      !skeletonLoading &&
+      !stories.length
+    ) {
       notFound();
     }
-  }, [loading, currentStory]);
+  }, [loading, currentStory, skeletonLoading, stories.length]);
 
   React.useEffect(() => {
     const timer: Timer = new Timer(function () {
@@ -275,7 +301,7 @@ function Story({ params }: Props) {
 
     if (
       currentStory === stories[stories.length - 1] &&
-      index === currentStory.images.length - 1
+      index === currentStory.media.length - 1
     ) {
       const animation = progressBarRef.current?.getAnimations()[0];
       if (animation) {
@@ -295,38 +321,38 @@ function Story({ params }: Props) {
     const nextSecondStory = stories[storyIndex + 2];
     const prevStory2 = prevSecondStory
       ? {
-          username: prevSecondStory.username,
-          fullName: prevSecondStory.fullName,
-          avatar: prevSecondStory.avatar,
-          image: prevSecondStory.images[0].link,
+          username: prevSecondStory.user.username,
+          fullName: prevSecondStory.user.fullName,
+          avatar: prevSecondStory.user.avatar,
+          image: prevSecondStory.media[0],
         }
       : null;
     const prevStory1 = prevFirstStory
       ? {
-          username: prevFirstStory.username,
-          fullName: prevFirstStory.fullName,
-          avatar: prevFirstStory.avatar,
-          image: prevFirstStory.images[0].link,
+          username: prevFirstStory.user.username,
+          fullName: prevFirstStory.user.fullName,
+          avatar: prevFirstStory.user.avatar,
+          image: prevFirstStory.media[0],
         }
       : null;
     const nextStory1 = nextFirstStory
       ? {
-          username: nextFirstStory.username,
-          fullName: nextFirstStory.fullName,
-          avatar: nextFirstStory.avatar,
-          image: nextFirstStory.images[0].link,
+          username: nextFirstStory.user.username,
+          fullName: nextFirstStory.user.fullName,
+          avatar: nextFirstStory.user.avatar,
+          image: nextFirstStory.media[0],
         }
       : null;
     const nextStory2 = nextSecondStory
       ? {
-          username: nextSecondStory.username,
-          fullName: nextSecondStory.fullName,
-          avatar: nextSecondStory.avatar,
-          image: nextSecondStory.images[0].link,
+          username: nextSecondStory.user.username,
+          fullName: nextSecondStory.user.fullName,
+          avatar: nextSecondStory.user.avatar,
+          image: nextSecondStory.media[0],
         }
       : null;
     setLinkedStories({ prevStory2, prevStory1, nextStory1, nextStory2 });
-  }, [currentStory?.username]);
+  }, [currentStory?.user.username]);
 
   React.useEffect(() => {
     if (imageLoading) {
@@ -425,7 +451,7 @@ function Story({ params }: Props) {
         <div className="w-full absolute flex items-center justify-between p-4 pt-2 top-0 left-0 bg-gradient-to-b from-transparent/40 via-transparent/20 to-transparent pb-4">
           <div className="w-full flex flex-col justify-start">
             <div className="flex gap-0.5">
-              {currentStory.images.map((_, i) => (
+              {currentStory.media.map((_, i) => (
                 <div
                   className="h-[3px] bg-stone-500 rounded-lg w-full mb-2 relative"
                   key={i}
@@ -441,19 +467,19 @@ function Story({ params }: Props) {
             </div>
             <div className="flex z-10">
               <Link
-                href={`/${currentStory.username}`}
+                href={`/${currentStory.user.username}`}
                 className="w-full flex items-center justify-start"
               >
                 <Avatar className="ring-1 ring-stone-200 hover:opacity-80 transition-opacity">
-                  <AvatarImage src={currentStory.avatar} />
+                  <AvatarImage src={currentStory.user.avatar} />
                   <AvatarFallback>SS</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col items-start justify-start gap-0 mx-3">
                   <span className="text-stone-200 font-semibold tracking-tight">
-                    {currentStory.fullName}
+                    {currentStory.user.fullName}
                   </span>
                   <span className="text-stone-500 text-xs">
-                    @{currentStory.username}
+                    @{currentStory.user.username}
                   </span>
                 </div>
                 <span className="text-stone-500 text-sm">&#183; 3h</span>
@@ -512,7 +538,7 @@ function Story({ params }: Props) {
               </div>
             )}
             <Image
-              src={currentStory.images[index]?.link || ""}
+              src={currentStory.media[index] || ""}
               alt="Error fetching the story"
               className="max-h-full h-fit w-full object-fill select-none pointer-events-none"
               width="450"
@@ -554,7 +580,7 @@ function Story({ params }: Props) {
                 <FormItem className="w-full">
                   <FormControl>
                     <Input
-                      placeholder={`Reply to ${currentStory.username}`}
+                      placeholder={`Reply to ${currentStory.user.username}`}
                       {...field}
                       ref={inputRef}
                       autoComplete="off"
@@ -569,45 +595,53 @@ function Story({ params }: Props) {
               variant="ghost"
               size="icon"
               className="px-2 w-fit hover:bg-transparent rounded-full"
+              disabled={loading}
               onClick={() => {
-                setCurrentStory({
-                  ...currentStory,
-                  liked: !currentStory.liked,
-                });
+                if (loading) return;
+                if (currentStory.likes.includes(user._id)) {
+                  handleUnlike(currentStory._id);
+                } else {
+                  handleLike(currentStory._id);
+                }
               }}
               type="button"
             >
               <Heart
                 size="30"
-                fill={currentStory.liked ? "rgb(244 63 94)" : "none"}
+                fill={
+                  currentStory.likes.includes(user._id)
+                    ? "rgb(244 63 94)"
+                    : "none"
+                }
                 className={`active:scale-110 transition-all  ${
-                  currentStory.liked ? "text-rose-500" : ""
+                  currentStory.likes.includes(user._id) ? "text-rose-500" : ""
                 }`}
               />
             </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="px-2 w-fit hover:bg-transparent rounded-full"
-              disabled={form.getValues("reply") === ""}
-              type="submit"
-            >
-              <SendHorizonal size="30" />
-            </Button>
+            {form.watch("reply").length > 0 && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="px-2 w-fit hover:bg-transparent rounded-full"
+                disabled={form.getValues("reply") === ""}
+                type="submit"
+              >
+                <SendHorizonal size="30" />
+              </Button>
+            )}
           </form>
         </Form>
       </div>
       <div className="flex max-sm:hidden items-center justify-center h-full px-4 w-16">
         <button
           className={`p-1 bg-stone-200 text-black rounded-full ${
-            index === currentStory.images.length - 1 &&
-            !linkedStories.nextStory1
+            index === currentStory.media.length - 1 && !linkedStories.nextStory1
               ? "hidden"
               : ""
           }`}
           ref={nextRef}
           onClick={() => {
-            if (index === currentStory.images.length - 1) {
+            if (index === currentStory.media.length - 1) {
               if (linkedStories.nextStory1?.username) {
                 router.push(`/story/${linkedStories.nextStory1?.username}`);
               } else {

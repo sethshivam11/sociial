@@ -1,96 +1,108 @@
 "use client";
-import { Plus } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { nameFallback } from "@/lib/helpers";
-import { stories } from "@/lib/storiesData";
 import StoriesLoading from "./skeletons/StoriesLoading";
+import { useAppDispatch, useAppSelector } from "@/lib/store/store";
+import {
+  getStories,
+  getUserStory,
+} from "@/lib/store/features/slices/storySlice";
 
 function Stories() {
-  const user = {
-    fullName: "Shivam soni",
-    username: "sethshivam",
-    avatar:
-      "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
-  };
-  const storyAvailable = false;
-  const [loading, setLoading] = React.useState(true);
+  const dispatch = useAppDispatch();
+  const { user, skeletonLoading: userLoading } = useAppSelector(
+    (state) => state.user
+  );
+  const { stories, userStory, skeletonLoading } = useAppSelector(
+    (state) => state.story
+  );
+  const [redirecting, setRedirecting] = React.useState(false);
 
   React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, []);
+    if (userLoading) return;
+    if (!stories.length) dispatch(getStories());
+    if(!userStory?.media.length) dispatch(getUserStory());
+  }, [dispatch, getStories, getUserStory, userLoading]);
 
   return (
-    <div className="h-30 flex overflow-x-auto w-full p-4 gap-4 no-scrollbar">
-      <div className="flex flex-col items-center gap-1 relative">
-        <div
-          className={`w-20 h-20 rounded-full p-1 ${
-            storyAvailable &&
-            "bg-gradient-to-bl from-red-500 via-blue-500 to-green-500"
-          }`}
-        >
-          <Link
-            href={storyAvailable ? `/story/${user.username}` : "/add-story"}
-          >
-            <Avatar
-              className={`w-full h-full ring-2 ring-white dark:ring-black ${
-                user.avatar.includes("r5pvoicvcxtyhjkgqk8y.png")
-                  ? "bg-[#cdd5d8]"
-                  : "bg-white dark:bg-black"
-              }`}
-            >
-              <AvatarImage
-                src={user.avatar}
-                alt=""
-                className="pointer-events-none select-none"
-              />
-              <AvatarFallback>{nameFallback(user.fullName)}</AvatarFallback>
-            </Avatar>
-          </Link>
-          <Link href="/add-story">
-            <div className="absolute inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-blue-500 rounded-full bottom-0 end-0 sm:hover:scale-110">
-              <Plus />
-            </div>
-          </Link>
+    <>
+      {redirecting && (
+        <div className="fixed h-full w-full flex items-center justify-center bg-transparent/50 z-50 overflow-clip top-0 left-0">
+          <Loader2 className="animate-spin" size="100" strokeWidth="1" />
         </div>
-      </div>
-      {loading ? (
-        <StoriesLoading />
-      ) : (
-        stories.map((story, index) => {
-          return (
+      )}
+      <div className="h-30 flex overflow-x-auto w-full p-4 gap-4 no-scrollbar">
+        <div className="flex flex-col items-center gap-1 relative">
+          <div
+            className={`w-20 h-20 rounded-full p-1 ${
+              userStory?.media[0] &&
+              "bg-gradient-to-bl from-red-500 via-blue-500 to-green-500"
+            }`}
+          >
             <Link
-              href={`/story/${story.username}`}
-              key={index}
-              className="flex flex-col items-center gap-1 sm:hover:scale-105 transition-transform"
+              href={userStory?.media[0] ? `/story` : "/add-story"}
+              onClick={() => setRedirecting(true)}
             >
-              <div className="w-20 h-20 rounded-full bg-gradient-to-bl from-red-500 via-blue-500 to-green-500 p-1">
-                <Avatar
-                  className={`w-full h-full ring-2 ring-white dark:ring-black ${
-                    story.avatar.includes("r5pvoicvcxtyhjkgqk8y.png")
-                      ? "bg-[#cdd5d8]"
-                      : "bg-white dark:bg-black"
-                  }`}
-                >
-                  <AvatarImage
-                    src={story.avatar}
-                    alt=""
-                    className="pointer-events-none select-none"
-                  />
-                  <AvatarFallback>
-                    {nameFallback(story.fullName)}
-                  </AvatarFallback>
-                </Avatar>
+              <Avatar
+                className={`w-full h-full ring-2 ring-white dark:ring-black ${
+                  user.avatar.includes("r5pvoicvcxtyhjkgqk8y.png")
+                    ? "bg-[#cdd5d8]"
+                    : "bg-white dark:bg-black"
+                }`}
+              >
+                <AvatarImage
+                  src={user.avatar}
+                  alt=""
+                  className="pointer-events-none select-none"
+                />
+                <AvatarFallback>{nameFallback(user.fullName)}</AvatarFallback>
+              </Avatar>
+            </Link>
+            <Link href="/add-story">
+              <div className="absolute inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-blue-500 rounded-full bottom-0 end-0 sm:hover:scale-110">
+                <Plus />
               </div>
             </Link>
-          );
-        })
-      )}
-    </div>
+          </div>
+        </div>
+        {skeletonLoading ? (
+          <StoriesLoading />
+        ) : (
+          stories.map((story, index) => {
+            return (
+              <Link
+                href={`/stories/${story.user.username}`}
+                key={index}
+                onClick={() => setRedirecting(true)}
+                className="flex flex-col items-center gap-1 sm:hover:scale-105 transition-transform"
+              >
+                <div className="w-20 h-20 rounded-full bg-gradient-to-bl from-red-500 via-blue-500 to-green-500 p-1">
+                  <Avatar
+                    className={`w-full h-full ring-2 ring-white dark:ring-black ${
+                      story.user.avatar.includes("r5pvoicvcxtyhjkgqk8y.png")
+                        ? "bg-[#cdd5d8]"
+                        : "bg-white dark:bg-black"
+                    }`}
+                  >
+                    <AvatarImage
+                      src={story.user.avatar}
+                      alt=""
+                      className="pointer-events-none select-none"
+                    />
+                    <AvatarFallback>
+                      {nameFallback(story.user.fullName)}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+              </Link>
+            );
+          })
+        )}
+      </div>
+    </>
   );
 }
 
