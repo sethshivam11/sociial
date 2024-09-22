@@ -22,7 +22,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-// Layout
 import { toast } from "@/components/ui/use-toast";
 import QRCode from "qrcode";
 import Image from "next/image";
@@ -34,11 +33,19 @@ import {
   unfollowUser,
 } from "@/lib/store/features/slices/followSlice";
 import {
-  getLoggedInUser,
+  blockUser,
   getProfile,
+  unblockUser,
 } from "@/lib/store/features/slices/userSlice";
 import ProfileLoading from "@/components/skeletons/ProfileLoading";
-import { Metadata } from "next";
+import { AlertDialog } from "@radix-ui/react-alert-dialog";
+import {
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 function Profile({
   children,
@@ -58,7 +65,39 @@ function Profile({
   const [QR, setQR] = React.useState("");
   const [userNotFound, setUserNotFound] = React.useState(false);
   const [reportOpen, setReportOpen] = React.useState(false);
+  const [blockDialog, setBlockDialog] = React.useState(false);
+  const [blocking, setBlocking] = React.useState(false);
   const username = params.username;
+
+  function handleBlock() {
+    setBlocking(true);
+    dispatch(blockUser(profile._id))
+      .then((response) => {
+        if (!response.payload?.success) {
+          toast({
+            title: "Cannot block user",
+            description: response.payload?.message || "Something went wrong",
+            variant: "destructive",
+          });
+        }
+      })
+      .finally(() => setBlocking(false));
+  }
+
+  function handleUnblock() {
+    setBlocking(true);
+    dispatch(unblockUser(profile._id))
+      .then((response) => {
+        if (!response.payload?.success) {
+          toast({
+            title: "Cannot unblock user",
+            description: response.payload?.message || "Something went wrong",
+            variant: "destructive",
+          });
+        }
+      })
+      .finally(() => setBlocking(false));
+  }
 
   async function copyLink(username: string) {
     const link = `${baseUrl}/${username}`;
@@ -119,17 +158,61 @@ function Profile({
     document.body.removeChild(link);
   }
 
+  function getButton(): React.ReactNode {
+    if (user.username === username)
+      return (
+        <Button
+          className="my-4 py-1.5 h-fit w-fit px-3 rounded-full"
+          onClick={() => router.push("/settings/edit-profile")}
+        >
+          Edit Profile
+        </Button>
+      );
+    else if (user.blocked.includes(profile._id))
+      return (
+        <Button
+          className="my-4 bg-blue-500 hover:bg-blue-700 py-1.5 min-h-9 w-24 px-3 rounded-full text-white"
+          onClick={() => handleUnblock()}
+          disabled={blocking}
+        >
+          {blocking ? <Loader2 className="animate-spin" /> : "Unblock"}
+        </Button>
+      );
+    else
+      return followings.some(
+        (following) => following.username === profile.username
+      ) ? (
+        <Button
+          className="my-4 bg-stone-500 hover:bg-stone-600 py-1.5 min-h-9 w-24 px-3 rounded-full text-white"
+          onClick={() => handleUnfollow(profile.username)}
+          disabled={loading}
+        >
+          {loading ? <Loader2 className="animate-spin" /> : "Unfollow"}
+        </Button>
+      ) : (
+        <Button
+          className="my-4 bg-blue-500 hover:bg-blue-700 py-1.5 min-h-9 w-24 px-3 rounded-full text-white"
+          onClick={() => handleFollow(profile.username)}
+          disabled={loading}
+        >
+          {loading ? <Loader2 className="animate-spin" /> : "Follow"}
+        </Button>
+      );
+  }
+
   React.useEffect(() => {
     dispatch(getFollowings({ username }));
 
-    if (username) dispatch(getProfile({ username })).then((response) => {
-      if(response.payload?.message === "User not found") setUserNotFound(true);
-    })
+    if (username)
+      dispatch(getProfile({ username })).then((response) => {
+        if (response.payload?.message === "User not found")
+          setUserNotFound(true);
+      });
   }, [username, dispatch, getFollowings, getProfile]);
 
   React.useEffect(() => {
-    if(userNotFound) notFound();
-  },[userNotFound]);
+    if (userNotFound) notFound();
+  }, [userNotFound]);
 
   return (
     <>
@@ -158,40 +241,7 @@ function Profile({
                     @{profile.username}
                   </div>
                   <div className="flex items-center justify-center gap-2 max-sm:gap-4 select-none">
-                    {user.username === username ? (
-                      <Button
-                        className="my-4 py-1.5 h-fit w-fit px-3 rounded-full"
-                        onClick={() => router.push("/settings/edit-profile")}
-                      >
-                        Edit Profile
-                      </Button>
-                    ) : followings.some(
-                        (following) => following.username === profile.username
-                      ) ? (
-                      <Button
-                        className="my-4 bg-stone-500 hover:bg-stone-600 py-1.5 min-h-9 w-24 px-3 rounded-full text-white"
-                        onClick={() => handleUnfollow(profile.username)}
-                        disabled={loading}
-                      >
-                        {loading ? (
-                          <Loader2 className="animate-spin" />
-                        ) : (
-                          "Unfollow"
-                        )}
-                      </Button>
-                    ) : (
-                      <Button
-                        className="my-4 bg-blue-500 hover:bg-blue-700 py-1.5 min-h-9 w-24 px-3 rounded-full text-white"
-                        onClick={() => handleFollow(profile.username)}
-                        disabled={loading}
-                      >
-                        {loading ? (
-                          <Loader2 className="animate-spin" />
-                        ) : (
-                          "Follow"
-                        )}
-                      </Button>
-                    )}
+                    {getButton()}
                     {profile.username === user.username ? (
                       <Dialog>
                         <DialogTrigger asChild>
@@ -291,7 +341,11 @@ function Profile({
                         {profile.username !== user.username && (
                           <>
                             <DialogClose
-                              className="w-full md:px-20 py-1 text-red-500"
+                              className={`w-full md:px-20 py-1 ${
+                                user.blocked.includes(profile._id)
+                                  ? "text-blue-500"
+                                  : "text-red-500"
+                              }`}
                               onClick={() => {
                                 if (!isLoggedIn) {
                                   toast({
@@ -307,9 +361,12 @@ function Profile({
                                     ),
                                   });
                                 }
+                                setBlockDialog(true);
                               }}
                             >
-                              Block
+                              {user.blocked.includes(profile._id)
+                                ? "Unblock"
+                                : "Block"}
                             </DialogClose>
                             <DialogClose
                               className="text-red-500 w-full md:px-20 py-1"
@@ -444,7 +501,57 @@ function Profile({
             <hr className="my-2 md:w-10/12 w-full mx-auto bg-stone-500 border-2 rounded-sm" />
           </>
         )}
-
+        <AlertDialog
+          open={blockDialog}
+          onOpenChange={(open) => {
+            if (!blocking) setBlockDialog(open);
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogTitle>
+              <Avatar className="mx-auto w-20 h-20">
+                <AvatarImage src={profile.avatar} />
+                <AvatarFallback>
+                  {nameFallback(profile.fullName)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="text-center">
+                {user.blocked.includes(profile._id) ? "Unblock" : "Block"}
+                &nbsp;
+                {profile.fullName}
+                &nbsp;&#183;&nbsp;
+                <span className="text-stone-500">@{profile.username}</span>
+                &nbsp;
+              </div>
+            </AlertDialogTitle>
+            <AlertDialogFooter className="grid grid-cols-1 gap-2 sm:space-x-0">
+              <AlertDialogAction
+                disabled={blocking}
+                onClick={() => {
+                  if (user.blocked.includes(profile._id)) {
+                    handleUnblock();
+                  } else {
+                    handleBlock();
+                  }
+                }}
+                className={
+                  user.blocked.includes(profile._id)
+                    ? ""
+                    : "bg-destructive hover:bg-destructive/80"
+                }
+              >
+                {blocking ? (
+                  <Loader2 className="animate-spin" />
+                ) : user.blocked.includes(profile._id) ? (
+                  "Unblock"
+                ) : (
+                  "Block"
+                )}
+              </AlertDialogAction>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
         <div className="mx-auto md:w-4/5 w-full sm:pb-6 pb-20 sm:pt-0 mt-6">
           {children}
         </div>

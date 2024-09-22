@@ -26,6 +26,7 @@ export interface UserSliceI {
     blocked: string[];
   };
   searchResults: BasicUserI[];
+  blocked: BasicUserI[];
   savedPosts: PostI[];
   suggestions: (BasicUserI & { loading: boolean; isFollowing: boolean })[];
   profile: ProfileI;

@@ -1,7 +1,6 @@
 "use client";
 import { UserSliceI } from "@/types/sliceTypes";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { store } from "../../store";
 
 const initialState: UserSliceI = {
   user: {
@@ -27,6 +26,7 @@ const initialState: UserSliceI = {
     followingCount: 0,
     postsCount: 0,
   },
+  blocked: [],
   searchResults: [],
   suggestions: [],
   savedPosts: [],
@@ -279,40 +279,26 @@ export const renewAccessToken = createAsyncThunk(
   }
 );
 
+export const getBlockedUsers = createAsyncThunk(
+  "users/getBlocked",
+  async () => {
+    const parsed = await fetch("/api/v1/users/blocked");
+    return parsed.json();
+  }
+);
+
 export const blockUser = createAsyncThunk(
   "users/blockUser",
-  async ({ userId, username }: { userId?: string; username?: string }) => {
-    if (!userId && !username)
-      return {
-        success: false,
-        message: "userId or username is required",
-        status: 404,
-        data: null,
-      };
-    const parsed = await fetch(
-      `/api/v1/users/block?${
-        userId ? `userId=${userId}` : `username=${username}`
-      }`
-    );
+  async (userId: string) => {
+    const parsed = await fetch(`/api/v1/users/block?userId=${userId}`);
     return parsed.json();
   }
 );
 
 export const unblockUser = createAsyncThunk(
   "users/unblockUser",
-  async ({ userId, username }: { userId?: string; username?: string }) => {
-    if (!userId && !username)
-      return {
-        success: false,
-        message: "userId or username is required",
-        status: 404,
-        data: null,
-      };
-    const parsed = await fetch(
-      `/api/v1/users/unblock?${
-        userId ? `userId=${userId}` : `username=${username}`
-      }`
-    );
+  async (userId: string) => {
+    const parsed = await fetch(`/api/v1/users/unblock?userId=${userId}`);
     return parsed.json();
   }
 );
@@ -454,12 +440,9 @@ export const userSlice = createSlice({
       .addCase(forgotPassword.pending, (state) => {
         state.loading = true;
       })
-      .addCase(
-        forgotPassword.fulfilled || forgotPassword.rejected,
-        (state, action) => {
-          state.loading = false;
-        }
-      );
+      .addCase(forgotPassword.fulfilled || forgotPassword.rejected, (state) => {
+        state.loading = false;
+      });
 
     builder
       .addCase(getProfile.pending, (state) => {
@@ -581,13 +564,27 @@ export const userSlice = createSlice({
       });
 
     builder
+      .addCase(getBlockedUsers.pending, (state) => {
+        state.skeletonLoading = true;
+      })
+      .addCase(getBlockedUsers.fulfilled, (state, action) => {
+        state.skeletonLoading = false;
+        if (action.payload?.success) {
+          state.blocked = action.payload.data;
+        }
+      })
+      .addCase(getBlockedUsers.rejected, (state) => {
+        state.skeletonLoading = false;
+      });
+
+    builder
       .addCase(blockUser.pending, (state) => {
         state.loading = true;
       })
       .addCase(blockUser.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload?.success) {
-          state.user.blocked.push(action.payload.data.blocked);
+          state.user.blocked.push(action.meta.arg);
         }
       })
       .addCase(blockUser.rejected, (state) => {
@@ -602,7 +599,7 @@ export const userSlice = createSlice({
         state.loading = false;
         if (action.payload?.success) {
           state.user.blocked = state.user.blocked.filter(
-            (user) => user !== action.payload.data.unblockUserId
+            (user) => user !== action.meta.arg
           );
         }
       })

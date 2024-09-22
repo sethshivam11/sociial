@@ -36,7 +36,7 @@ function Messages({ children }: { children: React.ReactNode }) {
   }, [dispatch, getChats]);
 
   React.useEffect(() => {
-    if (newChatDialog || !userLoading) {
+    if (newChatDialog && !userLoading) {
       dispatch(getFollowings({ userId: user._id })).then((response) => {
         if (!response.payload?.success) {
           return toast({

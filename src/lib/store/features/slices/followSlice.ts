@@ -82,6 +82,7 @@ const followSlice = createSlice({
         state.loading = true;
       })
       .addCase(followUser.fulfilled, (state, action) => {
+        state.loading = false;
         if (action.payload?.success) {
           state.followings.push(action.payload.data.follow);
         }
@@ -95,6 +96,7 @@ const followSlice = createSlice({
         state.loading = true;
       })
       .addCase(unfollowUser.fulfilled, (state, action) => {
+        state.loading = false;
         if (action.payload?.success) {
           const filteredFollowings = state.followings.filter(
             (user) =>
