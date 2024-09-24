@@ -74,7 +74,7 @@ const ForgotPasswordPage = () => {
       }).parse({ identifier: form.watch("identifier") });
       form.clearErrors();
       const response = await dispatch(
-        resendVerificationCode(form.watch("identifier"))
+        resendVerificationCode({ username: form.watch("identifier") })
       );
       if (response.payload.success) {
         setTimer(60);

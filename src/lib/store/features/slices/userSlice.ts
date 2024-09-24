@@ -110,9 +110,13 @@ export const verifyCode = createAsyncThunk(
 
 export const resendVerificationCode = createAsyncThunk(
   "users/resendCode",
-  async (username: string) => {
+  async ({ username, email }: { username: string; email?: string }) => {
     if (!username) return;
-    const parsed = await fetch(`/api/v1/users/resendMail?username=${username}`);
+    const parsed = await fetch(
+      `/api/v1/users/resendMail?username=${username}${
+        email ? `&email=${email}` : ""
+      }`
+    );
     return parsed.json();
   }
 );
@@ -168,7 +172,7 @@ export const logOutUser = createAsyncThunk("users/logout", async () => {
 });
 
 export const updatePassword = createAsyncThunk(
-  "users/changePassword",
+  "users/updatePassword",
   async ({
     oldPassword,
     newPassword,
@@ -177,12 +181,27 @@ export const updatePassword = createAsyncThunk(
     newPassword: string;
   }) => {
     if (!oldPassword || !newPassword) return;
-    const parsed = await fetch("/api/v1/users/changePassword", {
+    const parsed = await fetch("/api/v1/users/updatePassword", {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ oldPassword, newPassword }),
+    });
+    return parsed.json();
+  }
+);
+
+export const updateEmail = createAsyncThunk(
+  "users/updateEmail",
+  async ({ email, code }: { email: string; code: string }) => {
+    if (!email) return;
+    const parsed = await fetch("/api/v1/users/updateEmail", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, code }),
     });
     return parsed.json();
   }
@@ -482,7 +501,22 @@ export const userSlice = createSlice({
       .addCase(updatePassword.pending, (state) => {
         state.loading = true;
       })
-      .addCase(updatePassword.fulfilled || updatePassword.rejected, (state) => {
+      .addCase(updatePassword.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(updatePassword.rejected, (state) => {
+        state.loading = false;
+      });
+
+    builder
+      .addCase(updateEmail.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(updateEmail.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload?.success) state.user.email = action.meta.arg.email;
+      })
+      .addCase(updateEmail.rejected, (state) => {
         state.loading = false;
       });
 
@@ -586,6 +620,9 @@ export const userSlice = createSlice({
         if (action.payload?.success) {
           state.user.blocked.push(action.meta.arg);
         }
+        state.blocked = state.blocked.filter(
+          (user) => user._id !== action.meta.arg
+        );
       })
       .addCase(blockUser.rejected, (state) => {
         state.loading = false;
@@ -600,6 +637,9 @@ export const userSlice = createSlice({
         if (action.payload?.success) {
           state.user.blocked = state.user.blocked.filter(
             (user) => user !== action.meta.arg
+          );
+          state.blocked = state.blocked.filter(
+            (user) => user._id !== action.meta.arg
           );
         }
       })
@@ -650,17 +690,21 @@ export const userSlice = createSlice({
       .addCase(savePost.pending, (state) => {
         state.loading = true;
       })
-      .addCase(savePost.fulfilled || savePost.rejected, (state, action) => {
+      .addCase(savePost.fulfilled, (state) => {
         state.loading = false;
-      });
+      }).addCase(savePost.rejected, (state) => {
+        state.loading = false;
+      })
 
     builder
       .addCase(unsavePost.pending, (state) => {
         state.loading = true;
       })
-      .addCase(unsavePost.fulfilled || unsavePost.rejected, (state, action) => {
+      .addCase(unsavePost.fulfilled, (state, action) => {
         state.loading = false;
-      });
+      }).addCase(unsavePost.rejected, (state) => {
+        state.loading = false;
+      })
 
     builder
       .addCase(getUserSuggestions.pending, (state) => {

@@ -1,5 +1,5 @@
 "use client";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Loader2 } from "lucide-react";
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -16,20 +16,24 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
 import { emailSchema, verificationCodeSchema } from "@/schemas/userSchema";
+import { useAppDispatch, useAppSelector } from "@/lib/store/store";
+import { toast } from "@/components/ui/use-toast";
+import {
+  resendVerificationCode,
+  updateEmail,
+} from "@/lib/store/features/slices/userSlice";
 
 function Page() {
+  const dispatch = useAppDispatch();
   const formSchema = z.object({
     email: emailSchema,
     otp: verificationCodeSchema,
   });
 
-  const [user, setUser] = React.useState({
-    fullName: "Shivam Soni",
-    username: "sethshivam11",
-    avatar:
-      "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
-    email: "shivam@example.com",
-  });
+  const { user, isSendingMail, loading } = useAppSelector(
+    (state) => state.user
+  );
+  const [timer, setTimer] = React.useState(0);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -38,13 +42,75 @@ function Page() {
     },
   });
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    console.log(data);
+  function onSubmit({ email, otp }: z.infer<typeof formSchema>) {
+    dispatch(updateEmail({ email, code: otp.toString() })).then((response) => {
+      if (!response.payload.success) {
+        toast({
+          title: "Error",
+          description: response.payload.message || "Something went wrong",
+          variant: "destructive",
+        });
+      } else {
+        form.resetField("otp");
+        toast({
+          title: "Success",
+          description: response.payload.message,
+        });
+      }
+    });
   }
 
-  function sendMail(email: string) {
-    console.log(email);
+  function sendMail() {
+    if (
+      form.watch("email") === user.email ||
+      !form.watch("email") ||
+      isSendingMail
+    )
+      return;
+    try {
+      z.object({
+        email: emailSchema,
+      }).parse({ email: form.watch("email") });
+      form.clearErrors();
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        form.setError("email", { message: error.errors[0].message });
+      }
+    }
+    dispatch(
+      resendVerificationCode({
+        username: user.username,
+        email: form.watch("email"),
+      })
+    ).then((response) => {
+      if (response.payload.success) {
+        setTimer(60);
+        toast({
+          title: "Success",
+          description: response.payload.message,
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: response.payload.message || "Something went wrong",
+          variant: "destructive",
+        });
+      }
+    });
   }
+
+  React.useEffect(() => {
+    form.setValue("email", user.email);
+  }, [form, user.email]);
+
+  React.useEffect(() => {
+    if (timer > 0) {
+      const runningTimer = setInterval(() => {
+        setTimer((timer) => (timer -= 1));
+      }, 1000);
+      return () => clearInterval(runningTimer);
+    }
+  }, [timer]);
 
   return (
     <div className="flex flex-col items-center justify-start">
@@ -68,18 +134,30 @@ function Page() {
                 <div className="flex items-center gap-2">
                   <FormControl>
                     <Input
-                      placeholder="Email"
+                      placeholder="example@mail.com"
                       inputMode="text"
                       autoComplete="name"
                       {...field}
                     />
                   </FormControl>
                   <Button
-                    variant="secondary"
                     type="button"
-                    onClick={() => sendMail(form.getValues("email"))}
+                    variant="secondary"
+                    className="min-w-24"
+                    disabled={
+                      form.watch("email") === user.email ||
+                      timer > 0 ||
+                      isSendingMail
+                    }
+                    onClick={sendMail}
                   >
-                    Get OTP
+                    {isSendingMail ? (
+                      <Loader2 className="animate-spin" />
+                    ) : timer > 0 ? (
+                      timer
+                    ) : (
+                      "Get OTP"
+                    )}
                   </Button>
                 </div>
                 <FormMessage />
@@ -105,7 +183,7 @@ function Page() {
             )}
           />
           <Button type="submit" size="lg">
-            Submit
+            {loading ? <Loader2 className="animate-spin" /> : "Update"}
           </Button>
         </form>
       </Form>

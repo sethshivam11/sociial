@@ -55,9 +55,13 @@ function Profile({
   params: { username: string };
 }) {
   const dispatch = useAppDispatch();
-  const { user, profile, skeletonLoading, isLoggedIn } = useAppSelector(
-    (state) => state.user
-  );
+  const {
+    user,
+    profile,
+    skeletonLoading,
+    isLoggedIn,
+    loading: userLoading,
+  } = useAppSelector((state) => state.user);
   const { followings, loading } = useAppSelector((state) => state.follow);
   const baseUrl = process.env.NEXT_PUBLIC_LINK || "";
   const router = useRouter();
@@ -66,37 +70,30 @@ function Profile({
   const [userNotFound, setUserNotFound] = React.useState(false);
   const [reportOpen, setReportOpen] = React.useState(false);
   const [blockDialog, setBlockDialog] = React.useState(false);
-  const [blocking, setBlocking] = React.useState(false);
   const username = params.username;
 
   function handleBlock() {
-    setBlocking(true);
-    dispatch(blockUser(profile._id))
-      .then((response) => {
-        if (!response.payload?.success) {
-          toast({
-            title: "Cannot block user",
-            description: response.payload?.message || "Something went wrong",
-            variant: "destructive",
-          });
-        }
-      })
-      .finally(() => setBlocking(false));
+    dispatch(blockUser(profile._id)).then((response) => {
+      if (!response.payload?.success) {
+        toast({
+          title: "Cannot block user",
+          description: response.payload?.message || "Something went wrong",
+          variant: "destructive",
+        });
+      }
+    });
   }
 
   function handleUnblock() {
-    setBlocking(true);
-    dispatch(unblockUser(profile._id))
-      .then((response) => {
-        if (!response.payload?.success) {
-          toast({
-            title: "Cannot unblock user",
-            description: response.payload?.message || "Something went wrong",
-            variant: "destructive",
-          });
-        }
-      })
-      .finally(() => setBlocking(false));
+    dispatch(unblockUser(profile._id)).then((response) => {
+      if (!response.payload?.success) {
+        toast({
+          title: "Cannot unblock user",
+          description: response.payload?.message || "Something went wrong",
+          variant: "destructive",
+        });
+      }
+    });
   }
 
   async function copyLink(username: string) {
@@ -173,9 +170,9 @@ function Profile({
         <Button
           className="my-4 bg-blue-500 hover:bg-blue-700 py-1.5 min-h-9 w-24 px-3 rounded-full text-white"
           onClick={() => handleUnblock()}
-          disabled={blocking}
+          disabled={userLoading}
         >
-          {blocking ? <Loader2 className="animate-spin" /> : "Unblock"}
+          {userLoading ? <Loader2 className="animate-spin" /> : "Unblock"}
         </Button>
       );
     else
@@ -501,12 +498,7 @@ function Profile({
             <hr className="my-2 md:w-10/12 w-full mx-auto bg-stone-500 border-2 rounded-sm" />
           </>
         )}
-        <AlertDialog
-          open={blockDialog}
-          onOpenChange={(open) => {
-            if (!blocking) setBlockDialog(open);
-          }}
-        >
+        <AlertDialog open={blockDialog} onOpenChange={setBlockDialog}>
           <AlertDialogContent>
             <AlertDialogTitle>
               <Avatar className="mx-auto w-20 h-20">
@@ -526,7 +518,7 @@ function Profile({
             </AlertDialogTitle>
             <AlertDialogFooter className="grid grid-cols-1 gap-2 sm:space-x-0">
               <AlertDialogAction
-                disabled={blocking}
+                disabled={userLoading}
                 onClick={() => {
                   if (user.blocked.includes(profile._id)) {
                     handleUnblock();
@@ -537,10 +529,10 @@ function Profile({
                 className={
                   user.blocked.includes(profile._id)
                     ? ""
-                    : "bg-destructive hover:bg-destructive/80"
+                    : "bg-destructive hover:bg-destructive/80 text-white"
                 }
               >
-                {blocking ? (
+                {userLoading ? (
                   <Loader2 className="animate-spin" />
                 ) : user.blocked.includes(profile._id) ? (
                   "Unblock"

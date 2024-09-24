@@ -58,7 +58,7 @@ function VerifyCodePage({ searchParams }: Props) {
 
   async function handleSendCode() {
     const response = await dispatch(
-      resendVerificationCode(form.watch("username"))
+      resendVerificationCode({username: form.watch("username")})
     );
     if (response.payload.success) {
       toast({

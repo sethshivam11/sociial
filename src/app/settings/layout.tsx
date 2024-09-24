@@ -46,7 +46,7 @@ function Page({ children }: React.PropsWithChildren) {
   return (
     <div className="md:container flex items-start justify-start xl:col-span-8 sm:col-span-9 col-span-10 sm:py-6">
       <div
-        className={`lg:w-1/4 md:w-1/3 max-md:ml-6 w-full max-h-[100dvh]  ${
+        className={`lg:w-1/4 md:w-1/3 max-md:ml-6 w-full max-h-[100dvh] sticky top-0 ${
           location === "/settings" ? "block" : "max-md:hidden"
         }`}
       >

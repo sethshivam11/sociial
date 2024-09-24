@@ -1,5 +1,5 @@
 "use client";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Loader2 } from "lucide-react";
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -16,17 +16,28 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
 import { passwordSchema } from "@/schemas/userSchema";
+import { useAppDispatch, useAppSelector } from "@/lib/store/store";
+import { updatePassword } from "@/lib/store/features/slices/userSlice";
+import { toast } from "@/components/ui/use-toast";
+import CheckboxWithLabel from "@/components/CheckboxWithLabel";
 
 function Page() {
+  const dispatch = useAppDispatch();
+  const { loading } = useAppSelector((state) => state.user);
+  const [showPwd, setShowPwd] = React.useState(false);
   const formSchema = z
     .object({
       currentPassword: passwordSchema,
       newPassword: passwordSchema,
       confirmPassword: z.string(),
     })
-    .refine((data) => data.newPassword !== data.confirmPassword, {
+    .refine((data) => data.newPassword === data.confirmPassword, {
       message: "Passwords do not match",
       path: ["confirmPassword"],
+    })
+    .refine((data) => data.currentPassword !== data.newPassword, {
+      message: "New password should be different from current password",
+      path: ["newPassword"],
     });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -38,12 +49,31 @@ function Page() {
     },
   });
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    console.log(data);
-  }
-
-  function sendMail(email: string) {
-    console.log(email);
+  function onSubmit({
+    currentPassword,
+    newPassword,
+  }: z.infer<typeof formSchema>) {
+    dispatch(
+      updatePassword({
+        oldPassword: currentPassword,
+        newPassword,
+      })
+    ).then((response) => {
+      if (!response.payload?.success) {
+        toast({
+          title: "Cannot update password",
+          description: response.payload?.message || "Something went wrong",
+          variant: "destructive",
+        });
+      } else {
+        form.reset();
+        toast({
+          title: "Success",
+          description:
+            response.payload?.message || "Password updated successfully",
+        });
+      }
+    });
   }
 
   return (
@@ -64,12 +94,14 @@ function Page() {
             name="currentPassword"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel>Password</FormLabel>
+                <FormLabel>Current Password</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Current Password"
                     inputMode="text"
-                    autoComplete="name"
+                    type={showPwd ? "text" : "password"}
+                    autoComplete="current-password"
+                    className=""
                     {...field}
                   />
                 </FormControl>
@@ -87,7 +119,8 @@ function Page() {
                   <Input
                     placeholder="New Password"
                     inputMode="text"
-                    autoComplete="username"
+                    type={showPwd ? "text" : "password"}
+                    autoComplete="new-password"
                     {...field}
                   />
                 </FormControl>
@@ -105,7 +138,8 @@ function Page() {
                   <Input
                     placeholder="Confirm New Password"
                     inputMode="text"
-                    autoComplete="username"
+                    type={showPwd ? "text" : "password"}
+                    autoComplete="off"
                     {...field}
                   />
                 </FormControl>
@@ -113,8 +147,22 @@ function Page() {
               </FormItem>
             )}
           />
-          <Button type="submit" size="lg">
-            Submit
+          <CheckboxWithLabel
+            text="Show Password"
+            checked={showPwd}
+            setChecked={setShowPwd}
+          />
+          <Button
+            type="submit"
+            size="lg"
+            disabled={
+              loading ||
+              form.watch("currentPassword").length < 6 ||
+              form.watch("newPassword").length < 6 ||
+              form.watch("confirmPassword").length < 6
+            }
+          >
+            {loading ? <Loader2 className="animate-spin" /> : "Update"}
           </Button>
         </form>
       </Form>
