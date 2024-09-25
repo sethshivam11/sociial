@@ -40,7 +40,7 @@ import {
 import SavePost from "./SavePost";
 import PostCaption from "./PostCaption";
 import { useRouter } from "next/navigation";
-import { saveToken } from "@/lib/store/features/slices/pushNotificationSlice";
+import { saveToken } from "@/lib/store/features/slices/notificationPreference";
 
 interface Props {
   feed?: boolean;
@@ -54,7 +54,6 @@ function Posts({ feed }: Props) {
   const {
     user,
     profile,
-    skeletonLoading: userLoading,
   } = useAppSelector((state) => state.user);
   const {
     skeletonLoading,
@@ -142,7 +141,7 @@ function Posts({ feed }: Props) {
     }
 
     return () => clearTimeout(timerRef.current);
-  }, [profile.username, dispatch, getFeed, exploreFeed, user._id]);
+  }, [profile.username, dispatch, user._id, feed]);
 
   return (
     <>

@@ -1,29 +1,158 @@
 "use client";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { ChevronLeft } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
+import {
+  getPreferences,
+  updatePreferences,
+} from "@/lib/store/features/slices/notificationPreference";
+import { useAppDispatch, useAppSelector } from "@/lib/store/store";
+import { ChevronLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
 function Page() {
+  const dispatch = useAppDispatch();
+  const { pushNotifications, loading } = useAppSelector(
+    (state) => state.notificationPreference
+  );
   const [notificationPreferences, setNotificationPreferences] = React.useState({
-    likes: true,
-    comments: true,
-    commentLikes: true,
-    storyLikes: true,
-    newFollowers: true,
-    messages: true,
-    tags: true,
-    group: true,
+    likes: false,
+    comments: false,
+    commentLikes: false,
+    storyLikes: false,
+    newFollowers: false,
+    newMessages: false,
+    newGroups: false,
   });
   const [pauseAll, setPauseAll] = React.useState(false);
+  const [permission, setPermission] = React.useState(false);
+
+  function handleUpdatePreferences() {
+    const {
+      likes,
+      comments,
+      commentLikes,
+      storyLikes,
+      newFollowers,
+      newMessages,
+      newGroups,
+    } = notificationPreferences;
+    dispatch(
+      updatePreferences({
+        likes,
+        comments,
+        commentLikes,
+        storyLikes,
+        newFollowers,
+        newMessages,
+        newGroups,
+      })
+    ).then((response) => {
+      if (!response.payload?.success) {
+        toast({
+          title: "Cannot update preferences",
+          description: response.payload?.message || "Something went wrong",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Preferences updated",
+          description: "Push notification preferences updated successfully",
+        });
+      }
+    });
+  }
+
+  function handlePause() {
+    dispatch(
+      updatePreferences({
+        likes: pauseAll,
+        comments: pauseAll,
+        commentLikes: pauseAll,
+        storyLikes: pauseAll,
+        newFollowers: pauseAll,
+        newMessages: pauseAll,
+        newGroups: pauseAll,
+      })
+    ).then((response) => {
+      if (!response.payload?.success) {
+        toast({
+          title: "Cannot update preferences",
+          description: response.payload?.message || "Something went wrong",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: pauseAll ? "Notifications unpaused" : "Notifications paused",
+          description: `All notifications are ${
+            pauseAll ? "unpaused" : "paused"
+          }`,
+        });
+        setNotificationPreferences({
+          likes: pauseAll,
+          comments: pauseAll,
+          commentLikes: pauseAll,
+          storyLikes: pauseAll,
+          newFollowers: pauseAll,
+          newMessages: pauseAll,
+          newGroups: pauseAll,
+        });
+        setPauseAll(!pauseAll);
+      }
+    });
+  }
+
+  function handlePermission() {
+    Notification.requestPermission().then((permission) => {
+      if (permission !== "granted") {
+        toast({
+          title: "Please provide permission",
+          description:
+            "Please provide permission to enable push notifications on your device",
+          variant: "destructive",
+        });
+      } else {
+        setPermission(true);
+        setPauseAll(false);
+      }
+    });
+  }
 
   React.useEffect(() => {
-    console.log(notificationPreferences);
-  }, [notificationPreferences]);
+    if (Notification.permission === "granted") {
+      setPermission(true);
+      dispatch(getPreferences()).then((response) => {
+        if (response.payload?.success) {
+          setNotificationPreferences(response.payload.data.pushNotifications);
+          const {
+            likes,
+            comments,
+            commentLikes,
+            storyLikes,
+            newFollowers,
+            newMessages,
+            newGroups,
+          } = response.payload.data.pushNotifications;
+          if (
+            !likes &&
+            !comments &&
+            !commentLikes &&
+            !storyLikes &&
+            !newFollowers &&
+            !newMessages &&
+            !newGroups
+          ) {
+            setPauseAll(true);
+          }
+        }
+      });
+    }
+  }, [dispatch, setPermission, setNotificationPreferences]);
 
   return (
-    <div className="flex flex-col items-center justify-start overflow-y-auto max-h-[100dvh] h-full xl:col-span-8 sm:col-span-9 col-span-10 w-full max-sm:pb-10">
+    <div className="flex flex-col items-center justify-start overflow-y-auto min-h-[90dvh] h-full xl:col-span-8 sm:col-span-9 col-span-10 w-full max-sm:pb-10">
       <div className="text-lg tracking-tight font-semibold sm:w-2/3 w-full text-left sm:my-2 my-2 flex items-center gap-4">
         <Link className="sm:hidden ml-2 p-2" href="/settings/notifications">
           <ChevronLeft />
@@ -31,14 +160,34 @@ function Page() {
         Push Notifications
       </div>
       <div className="sm:w-2/3 w-full max-sm:px-10 sm:space-y-8 space-y-5 mt-6">
+        <div className="space-y-2">
+          <div className="w-full flex items-center justify-start gap-4">
+            <Label
+              htmlFor="notification-permission"
+              className="text-md cursor-pointer w-full"
+            >
+              Permissions
+            </Label>
+            <Switch
+              id="notification-permission"
+              checked={permission}
+              onCheckedChange={handlePermission}
+            />
+          </div>
+          <p className="text-stone-500 text-sm">
+            Please provide permission to enable push notifications on your
+            device
+          </p>
+        </div>
         <div className="w-full flex items-center justify-start gap-4">
           <Label htmlFor="pause-all" className="text-md cursor-pointer w-full">
             Pause all
           </Label>
           <Switch
             id="pause-all"
-            checked={pauseAll}
-            onCheckedChange={setPauseAll}
+            disabled={!permission}
+            checked={pauseAll || !permission}
+            onCheckedChange={handlePause}
           />
         </div>
         <hr className="w-full bg-stone-500" />
@@ -50,7 +199,7 @@ function Page() {
           >
             <input
               type="radio"
-              disabled={pauseAll}
+              disabled={pauseAll || !permission}
               id="likes-off"
               name="likes"
               checked={!notificationPreferences.likes}
@@ -70,7 +219,7 @@ function Page() {
           >
             <input
               type="radio"
-              disabled={pauseAll}
+              disabled={pauseAll || !permission}
               id="likes-on"
               name="likes"
               checked={notificationPreferences.likes}
@@ -94,7 +243,7 @@ function Page() {
           >
             <input
               type="radio"
-              disabled={pauseAll}
+              disabled={pauseAll || !permission}
               id="comments-off"
               name="comments"
               checked={!notificationPreferences.comments}
@@ -114,7 +263,7 @@ function Page() {
           >
             <input
               type="radio"
-              disabled={pauseAll}
+              disabled={pauseAll || !permission}
               id="comments-on"
               name="comments"
               checked={notificationPreferences.comments}
@@ -138,7 +287,7 @@ function Page() {
           >
             <input
               type="radio"
-              disabled={pauseAll}
+              disabled={pauseAll || !permission}
               id="comment-likes-off"
               name="comment-likes"
               checked={!notificationPreferences.commentLikes}
@@ -158,7 +307,7 @@ function Page() {
           >
             <input
               type="radio"
-              disabled={pauseAll}
+              disabled={pauseAll || !permission}
               id="comment-likes-on"
               name="comment-likes"
               checked={notificationPreferences.commentLikes}
@@ -182,7 +331,7 @@ function Page() {
           >
             <input
               type="radio"
-              disabled={pauseAll}
+              disabled={pauseAll || !permission}
               id="story-likes-off"
               name="story-likes"
               checked={!notificationPreferences.storyLikes}
@@ -202,7 +351,7 @@ function Page() {
           >
             <input
               type="radio"
-              disabled={pauseAll}
+              disabled={pauseAll || !permission}
               id="story-likes-on"
               name="story-likes"
               checked={notificationPreferences.storyLikes}
@@ -226,7 +375,7 @@ function Page() {
           >
             <input
               type="radio"
-              disabled={pauseAll}
+              disabled={pauseAll || !permission}
               id="new-followers-off"
               name="new-followers"
               checked={!notificationPreferences.newFollowers}
@@ -246,7 +395,7 @@ function Page() {
           >
             <input
               type="radio"
-              disabled={pauseAll}
+              disabled={pauseAll || !permission}
               id="new-followers-on"
               name="new-followers"
               checked={notificationPreferences.newFollowers}
@@ -270,14 +419,14 @@ function Page() {
           >
             <input
               type="radio"
-              disabled={pauseAll}
+              disabled={pauseAll || !permission}
               id="messages-off"
               name="messages"
-              checked={!notificationPreferences.messages}
+              checked={!notificationPreferences.newMessages}
               onChange={(e) =>
                 setNotificationPreferences({
                   ...notificationPreferences,
-                  messages: e.target.checked ? false : true,
+                  newMessages: e.target.checked ? false : true,
                 })
               }
               className="w-6 h-6 accent-black dark:accent-white"
@@ -290,14 +439,14 @@ function Page() {
           >
             <input
               type="radio"
-              disabled={pauseAll}
+              disabled={pauseAll || !permission}
               id="messages-on"
               name="messages"
-              checked={notificationPreferences.messages}
+              checked={notificationPreferences.newMessages}
               onChange={(e) =>
                 setNotificationPreferences({
                   ...notificationPreferences,
-                  messages: e.target.checked ? true : false,
+                  newMessages: e.target.checked ? true : false,
                 })
               }
               className="w-6 h-6 accent-black dark:accent-white"
@@ -314,14 +463,14 @@ function Page() {
           >
             <input
               type="radio"
-              disabled={pauseAll}
+              disabled={pauseAll || !permission}
               id="group-off"
-              name="messages"
-              checked={!notificationPreferences.group}
+              name="group"
+              checked={!notificationPreferences.newGroups}
               onChange={(e) =>
                 setNotificationPreferences({
                   ...notificationPreferences,
-                  group: e.target.checked ? false : true,
+                  newGroups: e.target.checked ? false : true,
                 })
               }
               className="w-6 h-6 accent-black dark:accent-white"
@@ -334,14 +483,14 @@ function Page() {
           >
             <input
               type="radio"
-              disabled={pauseAll}
+              disabled={pauseAll || !permission}
               id="group-on"
               name="group"
-              checked={notificationPreferences.group}
+              checked={notificationPreferences.newGroups}
               onChange={(e) =>
                 setNotificationPreferences({
                   ...notificationPreferences,
-                  group: e.target.checked ? true : false,
+                  newGroups: e.target.checked ? true : false,
                 })
               }
               className="w-6 h-6 accent-black dark:accent-white"
@@ -349,6 +498,22 @@ function Page() {
             On
           </Label>
         </div>
+        <Button
+          size="lg"
+          onClick={handleUpdatePreferences}
+          disabled={
+            loading ||
+            pauseAll ||
+            Object.keys(notificationPreferences).every(
+              (key) =>
+                notificationPreferences[
+                  key as keyof typeof notificationPreferences
+                ] === pushNotifications[key as keyof typeof pushNotifications]
+            )
+          }
+        >
+          {loading ? <Loader2 className="animate-spin" /> : "Save Preferences"}
+        </Button>
       </div>
     </div>
   );

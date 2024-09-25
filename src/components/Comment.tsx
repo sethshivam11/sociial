@@ -198,12 +198,12 @@ export default function Comment({
 
   React.useEffect(() => {
     if (dialogOpen) dispatch(getComments({ postId }));
-  }, [dispatch, dialogOpen, getComments, postId]);
+  }, [dispatch, dialogOpen, postId]);
 
   React.useEffect(() => {
     if (likesDialog.open && likesDialog.commentId)
       dispatch(getLikes(likesDialog.commentId));
-  }, [dispatch, getLikes, likesDialog.open, likesDialog.commentId]);
+  }, [dispatch, likesDialog.open, likesDialog.commentId]);
 
   return (
     <>

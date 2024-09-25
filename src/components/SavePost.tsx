@@ -63,8 +63,9 @@ function SavePost({ post, isVideo }: Props) {
       }
     });
   }
-
-  const fetchSavedPosts = React.useCallback(async () => {
+  
+  React.useEffect(() => {
+    if (!user._id || !dialogOpen) return;
     dispatch(getSavedPosts()).then((response) => {
       if (response.payload?.success) {
         setSavedPostIds(
@@ -73,12 +74,7 @@ function SavePost({ post, isVideo }: Props) {
         setDialogOpen(false);
       }
     });
-  }, [dispatch, getSavedPosts]);
-
-  React.useEffect(() => {
-    if (!user._id || !dialogOpen) return;
-    fetchSavedPosts();
-  }, [fetchSavedPosts, user._id, dialogOpen]);
+  }, [dispatch, user._id, dialogOpen]);
 
   return (
     <Dialog

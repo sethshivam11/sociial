@@ -1,19 +1,64 @@
 "use client";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { toast } from "@/components/ui/use-toast";
+import {
+  getPreferences,
+  updatePreferences,
+} from "@/lib/store/features/slices/notificationPreference";
+import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
 function Page() {
+  const dispatch = useAppDispatch();
+  const { emailNotifications, loading } = useAppSelector(
+    (state) => state.notificationPreference
+  );
   const [emailPreferences, setEmailPreferences] = React.useState({
     products: true,
     announcements: true,
     support: true,
   });
 
+  function handleUpdatePreference() {
+    dispatch(updatePreferences(emailPreferences)).then((response) => {
+      if (response.payload?.success) {
+        const { products, announcements, support } =
+          response.payload.data.emails;
+        setEmailPreferences({
+          products,
+          announcements,
+          support,
+        });
+        toast({
+          title: "Preferences updated",
+          description: "Your email preferences have been updated",
+        });
+      } else {
+        toast({
+          title: "Cannot update preferences",
+          description: "Please try again later",
+          variant: "destructive",
+        });
+      }
+    });
+  }
+
   React.useEffect(() => {
-    console.log(emailPreferences);
-  }, [emailPreferences]);
+    dispatch(getPreferences()).then((response) => {
+      if (response.payload?.success) {
+        const { products, announcements, support } =
+          response.payload.data.emails;
+        setEmailPreferences({
+          products,
+          announcements,
+          support,
+        });
+      }
+    });
+  }, [dispatch]);
 
   return (
     <div className="flex flex-col items-center justify-start overflow-y-auto max-h-[100dvh] h-full xl:col-span-8 sm:col-span-9 col-span-10 w-full">
@@ -23,6 +68,10 @@ function Page() {
         </Link>
         Email Notifications
       </h1>
+      <p className="text-stone-500 text-sm text-left sm:w-2/3 w-full">
+        Important emails about your account and activity on the platform will be
+        sent to you even if you opt out of all the options below.
+      </p>
       <div className="sm:w-2/3 w-full max-sm:px-10 sm:space-y-8 space-y-5 mt-6">
         <div className="w-full flex flex-col items-center justify-start gap-4">
           <h2 className="w-full mb-2">New Products</h2>
@@ -147,6 +196,20 @@ function Page() {
             On
           </Label>
         </div>
+        <Button
+          size="lg"
+          onClick={handleUpdatePreference}
+          disabled={
+            loading ||
+            Object.keys(emailPreferences).every(
+              (key) =>
+                emailPreferences[key as keyof typeof emailPreferences] ===
+                emailNotifications[key as keyof typeof emailNotifications]
+            )
+          }
+        >
+          Update Preferences
+        </Button>
       </div>
     </div>
   );

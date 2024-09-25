@@ -97,7 +97,7 @@ function Page({ params }: { params: { postId: string } }) {
           break;
       }
     },
-    [isPaused, isMuted]
+    [isPaused, isMuted, videoRef]
   );
 
   React.useEffect(() => {
@@ -106,7 +106,7 @@ function Page({ params }: { params: { postId: string } }) {
     } else {
       videoRef?.play();
     }
-  }, [isPaused, seeking]);
+  }, [isPaused, seeking, videoRef]);
 
   React.useEffect(() => {
     window.addEventListener("keydown", handleKeys);

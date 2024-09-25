@@ -205,7 +205,7 @@ function Profile({
         if (response.payload?.message === "User not found")
           setUserNotFound(true);
       });
-  }, [username, dispatch, getFollowings, getProfile]);
+  }, [username, dispatch]);
 
   React.useEffect(() => {
     if (userNotFound) notFound();

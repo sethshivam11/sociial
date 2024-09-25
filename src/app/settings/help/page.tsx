@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronLeft, Info } from "lucide-react";
+import { ChevronLeft, Info, Loader2 } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -23,7 +23,7 @@ import { toast } from "@/components/ui/use-toast";
 
 function Page() {
   const dispatch = useAppDispatch();
-  const { user } = useAppSelector((state) => state.user);
+  const { user, loading } = useAppSelector((state) => state.user);
   const [image, setImage] = React.useState<File | null>(null);
   const [submitted, setSubmitted] = React.useState(false);
   const formSchema = z.object({
@@ -155,7 +155,7 @@ function Page() {
                 )}
               />
               <Button type="submit" size="lg">
-                Submit
+                {loading ? <Loader2 className="animate-spin" /> : "Submit"}
               </Button>
             </form>
           </Form>

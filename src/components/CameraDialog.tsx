@@ -62,7 +62,7 @@ function CameraDialog({ open, setOpen }: Props) {
     setImage(undefined);
   }
 
-  async function switchCamera() {
+  function switchCamera() {
     if (!multipleCamAvailalble) return;
 
     stopCamera();
@@ -73,64 +73,65 @@ function CameraDialog({ open, setOpen }: Props) {
     }
   }
 
-  const getUserMedia = React.useCallback(async function (facingMode?: {
-    exact: string;
-  }) {
-    const mediaDevicesAvailable =
-      (await navigator.mediaDevices) ||
-      (await navigator.mediaDevices?.getUserMedia);
-    if (!mediaDevicesAvailable) {
-      return toast({
-        title: "Error",
-        description: "Camera is not supported by your browser",
-        variant: "destructive",
-      });
-    }
-    await navigator.mediaDevices
-      .getUserMedia({ video: facingMode ? { facingMode } : true })
-      .then((stream) => {
-        setPermissionDenied(false);
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-        setStream(stream);
-        const capabilties = stream?.getTracks()[0].getCapabilities();
-        if (capabilties.facingMode) {
-          setActiveCamera(capabilties.facingMode[0]);
-          console.log(capabilties.facingMode[0]);
-        }
-      })
-      .catch((err) => {
-        console.log(err.message);
-        if (err.message === "Permission denied") {
-          setPermissionDenied(true);
-          toast({
-            title: "Permission",
-            description: "Please allow camera permission",
-            variant: "destructive",
-          });
-        }
-      });
-    navigator.mediaDevices
-      .enumerateDevices()
-      .then((devices) => {
-        if (devices.filter(({ kind }) => kind === "videoinput").length > 1) {
-          setMultipleCamAvailable(true);
-        }
-      })
-      .catch((err) => console.log(err));
+  const getUserMedia = React.useCallback(
+    async function (facingMode?: { exact: string }) {
+      const mediaDevicesAvailable =
+        (await navigator.mediaDevices) ||
+        (await navigator.mediaDevices?.getUserMedia);
+      if (!mediaDevicesAvailable) {
+        return toast({
+          title: "Error",
+          description: "Camera is not supported by your browser",
+          variant: "destructive",
+        });
+      }
+      await navigator.mediaDevices
+        .getUserMedia({ video: facingMode ? { facingMode } : true })
+        .then((stream) => {
+          setPermissionDenied(false);
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+          }
+          setStream(stream);
+          const capabilties = stream?.getTracks()[0].getCapabilities();
+          if (capabilties.facingMode) {
+            setActiveCamera(capabilties.facingMode[0]);
+            console.log(capabilties.facingMode[0]);
+          }
+        })
+        .catch((err) => {
+          console.log(err.message);
+          if (err.message === "Permission denied") {
+            setPermissionDenied(true);
+            toast({
+              title: "Permission",
+              description: "Please allow camera permission",
+              variant: "destructive",
+            });
+          }
+        });
+      navigator.mediaDevices
+        .enumerateDevices()
+        .then((devices) => {
+          if (devices.filter(({ kind }) => kind === "videoinput").length > 1) {
+            setMultipleCamAvailable(true);
+          }
+        })
+        .catch((err) => console.log(err));
 
-    return () => {
-      resetCamera();
-    };
-  },
-  []);
+      return () => {
+        resetCamera();
+      };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   React.useEffect(() => {
     if (open) {
       getUserMedia();
     }
-  }, [open]);
+  }, [open, getUserMedia]);
 
   return (
     <Dialog

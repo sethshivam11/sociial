@@ -25,7 +25,7 @@ function Stories() {
     if (userLoading) return;
     if (!stories.length) dispatch(getStories());
     if(!userStory?.media.length) dispatch(getUserStory());
-  }, [dispatch, getStories, getUserStory, userLoading]);
+  }, [dispatch, userLoading, stories.length, userStory?.media.length]);
 
   return (
     <>

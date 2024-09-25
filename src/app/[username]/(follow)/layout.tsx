@@ -14,7 +14,7 @@ function Layout({ children }: { children: React.ReactNode }) {
 
   React.useEffect(() => {
     dispatch(getProfile({ username: location.split("/")[1] }));
-  }, [dispatch, getProfile, location]);
+  }, [dispatch, location]);
 
   return (
     <div className="sm:container flex flex-col items-center justify-start xl:col-span-8 sm:col-span-9 col-span-10 sm:py-6">

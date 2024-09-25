@@ -82,7 +82,7 @@ function Page() {
         setSearchResults(response.payload.data.followings);
       }
     },
-    [dispatch, getFollowings]
+    [dispatch]
   );
 
   React.useEffect(() => {
@@ -99,7 +99,7 @@ function Page() {
     } else {
       setSearchResults(followings);
     }
-  }, [search]);
+  }, [search, followings]);
 
   React.useEffect(() => {
     if (!profile.username) return;

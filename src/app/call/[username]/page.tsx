@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
+import { useAppSelector } from "@/lib/store/store";
 import {
   ChevronLeft,
   ChevronRight,
@@ -11,19 +12,13 @@ import {
   Video,
   VideoOff,
 } from "lucide-react";
-import Image from "next/image";
 import { useSearchParams, useRouter } from "next/navigation";
 import React from "react";
 
 function Page() {
   const router = useRouter();
   const query = useSearchParams();
-  const user = {
-    avatar:
-      "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
-    fullName: "Shivam Soni",
-    username: "sethshivam",
-  };
+  const { user } = useAppSelector((state) => state.user);
   const peerVideoRef = React.useRef<HTMLVideoElement>(null);
   const selfVideoRef = React.useRef<HTMLVideoElement>(null);
   const selfVideoContainerRef = React.useRef<HTMLDivElement>(null);
@@ -37,18 +32,38 @@ function Page() {
     React.useState(false);
 
   function handleCallEnd() {
+    stopCamera();
     router.push(`/call/ended?username=${user.username}`);
   }
 
   function switchCamera() {
-    console.log("Switching Camera");
+    // if (!multipleCamAvailalble) return;
+    // stopCamera();
+    // console.log(activeCamera);
+    // if (activeCamera === "user") {
+    //   getUserMedia(true, "environment");
+    // } else {
+    //   getUserMedia(true, "user");
+    // }
+  }
+
+  function stopCamera() {
+    console.log(stream);
+    if (stream) {
+      stream.getTracks().forEach((track) => {
+        track.stop();
+      });
+      setStream(null);
+    }
+    // if (selfVideoRef.current) selfVideoRef.current.srcObject = null;
+    // if (peerVideoRef.current) peerVideoRef.current.srcObject = null;
   }
 
   function handleSelfVideoPause() {
     if (!isVideoCall) {
       setSelfVideoPaused(false);
       setIsVideoCall(true);
-      return getUserMedia(true, { exact: "user" }, true);
+      return getUserMedia(true, "user", true);
     }
     if (!selfVideoRef.current) return;
     if (selfVideoPaused) {
@@ -63,12 +78,13 @@ function Page() {
   const getUserMedia = React.useCallback(
     async (
       video: boolean,
-      facingMode?: { exact: "user" | "environment" },
+      mode?: "user" | "environment",
       convertingToVideo?: boolean
     ) => {
       const videoMode = video
-        ? { facingMode: facingMode ? facingMode : { exact: "user" } }
+        ? { facingMode: { exact: mode || "user" } }
         : false;
+      console.log(videoMode);
       await navigator.mediaDevices
         .getUserMedia({
           video: videoMode,
@@ -82,8 +98,8 @@ function Page() {
           const capabilties = stream.getTracks()[0].getCapabilities();
           if (capabilties.facingMode) {
             setActiveCamera(capabilties.facingMode[0]);
-            console.log(capabilties.facingMode[0]);
           }
+          console.log(stream.getTracks()[0]);
         })
         .catch((err) => {
           console.log(err);
@@ -131,7 +147,7 @@ function Page() {
       setSelfVideoPaused(true);
       getUserMedia(false);
     }
-  }, []);
+  }, [getUserMedia, query]);
 
   return (
     <div className="col-span-10 flex flex-col items-center justify-center min-h-[100dvh] max-h-[100dvh] bg-black overflow-hidden relative">
@@ -184,8 +200,8 @@ function Page() {
         </Button>
       </div>
       <div
-        className={`flex items-center justify-center lg:w-96 lg:h-72 sm:w-60 sm:h-44 w-full max-lg:top-4 lg:bottom-4 right-4 sm:shadow-lg bg-black sm:border sm:border-stone-500 sm:rounded-xl sm:absolute transition-transform max-sm:h-1/2 ${
-          isVideoCall ? "visible" : "invisible"
+        className={`flex items-center justify-center lg:w-96 lg:h-72 sm:w-60 sm:h-44 w-full max-lg:top-4 lg:bottom-4 right-4 sm:shadow-lg sm:rounded-xl sm:absolute transition-transform max-sm:h-1/2 overflow-hidden ${
+          isVideoCall ? "visible bg-black" : "invisible bg-transparent"
         }`}
         ref={selfVideoContainerRef}
       >

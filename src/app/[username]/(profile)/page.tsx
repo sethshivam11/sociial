@@ -21,7 +21,7 @@ function Page() {
   React.useEffect(() => {
     if (!profile.username) return;
     dispatch(getUserPosts({ username: profile.username }));
-  }, [dispatch, getUserPosts, profile.username]);
+  }, [dispatch, profile.username]);
   return (
     <div className="flex items-center justify-start flex-wrap flex-row w-full">
       {userLoading || postLoading ? (

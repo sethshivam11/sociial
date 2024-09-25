@@ -7,7 +7,6 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -35,9 +34,7 @@ import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import {
   ArrowLeft,
   BellRing,
-  Check,
   CheckCheck,
-  Circle,
   Loader2,
   MoreHorizontal,
   Trash2,
@@ -80,7 +77,7 @@ function Page() {
         );
       }
     });
-  }, [dispatch, getNotifications]);
+  }, [dispatch]);
 
   return (
     <div className="sm:container flex flex-col items-center justify-start min-h-[100dvh] xl:col-span-8 sm:col-span-9 col-span-10 sm:pt-6 pb-3">

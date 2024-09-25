@@ -122,7 +122,7 @@ function Navbar() {
       }
     }
     dispatch(getLoggedInUser());
-  }, [getLoggedInUser, dispatch]);
+  }, [dispatch]);
 
   return (
     <nav

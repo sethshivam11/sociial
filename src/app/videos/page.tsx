@@ -100,7 +100,7 @@ function Videos() {
           break;
       }
     },
-    [isPaused, isMuted]
+    [isPaused, isMuted, videoRef]
   );
 
   const debounce = useDebounceCallback((entry: IntersectionObserverEntry) => {
@@ -157,7 +157,7 @@ function Videos() {
     return () => {
       observers.forEach((observer) => observer.disconnect());
     };
-  }, [posts.length]);
+  }, [posts.length, debounce]);
 
   React.useEffect(() => {
     if (isPaused || seeking) {
@@ -165,7 +165,7 @@ function Videos() {
     } else {
       videoRef?.play();
     }
-  }, [isPaused, seeking]);
+  }, [isPaused, seeking, videoRef]);
 
   React.useEffect(() => {
     window.addEventListener("keydown", handleKeys);
@@ -173,12 +173,12 @@ function Videos() {
     return () => {
       window.removeEventListener("keydown", handleKeys);
     };
-  }, [handleKeys]);
+  }, [handleKeys, videoRef]);
 
   React.useEffect(() => {
     if (userLoading || !user._id) return;
     dispatch(videoFeed(1));
-  }, [user._id, userLoading, dispatch, videoFeed]);
+  }, [user._id, userLoading, dispatch]);
 
   return (
     <div

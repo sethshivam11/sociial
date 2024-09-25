@@ -44,7 +44,7 @@ function Page() {
         });
       });
     },
-    [dispatch, getFollowings, getFollowers]
+    [dispatch]
   );
 
   function setLoading(userId: string, loading: boolean) {
@@ -110,7 +110,7 @@ function Page() {
     } else {
       setSearchResults(followers);
     }
-  }, [search]);
+  }, [search, followers]);
 
   return (
     <>

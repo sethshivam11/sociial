@@ -14,7 +14,7 @@ function Page() {
   React.useEffect(() => {
     if (!user._id) return;
     dispatch(getSavedPosts());
-  }, [dispatch, user._id, getSavedPosts]);
+  }, [dispatch, user._id]);
 
   return (
     <div className="flex items-center justify-start flex-wrap flex-row w-full">

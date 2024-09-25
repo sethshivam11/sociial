@@ -8,7 +8,6 @@ import {
 import { AppDispatch, RootState } from "@/lib/store/store";
 import { socket } from "@/socket";
 import { MessageI } from "@/types/types";
-import { useRouter } from "next/navigation";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -19,7 +18,6 @@ const initialState = {
 const SocketContext = React.createContext(initialState);
 
 export function SocketProvider({ children }: React.PropsWithChildren<{}>) {
-  const router = useRouter();
   const dispatch: AppDispatch = useDispatch();
   const { chat } = useSelector((state: RootState) => state.chat);
   const [connected, setConnected] = React.useState(false);
@@ -63,7 +61,7 @@ export function SocketProvider({ children }: React.PropsWithChildren<{}>) {
       socket.off("disconnect", handleDisconnection);
       socket.disconnect();
     };
-  }, []);
+  }, [chat, dispatch]);
 
   return (
     <SocketContext.Provider value={{ connected }}>

@@ -118,7 +118,7 @@ function Page() {
       setUsername(user.username);
       form.setValue("username", user.username);
     }
-  }, [user]);
+  }, [user, form]);
 
   React.useEffect(() => {
     if (username === user.username) return setUsernameMessage("");
@@ -140,7 +140,7 @@ function Page() {
         console.log(error);
       }
     }
-  }, [username]);
+  }, [username, user.username]);
 
   return (
     <div className="flex flex-col items-center justify-start">

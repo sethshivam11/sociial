@@ -20,26 +20,24 @@ function LikeDialog({
   const { likes, loading } = useAppSelector((state) => state.post);
   const dispatch = useAppDispatch();
 
-  const getLikes = React.useCallback(async () => {
-    const response = await dispatch(fetchLikes(postId));
-    if (
-      !response.payload?.success &&
-      response.payload?.message !== "No likes found"
-    ) {
-      toast({
-        title: "Something went wrong!",
-        description:
-          response.payload?.message ||
-          "Failed to fetch likes, Please try again",
-      });
-    } else if (response.payload?.message === "No likes found") {
-      dispatch(resetLikes());
-    }
-  }, []);
-
   React.useEffect(() => {
-    if (dialogOpen) getLikes();
-  }, [dialogOpen]);
+    if (!dialogOpen) return;
+    dispatch(fetchLikes(postId)).then((response) => {
+      if (
+        !response.payload?.success &&
+        response.payload?.message !== "No likes found"
+      ) {
+        toast({
+          title: "Something went wrong!",
+          description:
+            response.payload?.message ||
+            "Failed to fetch likes, Please try again",
+        });
+      } else if (response.payload?.message === "No likes found") {
+        dispatch(resetLikes());
+      }
+    });
+  }, [dialogOpen, dispatch, postId]);
 
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

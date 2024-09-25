@@ -33,7 +33,7 @@ function Messages({ children }: { children: React.ReactNode }) {
         });
       }
     });
-  }, [dispatch, getChats]);
+  }, [dispatch]);
 
   React.useEffect(() => {
     if (newChatDialog && !userLoading) {
@@ -47,7 +47,7 @@ function Messages({ children }: { children: React.ReactNode }) {
         }
       });
     }
-  }, [dispatch, getFollowings, newChatDialog, user._id, userLoading]);
+  }, [dispatch, newChatDialog, user._id, userLoading]);
 
   return (
     <div className="grid min-h-[100dvh] max-sm:max-h-[100dvh] xl:col-span-8 pl-8 md:pl-4 max-sm:pl-0 sm:col-span-9 col-span-10 sm:grid-cols-10">

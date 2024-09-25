@@ -1,8 +1,7 @@
-import { PushNotificationSliceI } from "@/types/sliceTypes";
+import { NotificationPreferenceSliceI } from "@/types/sliceTypes";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
-const initialState: PushNotificationSliceI = {
-  token: "",
+const initialState: NotificationPreferenceSliceI = {
   loading: false,
   pushNotifications: {
     likes: false,
@@ -29,7 +28,7 @@ export const saveToken = createAsyncThunk(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ token }),
-    })
+    });
     return parsed.json();
   }
 );
@@ -45,16 +44,16 @@ export const getPreferences = createAsyncThunk(
 export const updatePreferences = createAsyncThunk(
   "pushNotification/updatePreferences",
   async (preferences: {
-    likes: boolean;
-    comments: boolean;
-    commentLikes: boolean;
-    storyLikes: boolean;
-    newFollowers: boolean;
-    newMessages: boolean;
-    newGroups: boolean;
-    newProducts: boolean;
-    announcements: boolean;
-    support: boolean;
+    likes?: boolean;
+    comments?: boolean;
+    commentLikes?: boolean;
+    storyLikes?: boolean;
+    newFollowers?: boolean;
+    newMessages?: boolean;
+    newGroups?: boolean;
+    newProducts?: boolean;
+    announcements?: boolean;
+    support?: boolean;
   }) => {
     const parsed = await fetch(
       "/api/v1/notificationPreferences/updatePreferences",
@@ -70,7 +69,7 @@ export const updatePreferences = createAsyncThunk(
   }
 );
 
-const pushNotificationSlice = createSlice({
+const notificationPreference = createSlice({
   name: "pushNotification",
   initialState,
   reducers: {},
@@ -80,9 +79,6 @@ const pushNotificationSlice = createSlice({
     });
     builder.addCase(saveToken.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload?.success) {
-        state.token = action.payload.token;
-      }
     });
     builder.addCase(saveToken.rejected, (state, action) => {
       state.loading = false;
@@ -118,4 +114,4 @@ const pushNotificationSlice = createSlice({
   },
 });
 
-export default pushNotificationSlice.reducer;
+export default notificationPreference.reducer;

@@ -2,7 +2,9 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { nameFallback } from "@/lib/helpers";
+import { useAppSelector } from "@/lib/store/store";
 import { MicOff, VideoOff } from "lucide-react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 
@@ -30,13 +32,7 @@ function Page() {
       .finally(() => setLoading(false));
   }, []);
 
-  const user = {
-    avatar:
-      "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
-    fullName: "Shivam Soni",
-    username: "sethshivam",
-    isPremium: false,
-  };
+  const { user } = useAppSelector((state) => state.user);
 
   React.useEffect(() => {
     const username = query.get("username");
@@ -45,7 +41,7 @@ function Page() {
     setUsername(query.get("username") || "");
     getPermissions(video === "true");
     setVideoEnabled(video === "true");
-  }, []);
+  }, [getPermissions, query]);
 
   if (permissions || loading) {
     return (
@@ -60,12 +56,11 @@ function Page() {
           <h1 className="text-2xl tracking-tight font-bold">{user.fullName}</h1>
           <h6 className="text-stone-500 text-lg">@{user.username}</h6>
         </div>
-        <Button
-          className="bg-blue-500 hover:bg-blue-600 text-white rounded-full"
-          onClick={() => router.push(`/call/${username}?video=${videoEnabled}`)}
-        >
-          Start Call
-        </Button>
+        <Link href={`/call/${username}?video=${videoEnabled}`}>
+          <Button className="bg-blue-500 hover:bg-blue-600 text-white rounded-full">
+            Start Call
+          </Button>
+        </Link>
       </div>
     );
   } else {
@@ -80,7 +75,8 @@ function Page() {
             Permissions Required
           </h1>
           <h6 className="text-stone-400">
-            Please allow Sociial to access your camera and microphone. <br className="max-sm:hidden" />
+            Please allow Sociial to access your camera and microphone.{" "}
+            <br className="max-sm:hidden" />
             You can turn this off later.
           </h6>
         </div>

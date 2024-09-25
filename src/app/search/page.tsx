@@ -45,6 +45,7 @@ function Search() {
 
   function appendRecentSearches(search: string) {
     recentSearches.length >= 10 ? recentSearches.pop() : recentSearches;
+    if (recentSearches.includes(search)) return;
     setRecentSearches((recentSearches) => [search, ...recentSearches]);
     localStorage.setItem(
       "recentSearches",
@@ -52,23 +53,23 @@ function Search() {
     );
   }
 
-  const searchForUsers = React.useCallback(async () => {
-    const response = await dispatch(searchUsers(search));
-    if (!response.payload?.success) {
-      console.log(response.payload);
-    }
-  }, [search, dispatch]);
-
   React.useEffect(() => {
-    searchForUsers();
-  }, [search]);
+    dispatch(searchUsers(search)).then((response) => {
+      if (
+        !response.payload?.success &&
+        response.payload?.message !== "No users found"
+      ) {
+        console.log(response.payload?.message);
+      }
+    });
+  }, [search, dispatch]);
 
   React.useEffect(() => {
     const savedRecentSearches = localStorage.getItem("recentSearches");
     if (savedRecentSearches) {
       setRecentSearches(JSON.parse(savedRecentSearches));
     }
-  }, []);
+  }, [setRecentSearches]);
 
   return (
     <div className="container flex flex-col items-center justify-start min-h-screen xl:col-span-8 sm:col-span-9 col-span-10 md:py-10 py-4">

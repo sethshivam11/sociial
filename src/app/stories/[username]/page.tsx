@@ -192,7 +192,7 @@ function Story({ params }: Props) {
 
   React.useEffect(() => {
     if (!userLoading && !stories.length) dispatch(getStories());
-  }, [dispatch, userLoading, stories.length, getStories]);
+  }, [dispatch, userLoading, stories.length]);
 
   React.useEffect(() => {
     function getStory() {
@@ -252,7 +252,7 @@ function Story({ params }: Props) {
       document.removeEventListener("keydown", handleKeyDown);
       document.removeEventListener("DOMContentLoaded", handleFullscreenChange);
     };
-  }, [stories]);
+  }, [router, query, username, stories]);
 
   React.useEffect(() => {
     if (
@@ -273,6 +273,7 @@ function Story({ params }: Props) {
     return () => {
       timer.clear();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
 
   React.useEffect(() => {
@@ -310,7 +311,7 @@ function Story({ params }: Props) {
         };
       }
     }
-  }, [index]);
+  }, [index, currentStory, router, stories]);
 
   React.useEffect(() => {
     if (!currentStory) return;
@@ -352,7 +353,7 @@ function Story({ params }: Props) {
         }
       : null;
     setLinkedStories({ prevStory2, prevStory1, nextStory1, nextStory2 });
-  }, [currentStory?.user.username]);
+  }, [currentStory, stories]);
 
   React.useEffect(() => {
     if (imageLoading) {
@@ -363,9 +364,7 @@ function Story({ params }: Props) {
   }, [imageLoading]);
 
   if (!currentStory) {
-    return (
-      <div className="col-span-10 h-[100dvh] bg-white dark:bg-black"></div>
-    );
+    return <></>;
   }
 
   return (

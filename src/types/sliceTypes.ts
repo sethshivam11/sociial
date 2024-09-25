@@ -84,8 +84,7 @@ export interface ChatSliceI {
   page: number;
 }
 
-export interface PushNotificationSliceI {
-  token: string;
+export interface NotificationPreferenceSliceI {
   loading: boolean;
   pushNotifications: PushNotificationI;
   emailNotifications: EmailNotificationI;

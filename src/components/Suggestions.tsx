@@ -57,7 +57,7 @@ function Suggestions() {
   React.useEffect(() => {
     if (!user._id) return;
     dispatch(getUserSuggestions());
-  }, [dispatch, getUserSuggestions, user._id, location]);
+  }, [dispatch, user._id, location]);
 
   return (
     <div className="py-4 px-2 lg:flex hidden h-fit sticky top-0 flex-col gap-4 lg:col-span-3">

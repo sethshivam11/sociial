@@ -79,7 +79,7 @@ function Page({ params }: { params: { postId: string } }) {
         setError(true);
       }
     });
-  }, [dispatch, getPost, params.postId]);
+  }, [dispatch, params.postId]);
 
   if (error) {
     notFound();

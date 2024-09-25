@@ -17,7 +17,8 @@ function Page() {
   React.useEffect(() => {
     if (userLoading || !profile.username) return;
     dispatch(getUserPosts({ username: profile.username }));
-  }, [dispatch, getUserPosts, profile.username, userLoading]);
+  }, [dispatch, profile.username, userLoading]);
+  
   return (
     <div className="flex items-center justify-start flex-wrap flex-row w-full">
       {skeletonLoading ? (

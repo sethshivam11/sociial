@@ -59,7 +59,7 @@ function Page() {
 
   React.useEffect(() => {
     dispatch(getBlockedUsers());
-  }, [dispatch, getBlockedUsers]);
+  }, [dispatch]);
 
   return (
     <div className="flex flex-col items-center justify-start overflow-y-auto min-h-[90dvh] h-full xl:col-span-8 sm:col-span-9 col-span-10 w-full max-sm:pb-10">

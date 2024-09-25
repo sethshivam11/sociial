@@ -264,7 +264,7 @@ function Page() {
   React.useEffect(() => {
     if (userLoading) return;
     if (!user._id) dispatch(getLoggedInUser());
-  }, [user._id, dispatch, getLoggedInUser]);
+  }, [user._id, dispatch, userLoading]);
 
   return (
     <div
