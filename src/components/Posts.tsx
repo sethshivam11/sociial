@@ -51,10 +51,7 @@ function Posts({ feed }: Props) {
   const timerRef = React.useRef<NodeJS.Timeout>();
   const [savingToken, setSavingToken] = React.useState(false);
   const dispatch = useAppDispatch();
-  const {
-    user,
-    profile,
-  } = useAppSelector((state) => state.user);
+  const { user, profile } = useAppSelector((state) => state.user);
   const {
     skeletonLoading,
     posts,
@@ -117,7 +114,7 @@ function Posts({ feed }: Props) {
     );
 
     if (!savedConsent?.consent && savedConsent?.expiry < Date.now()) {
-      timerRef.current = setTimeout(() => setConsentDialog(true), 5000);
+      timerRef.current = setTimeout(() => setConsentDialog(true), 10000);
     } else if (savedConsent?.consent && Notification.permission !== "granted") {
       localStorage.setItem(
         "notificationConsent",

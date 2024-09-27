@@ -41,6 +41,7 @@ function Page({ params }: { params: { postId: string } }) {
   const [isPaused, setIsPaused] = React.useState(false);
   const [sliderValue, setSliderValue] = React.useState(0);
   const [seeking, setSeeking] = React.useState(false);
+  const [notFoundError, setNotFoundError] = React.useState(false);
 
   function handleLike(postId: string) {
     dispatch(
@@ -119,12 +120,16 @@ function Page({ params }: { params: { postId: string } }) {
   React.useEffect(() => {
     const postId = params.postId;
     if (!postId) return;
-    dispatch(getPost(postId));
+    dispatch(getPost(postId)).then((response) => {
+      if (response.payload?.message === "Post not found") {
+        setNotFoundError(true);
+      }
+    });
   }, [dispatch, params]);
 
-  React.useEffect(() => {
-    if (!loading && !post._id) notFound();
-  }, [loading, post._id]);
+  if (notFoundError) {
+    notFound();
+  }
 
   return (
     <div

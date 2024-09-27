@@ -120,6 +120,7 @@ function Page() {
   const canvasRef = React.useRef<ReactSketchCanvasRef>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const [selectedFile, setSelectedFile] = React.useState<string>("");
+  const [postDialog, setPostDialog] = React.useState(false);
   const [stories, setStories] = React.useState<string[]>([]);
   const [textItems, setTextItems] = React.useState<TextItem[]>([]);
   const [strokeWidth, setStrokeWidth] = React.useState(6);
@@ -216,7 +217,7 @@ function Page() {
         ctx.drawImage(img, 0, 0);
         textItems.forEach((item) => {
           ctx.fillStyle = item.color;
-          ctx.font = `${item.size}px '__Inter_aaf875', '__Inter_Fallback_aaf875'`;
+          ctx.font = `bold ${item.size}px auto`;
           ctx.textAlign = "center";
           ctx.fillText(item.text, item.x, item.y);
         });
@@ -236,29 +237,71 @@ function Page() {
 
   async function handlePost() {
     dispatch(setLoading(true));
+    let currentImage: File | Blob | undefined;
+
+    if (canvasRef.current) {
+      const data = await canvasRef.current.exportImage("jpeg");
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      const img = new Image();
+      img.src = data;
+      await new Promise<void>((resolve) => {
+        img.onload = () => {
+          canvas.width = 450;
+          canvas.height = 800;
+          ctx.drawImage(img, 0, 0);
+
+          textItems.forEach((item) => {
+            ctx.fillStyle = item.color;
+            ctx.font = `bold ${item.size}px auto`;
+            ctx.textAlign = "center";
+            ctx.fillText(item.text, item.x, item.y);
+          });
+
+          canvas.toBlob((blob) => {
+            if (blob) {
+              currentImage = new File([blob], `${Date.now()}.jpeg`, {
+                type: "image/jpeg",
+              });
+              resolve();
+            }
+          }, "image/jpeg");
+        };
+      });
+    }
     let files: File[] = [];
     await Promise.all(
       stories.map(async (story) => {
-        const response = await fetch(story);
-        const blob = await response.blob();
-        const image = new File([blob], `${Date.now()}.jpg`, {
-          type: blob.type,
-        });
-        files.push(image);
+        if (story === selectedFile && currentImage) {
+          files.push(currentImage as File);
+        } else {
+          const response = await fetch(story);
+          const blob = await response.blob();
+          const image = new File([blob], `${Date.now()}.jpeg`, {
+            type: blob.type,
+          });
+          files.push(image);
+        }
       })
     );
+
     if (files.length === 0) return dispatch(setLoading(false));
-    dispatch(createStory(files)).then((response) => {
-      if (response.payload?.success) {
-        router.push("/");
-      } else {
-        toast({
-          title: "Cannot post",
-          description: response.payload?.message || "Something went wrong",
-          variant: "destructive",
-        });
-      }
-    });
+    dispatch(createStory(files))
+      .then((response) => {
+        if (response.payload?.success) {
+          setPostDialog(false);
+          router.push("/");
+        } else {
+          toast({
+            title: "Cannot post",
+            description: response.payload?.message || "Something went wrong",
+            variant: "destructive",
+          });
+        }
+      })
+      .finally(() => dispatch(setLoading(false)));
   }
 
   React.useEffect(() => {
@@ -428,19 +471,22 @@ function Page() {
                   Are you sure you want to discard this story? All changes will
                   be lost.
                 </AlertDialogDescription>
-                <AlertDialogFooter className="max-sm:flex-col mt-4">
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
                   <AlertDialogAction
                     className="bg-destructive text-white hover:bg-destructive/90"
                     onClick={() => router.push("/")}
                   >
                     Discard
                   </AlertDialogAction>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
-            <AlertDialog>
-              <AlertDialogTrigger className="absolute right-2 top-2 z-10 bg-transparent/50 rounded-full p-2">
+            <AlertDialog open={postDialog}>
+              <AlertDialogTrigger
+                className="absolute right-2 top-2 z-10 bg-transparent/50 rounded-full p-2"
+                onClick={() => setPostDialog(true)}
+              >
                 <Check size="30" color="#3b82f6" />
               </AlertDialogTrigger>
               <AlertDialogContent>
@@ -449,10 +495,17 @@ function Page() {
                   Are you sure you want to post this story?
                 </AlertDialogDescription>
                 <AlertDialogFooter className="max-sm:flex-col mt-4">
-                  <AlertDialogAction onClick={handlePost}>
+                  <AlertDialogCancel
+                    disabled={loading}
+                    onClick={() => {
+                      if (!loading) setPostDialog(false);
+                    }}
+                  >
+                    Cancel
+                  </AlertDialogCancel>
+                  <AlertDialogAction onClick={handlePost} disabled={loading}>
                     {loading ? <Loader2 className="animate-spin" /> : "Post"}
                   </AlertDialogAction>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
@@ -563,6 +616,7 @@ function Page() {
               <Rnd
                 key={index}
                 style={{
+                  fontFamily: "sans-serif",
                   fontSize: item.size,
                   color: item.color,
                   backgroundColor: item.background
@@ -581,7 +635,6 @@ function Page() {
                     prevItems.map((prevItem) => {
                       const rect =
                         containerRef.current?.getBoundingClientRect();
-                      console.log(rect, direction);
                       if (prevItem.id === item.id && rect) {
                         prevItem.x = direction.x + 55;
                         prevItem.y = direction.y + 33;
@@ -596,6 +649,10 @@ function Page() {
               >
                 <button
                   className="cursor-all-scroll pt-2.5 px-2 font-bold"
+                  style={{
+                    fontSize: `${item.size}px`,
+                    fontFamily: "auto",
+                  }}
                   onTouchStart={() => {
                     timerRef.current = setTimeout(() => {
                       handleEdit(item);
@@ -625,6 +682,7 @@ function Page() {
               strokeColor={color}
               strokeWidth={brush ? strokeWidth : 0}
               eraserWidth={strokeWidth * 2}
+              style={{ borderWidth: 0 }}
               preserveBackgroundImageAspectRatio="xMidYMid"
             />
           </>

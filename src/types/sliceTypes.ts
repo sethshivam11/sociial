@@ -117,6 +117,7 @@ export interface StorySliceI {
       username: string;
     };
     media: string[];
+    selfSeen: boolean;
     seenBy: BasicUserI[];
     likes: BasicUserI[];
     blockedTo: string[];

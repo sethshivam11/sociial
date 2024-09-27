@@ -62,6 +62,7 @@ function Page() {
   });
   const [selectedFile, setSelectedFile] = React.useState<string>("");
   const [posts, setPosts] = React.useState<string[]>([]);
+  const [postDialog, setPostDialog] = React.useState(false);
 
   const dragContainer = React.useRef<HTMLDivElement>(null);
 

@@ -1,5 +1,6 @@
 "use client";
 import { configureStore } from "@reduxjs/toolkit";
+import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import userSlice from "./features/slices/userSlice";
 import postSlice from "./features/slices/postSlice";
 import followSlice from "./features/slices/followSlice";
@@ -7,7 +8,6 @@ import commentSlice from "./features/slices/commentSlice";
 import notificationSlice from "./features/slices/notificationSlice";
 import chatSlice from "./features/slices/chatSlice";
 import messageSlice from "./features/slices/messageSlice";
-import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import reportSlice from "./features/slices/reportSlice";
 import storySlice from "./features/slices/storySlice";
 import notificationPreferenceSlice from "./features/slices/notificationPreference";

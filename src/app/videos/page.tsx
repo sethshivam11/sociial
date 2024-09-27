@@ -157,7 +157,9 @@ function Videos() {
     return () => {
       observers.forEach((observer) => observer.disconnect());
     };
-  }, [posts.length, debounce]);
+    
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [posts.length]);
 
   React.useEffect(() => {
     if (isPaused || seeking) {
@@ -179,7 +181,7 @@ function Videos() {
     if (userLoading || !user._id) return;
     dispatch(videoFeed(1));
   }, [user._id, userLoading, dispatch]);
-
+  
   return (
     <div
       className="max-h-[100dvh] h-[100dvh] xl:col-span-8 sm:col-span-9 col-span-10 snap-y snap-mandatory overflow-auto relative no-scrollbar"

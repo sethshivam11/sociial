@@ -4,6 +4,7 @@ import {
   CircleFadingPlusIcon,
   Grid2X2,
   Home,
+  Loader2,
   LogOut,
   Mail,
   Menu,
@@ -71,15 +72,14 @@ function Navbar() {
     "/add-story",
   ];
   const [unreadMessageCount, newNotifications] = [0, false];
-  const { user, isLoggedIn } = useAppSelector(
-    (state) => state.user
-  );
+  const { user, isLoggedIn, loading } = useAppSelector((state) => state.user);
 
   function handleLogout() {
     dispatch(logOutUser())
       .then(({ payload }) => {
-        if (payload?.success) {
+        if (payload?.success || payload?.message === "Token is required") {
           router.push("/sign-in");
+          if (window && "location" in window) window.location.reload();
         } else {
           toast({
             title: "Error",
@@ -398,7 +398,7 @@ function Navbar() {
             setOpen={setReportDialog}
             type="problem"
           />
-          <AlertDialog open={logOutDialog} onOpenChange={setLogOutDialog}>
+          <AlertDialog open={logOutDialog}>
             <AlertDialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
               <AlertDialogTitle className="w-full text-center text-2xl tracking-tight font-bold">
                 Log Out
@@ -408,12 +408,20 @@ function Navbar() {
                 Log Out?
               </p>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogCancel
+                  disabled={loading}
+                  onClick={() => {
+                    if (!loading) setLogOutDialog(false);
+                  }}
+                >
+                  Cancel
+                </AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleLogout}
-                  className="bg-destructive text-white sm:hover:bg-destructive/80"
+                  disabled={loading}
+                  className="bg-destructive text-white sm:hover:bg-destructive/80 min-w-20"
                 >
-                  Confirm
+                  {loading ? <Loader2 className="animate-spin" /> : "Confirm"}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>

@@ -6,14 +6,15 @@ import {
   AlertDialogContent,
   AlertDialogFooter,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useAppSelector } from "@/lib/store/store";
+import { logOutUser } from "@/lib/store/features/slices/userSlice";
+import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import {
   Ban,
   Bell,
   ChevronLeft,
   KeySquare,
+  Loader2,
   LogOut,
   Palette,
   Shield,
@@ -26,7 +27,23 @@ import React from "react";
 function Page({ children }: React.PropsWithChildren) {
   const location = usePathname();
   const router = useRouter();
-  const { username } = useAppSelector((state) => state.user.user);
+  const dispatch = useAppDispatch();
+  const { user, loading } = useAppSelector((state) => state.user);
+  const [open, setOpen] = React.useState(false);
+
+  function handleLogOut() {
+    dispatch(logOutUser())
+      .then((response) => {
+        if (
+          response.payload?.success ||
+          response.payload?.message === "Token is required"
+        ) {
+          router.push("/sign-in");
+          if (window && "location" in window) window.location.reload();
+        }
+      })
+      .finally(() => setOpen(false));
+  }
 
   React.useEffect(() => {
     const checkScreenWidthAndRedirect = () => {
@@ -46,12 +63,12 @@ function Page({ children }: React.PropsWithChildren) {
   return (
     <div className="md:container flex items-start justify-start xl:col-span-8 sm:col-span-9 col-span-10 sm:py-6">
       <div
-        className={`lg:w-1/4 md:w-1/3 max-md:ml-6 w-full max-h-[100dvh] sticky top-0 ${
+        className={`lg:w-1/4 md:w-1/3 max-md:ml-6 max-sm:ml-0 w-full max-h-[100dvh] sticky top-0 ${
           location === "/settings" ? "block" : "max-md:hidden"
         }`}
       >
         <div className="sm:text-3xl text-xl tracking-tighter font-bold text-center w-full sm:py-6 py-2 flex items-center">
-          <Link className="sm:hidden ml-2 p-2" href={`/${username}`}>
+          <Link className="sm:hidden ml-2 p-2" href={`/${user.username}`}>
             <ChevronLeft />
           </Link>
           <h1 className="w-full max-sm:pr-14">Settings</h1>
@@ -108,12 +125,6 @@ function Page({ children }: React.PropsWithChildren) {
           >
             <Palette size="30" strokeWidth="1.5" /> Theme
           </Link>
-          {/* <Link
-            href={user.isPremium ? "/settings/premium" : "/get-premium"}
-            className="flex items-center justify-start gap-2 py-2 px-3 hover:bg-stone-200 hover:dark:bg-stone-800 rounded-lg"
-          >
-            <BadgeCheck size="30" strokeWidth="1.5" /> Premium
-          </Link> */}
           <Link
             href="/settings/help"
             className={`flex items-center justify-start gap-2 py-2 px-3 hover:bg-stone-200 hover:dark:bg-stone-800 rounded-lg ${
@@ -124,38 +135,42 @@ function Page({ children }: React.PropsWithChildren) {
           >
             <Shield size="30" strokeWidth="1.5" /> Help
           </Link>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <button
-                className={`sm:hidden flex items-center justify-start gap-2 py-2 px-3 hover:bg-stone-200 hover:dark:bg-stone-800 rounded-lg`}
-              >
-                <LogOut size="30" strokeWidth="1.5" /> Log Out
-              </button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogTitle className="w-full text-center text-2xl tracking-tight font-bold">
-                Log Out
-              </AlertDialogTitle>
-              <p>
-                You can always log back in at any time. Are you sure you want to
-                Log Out?
-              </p>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                className="text-white bg-destructive hover:bg-destructive/80"
-                  onClick={() => {
-                    localStorage.clear();
-                    router.push("/sign-in");
-                  }}
-                >
-                  Confirm
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <button
+            onClick={() => setOpen(true)}
+            className={`sm:hidden flex items-center justify-start gap-2 py-2 px-3 hover:bg-stone-200 hover:dark:bg-stone-800 rounded-lg`}
+          >
+            <LogOut size="30" strokeWidth="1.5" /> Log Out
+          </button>
         </div>
       </div>
+      <AlertDialog open={open}>
+        <AlertDialogContent>
+          <AlertDialogTitle className="w-full text-center text-2xl tracking-tight font-bold">
+            Log Out
+          </AlertDialogTitle>
+          <p>
+            You can always log back in at any time. Are you sure you want to Log
+            Out?
+          </p>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              disabled={loading}
+              onClick={() => {
+                if (!loading) setOpen(false);
+              }}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="text-white bg-destructive hover:bg-destructive/80"
+              disabled={loading}
+              onClick={handleLogOut}
+            >
+              {loading ? <Loader2 className="animate-spin" /> : "Confirm"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <div
         className={`h-full md:max-h-full md:border-l-2 border-stone-200 dark:border-stone-800 ${
           location === "/settings" ? "lg:w-3/4 w-0" : "lg:w-3/4 w-full"
@@ -168,3 +183,12 @@ function Page({ children }: React.PropsWithChildren) {
 }
 
 export default Page;
+
+{
+  /* <Link
+            href={user.isPremium ? "/settings/premium" : "/get-premium"}
+            className="flex items-center justify-start gap-2 py-2 px-3 hover:bg-stone-200 hover:dark:bg-stone-800 rounded-lg"
+          >
+            <BadgeCheck size="30" strokeWidth="1.5" /> Premium
+          </Link> */
+}

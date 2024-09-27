@@ -33,6 +33,7 @@ import { StoryI } from "@/types/types";
 import {
   getStories,
   likeStory,
+  seenStory,
   unlikeStory,
 } from "@/lib/store/features/slices/storySlice";
 import { toast } from "@/components/ui/use-toast";
@@ -95,6 +96,11 @@ function Story({ params }: Props) {
 
   function onSubmit(data: { reply: string }) {
     console.log(data.reply);
+    toast({
+      title: "Cannot send reply",
+      description: "This feature is not available yet",
+      variant: "destructive",
+    });
   }
 
   function handleTouchStart(e: React.TouchEvent<HTMLButtonElement>) {
@@ -237,20 +243,10 @@ function Story({ params }: Props) {
 
     getStory();
 
-    const handleFullscreenChange = () => {
-      const isFullscreen = document.fullscreenElement !== null;
-      alert(isFullscreen);
-      containerRef.current?.requestFullscreen().catch((err) => {
-        alert("Failed to enter fullscreen:" + err);
-      });
-    };
-
     document.addEventListener("keydown", handleKeyDown);
-    document.addEventListener("DOMContentLoaded", handleFullscreenChange);
 
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
-      document.removeEventListener("DOMContentLoaded", handleFullscreenChange);
     };
   }, [router, query, username, stories]);
 
@@ -289,6 +285,10 @@ function Story({ params }: Props) {
   }, [isPaused, timer]);
 
   React.useEffect(() => {
+    if (currentStory && index === currentStory.media.length - 1 && !currentStory.seenBy.includes(user._id)) {
+      dispatch(seenStory({ storyId: currentStory._id, userId: user._id }));
+    }
+
     progressBarRef.current?.parentNode?.parentElement?.children[
       index - 1
     ]?.children[0]
@@ -311,7 +311,7 @@ function Story({ params }: Props) {
         };
       }
     }
-  }, [index, currentStory, router, stories]);
+  }, [index, currentStory, router, stories, dispatch, user._id]);
 
   React.useEffect(() => {
     if (!currentStory) return;
@@ -415,7 +415,6 @@ function Story({ params }: Props) {
               width="200"
               height="350"
             />
-            6{" "}
           </Link>
         )}
       </div>
@@ -444,7 +443,7 @@ function Story({ params }: Props) {
         </button>
       </div>
       <div
-        className="ring-1 ring-stone-800 flex items-center my-2 rounded-sm bg-black min-w-72 sm:h-[50rem] max-h-full h-fit sm:aspect-9/16 max-sm:h-full sm:w-fit w-full transition-opacity duration-200 relative"
+        className="ring-1 ring-stone-800 flex items-center my-2 rounded-sm bg-black min-w-72 sm:h-[50rem] max-h-full h-fit sm:aspect-9/16 max-sm:h-full sm:w-fit w-full transition-opacity duration-200 relative overflow-hidden"
         ref={storyContainer}
       >
         <div className="w-full absolute flex items-center justify-between p-4 pt-2 top-0 left-0 bg-gradient-to-b from-transparent/40 via-transparent/20 to-transparent pb-4">

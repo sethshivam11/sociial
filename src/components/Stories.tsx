@@ -19,12 +19,25 @@ function Stories() {
   const { stories, userStory, skeletonLoading } = useAppSelector(
     (state) => state.story
   );
+
+  const sortedStories = stories
+    .map((story) => ({
+      ...story,
+      seen: story.seenBy.includes(user._id),
+    }))
+    .sort((a, b) => {
+      if (a.seen !== b.seen) {
+        return a.seen ? 1 : -1;
+      }
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+
   const [redirecting, setRedirecting] = React.useState(false);
 
   React.useEffect(() => {
     if (userLoading) return;
     if (!stories.length) dispatch(getStories());
-    if(!userStory?.media.length) dispatch(getUserStory());
+    if (!userStory?.media.length) dispatch(getUserStory());
   }, [dispatch, userLoading, stories.length, userStory?.media.length]);
 
   return (
@@ -39,7 +52,9 @@ function Stories() {
           <div
             className={`w-20 h-20 rounded-full p-1 ${
               userStory?.media[0] &&
-              "bg-gradient-to-bl from-red-500 via-blue-500 to-green-500"
+              (userStory?.selfSeen
+                ? "bg-stone-400 dark:bg-stone-600"
+                : "bg-gradient-to-bl from-red-500 via-blue-500 to-green-500")
             }`}
           >
             <Link
@@ -71,7 +86,7 @@ function Stories() {
         {skeletonLoading ? (
           <StoriesLoading />
         ) : (
-          stories.map((story, index) => {
+          sortedStories.map((story, index) => {
             return (
               <Link
                 href={`/stories/${story.user.username}`}
@@ -79,7 +94,13 @@ function Stories() {
                 onClick={() => setRedirecting(true)}
                 className="flex flex-col items-center gap-1 sm:hover:scale-105 transition-transform"
               >
-                <div className="w-20 h-20 rounded-full bg-gradient-to-bl from-red-500 via-blue-500 to-green-500 p-1">
+                <div
+                  className={`w-20 h-20 rounded-full p-1 ${
+                    story.seenBy.includes(user._id)
+                      ? "bg-stone-400 dark:bg-stone-600"
+                      : "bg-gradient-to-bl from-red-500 via-blue-500 to-green-500 "
+                  }`}
+                >
                   <Avatar
                     className={`w-full h-full ring-2 ring-white dark:ring-black ${
                       story.user.avatar.includes("r5pvoicvcxtyhjkgqk8y.png")

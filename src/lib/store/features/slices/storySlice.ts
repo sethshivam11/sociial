@@ -15,6 +15,7 @@ const initialState: StorySliceI = {
     media: [],
     seenBy: [],
     likes: [],
+    selfSeen: false,
     blockedTo: [],
     createdAt: "",
   },
@@ -62,10 +63,19 @@ export const deleteStory = createAsyncThunk(
   }
 );
 
+export const markSelfSeen = createAsyncThunk("stories/markSeen", async () => {
+  const response = await fetch("/api/v1/stories/markSelfSeen", {
+    method: "PATCH",
+  });
+  return response.json();
+});
+
 export const seenStory = createAsyncThunk(
   "stories/seen",
   async ({ storyId, userId }: { storyId: string; userId: string }) => {
-    const parsed = await fetch(`/api/v1/stories/seen/${storyId}`);
+    const parsed = await fetch(`/api/v1/stories/seen/${storyId}`, {
+      method: "PATCH",
+    });
     return parsed.json();
   }
 );
@@ -141,6 +151,12 @@ const storySlice = createSlice({
       }
     });
 
+    builder.addCase(markSelfSeen.fulfilled, (state, action) => {
+      if (action.payload?.success && state.userStory) {
+        state.userStory.selfSeen = true;
+      }
+    });
+
     builder
       .addCase(deleteStory.pending, (state) => {
         state.loading = true;
@@ -148,33 +164,24 @@ const storySlice = createSlice({
       .addCase(deleteStory.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload?.success) {
-          state.stories = state.stories.filter(
-            (story) => story._id !== action.meta.arg
-          );
+          state.userStory = initialState.userStory;
         }
       })
       .addCase(deleteStory.rejected, (state) => {
         state.loading = false;
       });
 
-    builder
-      .addCase(seenStory.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(seenStory.fulfilled, (state, action) => {
-        state.loading = false;
-        if (action.payload?.success) {
-          state.stories = state.stories.map((story) => {
-            if (story._id === action.meta.arg.storyId) {
-              story.seenBy.push(action.meta.arg.userId);
-            }
-            return story;
-          });
-        }
-      })
-      .addCase(seenStory.rejected, (state) => {
-        state.loading = false;
-      });
+    builder.addCase(seenStory.fulfilled, (state, action) => {
+      state.loading = false;
+      if (action.payload?.success) {
+        state.stories = state.stories.map((story) => {
+          if (story._id === action.meta.arg.storyId) {
+            story.seenBy.push(action.meta.arg.userId);
+          }
+          return story;
+        });
+      }
+    });
 
     builder
       .addCase(likeStory.pending, (state) => {
