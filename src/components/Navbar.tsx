@@ -121,7 +121,12 @@ function Navbar() {
         document.cookie = "refreshToken=; accessToken=;";
       }
     }
-    dispatch(getLoggedInUser());
+    dispatch(getLoggedInUser()).then((response) => {
+      if (response.payload?.success && location === "/sign-in") {
+        router.push("/");
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch]);
 
   return (

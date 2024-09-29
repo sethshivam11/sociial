@@ -35,10 +35,11 @@ function Stories() {
   const [redirecting, setRedirecting] = React.useState(false);
 
   React.useEffect(() => {
-    if (userLoading) return;
     if (!stories.length) dispatch(getStories());
     if (!userStory?.media.length) dispatch(getUserStory());
-  }, [dispatch, userLoading, stories.length, userStory?.media.length]);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch]);
 
   return (
     <>

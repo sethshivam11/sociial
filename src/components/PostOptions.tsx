@@ -26,6 +26,7 @@ import { nameFallback } from "@/lib/helpers";
 import { deletePost } from "@/lib/store/features/slices/postSlice";
 import {
   followUser,
+  getFollowings,
   unfollowUser,
 } from "@/lib/store/features/slices/followSlice";
 
@@ -47,6 +48,7 @@ function PostOptions({ user, postId, isVideo, explorePosts }: Props) {
   const [unfollowing, setUnfollowing] = React.useState(false);
   const [deleting, setDeleting] = React.useState(false);
   const { user: currentUser } = useAppSelector((state) => state.user);
+  const { followings } = useAppSelector((state) => state.follow.follow);
   const router = useRouter();
   const location = usePathname();
   const [unfollowDialog, setUnfollowDialog] = React.useState(false);
@@ -80,8 +82,12 @@ function PostOptions({ user, postId, isVideo, explorePosts }: Props) {
     setUnfollowing(true);
     dispatch(unfollowUser({ username }))
       .then((response) => {
-        console.log(response.payload?.message);
-        if (response.payload?.success) setUnfollowDialog(false);
+        if (response.payload?.success){
+          setUnfollowDialog(false);
+          toast({
+            title: `You unfollowed ${username}`,
+          })
+        } 
         else if (response.payload?.message === "Follower already unfollowed") {
           toast({
             title: `You already unfollowed ${username}`,
@@ -96,6 +102,26 @@ function PostOptions({ user, postId, isVideo, explorePosts }: Props) {
         }
       })
       .finally(() => setUnfollowing(false));
+  }
+  function handleFollow(username: string) {
+    dispatch(followUser({ username })).then((response) => {
+      if (response.payload?.success) {
+        toast({
+          title: `You started following ${user.username}`,
+        });
+      } else if (response.payload?.message === "Follower already followed") {
+        toast({
+          title: `You already follow ${user.username}`,
+          description: "You can unfollow them if you want",
+        });
+      } else if (!response.payload?.success) {
+        toast({
+          title: `Cannot follow ${user.username}`,
+          description: "Please try again later",
+          variant: "destructive",
+        });
+      }
+    });
   }
 
   return (
@@ -120,43 +146,19 @@ function PostOptions({ user, postId, isVideo, explorePosts }: Props) {
               >
                 Report
               </DialogClose>
-              {explorePosts ? (
-                <DialogClose
-                  className="text-blue-500 w-full md:px-20 py-1"
-                  onClick={() =>
-                    dispatch(followUser({ userId: user._id })).then(
-                      (response) => {
-                        if (response.payload?.success) {
-                          toast({
-                            title: `You started following ${user.username}`,
-                          });
-                        } else if (
-                          response.payload?.message ===
-                          "Follower already followed"
-                        ) {
-                          toast({
-                            title: `You already follow ${user.username}`,
-                            description: "You can unfollow them if you want",
-                          });
-                        } else if (!response.payload?.success) {
-                          toast({
-                            title: `Cannot follow ${user.username}`,
-                            description: "Please try again later",
-                            variant: "destructive",
-                          });
-                        }
-                      }
-                    )
-                  }
-                >
-                  Follow
-                </DialogClose>
-              ) : (
+              {followings.includes(user._id) ? (
                 <DialogClose
                   className="text-red-500 w-full md:px-20 py-1"
                   onClick={() => setUnfollowDialog(true)}
                 >
                   Unfollow
+                </DialogClose>
+              ) : (
+                <DialogClose
+                  className="text-blue-500 w-full md:px-20 py-1"
+                  onClick={() => handleFollow(user.username)}
+                >
+                  Follow
                 </DialogClose>
               )}
             </>
@@ -167,7 +169,7 @@ function PostOptions({ user, postId, isVideo, explorePosts }: Props) {
           >
             Copy link
           </DialogClose>
-          {location === "/" ? (
+          {location === "/" && (
             <DialogClose
               className="w-full md:px-20 py-1"
               onClick={() =>
@@ -176,8 +178,6 @@ function PostOptions({ user, postId, isVideo, explorePosts }: Props) {
             >
               Open post
             </DialogClose>
-          ) : (
-            ""
           )}
           <DialogClose
             className="w-full md:px-20 py-1"
@@ -258,7 +258,6 @@ function PostOptions({ user, postId, isVideo, explorePosts }: Props) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
       <ReportDialog
         open={reportDialog}
         setOpen={setReportDialog}

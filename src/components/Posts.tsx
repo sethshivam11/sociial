@@ -40,7 +40,11 @@ import {
 import SavePost from "./SavePost";
 import PostCaption from "./PostCaption";
 import { useRouter } from "next/navigation";
-import { saveToken } from "@/lib/store/features/slices/notificationPreference";
+import {
+  checkExistingToken,
+  saveToken,
+} from "@/lib/store/features/slices/notificationPreferenceSlice";
+import { getBasicFollow } from "@/lib/store/features/slices/followSlice";
 
 interface Props {
   feed?: boolean;
@@ -65,12 +69,15 @@ function Posts({ feed }: Props) {
   const [showExplorePosts, setShowExplorePosts] = React.useState(true);
 
   async function handleSaveToken() {
-    const response = await handleConsent(setSavingToken, setConsentDialog);
+    setSavingToken(true);
+    const response = await handleConsent();
     if (response?.toast) {
       toast(response.toast);
     } else if (response.token) {
-      dispatch(saveToken(response.token));
+      await dispatch(saveToken(response.token));
+      setConsentDialog(false);
     }
+    setSavingToken(false);
   }
 
   function handleLike(postId: string, type: "posts" | "explore") {
@@ -108,9 +115,16 @@ function Posts({ feed }: Props) {
   }
 
   React.useEffect(() => {
+    if (!feed) {
+      dispatch(getFeed(1));
+    } else if (profile.username) {
+      dispatch(getUserPosts({ username: profile.username }));
+    }
+    dispatch(getBasicFollow());
+
     const savedConsent = JSON.parse(
       localStorage.getItem("notificationConsent") ||
-        '{"consent": false,"expiry": 0}'
+        `{"consent": false,"expiry": 0, "token": null, "lastChecked": null}`
     );
 
     if (!savedConsent?.consent && savedConsent?.expiry < Date.now()) {
@@ -118,10 +132,21 @@ function Posts({ feed }: Props) {
     } else if (savedConsent?.consent && Notification.permission !== "granted") {
       localStorage.setItem(
         "notificationConsent",
-        '{"consent": false,"expiry": 0}'
+        '{"consent": false,"expiry": 0, "token": null}'
       );
       timerRef.current = setTimeout(() => setConsentDialog(true), 5000);
+    } else if (
+      savedConsent?.token &&
+      Notification.permission === "granted" &&
+      savedConsent?.lastChecked - Date.now() > 600_000
+    ) {
+      dispatch(checkExistingToken(savedConsent.token)).then((response) => {
+        if (!response.payload?.success) {
+          handleSaveToken();
+        }
+      });
     }
+
     const savedExplorePostsConsent =
       localStorage.getItem("explorePostsConsent") || "true";
     if (savedExplorePostsConsent !== "false") {
@@ -129,16 +154,16 @@ function Posts({ feed }: Props) {
     } else {
       setShowExplorePosts(false);
     }
-    if (!feed && user._id) {
-      dispatch(getFeed(1)).then(() => {
-        dispatch(exploreFeed({ page: 1, userId: user._id }));
-      });
-    } else if (profile.username) {
-      dispatch(getUserPosts({ username: profile.username }));
-    }
 
     return () => clearTimeout(timerRef.current);
-  }, [profile.username, dispatch, user._id, feed]);
+    
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile.username, dispatch, feed]);
+
+  React.useEffect(() => {
+    if (!user._id || !feed) return;
+    dispatch(exploreFeed({ page: 1, userId: user._id }));
+  }, [dispatch, user._id, feed]);
 
   return (
     <>

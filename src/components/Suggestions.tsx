@@ -55,8 +55,21 @@ function Suggestions() {
   }
 
   React.useEffect(() => {
-    if (!user._id) return;
-    dispatch(getUserSuggestions());
+    if (!user._id || !window) return;
+    const checkScreenWidth = () => {
+      const screenWidth = window.innerWidth;
+      const targetWidth = 1024;
+
+      if (screenWidth > targetWidth && !suggestions.length) {
+        dispatch(getUserSuggestions());
+      }
+    };
+
+    if (location === "/") {
+      checkScreenWidth();
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, user._id, location]);
 
   return (

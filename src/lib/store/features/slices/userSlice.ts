@@ -162,9 +162,7 @@ export const getProfile = createAsyncThunk(
 );
 
 export const logOutUser = createAsyncThunk("users/logout", async () => {
-  const token = JSON.parse(
-    localStorage.getItem("notificationConsent") || '{"token": null}'
-  ).token;
+  const token = localStorage.getItem("notification-token") || "";
   const parsed = await fetch(
     `/api/v1/users/logout${token ? `?firebaseToken=${token}` : ""}`
   );
@@ -692,9 +690,10 @@ export const userSlice = createSlice({
       })
       .addCase(savePost.fulfilled, (state) => {
         state.loading = false;
-      }).addCase(savePost.rejected, (state) => {
-        state.loading = false;
       })
+      .addCase(savePost.rejected, (state) => {
+        state.loading = false;
+      });
 
     builder
       .addCase(unsavePost.pending, (state) => {
@@ -702,9 +701,10 @@ export const userSlice = createSlice({
       })
       .addCase(unsavePost.fulfilled, (state, action) => {
         state.loading = false;
-      }).addCase(unsavePost.rejected, (state) => {
-        state.loading = false;
       })
+      .addCase(unsavePost.rejected, (state) => {
+        state.loading = false;
+      });
 
     builder
       .addCase(getUserSuggestions.pending, (state) => {

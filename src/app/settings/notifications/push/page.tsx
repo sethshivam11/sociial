@@ -4,9 +4,10 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/use-toast";
 import {
+  deleteToken,
   getPreferences,
   updatePreferences,
-} from "@/lib/store/features/slices/notificationPreference";
+} from "@/lib/store/features/slices/notificationPreferenceSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { ChevronLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
@@ -14,7 +15,7 @@ import React from "react";
 
 function Page() {
   const dispatch = useAppDispatch();
-  const { pushNotifications, loading } = useAppSelector(
+  const { pushNotifications, loading, skeletonLoading } = useAppSelector(
     (state) => state.notificationPreference
   );
   const [notificationPreferences, setNotificationPreferences] = React.useState({
@@ -105,54 +106,62 @@ function Page() {
   }
 
   function handlePermission() {
-    Notification.requestPermission().then((permission) => {
-      if (permission !== "granted") {
-        toast({
-          title: "Please provide permission",
-          description:
-            "Please provide permission to enable push notifications on your device",
-          variant: "destructive",
-        });
-      } else {
-        setPermission(true);
-        setPauseAll(false);
-      }
-    });
+    if (Notification.permission === "granted") {
+      Notification.requestPermission().then((permission) => {
+        if (permission !== "granted") {
+          toast({
+            title: "Please provide permission",
+            description:
+              "Please provide permission to enable push notifications on your device",
+            variant: "destructive",
+          });
+        } else {
+          setPermission(true);
+          setPauseAll(false);
+        }
+      });
+    } else {
+      const consent = JSON.parse(
+        localStorage.getItem("notificationToken") ||
+          `{"consent": false,"expiry": 0, "token": null, "lastChecked": ${Date.now()}}`
+      );
+      dispatch(deleteToken(consent?.token));
+    }
   }
 
   React.useEffect(() => {
     if (Notification.permission === "granted") {
       setPermission(true);
-      dispatch(getPreferences()).then((response) => {
-        if (response.payload?.success) {
-          setNotificationPreferences(response.payload.data.pushNotifications);
-          const {
-            likes,
-            comments,
-            commentLikes,
-            storyLikes,
-            newFollowers,
-            newMessages,
-            newGroups,
-          } = response.payload.data.pushNotifications;
-          if (
-            !likes &&
-            !comments &&
-            !commentLikes &&
-            !storyLikes &&
-            !newFollowers &&
-            !newMessages &&
-            !newGroups
-          ) {
-            setPauseAll(true);
-          }
-        }
-      });
     }
+    dispatch(getPreferences()).then((response) => {
+      if (response.payload?.success) {
+        setNotificationPreferences(response.payload.data.pushNotifications);
+        const {
+          likes,
+          comments,
+          commentLikes,
+          storyLikes,
+          newFollowers,
+          newMessages,
+          newGroups,
+        } = response.payload.data.pushNotifications;
+        if (
+          !likes &&
+          !comments &&
+          !commentLikes &&
+          !storyLikes &&
+          !newFollowers &&
+          !newMessages &&
+          !newGroups
+        ) {
+          setPauseAll(true);
+        }
+      }
+    });
   }, [dispatch, setPermission, setNotificationPreferences]);
 
   return (
-    <div className="flex flex-col items-center justify-start overflow-y-auto min-h-[90dvh] h-full xl:col-span-8 sm:col-span-9 col-span-10 w-full max-sm:pb-10">
+    <div className="flex flex-col items-center justify-start overflow-y-auto min-h-[90dvh] h-full xl:col-span-8 sm:col-span-9 col-span-10 w-full max-sm:pb-20">
       <div className="text-lg tracking-tight font-semibold sm:w-2/3 w-full text-left sm:my-2 my-2 flex items-center gap-4">
         <Link className="sm:hidden ml-2 p-2" href="/settings/notifications">
           <ChevronLeft />
@@ -170,6 +179,7 @@ function Page() {
             </Label>
             <Switch
               id="notification-permission"
+              disabled={skeletonLoading || loading}
               checked={permission}
               onCheckedChange={handlePermission}
             />
@@ -185,7 +195,7 @@ function Page() {
           </Label>
           <Switch
             id="pause-all"
-            disabled={!permission}
+            disabled={!permission || skeletonLoading}
             checked={pauseAll || !permission}
             onCheckedChange={handlePause}
           />
@@ -199,7 +209,7 @@ function Page() {
           >
             <input
               type="radio"
-              disabled={pauseAll || !permission}
+              disabled={pauseAll || !permission || skeletonLoading}
               id="likes-off"
               name="likes"
               checked={!notificationPreferences.likes}
@@ -219,7 +229,7 @@ function Page() {
           >
             <input
               type="radio"
-              disabled={pauseAll || !permission}
+              disabled={pauseAll || !permission || skeletonLoading}
               id="likes-on"
               name="likes"
               checked={notificationPreferences.likes}
@@ -243,7 +253,7 @@ function Page() {
           >
             <input
               type="radio"
-              disabled={pauseAll || !permission}
+              disabled={pauseAll || !permission || skeletonLoading}
               id="comments-off"
               name="comments"
               checked={!notificationPreferences.comments}
@@ -263,7 +273,7 @@ function Page() {
           >
             <input
               type="radio"
-              disabled={pauseAll || !permission}
+              disabled={pauseAll || !permission || skeletonLoading}
               id="comments-on"
               name="comments"
               checked={notificationPreferences.comments}
@@ -287,7 +297,7 @@ function Page() {
           >
             <input
               type="radio"
-              disabled={pauseAll || !permission}
+              disabled={pauseAll || !permission || skeletonLoading}
               id="comment-likes-off"
               name="comment-likes"
               checked={!notificationPreferences.commentLikes}
@@ -307,7 +317,7 @@ function Page() {
           >
             <input
               type="radio"
-              disabled={pauseAll || !permission}
+              disabled={pauseAll || !permission || skeletonLoading}
               id="comment-likes-on"
               name="comment-likes"
               checked={notificationPreferences.commentLikes}
@@ -331,7 +341,7 @@ function Page() {
           >
             <input
               type="radio"
-              disabled={pauseAll || !permission}
+              disabled={pauseAll || !permission || skeletonLoading}
               id="story-likes-off"
               name="story-likes"
               checked={!notificationPreferences.storyLikes}
@@ -351,7 +361,7 @@ function Page() {
           >
             <input
               type="radio"
-              disabled={pauseAll || !permission}
+              disabled={pauseAll || !permission || skeletonLoading}
               id="story-likes-on"
               name="story-likes"
               checked={notificationPreferences.storyLikes}
@@ -375,7 +385,7 @@ function Page() {
           >
             <input
               type="radio"
-              disabled={pauseAll || !permission}
+              disabled={pauseAll || !permission || skeletonLoading}
               id="new-followers-off"
               name="new-followers"
               checked={!notificationPreferences.newFollowers}
@@ -395,7 +405,7 @@ function Page() {
           >
             <input
               type="radio"
-              disabled={pauseAll || !permission}
+              disabled={pauseAll || !permission || skeletonLoading}
               id="new-followers-on"
               name="new-followers"
               checked={notificationPreferences.newFollowers}
@@ -419,7 +429,7 @@ function Page() {
           >
             <input
               type="radio"
-              disabled={pauseAll || !permission}
+              disabled={pauseAll || !permission || skeletonLoading}
               id="messages-off"
               name="messages"
               checked={!notificationPreferences.newMessages}
@@ -439,7 +449,7 @@ function Page() {
           >
             <input
               type="radio"
-              disabled={pauseAll || !permission}
+              disabled={pauseAll || !permission || skeletonLoading}
               id="messages-on"
               name="messages"
               checked={notificationPreferences.newMessages}
@@ -463,7 +473,7 @@ function Page() {
           >
             <input
               type="radio"
-              disabled={pauseAll || !permission}
+              disabled={pauseAll || !permission || skeletonLoading}
               id="group-off"
               name="group"
               checked={!notificationPreferences.newGroups}
@@ -483,7 +493,7 @@ function Page() {
           >
             <input
               type="radio"
-              disabled={pauseAll || !permission}
+              disabled={pauseAll || !permission || skeletonLoading}
               id="group-on"
               name="group"
               checked={notificationPreferences.newGroups}
@@ -504,6 +514,7 @@ function Page() {
           disabled={
             loading ||
             pauseAll ||
+            skeletonLoading ||
             Object.keys(notificationPreferences).every(
               (key) =>
                 notificationPreferences[

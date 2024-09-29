@@ -10,7 +10,7 @@ import chatSlice from "./features/slices/chatSlice";
 import messageSlice from "./features/slices/messageSlice";
 import reportSlice from "./features/slices/reportSlice";
 import storySlice from "./features/slices/storySlice";
-import notificationPreferenceSlice from "./features/slices/notificationPreference";
+import notificationPreferenceSlice from "./features/slices/notificationPreferenceSlice";
 
 export const store = configureStore({
   reducer: {

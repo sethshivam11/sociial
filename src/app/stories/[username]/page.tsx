@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/dialog";
 import Image from "next/image";
 import EmojiKeyboard from "@/components/EmojiKeyboard";
-import { nameFallback } from "@/lib/helpers";
+import { getTimeDifference, nameFallback } from "@/lib/helpers";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import ReportDialog from "@/components/ReportDialog";
 import { StoryI } from "@/types/types";
@@ -264,7 +264,7 @@ function Story({ params }: Props) {
   React.useEffect(() => {
     const timer: Timer = new Timer(function () {
       nextRef.current?.click();
-    }, 5000);
+    }, 15000);
     setTimer(timer);
     return () => {
       timer.clear();
@@ -480,7 +480,7 @@ function Story({ params }: Props) {
                     @{currentStory.user.username}
                   </span>
                 </div>
-                <span className="text-stone-500 text-sm">&#183; 3h</span>
+                <span className="text-stone-500 text-sm">&#183; {getTimeDifference(currentStory.createdAt)}</span>
               </Link>
               <div className="flex items-center justify-center gap-2">
                 <button

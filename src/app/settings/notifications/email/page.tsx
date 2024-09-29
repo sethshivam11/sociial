@@ -5,7 +5,7 @@ import { toast } from "@/components/ui/use-toast";
 import {
   getPreferences,
   updatePreferences,
-} from "@/lib/store/features/slices/notificationPreference";
+} from "@/lib/store/features/slices/notificationPreferenceSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
@@ -13,7 +13,7 @@ import React from "react";
 
 function Page() {
   const dispatch = useAppDispatch();
-  const { emailNotifications, loading } = useAppSelector(
+  const { emailNotifications, loading, skeletonLoading } = useAppSelector(
     (state) => state.notificationPreference
   );
   const [emailPreferences, setEmailPreferences] = React.useState({
@@ -68,7 +68,7 @@ function Page() {
         </Link>
         Email Notifications
       </h1>
-      <p className="text-stone-500 text-sm text-left sm:w-2/3 w-full">
+      <p className="text-stone-500 text-sm text-left sm:w-2/3 w-full max-sm:px-10">
         Important emails about your account and activity on the platform will be
         sent to you even if you opt out of all the options below.
       </p>
@@ -90,6 +90,7 @@ function Page() {
                   products: e.target.checked ? false : true,
                 })
               }
+              disabled={loading || skeletonLoading}
               className="w-6 h-6 accent-black dark:accent-white"
             />
             Off
@@ -103,6 +104,7 @@ function Page() {
               id="products-on"
               name="products"
               checked={emailPreferences.products}
+              disabled={loading || skeletonLoading}
               onChange={(e) =>
                 setEmailPreferences({
                   ...emailPreferences,
@@ -125,6 +127,7 @@ function Page() {
               id="announcements-off"
               name="announcements"
               checked={!emailPreferences.announcements}
+              disabled={loading || skeletonLoading}
               onChange={(e) =>
                 setEmailPreferences({
                   ...emailPreferences,
@@ -144,6 +147,7 @@ function Page() {
               id="announcements-on"
               name="announcements"
               checked={emailPreferences.announcements}
+              disabled={loading || skeletonLoading}
               onChange={(e) =>
                 setEmailPreferences({
                   ...emailPreferences,
@@ -166,6 +170,7 @@ function Page() {
               id="support-off"
               name="support"
               checked={!emailPreferences.support}
+              disabled={loading || skeletonLoading}
               onChange={(e) =>
                 setEmailPreferences({
                   ...emailPreferences,
@@ -185,6 +190,7 @@ function Page() {
               id="support-on"
               name="support"
               checked={emailPreferences.support}
+              disabled={loading || skeletonLoading}
               onChange={(e) =>
                 setEmailPreferences({
                   ...emailPreferences,
@@ -200,7 +206,7 @@ function Page() {
           size="lg"
           onClick={handleUpdatePreference}
           disabled={
-            loading ||
+            loading || skeletonLoading ||
             Object.keys(emailPreferences).every(
               (key) =>
                 emailPreferences[key as keyof typeof emailPreferences] ===

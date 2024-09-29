@@ -5,6 +5,11 @@ const initialState: FollowSliceI = {
   _id: "",
   followings: [],
   followers: [],
+  follow: {
+    _id: "",
+    followers: [],
+    followings: [],
+  },
   skeletonLoading: false,
   loading: false,
 };
@@ -42,6 +47,14 @@ export const unfollowUser = createAsyncThunk(
         username ? `username=${username}` : `userId=${userId}`
       }`
     );
+    return parsed.json();
+  }
+);
+
+export const getBasicFollow = createAsyncThunk(
+  "follow/getBasicFollow",
+  async () => {
+    const parsed = await fetch("/api/v1/follow/get");
     return parsed.json();
   }
 );
@@ -85,6 +98,7 @@ const followSlice = createSlice({
         state.loading = false;
         if (action.payload?.success) {
           state.followings.push(action.payload.data.follow);
+          state.follow.followings.push(action.payload.data.follow._id);
         }
       })
       .addCase(followUser.rejected, (state) => {
@@ -104,11 +118,20 @@ const followSlice = createSlice({
               user._id !== action.meta.arg.userId
           );
           state.followings = filteredFollowings;
+          state.follow.followings = state.follow.followings.filter(
+            (user) => user !== action.payload.data.unfollow._id
+          );
         }
       })
       .addCase(unfollowUser.rejected, (state) => {
         state.loading = false;
       });
+
+    builder.addCase(getBasicFollow.fulfilled, (state, action) => {
+      if (action.payload?.success) {
+        state.follow = action.payload.data;
+      }
+    });
 
     builder
       .addCase(getFollowers.pending, (state) => {

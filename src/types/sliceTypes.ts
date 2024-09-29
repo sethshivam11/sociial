@@ -44,6 +44,11 @@ export interface UserSliceI {
 export interface FollowSliceI {
   _id: string;
   followers: (BasicUserI & { loading: boolean })[];
+  follow: {
+    _id: string;
+    followers: string[];
+    followings: string[];
+  };
   followings: (BasicUserI & { loading: boolean })[];
   skeletonLoading: boolean;
   loading: boolean;
@@ -86,6 +91,7 @@ export interface ChatSliceI {
 
 export interface NotificationPreferenceSliceI {
   loading: boolean;
+  skeletonLoading: boolean;
   pushNotifications: PushNotificationI;
   emailNotifications: EmailNotificationI;
 }

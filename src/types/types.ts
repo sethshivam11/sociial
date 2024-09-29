@@ -81,6 +81,7 @@ export interface StoryI {
   likes: string[];
   blockedTo: string[];
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface NotificationI {

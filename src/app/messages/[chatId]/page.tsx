@@ -813,7 +813,7 @@ function Page({ params }: { params: { chatId: string } }) {
           />
         ) : (
           <ScrollArea className="h-[80dvh] min-w-40 px-3">
-            <div className="flex flex-col-reverse items-center justify-center w-full py-2 gap-2 mb-8">
+            <div className="flex flex-col items-center justify-center w-full py-2 gap-2 mb-8">
               <Avatar className="w-28 h-28 select-none pointer-events-none">
                 <AvatarImage src={recipent.avatar} alt="" />
                 <AvatarFallback>

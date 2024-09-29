@@ -461,11 +461,10 @@ const postSlice = createSlice({
                 if (post._id === action.meta.arg.postId) {
                   return {
                     ...post,
-                    likes: state.post.likes.filter(
+                    likes: post.likes.filter(
                       (like) => like !== action.meta.arg.userId
                     ),
-                    likesCount:
-                      state.post.likesCount > 0 ? state.post.likesCount - 1 : 0,
+                    likesCount: post.likesCount > 0 ? post.likesCount - 1 : 0,
                   };
                 }
                 return post;
@@ -476,11 +475,10 @@ const postSlice = createSlice({
                 if (post._id === action.meta.arg.postId) {
                   return {
                     ...post,
-                    likes: state.post.likes.filter(
+                    likes: post.likes.filter(
                       (like) => like !== action.meta.arg.userId
                     ),
-                    likesCount:
-                      state.post.likesCount > 0 ? state.post.likesCount - 1 : 0,
+                    likesCount: post.likesCount > 0 ? post.likesCount - 1 : 0,
                   };
                 }
                 return post;

@@ -62,10 +62,7 @@ export function isUsernameAvailable(
     .finally(() => setLoading(false));
 }
 
-export async function handleConsent(
-  setSavingToken: (arg: boolean) => void,
-  setConsentDialog: (arg: boolean) => void
-): Promise<{
+export async function handleConsent(): Promise<{
   token: string | null;
   toast?: {
     title: string;
@@ -74,7 +71,6 @@ export async function handleConsent(
   };
 }> {
   try {
-    setSavingToken(true);
     const result = await Notification.requestPermission();
     if (result === "granted") {
       const token = await getToken(messaging, {
@@ -122,8 +118,5 @@ export async function handleConsent(
         variant: null,
       },
     };
-  } finally {
-    setSavingToken(false);
-    setConsentDialog(false);
   }
 }
