@@ -1,4 +1,5 @@
 import { ChatSliceI } from "@/types/sliceTypes";
+import { ChatI } from "@/types/types";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 const initialState: ChatSliceI = {
@@ -14,7 +15,8 @@ const initialState: ChatSliceI = {
       _id: "",
       content: "",
       createdAt: "",
-    }
+    },
+    createdAt: "",
   },
   skeletonLoading: false,
   loadingMore: false,
@@ -217,6 +219,9 @@ const chatSlice = createSlice({
         state.chats.filter((chat) => chat._id !== action.payload.data._id),
       ];
     },
+    setCurrentChat: (state, action) => {
+      state.chat = state.chats.find((chat) => chat._id === action.payload) as ChatI;
+    }
   },
   extraReducers: (builder) => {
     builder.addCase(getChats.pending, (state) => {
@@ -392,5 +397,7 @@ export const {
   removedAdmin,
   newChatStarted,
   newMessage,
+  setCurrentChat
 } = chatSlice.actions;
+
 export default chatSlice.reducer;

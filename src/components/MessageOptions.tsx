@@ -11,26 +11,31 @@ import { toast } from "./ui/use-toast";
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 import { useTheme } from "next-themes";
+import { reactMessage, unsendMessage } from "@/lib/store/features/slices/messageSlice";
+import { useAppDispatch } from "@/lib/store/store";
 
 interface Props {
+  messageId: string;
   username: string;
-  setReply: (reply: { username: string; kind: string; content: string }) => void;
+  setReply: (reply: {
+    username: string;
+    kind: string;
+    content: string;
+  }) => void;
   message: string;
-  id: string;
   type: string;
   kind: string;
-  reactMessage: (emoji: string) => void;
 }
 
 function MessageOptions({
+  messageId,
   message,
-  id,
-  reactMessage,
   type,
   username,
   kind,
   setReply,
 }: Props) {
+  const dispatch = useAppDispatch();
   const { theme } = useTheme();
   function copyMessage(message: string) {
     if (navigator.clipboard) {
@@ -41,6 +46,31 @@ function MessageOptions({
       });
     }
   }
+
+  function handleReact(content: string) {
+    dispatch(reactMessage({ messageId, content })).then((response) => {
+      if (!response.payload?.success) {
+        toast({
+          title: "Cannot react to message",
+          description: response.payload?.message || "Something went wrong",
+          variant: "destructive",
+        });
+      }
+    });
+  }
+
+  function handleUnsend() {
+    dispatch(unsendMessage(messageId)).then((response) => {
+      if (!response.payload?.success) {
+        toast({
+          title: "Cannot unsend message",
+          description: response.payload?.message || "Something went wrong",
+          variant: "destructive",
+        });
+      }
+    });
+  }
+
   return (
     <>
       <Menubar className="bg-transparent border-transparent xl:justify-start justify-center w-fit p-0">
@@ -56,7 +86,7 @@ function MessageOptions({
                 theme={theme}
                 searchPosition="none"
                 onEmojiSelect={({ native }: { native: string }) =>
-                  reactMessage(native)
+                  handleReact(native)
                 }
                 previewPosition="none"
               />
@@ -88,12 +118,10 @@ function MessageOptions({
             >
               Copy Message
             </MenubarItem>
-            {type === "sent" ? (
-              <MenubarItem className="text-red-600 focus:text-red-600 rounded-lg py-2.5">
+            {type === "sent" && (
+              <MenubarItem className="text-red-600 focus:text-red-600 rounded-lg py-2.5" onClick={handleUnsend}>
                 Unsend
               </MenubarItem>
-            ) : (
-              ""
             )}
           </MenubarContent>
         </MenubarMenu>

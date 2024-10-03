@@ -26,7 +26,6 @@ import { nameFallback } from "@/lib/helpers";
 import { deletePost } from "@/lib/store/features/slices/postSlice";
 import {
   followUser,
-  getFollowings,
   unfollowUser,
 } from "@/lib/store/features/slices/followSlice";
 

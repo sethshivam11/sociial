@@ -56,6 +56,7 @@ export interface ChatI {
     content: string;
     createdAt: string;
   };
+  createdAt: string;
 }
 
 export interface CommentI {
@@ -122,7 +123,7 @@ export interface MessageI {
   reacts: {
     _id: string;
     content: string;
-    user: BasicUserI;
+    user: string;
   }[];
   readBy: BasicUserI[];
   reply: {
@@ -131,4 +132,10 @@ export interface MessageI {
   };
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ReactI {
+  _id: string;
+  user: BasicUserI;
+  content: string;
 }

@@ -7,7 +7,10 @@ import { History } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import ChatsLoadingSkeleton from "@/components/skeletons/ChatsLoading";
-import { getChats } from "@/lib/store/features/slices/chatSlice";
+import {
+  getChats,
+  setCurrentChat,
+} from "@/lib/store/features/slices/chatSlice";
 import Link from "next/link";
 import { toast } from "@/components/ui/use-toast";
 import { getFollowings } from "@/lib/store/features/slices/followSlice";
@@ -68,7 +71,7 @@ function Messages({ children }: { children: React.ReactNode }) {
           ) : chats.length > 1 ? (
             chats.map((chat, index) => (
               <Link
-                className={`flex items-center justify-center rounded-md w-full gap-2 p-2 ${
+                className={`flex items-center justify-center rounded-md w-full gap-2 p-2 mb-1 ${
                   location === `/messages/${chat._id}`
                     ? "bg-stone-200 dark:bg-stone-800 hover:bg-stone-100 hover:dark:bg-stone-900"
                     : "sm:hover:bg-stone-200 sm:dark:hover:bg-stone-800"
@@ -77,6 +80,7 @@ function Messages({ children }: { children: React.ReactNode }) {
                 title={
                   chat.isGroupChat ? chat.groupName : chat.users[0].fullName
                 }
+                onClick={() => dispatch(setCurrentChat(chat._id))}
                 href={`/messages/${chat._id}`}
               >
                 <Avatar className="w-10 h-10">
@@ -147,7 +151,7 @@ function Messages({ children }: { children: React.ReactNode }) {
                 <div className="flex flex-col items-start justify-center w-full">
                   <p>{chat.users[0].fullName}</p>
                   <p className="text-sm md:w-40 sm:w-80 w-40 text-left text-stone-500 text-ellipsis whitespace-nowrap overflow-x-hidden">
-                    {chat?.lastMessage?.content || ""}
+                    {chat?.lastMessage?.content}
                   </p>
                 </div>
               </Link>

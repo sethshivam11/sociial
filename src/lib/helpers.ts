@@ -3,6 +3,9 @@ import { messaging } from "./store/provider";
 import { FirebaseError } from "firebase/app";
 
 export function nameFallback(name: string): string {
+  if (!name || name === "") {
+    return "";
+  }
   const split = name.toUpperCase().split(" ");
   if (split.length >= 2) {
     return `${split[0].slice(0, 1)}${split[1].slice(0, 1)}`;

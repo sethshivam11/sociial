@@ -30,20 +30,11 @@ interface Theme {
 
 interface Props {
   recipents: {
-    id: string;
+    _id: string;
     fullName: string;
     username: string;
     avatar: string;
-    followersCount: number;
-    postsCount: number;
-    followingCount: number;
   }[];
-  user: {
-    id: string;
-    fullName: string;
-    username: string;
-    avatar: string;
-  };
   chatId: string;
   theme: Theme;
   themes: Theme[];
@@ -53,7 +44,6 @@ interface Props {
 
 function ChatInfo({
   recipents,
-  user,
   chatId,
   themes,
   setTheme,
@@ -64,40 +54,21 @@ function ChatInfo({
     (state) => state.follow
   );
   const [participants, setParticipants] = React.useState<typeof followers>([]);
-  const [switchLoading, setSwitchLoading] = React.useState(false);
   const form = useForm({
     defaultValues: {
       muteNotifications: false,
     },
   });
-  const { register, watch, setValue } = form;
-  const muteNotifications = watch("muteNotifications");
   const [reportDialog, setReportDialog] = React.useState(false);
-  const [removeDialog, setRemoveDialog] = React.useState({
-    open: false,
-    username: "",
-  });
-  function handleSwitchChange() {
-    setSwitchLoading(true);
-    setTimeout(() => {
-      setValue("muteNotifications", !muteNotifications);
-      setSwitchLoading(false);
-      toast({
-        title: !muteNotifications ? "Muted" : "Unmuted",
-        description: !muteNotifications
-          ? "Messages are now muted"
-          : "Messages are now unmuted",
-      });
-    }, 1000);
-  }
+
   return (
-    <div className="flex flex-col items-start justify-start w-full max-h-[100svh] gap-2">
+    <div className="flex flex-col items-start justify-end w-full h-full gap-2">
       {recipents.length === 1 && (
         <>
           <h3 className="text-lg mx-3">Members</h3>
           <Link
             href={`/${recipents[0].username}`}
-            className="flex items-center justify-start gap-2 w-full h-full px-3 py-3 hover:bg-stone-100 hover:dark:bg-stone-900"
+            className="flex items-center justify-start gap-2 w-full h-full p-3 hover:bg-stone-100 hover:dark:bg-stone-900"
           >
             <Avatar className="pointer-events-none select-none">
               <AvatarImage src={recipents[0].avatar} />
@@ -117,22 +88,6 @@ function ChatInfo({
         </>
       )}
       <hr className="bg-stone-500 w-full" />
-      <div className="flex items-center justify-between text-lg w-full py-3 gap-4 px-4 hover:bg-stone-100 hover:dark:bg-stone-900 rounded-sm">
-        <Label
-          htmlFor="mute-notifications"
-          className="flex items-center justify-start gap-4 w-full text-base cursor-pointer"
-        >
-          <Bell />
-          Mute Messages
-        </Label>
-        <Switch
-          id="mute-notifications"
-          {...register("muteNotifications")}
-          checked={muteNotifications}
-          onCheckedChange={handleSwitchChange}
-          disabled={switchLoading}
-        />
-      </div>
       <Dialog>
         <DialogTrigger className="flex items-center justify-start text-base gap-4 py-3 px-4 w-full hover:bg-stone-100 hover:dark:bg-stone-900 rounded-sm">
           <Palette /> Themes
@@ -300,7 +255,7 @@ function ChatInfo({
           variant="ghost"
           onClick={() => setReportDialog(true)}
         >
-          Report Conversation
+          Report Chat
         </Button>
         <ReportDialog
           open={reportDialog}
@@ -312,7 +267,7 @@ function ChatInfo({
           className="w-full text-red-600 hover:text-red-600"
           variant="ghost"
         >
-          Leave Conversation
+          Leave Group
         </Button>
       </div>
     </div>

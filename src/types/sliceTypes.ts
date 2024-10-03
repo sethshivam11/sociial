@@ -8,6 +8,7 @@ import {
   PostI,
   ProfileI,
   PushNotificationI,
+  ReactI,
   StoryI,
 } from "./types";
 
@@ -138,6 +139,7 @@ export interface MessageSliceI {
   typing: boolean;
   loading: boolean;
   skeletonLoading: boolean;
+  reactions: ReactI[];
   loadingMore: boolean;
   page: number;
   editingMessage: boolean;

@@ -1,10 +1,4 @@
 import React from "react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { Smile } from "lucide-react";
 import { Button } from "./ui/button";
 import data from "@emoji-mart/data";
@@ -27,22 +21,11 @@ function EmojiKeyboard({ setMessage, message }: Props) {
   return (
     <Menubar className="p-0 border-transparent bg-transparent">
       <MenubarMenu>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <MenubarTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className={`px-2 rounded-xl`}
-                >
-                  <Smile />
-                </Button>
-              </MenubarTrigger>
-            </TooltipTrigger>
-            <TooltipContent side="right">Emoji</TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <MenubarTrigger asChild>
+          <Button size="icon" variant="ghost" title="Emoji" className={`px-2 rounded-xl`}>
+            <Smile />
+          </Button>
+        </MenubarTrigger>
         <MenubarContent className="w-fit p-0 z-50">
           <Picker
             data={data}
