@@ -18,6 +18,7 @@ export const sendMessage = createAsyncThunk(
     content: string;
     chatId: string;
     reply?: string;
+    kind?: "message" | "location" | "call" | "media" | "audio" | "document";
     attachment?: Blob[];
   }) => {
     const formData = new FormData();
@@ -29,6 +30,7 @@ export const sendMessage = createAsyncThunk(
         formData.append("attachments", file);
       });
     }
+    if(message.kind) formData.append("kind", message.kind);
     const parsed = await fetch("/api/v1/messages/send", {
       method: "POST",
       body: formData,
@@ -61,6 +63,9 @@ export const reactMessage = createAsyncThunk(
     const parsed = await fetch(`/api/v1/messages/react/${messageId}`, {
       method: "PATCH",
       body: JSON.stringify({ content }),
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+      },
     });
     return parsed.json();
   }
@@ -207,7 +212,20 @@ const messageSlice = createSlice({
         if (action.payload?.success) {
           state.messages = state.messages.map((message) => {
             if (message._id === action.meta.arg.messageId) {
-              message.reacts = [action.payload.data, ...message.reacts];
+              if (
+                message.reacts.some(
+                  (react) => react.user === action.payload.data.user
+                )
+              ) {
+                message.reacts = message.reacts.map((react) => {
+                  if (react.user === action.payload.data.user) {
+                    react.content = action.payload.data.content;
+                  }
+                  return react;
+                });
+              } else {
+                message.reacts = [action.payload.data, ...message.reacts];
+              }
             }
             return message;
           });
@@ -229,7 +247,6 @@ const messageSlice = createSlice({
               message.reacts = message.reacts.filter(
                 (react) => react.user !== action.meta.arg.userId
               );
-              console.log(message.reacts);
             }
             return message;
           });

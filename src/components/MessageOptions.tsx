@@ -11,7 +11,10 @@ import { toast } from "./ui/use-toast";
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 import { useTheme } from "next-themes";
-import { reactMessage, unsendMessage } from "@/lib/store/features/slices/messageSlice";
+import {
+  reactMessage,
+  unsendMessage,
+} from "@/lib/store/features/slices/messageSlice";
 import { useAppDispatch } from "@/lib/store/store";
 
 interface Props {
@@ -119,7 +122,10 @@ function MessageOptions({
               Copy Message
             </MenubarItem>
             {type === "sent" && (
-              <MenubarItem className="text-red-600 focus:text-red-600 rounded-lg py-2.5" onClick={handleUnsend}>
+              <MenubarItem
+                className="text-red-600 focus:text-red-600 rounded-lg py-2.5"
+                onClick={handleUnsend}
+              >
                 Unsend
               </MenubarItem>
             )}

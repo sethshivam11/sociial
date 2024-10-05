@@ -123,3 +123,58 @@ export async function handleConsent(): Promise<{
     };
   }
 }
+
+export function checkForAssets(message: string, kind: string): string {
+  switch (kind) {
+    case "location":
+      return `📍 Location`;
+    case "image":
+      return `📷 Image`;
+    case "video":
+      return `🎥 Video`;
+    case "audio":
+      return `🔊 Audio`;
+    case "document":
+      return `📄 Document`;
+    default:
+      return message;
+  }
+}
+
+export const themes = [
+  {
+    name: "default",
+    color: "bg-stone-800 dark:bg-stone-200",
+    text: "white dark:text-black",
+  },
+  {
+    name: "orange",
+    color: "bg-orange-500",
+    text: "white",
+  },
+  {
+    name: "rose",
+    color: "bg-rose-500",
+    text: "white",
+  },
+  {
+    name: "emerald",
+    color: "bg-emerald-500",
+    text: "black",
+  },
+  {
+    name: "sky",
+    color: "bg-sky-500",
+    text: "black",
+  },
+  {
+    name: "blue",
+    color: "bg-blue-500",
+    text: "black",
+  },
+  {
+    name: "purple",
+    color: "bg-purple-500",
+    text: "white",
+  },
+];

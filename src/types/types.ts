@@ -54,6 +54,7 @@ export interface ChatI {
   lastMessage: null | {
     _id: string;
     content: string;
+    kind: "message" | "location" | "call" | "media" | "audio" | "document";
     createdAt: string;
   };
   createdAt: string;

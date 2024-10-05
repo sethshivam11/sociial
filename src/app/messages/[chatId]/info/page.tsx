@@ -1,13 +1,12 @@
+"use client";
 import React from "react";
-import { Switch } from "@/components/ui/switch";
-import { toast } from "@/components/ui/use-toast";
 import { useForm } from "react-hook-form";
-import { Label } from "./ui/label";
+import { Label } from "@/components/ui/label";
 import { Bell, MoreVertical, Palette, UserPlus, Users } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { nameFallback } from "@/lib/helpers";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { nameFallback, themes } from "@/lib/helpers";
 import Link from "next/link";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -15,12 +14,16 @@ import {
   DialogFooter,
   DialogTitle,
   DialogTrigger,
-} from "./ui/dialog";
-import ReportDialog from "./ReportDialog";
-import { ScrollArea } from "./ui/scroll-area";
-import { useAppSelector } from "@/lib/store/store";
-import { Checkbox } from "./ui/checkbox";
-import FollowersLoadingSkeleton from "./skeletons/FollowersLoading";
+} from "@/components/ui/dialog";
+import ReportDialog from "@/components/ReportDialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useAppDispatch, useAppSelector } from "@/lib/store/store";
+import { Checkbox } from "@/components/ui/checkbox";
+import FollowersLoadingSkeleton from "@/components/skeletons/FollowersLoading";
+import {
+  getChats,
+  setCurrentChat,
+} from "@/lib/store/features/slices/chatSlice";
 
 interface Theme {
   name: string;
@@ -28,60 +31,55 @@ interface Theme {
   text: string;
 }
 
-interface Props {
-  recipents: {
-    _id: string;
-    fullName: string;
-    username: string;
-    avatar: string;
-  }[];
-  chatId: string;
-  theme: Theme;
-  themes: Theme[];
-  setTheme: (theme: Theme) => void;
-  setInfoOpen: (open: boolean) => void;
-}
-
-function ChatInfo({
-  recipents,
-  chatId,
-  themes,
-  setTheme,
-  theme,
-  setInfoOpen,
-}: Props) {
+function Info({ params }: { params: { chatId: string } }) {
+  const dispatch = useAppDispatch();
+  const { chatId } = params;
   const { skeletonLoading, followers } = useAppSelector(
     (state) => state.follow
   );
+  const { chat, chats } = useAppSelector((state) => state.chat);
   const [participants, setParticipants] = React.useState<typeof followers>([]);
-  const form = useForm({
-    defaultValues: {
-      muteNotifications: false,
-    },
-  });
   const [reportDialog, setReportDialog] = React.useState(false);
+  const [theme, setTheme] = React.useState<Theme>(themes[0]);
+
+  React.useEffect(() => {
+    const savedMessageTheme = JSON.parse(
+      localStorage.getItem("message-theme") || "{}"
+    );
+    if (savedMessageTheme.name) {
+      setTheme(savedMessageTheme as (typeof themes)[0]);
+    } else {
+      setTheme(themes[0]);
+    }
+
+    if (!chats.length)
+      dispatch(getChats()).then((response) => {
+        if (!chat._id && response.payload?.success)
+          dispatch(setCurrentChat(chatId));
+      });
+  }, [themes, dispatch]);
 
   return (
-    <div className="flex flex-col items-start justify-end w-full h-full gap-2">
-      {recipents.length === 1 && (
+    <div className="flex flex-col col-span-7 items-start justify-end w-full h-full gap-2 relative">
+      {chat.users.length === 1 && (
         <>
-          <h3 className="text-lg mx-3">Members</h3>
+          <h3 className="text-lg mx-3 absolute top-0">Members</h3>
           <Link
-            href={`/${recipents[0].username}`}
-            className="flex items-center justify-start gap-2 w-full h-full p-3 hover:bg-stone-100 hover:dark:bg-stone-900"
+            href={`/${chat.users[0].username}`}
+            className="flex items-center justify-start gap-2 w-full absolute top-8 p-3 hover:bg-stone-100 hover:dark:bg-stone-900"
           >
             <Avatar className="pointer-events-none select-none">
-              <AvatarImage src={recipents[0].avatar} />
+              <AvatarImage src={chat.users[0].avatar} />
               <AvatarFallback>
-                {nameFallback(recipents[0].fullName)}
+                {nameFallback(chat.users[0].fullName)}
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col items-start justify-start gap-0">
               <span className="text-lg font-medium leading-4">
-                {recipents[0].fullName}
+                {chat.users[0].fullName}
               </span>
               <span className="text-sm text-stone-500">
-                @{recipents[0].username}
+                @{chat.users[0].username}
               </span>
             </div>
           </Link>
@@ -100,7 +98,7 @@ function ChatInfo({
             <h1 className="text-xl tracking-tight font-semibold mt-2 mb-4">
               Themes
             </h1>
-            {themes.map((theme, index) => (
+            {/* {themes.map((theme, index) => (
               <DialogClose
                 className="px-4 py-3 hover:bg-stone-100 hover:dark:bg-stone-900 flex items-center justify-start w-full rounded-xl gap-2 capitalize"
                 onClick={() => {
@@ -113,11 +111,11 @@ function ChatInfo({
                 <div className={`rounded-full ${theme.color} w-8 h-8`} />
                 &nbsp;{theme.name}
               </DialogClose>
-            ))}
+            ))} */}
           </div>
         </DialogContent>
       </Dialog>
-      {recipents.length !== 1 && (
+      {/* {recipents.length === 1 && (
         <Dialog>
           <DialogTrigger className="flex items-center justify-start text-base gap-4 py-3 px-4 w-full hover:bg-stone-100 hover:dark:bg-stone-900 rounded-sm">
             <Users /> Members
@@ -239,17 +237,17 @@ function ChatInfo({
             </div>
           </DialogContent>
         </Dialog>
-      )}
+      )} */}
       <hr className="bg-stone-500 w-full" />
       <div
         className="p-2 w-full bg-transparent
-       flex flex-col gap-2"
+     flex flex-col gap-2"
       >
-        {recipents.length === 1 && (
+        {/* {recipents.length === 1 && (
           <Button variant="ghost" className="w-full">
             Block @{recipents[0].username}
           </Button>
-        )}
+        )} */}
         <Button
           className="w-full text-red-600  hover:text-red-600"
           variant="ghost"
@@ -274,4 +272,4 @@ function ChatInfo({
   );
 }
 
-export default ChatInfo;
+export default Info;

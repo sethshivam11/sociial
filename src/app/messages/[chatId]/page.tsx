@@ -1,24 +1,17 @@
 "use client";
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { nameFallback } from "@/lib/helpers";
+import { nameFallback, themes } from "@/lib/helpers";
 import {
   ChevronLeft,
-  CameraIcon,
   DownloadIcon,
   FileIcon,
-  ImageIcon,
-  Info,
-  MapPin,
-  MicIcon,
-  Paperclip,
   Phone,
   SendHorizonal,
   Video,
   X,
   PlayIcon,
   MapPinnedIcon,
-  History,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -33,17 +26,9 @@ import {
 import EmojiKeyboard from "@/components/EmojiKeyboard";
 import MessageReacts from "@/components/MessageReacts";
 import MessageOptions from "@/components/MessageOptions";
-import ChatInfo from "@/components/ChatInfo";
 import NextImage from "next/image";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Menubar,
-  MenubarContent,
-  MenubarItem,
-  MenubarMenu,
-  MenubarTrigger,
-} from "@/components/ui/menubar";
 import { toast } from "@/components/ui/use-toast";
 import {
   Dialog,
@@ -53,12 +38,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import CameraDialog from "@/components/CameraDialog";
-import MediaDialog from "@/components/MediaDialog";
-import AudioDialog from "@/components/AudioDialog";
-import Link from "next/link";
-import DocumentDialog from "@/components/DocumentDialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import {
   getMessages,
@@ -70,6 +49,9 @@ import {
 } from "@/lib/store/features/slices/chatSlice";
 import MessagesLoading from "@/components/skeletons/MessagesLoading";
 import ChatLoading from "@/components/skeletons/ChatLoading";
+import Link from "next/link";
+import MessageActions from "@/components/MessageActions";
+import { checkForAssets } from "@/lib/helpers";
 
 interface Message {
   id: string;
@@ -91,10 +73,10 @@ interface Message {
 }
 
 function Page({ params }: { params: { chatId: string } }) {
-  const formSchema = z.object({
-    message: z.string(),
-  });
   const dispatch = useAppDispatch();
+  const location = usePathname();
+  const router = useRouter();
+
   const { user } = useAppSelector((state) => state.user);
   const {
     chat,
@@ -104,67 +86,30 @@ function Page({ params }: { params: { chatId: string } }) {
   const { messages, skeletonLoading, loadingMore, loading } = useAppSelector(
     (state) => state.message
   );
-  const location = usePathname();
-  const router = useRouter();
-  const chatId = params.chatId;
+
   const messageScrollElement = React.useRef<HTMLDivElement>(null);
   const lastMessageRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const [isTyping, setIsTyping] = React.useState(false);
-  const [cameraOpen, setCameraOpen] = React.useState(false);
-  const [mediaOpen, setMediaOpen] = React.useState(false);
-  const [audioOpen, setAudioOpen] = React.useState(false);
-  const [documentOpen, setDocumentOpen] = React.useState(false);
 
+  const formSchema = z.object({
+    message: z.string(),
+    reply: z
+      .object({
+        username: z.string(),
+        content: z.string(),
+      })
+      .optional(),
+  });
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       message: "",
     },
   });
-  const themes = [
-    {
-      name: "default",
-      color: "bg-stone-800 dark:bg-stone-300",
-      text: "white dark:text-black",
-    },
-    {
-      name: "orange",
-      color: "bg-orange-500",
-      text: "white",
-    },
-    {
-      name: "rose",
-      color: "bg-rose-500",
-      text: "white",
-    },
-    {
-      name: "emerald",
-      color: "bg-emerald-500",
-      text: "black",
-    },
-    {
-      name: "sky",
-      color: "bg-sky-500",
-      text: "black",
-    },
-    {
-      name: "blue",
-      color: "bg-blue-500",
-      text: "black",
-    },
-    {
-      name: "purple",
-      color: "bg-purple-500",
-      text: "white",
-    },
-  ];
+
   const [theme, setTheme] = React.useState(themes[0]);
-  const [reply, setReply] = React.useState({
-    username: "",
-    content: "",
-  });
-  const [infoOpen, setInfoOpen] = React.useState(false);
+  const [isTyping, setIsTyping] = React.useState(false);
+  const chatId = params.chatId;
   const message = form.watch("message");
 
   function handleDownload(content: string) {
@@ -177,9 +122,11 @@ function Page({ params }: { params: { chatId: string } }) {
     document.body.removeChild(a);
   }
 
-  function onSubmit({ message }: z.infer<typeof formSchema>) {
+  function onSubmit({ message, reply }: z.infer<typeof formSchema>) {
     if (!message) return;
-    dispatch(sendMessage({ content: message, chatId })).then((response) => {
+    dispatch(
+      sendMessage({ content: message, chatId, reply: reply?.content })
+    ).then((response) => {
       if (!response.payload?.success) {
         toast({
           title: "Error",
@@ -190,66 +137,13 @@ function Page({ params }: { params: { chatId: string } }) {
         form.reset();
         setTimeout(() => {
           lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
-          setReply({
+          form.setValue("reply", {
             username: "",
             content: "",
           });
         }, 10);
       }
     });
-  }
-
-  function shareLocation() {
-    navigator.geolocation.getCurrentPosition((position) => {
-      const content = `https://google.com/maps?q=${position.coords.latitude},${position.coords.longitude}`;
-      const date = new Date();
-      const savedMessage: Message = {
-        id: String(messages.length + 1),
-        content,
-        type: "sent",
-        kind: "location",
-        time: `${date.getHours()}:${date.getMinutes()} ${
-          date.getHours() > 12 ? "PM" : "AM"
-        }`,
-      };
-      //     setMessages([...messages, savedMessage]);
-      //     setTimeout(() => {
-      //       lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
-      //       setReply({
-      //         username: "",
-      //         content: "",
-      //       });
-      //     }, 1);
-      //   },
-      //   (err) => {
-      //     console.log(err);
-      //     const description =
-      //       err.message === "User denied Geolocation"
-      //         ? "Please provide location permisions"
-      //         : "Something went wrong, while fetching location";
-      //     toast({
-      //       title: "Error",
-      //       description,
-      //       variant: "destructive",
-      //     });
-    });
-  }
-
-  function checkForAssets(message: string, kind: string): string {
-    switch (kind) {
-      case "location":
-        return `📍 Location`;
-      case "image":
-        return `📷 Image`;
-      case "video":
-        return `🎥 Video`;
-      case "audio":
-        return `🔊 Audio`;
-      case "document":
-        return `📄 Document`;
-      default:
-        return message;
-    }
   }
 
   function giveAssets(content: string, kind: string): React.ReactNode {
@@ -369,21 +263,8 @@ function Page({ params }: { params: { chatId: string } }) {
     }
   }
 
-  React.useEffect(() => {
-    if (lastMessageRef.current) {
-      lastMessageRef.current.scrollIntoView({ behavior: "instant" });
-    }
-  }, [infoOpen]);
-
   // React.useEffect(() => {
-  //   const savedMessageTheme = JSON.parse(
-  //     localStorage.getItem("message-theme") || "{}"
-  //   );
-  //   if (savedMessageTheme.name) {
-  //     setTheme(savedMessageTheme as (typeof themes)[0]);
-  //   } else {
-  //     setTheme(themes[0]);
-  //   }
+  //
 
   //   function handleTyping(e: KeyboardEvent) {
   //     if (e.target === inputRef.current && e.code === "Enter") {
@@ -405,6 +286,15 @@ function Page({ params }: { params: { chatId: string } }) {
   // }, []);
 
   React.useEffect(() => {
+    const savedMessageTheme = JSON.parse(
+      localStorage.getItem("message-theme") || "{}"
+    );
+    if (savedMessageTheme.name) {
+      setTheme(savedMessageTheme as (typeof themes)[0]);
+    } else {
+      setTheme(themes[0]);
+    }
+    
     dispatch(getMessages(chatId));
     if (!chats.length)
       dispatch(getChats()).then((response) => {
@@ -415,7 +305,7 @@ function Page({ params }: { params: { chatId: string } }) {
 
   return (
     <div
-      className={`md:border-l-2 border-stone-200 dark:border-stone-800 md:flex flex flex-col items-start justify-between gap-1 lg:col-span-7 md:col-span-6 col-span-10 overflow-x-hidden h-[100dvh] ${
+      className={`md:border-l-2 border-stone-200 dark:border-stone-800 md:flex flex flex-col items-start justify-between lg:col-span-7 md:col-span-6 col-span-10 overflow-x-hidden h-[100dvh] ${
         location !== "/messages" ? "" : "hidden"
       } `}
     >
@@ -450,7 +340,7 @@ function Page({ params }: { params: { chatId: string } }) {
               className="flex flex-col items-start justify-start"
               href={chat.isGroupChat ? "" : `/${chat.users[0]?.username}`}
             >
-              <h1 className="text-xl tracking-tight font-bold leading-4 flex items-center justify-start gap-1 truncate h-12">
+              <h1 className="text-xl tracking-tight font-bold leading-4 flex items-center justify-start gap-1 truncate py-1">
                 {chat.groupName || chat.users[0]?.fullName}
               </h1>
               {!chat.isGroupChat && !isTyping && (
@@ -480,19 +370,9 @@ function Page({ params }: { params: { chatId: string } }) {
                 </Link>
               </>
             )}
-            <button
-              onClick={() => {
-                if (infoOpen) {
-                  document.body.classList.remove("sm:overflow-y-scroll");
-                } else {
-                  document.body.classList.add("sm:overflow-y-scroll");
-                }
-                setInfoOpen(!infoOpen);
-              }}
-              className="p-2"
-            >
-              <Info strokeWidth={infoOpen ? "3" : "2"} />
-            </button>
+            {/* <Link href={`/messages/${chatId}/info`} className="p-2">
+              <Info strokeWidth="2" />
+            </Link> */}
           </div>
         </div>
       )}
@@ -512,7 +392,7 @@ function Page({ params }: { params: { chatId: string } }) {
               </AvatarFallback>
             </Avatar>
             <div className="grid place-items-center">
-              <h1 className="text-2xl font-bold tracking-tight flex items-center justify-start gap-1">
+              <h1 className="text-2xl font-bold tracking-tight flex items-center justify-start">
                 {chat.groupName || chat.users[0]?.fullName}
               </h1>
               <p className="text-sm text-stone-500">
@@ -532,214 +412,192 @@ function Page({ params }: { params: { chatId: string } }) {
             )}
           </div>
         )}
-        {infoOpen ? (
-          <ChatInfo
-            recipents={chat.users}
-            chatId={chatId}
-            themes={themes}
-            theme={theme}
-            setTheme={(newTheme) => setTheme(newTheme)}
-            setInfoOpen={(open) => setInfoOpen(open)}
-          />
-        ) : (
-          <div className="flex flex-col items-center justify-start gap-2 px-2 w-full">
-            {skeletonLoading ? (
-              <MessagesLoading />
-            ) : (
-              messages.map((message, index) =>
-                !message.kind || message.kind === "message" ? (
+        <div className="flex flex-col items-center justify-start gap-2 px-2 w-full">
+          {skeletonLoading ? (
+            <MessagesLoading />
+          ) : (
+            messages.map((message, index) =>
+              !message.kind || message.kind === "message" ? (
+                <div
+                  className={`group flex items-center justify-start w-full ${
+                    message.sender.username !== user.username
+                      ? "flex-row"
+                      : "flex-row-reverse ml-auto"
+                  }`}
+                  key={index}
+                >
                   <div
-                    className={`group flex items-center justify-start w-full ${
+                    className={`flex flex-col gap-0 overflow-hidden ${
+                      message.sender.username !== user.username
+                        ? "items-start"
+                        : "items-end"
+                    }`}
+                  >
+                    <span
+                      className={`py-1 rounded-xl -mb-1 px-3 opacity-70 truncate max-w-full ${
+                        message.sender.username !== user.username
+                          ? `${theme.color} text-${theme.text}`
+                          : "bg-stone-300 dark:bg-stone-800"
+                      } ${!message?.reply?.content?.length ? "hidden" : ""}`}
+                    >
+                      {message?.reply?.content}
+                    </span>
+                    <div
+                      className={`py-2 px-4 rounded-2xl w-fit relative ${
+                        message.sender.username !== user.username
+                          ? `${theme.color} text-${theme.text} max-w-3/4`
+                          : "bg-stone-300 dark:bg-stone-800 max-w-3/4"
+                      } ${
+                        messages[index - 1]?.sender.username ===
+                        message.sender.username
+                          ? "mb-1"
+                          : "mb-3"
+                      }
+                  ${message.reacts ? "mb-4" : "mb-1"}`}
+                      ref={
+                        messages[messages.length - 1] === message
+                          ? lastMessageRef
+                          : null
+                      }
+                    >
+                      {message.content}
+                      {message.reacts.length > 0 && (
+                        <MessageReacts
+                          messageId={message._id}
+                          reacts={message.reacts}
+                          type={
+                            message.sender.username !== user.username
+                              ? "reply"
+                              : "sent"
+                          }
+                        />
+                      )}
+                    </div>
+                  </div>
+                  <div
+                    className={`flex group-hover:visible invisible w-fit mb-2 mx-0.5 gap-0 ${
                       message.sender.username !== user.username
                         ? "flex-row"
-                        : "flex-row-reverse ml-auto"
+                        : "flex-row-reverse"
                     }`}
-                    key={index}
-                    onDoubleClick={() => {
-                      const filteredReply = checkForAssets(
-                        message.content,
-                        message.kind || "message"
-                      );
-                      setReply({
-                        username: chat.users[0]?.username,
-                        content: filteredReply,
-                      });
-                      inputRef.current?.focus();
-                    }}
                   >
-                    <div
-                      className={`flex flex-col gap-0 ${
+                    <MessageOptions
+                      messageId={message._id}
+                      username={chat.users[0]?.username}
+                      setReply={(reply) => {
+                        const filteredReply = checkForAssets(
+                          reply.content,
+                          reply.kind
+                        );
+                        form.setValue("reply", {
+                          username: reply.username,
+                          content: filteredReply,
+                        });
+                        inputRef.current?.focus();
+                      }}
+                      message={message.content}
+                      type={
                         message.sender.username !== user.username
-                          ? "items-start"
-                          : "items-end"
-                      }`}
-                    >
-                      <span
-                        className={`py-1 rounded-xl -mb-1 px-3 opacity-70 truncate max-w-[40%] ${
-                          message.sender.username !== user.username
-                            ? `${theme.color} text-${theme.text}`
-                            : "bg-stone-300 dark:bg-stone-800"
-                        } ${!message?.reply?.content?.length ? "hidden" : ""}`}
-                      >
-                        {message?.reply?.content}
-                      </span>
-                      <div
-                        className={`py-2 px-4 rounded-2xl w-fit relative ${
-                          message.sender.username !== user.username
-                            ? `${theme.color} text-${theme.text} max-w-3/4`
-                            : "bg-stone-300 dark:bg-stone-800 max-w-3/4"
-                        } ${
-                          messages[index - 1]?.sender.username ===
-                          message.sender.username
-                            ? "mb-1"
-                            : "mb-3"
-                        }
-                  ${message.reacts ? "mb-4" : "mb-1"}`}
-                        ref={
-                          messages[messages.length - 1] === message
-                            ? lastMessageRef
-                            : null
-                        }
-                      >
-                        {message.content}
-                        {message.reacts.length > 0 && (
-                          <MessageReacts
-                            messageId={message._id}
-                            reacts={message.reacts}
-                            type={
-                              message.sender.username !== user.username
-                                ? "reply"
-                                : "sent"
-                            }
-                          />
-                        )}
-                      </div>
-                    </div>
-                    <div
-                      className={`flex group-hover:visible invisible w-fit mb-2 mx-0.5 gap-0 ${
-                        message.sender.username !== user.username
-                          ? "flex-row"
-                          : "flex-row-reverse"
-                      }`}
-                    >
-                      <MessageOptions
-                        messageId={message._id}
-                        username={chat.users[0]?.username}
-                        setReply={(reply) => {
-                          const filteredReply = checkForAssets(
-                            reply.content,
-                            reply.kind
-                          );
-                          setReply({
-                            username: reply.username,
-                            content: filteredReply,
-                          });
-                          inputRef.current?.focus();
-                        }}
-                        message={message.content}
-                        type={
-                          message.sender.username !== user.username
-                            ? "reply"
-                            : "sent"
-                        }
-                        kind={message.kind || "message"}
-                      />
-                    </div>
+                          ? "reply"
+                          : "sent"
+                      }
+                      kind={message.kind || "message"}
+                    />
                   </div>
-                ) : (
+                </div>
+              ) : (
+                <div
+                  className={`group flex items-center justify-start w-full relative ${
+                    message.sender.username !== user.username
+                      ? "flex-row"
+                      : "flex-row-reverse ml-auto"
+                  }`}
+                  key={index}
+                >
                   <div
-                    className={`group flex items-center justify-start w-full relative ${
+                    className={`flex flex-col gap-0 ${
                       message.sender.username === user.username
-                        ? "flex-row"
-                        : "flex-row-reverse ml-auto"
+                        ? "items-start"
+                        : "items-end"
                     }`}
-                    key={index}
-                    onDoubleClick={() => {
-                      const filteredReply = checkForAssets(
-                        message.content,
-                        message.kind || "message"
-                      );
-                      setReply({
-                        username: chat.users[0]?.username,
-                        content: filteredReply,
-                      });
-                      inputRef.current?.focus();
-                    }}
                   >
-                    <div
-                      className={`flex flex-col gap-0 ${
-                        message.sender.username === user.username
-                          ? "items-start"
-                          : "items-end"
-                      }`}
+                    <span
+                      className={`py-1 rounded-xl -mb-1 px-3 truncate max-w-[40%] opacity-70 ${
+                        message.sender.username !== user.username
+                          ? `${theme.color} text-${theme.text}`
+                          : "bg-stone-300 dark:bg-stone-800"
+                      } ${!message?.reply?.content ? "hidden" : ""}`}
                     >
-                      <span
-                        className={`py-1 rounded-xl -mb-1 px-3 truncate max-w-[40%] opacity-70 ${
-                          message.sender.username !== user.username
-                            ? `${theme.color} text-${theme.text}`
-                            : "bg-stone-300 dark:bg-stone-800"
-                        } ${!message?.reply?.content ? "hidden" : ""}`}
-                      >
-                        {message?.reply?.content}
-                      </span>
-                      <div
-                        className={`py-2 px-4 rounded-2xl w-fit max-w-3/4 relative ${
-                          message.sender.username !== user.username
-                            ? `${theme.color} text-${theme.text}`
-                            : "bg-stone-300 dark:bg-stone-800"
-                        } ${
-                          messages[index - 1]?.sender.username === user.username
-                            ? "mb-1"
-                            : "mb-3"
-                        } 
+                      {message?.reply?.content}
+                    </span>
+                    <div
+                      className={`py-2 px-4 rounded-2xl w-fit max-w-3/4 relative ${
+                        message.sender.username !== user.username
+                          ? `${theme.color} text-${theme.text}`
+                          : "bg-stone-300 dark:bg-stone-800"
+                      } ${
+                        messages[index - 1]?.sender.username === user.username
+                          ? "mb-1"
+                          : "mb-3"
+                      } 
                       ${message.reacts ? "mb-4" : "mb-1"}`}
-                        ref={
-                          messages[messages.length - 1] === message
-                            ? lastMessageRef
-                            : null
-                        }
-                      >
-                        {giveAssets(message.content, message.kind)}
-                      </div>
-                    </div>
-                    <div
-                      className={`reactions flex group-hover:visible invisible w-fit mb-2 mx-0.5 gap-0 ${
-                        message.sender.username === user.username
-                          ? "flex-row"
-                          : "flex-row-reverse"
-                      }`}
+                      ref={
+                        messages[messages.length - 1] === message
+                          ? lastMessageRef
+                          : null
+                      }
                     >
-                      <MessageOptions
-                        messageId={message._id}
-                        username={chat.users[0]?.username}
-                        setReply={(reply) => {
-                          const filteredReply = checkForAssets(
-                            reply.content,
-                            reply.kind
-                          );
-                          setReply({
-                            username: reply.username,
-                            content: filteredReply,
-                          });
-                          inputRef.current?.focus();
-                        }}
-                        message={message.content}
-                        type={
-                          message.sender.username !== user.username
-                            ? "reply"
-                            : "sent"
-                        }
-                        kind={message.kind || "message"}
-                      />
+                      {giveAssets(message.content, message.kind)}
+                      {message.reacts.length > 0 && (
+                        <MessageReacts
+                          messageId={message._id}
+                          reacts={message.reacts}
+                          type={
+                            message.sender.username !== user.username
+                              ? "reply"
+                              : "sent"
+                          }
+                        />
+                      )}
                     </div>
                   </div>
-                )
+                  <div
+                    className={`reactions flex group-hover:visible invisible w-fit mb-2 mx-0.5 gap-0 ${
+                      message.sender.username !== user.username
+                        ? "flex-row"
+                        : "flex-row-reverse"
+                    }`}
+                  >
+                    <MessageOptions
+                      messageId={message._id}
+                      username={chat.users[0]?.username}
+                      setReply={(reply) => {
+                        const filteredReply = checkForAssets(
+                          reply.content,
+                          reply.kind
+                        );
+                        form.setValue("reply", {
+                          username: reply.username,
+                          content: filteredReply,
+                        });
+                        inputRef.current?.focus();
+                      }}
+                      message={message.content}
+                      type={
+                        message.sender.username !== user.username
+                          ? "reply"
+                          : "sent"
+                      }
+                      kind={message.kind || "message"}
+                    />
+                  </div>
+                </div>
               )
-            )}
-          </div>
-        )}
+            )
+          )}
+        </div>
       </div>
-      {!infoOpen && !skeletonLoading && (
+      {!skeletonLoading && (
         <div className="sticky bg-white dark:bg-black bottom-0 left-0 w-full px-2.5 flex items-center justify-center z-20">
           <Form {...form}>
             <form
@@ -748,13 +606,13 @@ function Page({ params }: { params: { chatId: string } }) {
             >
               <div
                 className={`flex items-center justify-between gap-0 px-3 py-1 w-full border-t-2 leading-5 overflow-hidden ${
-                  reply.content ? "" : "hidden"
+                  form.watch("reply")?.content ? "" : "hidden"
                 }`}
               >
-                <div className="flex flex-col">
-                  {reply.username}
-                  <span className="text-stone-500 text-sm">
-                    {reply.content.slice(0, 100)}
+                <div className="flex gap-2 text-sm overflow-hidden">
+                  {form.watch("reply")?.username}:
+                  <span className="text-stone-500 truncate max-w-full">
+                    {form.watch("reply")?.content.slice(0, 100)}
                   </span>
                 </div>
                 <Button
@@ -763,8 +621,8 @@ function Page({ params }: { params: { chatId: string } }) {
                   type="button"
                   className="top-1 right-1 h-fit w-fit hover:bg-white dark:hover:bg-black"
                   onClick={() =>
-                    setReply({
-                      username: "",
+                    form.setValue("reply", {
+                      username: "baila",
                       content: "",
                     })
                   }
@@ -798,54 +656,7 @@ function Page({ params }: { params: { chatId: string } }) {
                     </FormItem>
                   )}
                 />
-                <Menubar className="border-0 p-0">
-                  <MenubarMenu>
-                    {form.watch("message").length === 0 && (
-                      <MenubarTrigger asChild>
-                        <Button type="button" variant="outline">
-                          <Paperclip />
-                        </Button>
-                      </MenubarTrigger>
-                    )}
-                    <MenubarContent align="center" className="rounded-xl">
-                      <MenubarItem
-                        className="rounded-lg py-2"
-                        onClick={() => setMediaOpen(true)}
-                      >
-                        <ImageIcon />
-                        &nbsp;Photos & Videos
-                      </MenubarItem>
-                      <MenubarItem
-                        className="rounded-lg py-2"
-                        onClick={() => setCameraOpen(true)}
-                      >
-                        <CameraIcon />
-                        &nbsp;Camera
-                      </MenubarItem>
-                      <MenubarItem
-                        className="rounded-lg py-2"
-                        onClick={() => setAudioOpen(true)}
-                      >
-                        <MicIcon />
-                        &nbsp;Audio
-                      </MenubarItem>
-                      <MenubarItem
-                        className="rounded-lg py-2"
-                        onClick={() => setDocumentOpen(true)}
-                      >
-                        <FileIcon />
-                        &nbsp;Document
-                      </MenubarItem>
-                      <MenubarItem
-                        className="rounded-lg py-2"
-                        onClick={shareLocation}
-                      >
-                        <MapPin />
-                        &nbsp;Location
-                      </MenubarItem>
-                    </MenubarContent>
-                  </MenubarMenu>
-                </Menubar>
+                <MessageActions message={message} chatId={chatId} />
                 {form.watch("message").length > 0 && (
                   <Button
                     type="submit"
@@ -860,10 +671,6 @@ function Page({ params }: { params: { chatId: string } }) {
           </Form>
         </div>
       )}
-      <CameraDialog open={cameraOpen} setOpen={setCameraOpen} />
-      <MediaDialog open={mediaOpen} setOpen={setMediaOpen} />
-      <AudioDialog open={audioOpen} setOpen={setAudioOpen} />
-      <DocumentDialog open={documentOpen} setOpen={setDocumentOpen} />
     </div>
   );
 }

@@ -13,6 +13,7 @@ const initialState: ChatSliceI = {
     groupIcon: "",
     lastMessage: {
       _id: "",
+      kind: "message",
       content: "",
       createdAt: "",
     },

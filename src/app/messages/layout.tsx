@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { nameFallback } from "@/lib/helpers";
+import { checkForAssets, nameFallback } from "@/lib/helpers";
 import { History } from "lucide-react";
 // import { SocketProvider } from "@/context/SocketProvider";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -102,7 +102,12 @@ function Messages({ children }: { children: React.ReactNode }) {
                     {chat.isGroupChat ? chat.groupName : chat.users[0].fullName}
                   </p>
                   <p className="text-sm md:w-40 sm:w-80 w-40 text-left text-stone-500 text-ellipsis whitespace-nowrap overflow-x-hidden">
-                    {chat?.lastMessage?.content || ""}
+                    {chat?.lastMessage
+                      ? checkForAssets(
+                          chat.lastMessage.content,
+                          chat.lastMessage.kind
+                        )
+                      : ""}
                   </p>
                 </div>
               </Link>
