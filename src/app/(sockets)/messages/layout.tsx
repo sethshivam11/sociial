@@ -3,7 +3,6 @@ import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { checkForAssets, nameFallback } from "@/lib/helpers";
 import { History } from "lucide-react";
-// import { SocketProvider } from "@/context/SocketProvider";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import ChatsLoadingSkeleton from "@/components/skeletons/ChatsLoading";
@@ -53,7 +52,7 @@ function Messages({ children }: { children: React.ReactNode }) {
   }, [dispatch, newChatDialog, user._id, userLoading]);
 
   return (
-    <div className="grid min-h-[100dvh] max-sm:max-h-[100dvh] xl:col-span-8 pl-8 md:pl-4 max-sm:pl-0 sm:col-span-9 col-span-10 sm:grid-cols-10">
+    <div className="grid h-[100dvh] sm:min-h-[42rem] max-sm:max-h-[100dvh] xl:col-span-8 pl-8 md:pl-4 max-sm:pl-0 sm:col-span-9 col-span-10 sm:grid-cols-10">
       <div
         className={`lg:col-span-3 md:col-span-4 col-span-10 md:flex flex-col items-start justify-start gap-2 py-6 h-full max-h-[100dvh] sm:min-h-[42rem] md:px-0 px-4 sticky top-0 ${
           location === "/messages" ? "flex" : "hidden"

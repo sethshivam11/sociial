@@ -46,7 +46,7 @@ export interface PostI {
 
 export interface ChatI {
   _id: string;
-  admin: [];
+  admin: string[];
   users: BasicUserI[];
   groupName: string;
   groupIcon: string;

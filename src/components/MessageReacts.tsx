@@ -135,7 +135,7 @@ function MessageReacts({ reacts, type, messageId }: Props) {
                         {nameFallback(react.user.fullName)}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="flex flex-col">
+                    <div className="flex flex-col items-start">
                       <p>{react.user.fullName}</p>
                       <p className="text-stone-500 text-sm">Tap to remove</p>
                     </div>

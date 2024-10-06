@@ -38,8 +38,9 @@ function Page({ children }: React.PropsWithChildren) {
           response.payload?.success ||
           response.payload?.message === "Token is required"
         ) {
+          if (document && "cookie" in window)
+            document.cookie = "accessToken=; refreshToken=;";
           router.push("/sign-in");
-          if (window && "location" in window) window.location.reload();
         }
       })
       .finally(() => setOpen(false));

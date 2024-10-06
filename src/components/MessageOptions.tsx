@@ -115,12 +115,14 @@ function MessageOptions({
             >
               Reply
             </MenubarItem>
-            <MenubarItem
-              className=" rounded-lg py-2.5"
-              onClick={() => copyMessage(message)}
-            >
-              Copy Message
-            </MenubarItem>
+            {kind === "message" && (
+              <MenubarItem
+                className=" rounded-lg py-2.5"
+                onClick={() => copyMessage(message)}
+              >
+                Copy Message
+              </MenubarItem>
+            )}
             {type === "sent" && (
               <MenubarItem
                 className="text-red-600 focus:text-red-600 rounded-lg py-2.5"

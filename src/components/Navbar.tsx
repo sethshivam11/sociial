@@ -78,8 +78,9 @@ function Navbar() {
     dispatch(logOutUser())
       .then(({ payload }) => {
         if (payload?.success || payload?.message === "Token is required") {
+          if (document && "cookie" in window)
+            document.cookie = "accessToken=; refreshToken=;";
           router.push("/sign-in");
-          if (window && "location" in window) window.location.reload();
         } else {
           toast({
             title: "Error",

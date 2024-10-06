@@ -214,12 +214,6 @@ const chatSlice = createSlice({
     newChatStarted: (state, action) => {
       state.chats = [action.payload.data, ...state.chats];
     },
-    newMessage: (state, action) => {
-      state.chats = [
-        action.payload,
-        state.chats.filter((chat) => chat._id !== action.payload.data._id),
-      ];
-    },
     setCurrentChat: (state, action) => {
       state.chat = state.chats.find((chat) => chat._id === action.payload) as ChatI;
     }
@@ -397,7 +391,6 @@ export const {
   newAdmin,
   removedAdmin,
   newChatStarted,
-  newMessage,
   setCurrentChat
 } = chatSlice.actions;
 

@@ -1,5 +1,5 @@
 import { MessageSliceI } from "@/types/sliceTypes";
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, nanoid } from "@reduxjs/toolkit";
 
 const initialState: MessageSliceI = {
   messages: [],
@@ -30,7 +30,7 @@ export const sendMessage = createAsyncThunk(
         formData.append("attachments", file);
       });
     }
-    if(message.kind) formData.append("kind", message.kind);
+    if (message.kind) formData.append("kind", message.kind);
     const parsed = await fetch("/api/v1/messages/send", {
       method: "POST",
       body: formData,
@@ -121,17 +121,20 @@ const messageSlice = createSlice({
       state.editingMessage = action.payload;
     },
     messageReceived: (state, action) => {
-      state.messages = action.payload.data;
+      state.messages = [...state.messages, action.payload].filter(
+        (message, index, self) =>
+          index === self.findIndex((msg) => msg._id === message._id)
+      );
     },
     messageDeleted: (state, action) => {
       state.messages = state.messages.filter(
-        (message) => message._id !== action.payload.data._id
+        (message) => message._id !== action.payload._id
       );
     },
     messageUpdated: (state, action) => {
       state.messages = state.messages.map((message) => {
-        if (message._id === action.payload.data._id) {
-          message.content = action.payload.data.content;
+        if (message._id === action.payload.message._id) {
+          message.content = action.payload.message.content;
         }
         return message;
       });
@@ -141,17 +144,24 @@ const messageSlice = createSlice({
     },
     reacted: (state, action) => {
       state.messages = state.messages.map((message) => {
-        if (message._id === action.payload.data.messageId) {
-          message.reacts = [action.payload.data.reacts, ...message.reacts];
+        if (message._id === action.payload.messageId) {
+          message.reacts = [
+            {
+              _id: nanoid(),
+              user: action.payload.user,
+              content: action.payload.content,
+            },
+            ...message.reacts,
+          ];
         }
         return message;
       });
     },
     unreacted: (state, action) => {
       state.messages = state.messages.map((message) => {
-        if (message._id === action.payload.data._id) {
+        if (message._id === action.payload.messageId) {
           message.reacts = message.reacts.filter(
-            (react) => react._id !== action.payload.data.reacts._id
+            (react) => react.user !== action.payload.user
           );
         }
         return message;
