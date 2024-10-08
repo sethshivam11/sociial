@@ -38,16 +38,16 @@ export const getMoreChats = createAsyncThunk(
   }
 );
 
-export const newChat = createAsyncThunk("chats/newChat", async (userId: string) => {
-  const parsed = await fetch("/api/v1/chats/new", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ userId }),
-  });
-  return parsed.json();
-});
+export const newChat = createAsyncThunk(
+  "chats/newChat",
+  async (userId: string) => {
+    const parsed = await fetch("/api/v1/chats/new", {
+      method: "POST",
+      body: JSON.stringify({ userId }),
+    });
+    return parsed.json();
+  }
+);
 
 export const newGroupChat = createAsyncThunk(
   "chats/newGroupChat",
@@ -79,9 +79,6 @@ export const addParticipants = createAsyncThunk(
   async (participants: string[]) => {
     const parsed = await fetch("/api/v1/addParticipants", {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify({ participants }),
     });
     return parsed.json();
@@ -90,13 +87,16 @@ export const addParticipants = createAsyncThunk(
 
 export const removeParticipants = createAsyncThunk(
   "chats/removeParticipants",
-  async (participants: string[]) => {
+  async ({
+    participants,
+    chatId,
+  }: {
+    chatId: string;
+    participants: string[];
+  }) => {
     const parsed = await fetch("/api/v1/removeParticipants", {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ participants }),
+      body: JSON.stringify({ participants, chatId }),
     });
     return parsed.json();
   }
@@ -158,9 +158,6 @@ export const makeAdmin = createAsyncThunk(
   async ({ chatId, userId }: { userId: string; chatId: string }) => {
     const parsed = await fetch("/api/v1/chats/makeAdmin", {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify({ userId, chatId }),
     });
     return parsed.json();
@@ -172,9 +169,6 @@ export const removeAdmin = createAsyncThunk(
   async ({ chatId, userId }: { userId: string; chatId: string }) => {
     const parsed = await fetch("/api/v1/chats/removeAdmin", {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify({ userId, chatId }),
     });
     return parsed.json();
@@ -215,8 +209,10 @@ const chatSlice = createSlice({
       state.chats = [action.payload.data, ...state.chats];
     },
     setCurrentChat: (state, action) => {
-      state.chat = state.chats.find((chat) => chat._id === action.payload) as ChatI;
-    }
+      state.chat = state.chats.find(
+        (chat) => chat._id === action.payload
+      ) as ChatI;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(getChats.pending, (state) => {
@@ -391,7 +387,7 @@ export const {
   newAdmin,
   removedAdmin,
   newChatStarted,
-  setCurrentChat
+  setCurrentChat,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

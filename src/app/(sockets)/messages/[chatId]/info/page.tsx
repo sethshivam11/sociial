@@ -38,6 +38,10 @@ import {
 } from "@/components/ui/menubar";
 import {
   getChats,
+  leaveGroupChat,
+  makeAdmin,
+  removeAdmin,
+  removeParticipants,
   setCurrentChat,
 } from "@/lib/store/features/slices/chatSlice";
 import {
@@ -49,6 +53,8 @@ import {
   AlertDialogFooter,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { toast } from "@/components/ui/use-toast";
+import { blockUser } from "@/lib/store/features/slices/userSlice";
 
 interface Theme {
   name: string;
@@ -70,7 +76,86 @@ function Info({ params }: { params: { chatId: string } }) {
   const [removeDialog, setRemoveDialog] = React.useState({
     open: false,
     username: "",
+    userId: "",
   });
+
+  function handleMakeAdmin(userId: string) {
+    dispatch(makeAdmin({ chatId, userId })).then((response) => {
+      if (response.payload?.success) {
+        toast({
+          title: "User is now an admin",
+        });
+      } else {
+        toast({
+          title: "Cannot make user an admin",
+          description: response.payload?.message || "Something went wrong",
+          variant: "destructive",
+        });
+      }
+    });
+  }
+  function handleRemoveAdmin(userId: string) {
+    dispatch(removeAdmin({ chatId, userId })).then((response) => {
+      if (response.payload?.success) {
+        toast({
+          title: "User is not an admin now",
+        });
+      } else {
+        toast({
+          title: "Cannot remove user as admin",
+          description: response.payload?.message || "Something went wrong",
+          variant: "destructive",
+        });
+      }
+    });
+  }
+  function handleRemoveUser(userId: string) {
+    dispatch(removeParticipants({ participants: [userId], chatId })).then(
+      (response) => {
+        if (response.payload?.success) {
+          toast({
+            title: "User removed from group",
+          });
+        } else {
+          toast({
+            title: "Cannot remove user",
+            description: response.payload?.message || "Something went wrong",
+            variant: "destructive",
+          });
+        }
+      }
+    );
+  }
+  function handleLeaveGroup() {
+    dispatch(leaveGroupChat(chatId)).then((response) => {
+      if (response.payload?.success) {
+        toast({
+          title: "You left the group",
+        });
+      } else {
+        toast({
+          title: "Cannot leave group",
+          description: response.payload?.message || "Something went wrong",
+          variant: "destructive",
+        });
+      }
+    });
+  }
+  function handleBlockUser(userId: string) {
+    dispatch(blockUser(userId)).then((response) => {
+      if (response.payload?.success) {
+        toast({
+          title: "User blocked",
+        });
+      } else {
+        toast({
+          title: "Cannot block user",
+          description: response.payload?.message || "Something went wrong",
+          variant: "destructive",
+        });
+      }
+    });
+  }
 
   React.useEffect(() => {
     const savedMessageTheme = JSON.parse(
@@ -126,23 +211,33 @@ function Info({ params }: { params: { chatId: string } }) {
           {chat.isGroupChat && chat.admin.includes(currentUser._id) && (
             <Menubar className="bg-transparent border-transparent xl:justify-start justify-center w-fit p-0">
               <MenubarMenu>
-                <MenubarTrigger className="px-1.5 rounded-lg">
+                <MenubarTrigger className="px-1.5 rounded-lg cursor-pointer">
                   <MoreHorizontal />
                 </MenubarTrigger>
                 <MenubarContent className="rounded-xl">
                   {chat.admin.includes(user._id) ? (
-                    <MenubarItem className=" rounded-lg py-2.5">
+                    <MenubarItem
+                      className=" rounded-lg py-2.5"
+                      onClick={() => handleRemoveAdmin(user._id)}
+                    >
                       Remove Admin
                     </MenubarItem>
                   ) : (
-                    <MenubarItem className=" rounded-lg py-2.5">
+                    <MenubarItem
+                      className=" rounded-lg py-2.5"
+                      onClick={() => handleMakeAdmin(user._id)}
+                    >
                       Make Admin
                     </MenubarItem>
                   )}
                   <MenubarItem
                     className="text-red-600 focus:text-red-600 rounded-lg py-2.5"
                     onClick={() =>
-                      setRemoveDialog({ open: true, username: user.username })
+                      setRemoveDialog({
+                        open: true,
+                        username: user.username,
+                        userId: user._id,
+                      })
                     }
                   >
                     Remove
@@ -204,6 +299,7 @@ function Info({ params }: { params: { chatId: string } }) {
           <Button
             className="w-full text-red-600 hover:text-red-600"
             variant="ghost"
+            onClick={handleLeaveGroup}
           >
             Leave Group
           </Button>
@@ -211,6 +307,7 @@ function Info({ params }: { params: { chatId: string } }) {
           <Button
             variant="ghost"
             className="w-full text-red-500 hover:text-red-500"
+            onClick={() => handleBlockUser(chat?.users[0]?._id)}
           >
             Block @{chat?.users[0]?.username}
           </Button>
@@ -223,13 +320,16 @@ function Info({ params }: { params: { chatId: string } }) {
           </AlertDialogTitle>
           <AlertDialogFooter>
             <AlertDialogCancel
-              onClick={() => {
-                setRemoveDialog({ open: false, username: "" });
-              }}
+              onClick={() =>
+                setRemoveDialog({ open: false, username: "", userId: "" })
+              }
             >
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction asChild>
+            <AlertDialogAction
+              onClick={() => handleRemoveUser(removeDialog.userId)}
+              asChild
+            >
               <Button variant="destructive">Remove</Button>
             </AlertDialogAction>
           </AlertDialogFooter>

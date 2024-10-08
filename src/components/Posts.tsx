@@ -156,12 +156,13 @@ function Posts({ feed }: Props) {
     }
 
     return () => clearTimeout(timerRef.current);
-    
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile.username, dispatch, feed]);
 
   React.useEffect(() => {
-    if (!user._id || !feed) return;
+    console.log("Explore posts", user._id);
+    if (!user._id || feed) return;
     dispatch(exploreFeed({ page: 1, userId: user._id }));
   }, [dispatch, user._id, feed]);
 

@@ -48,7 +48,7 @@ function SignInPage() {
       password: "",
     },
   });
-  
+
   const { loading } = useAppSelector((state) => state.user);
   const [showPwd, setShowPwd] = React.useState(false);
 
@@ -69,7 +69,9 @@ function SignInPage() {
         await dispatch(
           resendVerificationCode(response.payload.data.user.username)
         );
-        return router.push(`/verify-code?username=${response.payload.data.user.username}`);
+        return router.push(
+          `/verify-code?username=${response.payload.data.user.username}`
+        );
       } else {
         router.push("/");
       }
@@ -86,6 +88,11 @@ function SignInPage() {
       }
     }
   }
+
+  React.useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) router.push("/");
+  }, [router]);
 
   return (
     <div className="flex justify-center col-span-10 py-12 items-center min-h-screen bg-white dark:bg-zinc-800">
