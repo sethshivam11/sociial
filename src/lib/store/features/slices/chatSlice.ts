@@ -43,6 +43,9 @@ export const newChat = createAsyncThunk(
   async (userId: string) => {
     const parsed = await fetch("/api/v1/chats/new", {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({ userId }),
     });
     return parsed.json();

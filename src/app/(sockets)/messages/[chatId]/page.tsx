@@ -302,8 +302,7 @@ function Page({ params }: { params: { chatId: string } }) {
     dispatch(getMessages(chatId));
     if (!chats.length)
       dispatch(getChats()).then((response) => {
-        if (!chat._id && response.payload?.success)
-          dispatch(setCurrentChat(chatId));
+        if (response.payload?.success) dispatch(setCurrentChat(chatId));
       });
 
     function handleTyping(e: KeyboardEvent) {
@@ -319,7 +318,7 @@ function Page({ params }: { params: { chatId: string } }) {
     return () => {
       document.removeEventListener("keydown", handleTyping);
     };
-  }, [dispatch]);
+  }, [dispatch, chatId, setCurrentChat]);
 
   return (
     <div
@@ -438,16 +437,17 @@ function Page({ params }: { params: { chatId: string } }) {
                 }`}
                 key={index}
               >
-                {message.sender.username !== user.username && (
-                  <div className="flex h-full items-end pb-2">
-                    <Avatar className="w-5 h-5">
-                      <AvatarImage src={message.sender.avatar} />
-                      <AvatarFallback>
-                        {nameFallback(message.sender.fullName)}
-                      </AvatarFallback>
-                    </Avatar>
-                  </div>
-                )}
+                {message.sender.username !== user.username &&
+                  chat?.isGroupChat && (
+                    <div className="flex h-full items-end pb-2">
+                      <Avatar className="w-5 h-5">
+                        <AvatarImage src={message.sender.avatar} />
+                        <AvatarFallback>
+                          {nameFallback(message.sender.fullName)}
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
+                  )}
                 <div
                   className={`flex flex-col gap-0 overflow-hidden ${
                     message.sender.username !== user.username

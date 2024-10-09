@@ -46,6 +46,7 @@ import {
   AlertDialogFooter,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { newChat, setCurrentChat } from "@/lib/store/features/slices/chatSlice";
 
 function Profile({
   children,
@@ -83,7 +84,6 @@ function Profile({
       }
     });
   }
-
   function handleUnblock() {
     dispatch(unblockUser(profile._id)).then((response) => {
       if (!response.payload?.success) {
@@ -95,24 +95,35 @@ function Profile({
       }
     });
   }
-
-  async function copyLink(username: string) {
+  function copyLink(username: string) {
     const link = `${baseUrl}/${username}`;
-    await navigator.clipboard.writeText(link);
-    toast({
-      title: "Copied",
-      description: "The link has been copied to your clipboard.",
-    });
+    navigator.clipboard
+      .writeText(link)
+      .then(() => {
+        toast({
+          title: "Copied",
+          description: "The link has been copied to your clipboard.",
+        });
+      })
+      .catch((err) => {
+        toast({
+          title: "Error",
+          description: "An error occurred while copying the link.",
+          variant: "destructive",
+        });
+        console.log(err);
+      });
   }
-
-  async function generateQR(text: string) {
-    try {
-      setQR(await QRCode.toDataURL(`${baseUrl}/${text}`));
-    } catch (err) {
-      console.error(err);
-    }
+  function generateQR(text: string) {
+    QRCode.toDataURL(`${baseUrl}/${text}`)
+      .then((url) => setQR(url))
+      .catch((err) =>
+        toast({
+          title: "Cannot generate QR",
+          variant: "destructive",
+        })
+      );
   }
-
   function handleFollow(username: string) {
     if (!isLoggedIn) {
       return toast({
@@ -133,7 +144,6 @@ function Profile({
       }
     });
   }
-
   function handleUnfollow(username: string) {
     dispatch(unfollowUser({ username })).then((response) => {
       if (!response.payload?.success) {
@@ -145,7 +155,6 @@ function Profile({
       }
     });
   }
-
   function handleQRDownload() {
     const link = document.createElement("a");
     link.href = QR;
@@ -154,7 +163,21 @@ function Profile({
     link.click();
     document.body.removeChild(link);
   }
-
+  function handleDM(userId: string) {
+    dispatch(newChat(userId)).then((response) => {
+      if (!response.payload?.success) {
+        toast({
+          title: "Cannot start chat",
+          description:
+            response.payload?.message ||
+            "An error occurred while trying to start a chat.",
+          variant: "destructive",
+        });
+      } else {
+        router.push(`/messages/${response.payload.data._id}`);
+      }
+    });
+  }
   function getButton(): React.ReactNode {
     if (user.username === username)
       return (
@@ -285,7 +308,7 @@ function Profile({
                               ),
                             });
                           } else {
-                            router.push(`/messages/${profile._id}`);
+                            handleDM(profile._id);
                           }
                         }}
                       >

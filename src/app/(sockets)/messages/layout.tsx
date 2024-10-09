@@ -67,7 +67,7 @@ function Messages({ children }: { children: React.ReactNode }) {
         <ScrollArea className="py-3 w-full h-full p-2.5 max-sm:hidden">
           {skeletonLoading ? (
             <ChatsLoadingSkeleton />
-          ) : chats.length > 1 ? (
+          ) : chats.length > 0 ? (
             chats.map((chat, index) => (
               <Link
                 className={`flex items-center justify-center rounded-md w-full gap-2 p-2 mb-1 ${
@@ -77,7 +77,7 @@ function Messages({ children }: { children: React.ReactNode }) {
                 }`}
                 key={index}
                 title={
-                  chat.isGroupChat ? chat.groupName : chat.users[0].fullName
+                  chat.isGroupChat ? chat.groupName : chat?.users[0]?.fullName
                 }
                 onClick={() => dispatch(setCurrentChat(chat._id))}
                 href={`/messages/${chat._id}`}
@@ -85,20 +85,20 @@ function Messages({ children }: { children: React.ReactNode }) {
                 <Avatar className="w-10 h-10">
                   <AvatarImage
                     src={
-                      chat.isGroupChat ? chat.groupIcon : chat.users[0].avatar
+                      chat.isGroupChat ? chat.groupIcon : chat?.users[0]?.avatar
                     }
                     alt=""
                     className="pointer-events-none select-none object-contain"
                   />
                   <AvatarFallback>
                     {nameFallback(
-                      chat.isGroupChat ? chat.groupName : chat.users[0].fullName
+                      chat.isGroupChat ? chat.groupName : chat?.users[0]?.fullName
                     )}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col items-start justify-center w-full">
                   <p>
-                    {chat.isGroupChat ? chat.groupName : chat.users[0].fullName}
+                    {chat.isGroupChat ? chat.groupName : chat?.users[0]?.fullName}
                   </p>
                   <p className="text-sm md:w-40 sm:w-80 w-40 text-left text-stone-500 text-ellipsis whitespace-nowrap overflow-x-hidden">
                     {chat?.lastMessage
@@ -112,7 +112,7 @@ function Messages({ children }: { children: React.ReactNode }) {
               </Link>
             ))
           ) : (
-            <div className="w-full flex flex-col items-center justify-center gap-4 text-center h-full">
+            <div className="w-full flex flex-col items-center justify-center gap-4 text-center h-[100dvh]">
               <History size="60" />
               <div>
                 <h2 className="text-2xl tracking-tight font-bold">
@@ -128,7 +128,7 @@ function Messages({ children }: { children: React.ReactNode }) {
         <div className="sm:hidden pb-16 w-full">
           {skeletonLoading ? (
             <ChatsLoadingSkeleton />
-          ) : chats.length > 1 ? (
+          ) : chats.length > 0 ? (
             chats.map((chat, index) => (
               <Link
                 className={`flex items-center justify-center rounded-md w-full gap-2 p-2 ${
@@ -137,23 +137,23 @@ function Messages({ children }: { children: React.ReactNode }) {
                     : "sm:hover:bg-stone-200 sm:dark:hover:bg-stone-800"
                 }`}
                 key={index}
-                title={chat.users[0].username}
+                title={chat?.users[0]?.username}
                 href={`/messages/${chat._id}`}
               >
                 <Avatar className="w-10 h-10">
                   <AvatarImage
                     src={
-                      chat.isGroupChat ? chat.groupIcon : chat.users[0].avatar
+                      chat.isGroupChat ? chat.groupIcon : chat?.users[0]?.avatar
                     }
                     alt=""
                     className="pointer-events-none select-none"
                   />
                   <AvatarFallback>
-                    {nameFallback(chat.users[0].fullName)}
+                    {nameFallback(chat?.users[0]?.fullName)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col items-start justify-center w-full">
-                  <p>{chat.users[0].fullName}</p>
+                  <p>{chat?.users[0]?.fullName}</p>
                   <p className="text-sm md:w-40 sm:w-80 w-40 text-left text-stone-500 text-ellipsis whitespace-nowrap overflow-x-hidden">
                     {chat?.lastMessage?.content}
                   </p>

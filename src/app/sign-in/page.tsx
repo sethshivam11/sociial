@@ -50,15 +50,15 @@ function SignInPage() {
   });
 
   const { loading } = useAppSelector((state) => state.user);
-  const [showPwd, setShowPwd] = React.useState(false);
+  const [showPwd, setShowPwd] = React.useState<boolean>(false);
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
     let username = "";
     let email = "";
     if (!(data.identifier.includes("@") || data.identifier.includes("."))) {
-      username = data.identifier;
+      username = data.identifier.trim();
     } else {
-      email = data.identifier;
+      email = data.identifier.trim();
     }
     const response = await dispatch(
       loginUser({ email, username, password: data.password })
