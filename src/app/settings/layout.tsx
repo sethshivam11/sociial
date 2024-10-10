@@ -7,7 +7,7 @@ import {
   AlertDialogFooter,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { logOutUser } from "@/lib/store/features/slices/userSlice";
+import { clearCookies, logOutUser } from "@/lib/store/features/slices/userSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import {
   Ban,
@@ -22,31 +22,28 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import React from "react";
+import { PropsWithChildren, useState, useEffect } from "react";
 
-function Page({ children }: React.PropsWithChildren) {
+function Page({ children }: PropsWithChildren) {
   const location = usePathname();
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { user, loading } = useAppSelector((state) => state.user);
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
 
   function handleLogOut() {
     dispatch(logOutUser())
       .then((response) => {
-        if (
-          response.payload?.success ||
-          response.payload?.message === "Token is required"
-        ) {
-          if (document && "cookie" in window)
-            document.cookie = "accessToken=; refreshToken=;";
+        if (response.payload?.success) {
           router.push("/sign-in");
+        } else {
+          dispatch(clearCookies()).then(() => router.push("/sign-in"));
         }
       })
       .finally(() => setOpen(false));
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     const checkScreenWidthAndRedirect = () => {
       const screenWidth = window.innerWidth;
       const targetWidth = 768;

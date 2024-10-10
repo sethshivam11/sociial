@@ -1,6 +1,5 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import React from "react";
 
 function Page() {
   return (
@@ -13,6 +12,12 @@ function Page() {
       </h1>
       <div className="sm:w-3/4 w-full px-8 space-y-8 mt-2 max-sm:mt-4">
         <div className="flex flex-col gap-2 py-2 w-full items-center justify-start ring-1 ring-stone-200 dark:ring-stone-800 rounded-xl">
+          <Link
+            href="/settings/security/login-activity"
+            className="flex items-center justify-between w-full py-2 px-4"
+          >
+            Where you&apos;re logged in <ChevronRight />
+          </Link>
           <Link
             href="/settings/security/password"
             className="flex items-center justify-between w-full py-2 px-4"

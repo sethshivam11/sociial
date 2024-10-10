@@ -1,7 +1,7 @@
 "use client";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
-import React from "react";
+import { useEffect } from "react";
 import { Heart, MessageSquareText, ImageIcon, PlayIcon } from "lucide-react";
 import Link from "next/link";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
@@ -18,7 +18,7 @@ function Page() {
     (state) => state.post
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!profile.username) return;
     dispatch(getUserPosts({ username: profile.username }));
   }, [dispatch, profile.username]);

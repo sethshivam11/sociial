@@ -1,4 +1,3 @@
-import React from "react";
 import { Smile } from "lucide-react";
 import { Button } from "./ui/button";
 import data from "@emoji-mart/data";

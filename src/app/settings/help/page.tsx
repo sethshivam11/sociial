@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronLeft, Info, Loader2 } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import {
@@ -24,8 +24,8 @@ import { toast } from "@/components/ui/use-toast";
 function Page() {
   const dispatch = useAppDispatch();
   const { user, loading } = useAppSelector((state) => state.user);
-  const [image, setImage] = React.useState<File | null>(null);
-  const [submitted, setSubmitted] = React.useState(false);
+  const [image, setImage] = useState<File | null>(null);
+  const [submitted, setSubmitted] = useState(false);
   const formSchema = z.object({
     title: titleSchema,
     description: descriptionSchema,

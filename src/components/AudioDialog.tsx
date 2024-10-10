@@ -1,4 +1,4 @@
-import React from "react";
+import { useState, useRef, useEffect } from "react";
 import { Dialog, DialogContent, DialogTitle, DialogFooter } from "./ui/dialog";
 import { Button } from "./ui/button";
 import {
@@ -18,16 +18,16 @@ interface Props {
 }
 
 function AudioDialog({ open, setOpen }: Props) {
-  const audioRef = React.useRef<HTMLAudioElement>(null);
-  const mediaRecorder = React.useRef<MediaRecorder | null>(null);
-  const progressRef = React.useRef<HTMLSpanElement>(null);
-  const timerRef = React.useRef<NodeJS.Timeout | null>(null);
-  const [audio, setAudio] = React.useState("");
-  const [recording, setRecording] = React.useState(false);
-  const [isPaused, setIsPaused] = React.useState(false);
-  const [stream, setStream] = React.useState<MediaStream | null>(null);
-  const [timeStamp, setTimeStamp] = React.useState(0);
-  const [audioDuration, setAudioDuration] = React.useState(0);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const mediaRecorder = useRef<MediaRecorder | null>(null);
+  const progressRef = useRef<HTMLSpanElement>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const [audio, setAudio] = useState("");
+  const [recording, setRecording] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [timeStamp, setTimeStamp] = useState(0);
+  const [audioDuration, setAudioDuration] = useState(0);
 
   async function getUserAudio() {
     const devicesAvailable =
@@ -82,7 +82,7 @@ function AudioDialog({ open, setOpen }: Props) {
     }
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (mediaRecorder.current) {
       if (isPaused) mediaRecorder.current.pause();
       else mediaRecorder.current.resume();

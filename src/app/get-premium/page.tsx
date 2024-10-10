@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
-import React from "react";
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -66,8 +66,8 @@ function Page() {
     },
   ];
 
-  const [plan, setPlan] = React.useState("monthly");
-  const [alertOpen, setAlertOpen] = React.useState(false);
+  const [plan, setPlan] = useState("monthly");
+  const [alertOpen, setAlertOpen] = useState(false);
 
   return (
     <div className="col-span-10 flex flex-col items-center justify-start relative bg-gradient-to-br from-sky-200 via-stone-100 to-white dark:from-sky-950 dark:via-stone-950 dark:to-black min-h-[100dvh] h-fit pb-4">

@@ -18,7 +18,7 @@ import { SendHorizontal, ShareIcon } from "lucide-react";
 import Image from "next/image";
 import { Input } from "./ui/input";
 import { useForm } from "react-hook-form";
-import React from "react";
+import { useState, useEffect } from "react";
 import { Checkbox } from "./ui/checkbox";
 import { Label } from "./ui/label";
 import { z } from "zod";
@@ -45,7 +45,7 @@ export default function Share({ isVideo, _id }: Props) {
     },
   });
 
-  const [search, setSearch] = React.useState("");
+  const [search, setSearch] = useState("");
 
   const followers = [
     {
@@ -85,9 +85,7 @@ export default function Share({ isVideo, _id }: Props) {
     },
   ];
 
-  const [shareToPeople, setShareToPeople] = React.useState<typeof followers>(
-    []
-  );
+  const [shareToPeople, setShareToPeople] = useState<typeof followers>([]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);

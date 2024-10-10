@@ -1,7 +1,7 @@
 "use client";
 import { Loader2, Plus } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { nameFallback } from "@/lib/helpers";
 import StoriesLoading from "./skeletons/StoriesLoading";
@@ -32,9 +32,9 @@ function Stories() {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
 
-  const [redirecting, setRedirecting] = React.useState(false);
+  const [redirecting, setRedirecting] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!stories.length) dispatch(getStories());
     if (!userStory?.media.length) dispatch(getUserStory());
 

@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import Link from "next/link";
@@ -54,7 +54,7 @@ function Suggestions() {
       .finally(() => dispatch(setFollowing({ userId, isFollowing: false })));
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!user._id || !window) return;
     const checkScreenWidth = () => {
       const screenWidth = window.innerWidth;

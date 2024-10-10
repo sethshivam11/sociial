@@ -15,7 +15,7 @@ import {
   Type,
   X,
 } from "lucide-react";
-import React from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -114,20 +114,20 @@ function Page() {
   const dispatch = useAppDispatch();
   const { user, loading: userLoading } = useAppSelector((state) => state.user);
   const { loading } = useAppSelector((state) => state.story);
-  const dragContainer = React.useRef<HTMLDivElement>(null);
-  const timerRef = React.useRef<NodeJS.Timeout | null>(null);
-  const inputRef = React.useRef<HTMLInputElement>(null);
-  const canvasRef = React.useRef<ReactSketchCanvasRef>(null);
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const [selectedFile, setSelectedFile] = React.useState<string>("");
-  const [postDialog, setPostDialog] = React.useState(false);
-  const [stories, setStories] = React.useState<string[]>([]);
-  const [textItems, setTextItems] = React.useState<TextItem[]>([]);
-  const [strokeWidth, setStrokeWidth] = React.useState(6);
-  const [brush, setBrush] = React.useState(false);
-  const [color, setColor] = React.useState(colors[1]);
-  const [eraseMode, setEraseMode] = React.useState(false);
-  const [isEditing, setIsEditing] = React.useState(false);
+  const dragContainer = useRef<HTMLDivElement>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const canvasRef = useRef<ReactSketchCanvasRef>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [selectedFile, setSelectedFile] = useState<string>("");
+  const [postDialog, setPostDialog] = useState(false);
+  const [stories, setStories] = useState<string[]>([]);
+  const [textItems, setTextItems] = useState<TextItem[]>([]);
+  const [strokeWidth, setStrokeWidth] = useState(6);
+  const [brush, setBrush] = useState(false);
+  const [color, setColor] = useState(colors[1]);
+  const [eraseMode, setEraseMode] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   function onSubmit(data: z.infer<typeof formSchema>) {
     setTextItems((prevItems) =>
       prevItems.map((item) => {
@@ -304,7 +304,7 @@ function Page() {
       .finally(() => dispatch(setLoading(false)));
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (userLoading) return;
     if (!user._id) dispatch(getLoggedInUser());
   }, [user._id, dispatch, userLoading]);

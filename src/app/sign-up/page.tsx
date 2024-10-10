@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
@@ -61,12 +61,12 @@ function SignUpPage() {
   const router = useRouter();
   const { loading } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
-  const [showPwd, setShowPwd] = React.useState(false);
-  const [username, setUsername] = React.useState("");
-  const [avatar, setAvatar] = React.useState<File | null>(null);
+  const [showPwd, setShowPwd] = useState(false);
+  const [username, setUsername] = useState("");
+  const [avatar, setAvatar] = useState<File | null>(null);
   const debounced = useDebounceCallback(setUsername, 500);
-  const [isFetchingUsername, setIsFetchingUsername] = React.useState(false);
-  const [usernameMessage, setUsernameMessage] = React.useState("");
+  const [isFetchingUsername, setIsFetchingUsername] = useState(false);
+  const [usernameMessage, setUsernameMessage] = useState("");
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
     if (data.password !== data.confirmPassword) {
@@ -82,7 +82,7 @@ function SignUpPage() {
     }
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     try {
       if (username) {
         usernameSchema.parse(username);

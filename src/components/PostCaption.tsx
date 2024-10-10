@@ -1,6 +1,5 @@
 import { getTimeDifference } from "@/lib/helpers";
 import { History } from "lucide-react";
-import React from "react";
 
 function PostCaption({
   caption,

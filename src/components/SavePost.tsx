@@ -1,4 +1,4 @@
-import React from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -32,8 +32,8 @@ interface Props {
 }
 
 function SavePost({ post, isVideo }: Props) {
-  const [dialogOpen, setDialogOpen] = React.useState(false);
-  const [savedPostIds, setSavedPostIds] = React.useState<string[]>([]);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [savedPostIds, setSavedPostIds] = useState<string[]>([]);
   const dispatch = useAppDispatch();
   const { loading, user } = useAppSelector((state) => state.user);
 
@@ -63,8 +63,8 @@ function SavePost({ post, isVideo }: Props) {
       }
     });
   }
-  
-  React.useEffect(() => {
+
+  useEffect(() => {
     if (!user._id || !dialogOpen) return;
     dispatch(getSavedPosts()).then((response) => {
       if (response.payload?.success) {

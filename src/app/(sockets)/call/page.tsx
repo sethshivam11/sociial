@@ -6,17 +6,17 @@ import { useAppSelector } from "@/lib/store/store";
 import { MicOff, VideoOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import React from "react";
+import { useState, useCallback, useEffect } from "react";
 
 function Page() {
   const query = useSearchParams();
   const router = useRouter();
-  const [username, setUsername] = React.useState("");
-  const [videoEnabled, setVideoEnabled] = React.useState(false);
-  const [permissions, setPermissions] = React.useState(false);
-  const [loading, setLoading] = React.useState(true);
+  const [username, setUsername] = useState("");
+  const [videoEnabled, setVideoEnabled] = useState(false);
+  const [permissions, setPermissions] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const getPermissions = React.useCallback((video?: boolean) => {
+  const getPermissions = useCallback((video?: boolean) => {
     navigator.mediaDevices
       .getUserMedia({ video, audio: true })
       .then((stream) => {
@@ -34,7 +34,7 @@ function Page() {
 
   const { user } = useAppSelector((state) => state.user);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const username = query.get("username");
     const video = query.get("video");
     console.log(username, video);

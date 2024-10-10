@@ -1,7 +1,7 @@
 import { SocketProvider } from "@/context/SocketProvider";
-import React from "react";
+import { ReactNode } from "react";
 
-function Layout({ children }: { children: React.ReactNode }) {
+function Layout({ children }: { children: ReactNode }) {
   return <SocketProvider>{children}</SocketProvider>;
 }
 

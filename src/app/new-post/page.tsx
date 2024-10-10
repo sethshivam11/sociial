@@ -5,7 +5,7 @@ import { toast } from "@/components/ui/use-toast";
 import { ImageIcon, Loader2, X } from "lucide-react";
 import NextImage from "next/image";
 import Link from "next/link";
-import React from "react";
+import { useState, useRef } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -43,7 +43,7 @@ import { createPost, setLoading } from "@/lib/store/features/slices/postSlice";
 function Page() {
   const router = useRouter();
   const dispatch: AppDispatch = useDispatch();
-  const inputRef = React.useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const { user } = useAppSelector((state) => state.user);
   const { loading } = useAppSelector((state) => state.post);
   const formSchema = z.object({
@@ -60,11 +60,11 @@ function Page() {
       caption: "",
     },
   });
-  const [selectedFile, setSelectedFile] = React.useState<string>("");
-  const [posts, setPosts] = React.useState<string[]>([]);
-  const [postDialog, setPostDialog] = React.useState(false);
+  const [selectedFile, setSelectedFile] = useState<string>("");
+  const [posts, setPosts] = useState<string[]>([]);
+  const [postDialog, setPostDialog] = useState(false);
 
-  const dragContainer = React.useRef<HTMLDivElement>(null);
+  const dragContainer = useRef<HTMLDivElement>(null);
 
   function handleFiles(inputFiles: FileList) {
     const limit = 5 - posts.length - inputFiles.length;

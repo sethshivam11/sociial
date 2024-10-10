@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -44,6 +44,7 @@ import {
 import { useTheme } from "next-themes";
 import { nameFallback } from "@/lib/helpers";
 import {
+  clearCookies,
   getLoggedInUser,
   logOutUser,
 } from "@/lib/store/features/slices/userSlice";
@@ -56,8 +57,8 @@ function Navbar() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { theme, setTheme } = useTheme();
-  const [reportDialog, setReportDialog] = React.useState(false);
-  const [logOutDialog, setLogOutDialog] = React.useState(false);
+  const [reportDialog, setReportDialog] = useState(false);
+  const [logOutDialog, setLogOutDialog] = useState(false);
   const hideNav = [
     "/sign-in",
     "/sign-up",
@@ -78,15 +79,10 @@ function Navbar() {
     dispatch(logOutUser())
       .then(({ payload }) => {
         if (payload?.success || payload?.message === "Token is required") {
-          if (document && "cookie" in window)
-            document.cookie = "accessToken=; refreshToken=;";
+          if (document && "cookie" in window) document.cookie = "";
           router.push("/sign-in");
         } else {
-          toast({
-            title: "Error",
-            description: payload?.message || "Something went wrong!",
-            variant: "destructive",
-          });
+          dispatch(clearCookies()).then(() => router.push("/sign-in"));
         }
       })
       .catch((err) => {
@@ -109,26 +105,31 @@ function Navbar() {
       });
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!document.cookie) {
-      const token = localStorage.getItem("accessToken");
-      const refreshToken = localStorage.getItem("refreshToken");
-      if (refreshToken) {
-        document.cookie = `refreshToken=${refreshToken};`;
-      }
+      const token = localStorage.getItem("token");
       if (token) {
-        document.cookie = `accessToken=${token};`;
-      } else if (!token && !refreshToken) {
-        document.cookie = "refreshToken=; accessToken=;";
+        document.cookie = `token=${token};`;
+      } else if (!token) {
+        router.push("/sign-in");
       }
     }
-    dispatch(getLoggedInUser()).then((response) => {
-      if (response.payload?.success && location === "/sign-in") {
-        router.push("/");
-      }
-    });
+
+    dispatch(getLoggedInUser())
+      .then((response) => {
+        if (response.payload?.success && location === "/sign-in") {
+          router.push("/");
+        } else if (
+          response.payload?.status === 401 &&
+          location !== "/sign-in"
+        ) {
+          localStorage.removeItem("token");
+          dispatch(clearCookies()).then(() => router.push("/sign-in"));
+        }
+      })
+      .catch((err) => console.log(err));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch]);
+  }, [dispatch, router]);
 
   return (
     <nav

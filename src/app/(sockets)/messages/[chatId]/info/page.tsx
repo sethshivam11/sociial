@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Label } from "@/components/ui/label";
 import {
@@ -75,13 +75,13 @@ function Info({ params }: { params: { chatId: string } }) {
   );
   const { chat, chats } = useAppSelector((state) => state.chat);
   const { user: currentUser } = useAppSelector((state) => state.user);
-  const [participants, setParticipants] = React.useState<typeof followers>([]);
-  const [reportDialog, setReportDialog] = React.useState(false);
-  const [currentTheme, setCurrentTheme] = React.useState<Theme>(themes[0]);
-  const [leaveDialog, setLeaveDialog] = React.useState(false);
-  const [deleteGroup, setDeleteGroup] = React.useState(false);
-  const [blockDialog, setBlockDialog] = React.useState(false);
-  const [removeDialog, setRemoveDialog] = React.useState({
+  const [participants, setParticipants] = useState<typeof followers>([]);
+  const [reportDialog, setReportDialog] = useState(false);
+  const [currentTheme, setCurrentTheme] = useState<Theme>(themes[0]);
+  const [leaveDialog, setLeaveDialog] = useState(false);
+  const [deleteGroup, setDeleteGroup] = useState(false);
+  const [blockDialog, setBlockDialog] = useState(false);
+  const [removeDialog, setRemoveDialog] = useState({
     open: false,
     username: "",
     userId: "",
@@ -140,6 +140,7 @@ function Info({ params }: { params: { chatId: string } }) {
         toast({
           title: "You left the group",
         });
+        router.push("/messages");
       } else {
         toast({
           title: "Cannot leave group",
@@ -182,7 +183,7 @@ function Info({ params }: { params: { chatId: string } }) {
     });
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     const savedMessageTheme = JSON.parse(
       localStorage.getItem("message-theme") || "{}"
     );
@@ -336,7 +337,7 @@ function Info({ params }: { params: { chatId: string } }) {
             <Button
               className="w-full text-red-600 hover:text-red-600"
               variant="ghost"
-              onClick={handleLeaveGroup}
+              onClick={() => setLeaveDialog(true)}
             >
               Leave Group
             </Button>
@@ -377,6 +378,24 @@ function Info({ params }: { params: { chatId: string } }) {
               asChild
             >
               <Button variant="destructive">Block</Button>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <AlertDialog open={deleteGroup}>
+        <AlertDialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
+          <AlertDialogTitle className="font-normal">
+            Delete this group?
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            No one will be able to send messages in this group.
+          </AlertDialogDescription>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setLeaveDialog(false)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleLeaveGroup} asChild>
+              <Button variant="destructive">Delete</Button>
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -13,23 +13,22 @@ import {
   VideoOff,
 } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
-import React from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 
 function Page() {
   const router = useRouter();
   const query = useSearchParams();
   const { user } = useAppSelector((state) => state.user);
-  const peerVideoRef = React.useRef<HTMLVideoElement>(null);
-  const selfVideoRef = React.useRef<HTMLVideoElement>(null);
-  const selfVideoContainerRef = React.useRef<HTMLDivElement>(null);
-  const [selfMuted, setSelfMuted] = React.useState(false);
-  const [selfVideoPaused, setSelfVideoPaused] = React.useState(false);
-  const [hideSelfVideo, setHideSelfVideo] = React.useState(false);
-  const [stream, setStream] = React.useState<MediaStream | null>(null);
-  const [activeCamera, setActiveCamera] = React.useState("");
-  const [isVideoCall, setIsVideoCall] = React.useState(false);
-  const [multipleCamAvailalble, setMultipleCamAvailable] =
-    React.useState(false);
+  const peerVideoRef = useRef<HTMLVideoElement>(null);
+  const selfVideoRef = useRef<HTMLVideoElement>(null);
+  const selfVideoContainerRef = useRef<HTMLDivElement>(null);
+  const [selfMuted, setSelfMuted] = useState(false);
+  const [selfVideoPaused, setSelfVideoPaused] = useState(false);
+  const [hideSelfVideo, setHideSelfVideo] = useState(false);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [activeCamera, setActiveCamera] = useState("");
+  const [isVideoCall, setIsVideoCall] = useState(false);
+  const [multipleCamAvailalble, setMultipleCamAvailable] = useState(false);
 
   function handleCallEnd() {
     stopCamera();
@@ -75,7 +74,7 @@ function Page() {
     }
   }
 
-  const getUserMedia = React.useCallback(
+  const getUserMedia = useCallback(
     async (
       video: boolean,
       mode?: "user" | "environment",
@@ -123,7 +122,7 @@ function Page() {
     []
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!selfVideoContainerRef.current) return;
     if (hideSelfVideo) {
       selfVideoContainerRef.current.classList.add(
@@ -138,7 +137,7 @@ function Page() {
     }
   }, [hideSelfVideo]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (query.get("video") === "true") {
       setIsVideoCall(true);
       getUserMedia(true);

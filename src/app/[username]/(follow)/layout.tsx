@@ -5,14 +5,14 @@ import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React from "react";
+import { ReactNode, useEffect } from "react";
 
-function Layout({ children }: { children: React.ReactNode }) {
+function Layout({ children }: { children: ReactNode }) {
   const dispatch = useAppDispatch();
   const { profile } = useAppSelector((state) => state.user);
   const location = usePathname();
 
-  React.useEffect(() => {
+  useEffect(() => {
     dispatch(getProfile({ username: location.split("/")[1] }));
   }, [dispatch, location]);
 

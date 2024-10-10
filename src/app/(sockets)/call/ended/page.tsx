@@ -3,20 +3,20 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { nameFallback } from "@/lib/helpers";
 import { useAppSelector } from "@/lib/store/store";
-import React from "react";
+import { useState, useEffect } from "react";
 
 function Page() {
   const { user } = useAppSelector((state) => state.user);
-  const [timer, setTimer] = React.useState<{
+  const [timer, setTimer] = useState<{
     timeout: NodeJS.Timeout | null;
     left: number;
   }>({
     timeout: null,
     left: 30,
   });
-  const [cannotClose, setCannotClose] = React.useState(false);
+  const [cannotClose, setCannotClose] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const interval = setInterval(() => {
       if (timer.left > 0)
         setTimer((prev) => ({ ...prev, left: prev.left - 1 }));

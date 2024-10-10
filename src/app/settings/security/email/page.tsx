@@ -1,6 +1,6 @@
 "use client";
 import { ChevronLeft, Loader2 } from "lucide-react";
-import React from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,7 +33,7 @@ function Page() {
   const { user, isSendingMail, loading } = useAppSelector(
     (state) => state.user
   );
-  const [timer, setTimer] = React.useState(0);
+  const [timer, setTimer] = useState(0);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -99,11 +99,11 @@ function Page() {
     });
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     form.setValue("email", user.email);
   }, [form, user.email]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (timer > 0) {
       const runningTimer = setInterval(() => {
         setTimer((timer) => (timer -= 1));

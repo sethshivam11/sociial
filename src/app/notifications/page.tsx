@@ -40,15 +40,15 @@ import {
   Trash2,
 } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import { useState, useEffect } from "react";
 
 function Page() {
   const dispatch = useAppDispatch();
   const { skeletonLoading, notifications, loading } = useAppSelector(
     (state) => state.notification
   );
-  const [followingsIds, setFollowingsIds] = React.useState<string[]>([]);
-  const [deleteDialog, setDeleteDialog] = React.useState({
+  const [followingsIds, setFollowingsIds] = useState<string[]>([]);
+  const [deleteDialog, setDeleteDialog] = useState({
     open: false,
     id: "",
   });
@@ -67,7 +67,7 @@ function Page() {
     });
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     dispatch(getNotifications()).then((response) => {
       if (response.payload?.success) {
         setFollowingsIds(

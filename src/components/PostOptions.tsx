@@ -1,6 +1,6 @@
 "use client";
-import { Loader, Loader2, MoreHorizontal } from "lucide-react";
-import React from "react";
+import { Loader2, MoreHorizontal } from "lucide-react";
+import { useState } from "react";
 import {
   Dialog,
   DialogClose,
@@ -44,15 +44,15 @@ interface Props {
 function PostOptions({ user, postId, isVideo, explorePosts }: Props) {
   const { toast } = useToast();
   const dispatch = useAppDispatch();
-  const [unfollowing, setUnfollowing] = React.useState(false);
-  const [deleting, setDeleting] = React.useState(false);
+  const [unfollowing, setUnfollowing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const { user: currentUser } = useAppSelector((state) => state.user);
   const { followings } = useAppSelector((state) => state.follow.follow);
   const router = useRouter();
   const location = usePathname();
-  const [unfollowDialog, setUnfollowDialog] = React.useState(false);
-  const [deletePostDialog, setDeletePostDialog] = React.useState(false);
-  const [reportDialog, setReportDialog] = React.useState(false);
+  const [unfollowDialog, setUnfollowDialog] = useState(false);
+  const [deletePostDialog, setDeletePostDialog] = useState(false);
+  const [reportDialog, setReportDialog] = useState(false);
 
   async function copyLink(postId: string) {
     const link = `${process.env.NEXT_PUBLIC_LINK || ""}/post/${postId}`;
@@ -81,13 +81,14 @@ function PostOptions({ user, postId, isVideo, explorePosts }: Props) {
     setUnfollowing(true);
     dispatch(unfollowUser({ username }))
       .then((response) => {
-        if (response.payload?.success){
+        if (response.payload?.success) {
           setUnfollowDialog(false);
           toast({
             title: `You unfollowed ${username}`,
-          })
-        } 
-        else if (response.payload?.message === "Follower already unfollowed") {
+          });
+        } else if (
+          response.payload?.message === "Follower already unfollowed"
+        ) {
           toast({
             title: `You already unfollowed ${username}`,
             description: "You can follow them again if you want",

@@ -5,7 +5,7 @@ import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { PlayIcon, Tv } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import { useEffect } from "react";
 
 function Page() {
   const dispatch = useAppDispatch();
@@ -14,11 +14,11 @@ function Page() {
     (state) => state.user
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (userLoading || !profile.username) return;
     dispatch(getUserPosts({ username: profile.username }));
   }, [dispatch, profile.username, userLoading]);
-  
+
   return (
     <div className="flex items-center justify-start flex-wrap flex-row w-full">
       {skeletonLoading ? (

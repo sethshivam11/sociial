@@ -1,4 +1,4 @@
-import React from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -31,7 +31,7 @@ function MessageReacts({ reacts, type, messageId }: Props) {
   const dispatch = useAppDispatch();
   const { reactions, loading } = useAppSelector((state) => state.message);
   const { user } = useAppSelector((state) => state.user);
-  const [dialogOpen, setDialogOpen] = React.useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   function getUniqueEmojis(reacts: Props["reacts"]): string {
     let threeEmojis = new Set<string>();
@@ -56,7 +56,7 @@ function MessageReacts({ reacts, type, messageId }: Props) {
     });
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (dialogOpen) {
       dispatch(getReactions(messageId));
     }
@@ -100,7 +100,7 @@ function MessageReacts({ reacts, type, messageId }: Props) {
         ) : (
           <ScrollArea className="w-80 h-80 p-3">
             {reactions.map((react, index) =>
-              react.user.username !== user.username ? (
+              user.username !== user.username ? (
                 <Link
                   href={`/${react.user.username}`}
                   className="flex items-center justify-between w-full hover:bg-stone-200 dark:hover:bg-stone-800 pl-0 pr-4 py-2 rounded-lg"

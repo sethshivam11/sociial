@@ -1,6 +1,6 @@
 "use client";
 import { ChevronLeft, Loader2 } from "lucide-react";
-import React from "react";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,7 +24,7 @@ import CheckboxWithLabel from "@/components/CheckboxWithLabel";
 function Page() {
   const dispatch = useAppDispatch();
   const { loading } = useAppSelector((state) => state.user);
-  const [showPwd, setShowPwd] = React.useState(false);
+  const [showPwd, setShowPwd] = useState(false);
   const formSchema = z
     .object({
       currentPassword: passwordSchema,

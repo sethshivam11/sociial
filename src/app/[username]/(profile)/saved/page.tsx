@@ -1,7 +1,7 @@
 "use client";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
-import React from "react";
+import { useEffect } from "react";
 import { ImageIcon } from "lucide-react";
 import Link from "next/link";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
@@ -9,9 +9,11 @@ import { getSavedPosts } from "@/lib/store/features/slices/userSlice";
 
 function Page() {
   const dispatch = useAppDispatch();
-  const { user, skeletonLoading, savedPosts } = useAppSelector((state) => state.user);
+  const { user, skeletonLoading, savedPosts } = useAppSelector(
+    (state) => state.user
+  );
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!user._id) return;
     dispatch(getSavedPosts());
   }, [dispatch, user._id]);

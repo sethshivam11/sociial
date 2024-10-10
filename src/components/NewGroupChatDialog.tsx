@@ -1,4 +1,4 @@
-import React from "react";
+import { useState, useEffect } from "react";
 import { Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -39,15 +39,15 @@ interface Props {
 function NewGroupChatDialog({ open, setOpen }: Props) {
   const defaultIcon =
     "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1725736840/sociial/settings/feahtus4algwiixi0zmi.png";
-  const [level, setLevel] = React.useState<"1" | "2">("1");
-  const [searchFollowers, setSearchFollowers] = React.useState("");
+  const [level, setLevel] = useState<"1" | "2">("1");
+  const [searchFollowers, setSearchFollowers] = useState("");
   const { followings } = useAppSelector((state) => state.follow);
-  const [groupIcon, setGroupIcon] = React.useState(defaultIcon);
+  const [groupIcon, setGroupIcon] = useState(defaultIcon);
   const followersLoading = useAppSelector(
     (state) => state.follow.skeletonLoading
   );
-  const [participants, setParticipants] = React.useState<string[]>([]);
-  const [followers, setFollowers] = React.useState<typeof followings>([]);
+  const [participants, setParticipants] = useState<string[]>([]);
+  const [followers, setFollowers] = useState<typeof followings>([]);
   const formSchema = z.object({
     name: z
       .string()
@@ -72,7 +72,7 @@ function NewGroupChatDialog({ open, setOpen }: Props) {
     setOpen(false);
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (searchFollowers) {
       setFollowers(
         followings.filter((user) =>

@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useDebounceCallback } from "usehooks-ts";
 
 function Videos() {
@@ -38,12 +38,12 @@ function Videos() {
     (state) => state.user
   );
 
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const [videoRef, setVideoRef] = React.useState<HTMLVideoElement | null>(null);
-  const [isMuted, setIsMuted] = React.useState(true);
-  const [isPaused, setIsPaused] = React.useState(false);
-  const [sliderValue, setSliderValue] = React.useState(0);
-  const [seeking, setSeeking] = React.useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [videoRef, setVideoRef] = useState<HTMLVideoElement | null>(null);
+  const [isMuted, setIsMuted] = useState(true);
+  const [isPaused, setIsPaused] = useState(false);
+  const [sliderValue, setSliderValue] = useState(0);
+  const [seeking, setSeeking] = useState(false);
 
   function handleLike(postId: string) {
     dispatch(
@@ -118,7 +118,7 @@ function Videos() {
     }
   }, 100);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const videos = document.querySelectorAll("video");
     const observers: IntersectionObserver[] = [];
 
@@ -157,11 +157,11 @@ function Videos() {
     return () => {
       observers.forEach((observer) => observer.disconnect());
     };
-    
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [posts.length]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isPaused || seeking) {
       videoRef?.pause();
     } else {
@@ -169,7 +169,7 @@ function Videos() {
     }
   }, [isPaused, seeking, videoRef]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     window.addEventListener("keydown", handleKeys);
 
     return () => {
@@ -177,11 +177,11 @@ function Videos() {
     };
   }, [handleKeys, videoRef]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (userLoading || !user._id) return;
     dispatch(videoFeed(1));
   }, [user._id, userLoading, dispatch]);
-  
+
   return (
     <div
       className="max-h-[100dvh] h-[100dvh] xl:col-span-8 sm:col-span-9 col-span-10 snap-y snap-mandatory overflow-auto relative no-scrollbar"

@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import React from "react";
 import Image from "next/image";
 
 function Page() {

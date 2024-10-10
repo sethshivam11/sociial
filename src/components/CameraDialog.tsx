@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import { Dialog, DialogContent, DialogTitle, DialogFooter } from "./ui/dialog";
 import {
   CameraIcon,
@@ -18,17 +18,14 @@ interface Props {
 }
 
 function CameraDialog({ open, setOpen }: Props) {
-  const videoRef = React.useRef<HTMLVideoElement>(null);
-  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const [stream, setStream] = React.useState<MediaStream | undefined>(
-    undefined
-  );
-  const [image, setImage] = React.useState<string | undefined>(undefined);
-  const [permisionDenied, setPermissionDenied] = React.useState(false);
-  const [multipleCamAvailalble, setMultipleCamAvailable] =
-    React.useState(false);
-  const [activeCamera, setActiveCamera] = React.useState<string | undefined>(
+  const [stream, setStream] = useState<MediaStream | undefined>(undefined);
+  const [image, setImage] = useState<string | undefined>(undefined);
+  const [permisionDenied, setPermissionDenied] = useState(false);
+  const [multipleCamAvailalble, setMultipleCamAvailable] = useState(false);
+  const [activeCamera, setActiveCamera] = useState<string | undefined>(
     undefined
   );
 
@@ -73,7 +70,7 @@ function CameraDialog({ open, setOpen }: Props) {
     }
   }
 
-  const getUserMedia = React.useCallback(
+  const getUserMedia = useCallback(
     async function (facingMode?: { exact: string }) {
       const mediaDevicesAvailable =
         (await navigator.mediaDevices) ||
@@ -127,7 +124,7 @@ function CameraDialog({ open, setOpen }: Props) {
     []
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (open) {
       getUserMedia();
     }

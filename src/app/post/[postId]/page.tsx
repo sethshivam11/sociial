@@ -16,7 +16,7 @@ import { getTimeDifference, nameFallback } from "@/lib/helpers";
 import { Heart, History } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import { useState, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import {
   getPost,
@@ -34,7 +34,7 @@ function Page({ params }: { params: { postId: string } }) {
     (state) => state.post
   );
   const { user } = useAppSelector((state) => state.user);
-  const [notFoundError, setNotFoundError] = React.useState(false);
+  const [notFoundError, setNotFoundError] = useState(false);
 
   function handleLike(postId: string) {
     dispatch(
@@ -70,7 +70,7 @@ function Page({ params }: { params: { postId: string } }) {
     });
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     dispatch(getPost(params.postId)).then((response) => {
       if (
         response.payload?.message === "Post not found" ||

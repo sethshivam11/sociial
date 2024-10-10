@@ -10,7 +10,7 @@ import {
   SendHorizonal,
   X,
 } from "lucide-react";
-import React from "react";
+import { useRef, useState, useEffect, TouchEvent } from "react";
 import { notFound, useRouter, useSearchParams } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
@@ -70,29 +70,29 @@ function Story({ params }: Props) {
   const { username } = params;
   const { user, loading: userLoading } = useAppSelector((state) => state.user);
   const { stories, skeletonLoading } = useAppSelector((state) => state.story);
-  const nextRef = React.useRef<HTMLButtonElement>(null);
-  const prevRef = React.useRef<HTMLButtonElement>(null);
-  const closeRef1 = React.useRef<HTMLButtonElement>(null);
-  const closeRef2 = React.useRef<HTMLButtonElement>(null);
-  const inputRef = React.useRef<HTMLInputElement>(null);
-  const progressBarRef = React.useRef<HTMLSpanElement>(null);
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const touchStartRef = React.useRef<number>(0);
-  const storyContainer = React.useRef<HTMLDivElement>(null);
+  const nextRef = useRef<HTMLButtonElement>(null);
+  const prevRef = useRef<HTMLButtonElement>(null);
+  const closeRef1 = useRef<HTMLButtonElement>(null);
+  const closeRef2 = useRef<HTMLButtonElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const progressBarRef = useRef<HTMLSpanElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const touchStartRef = useRef<number>(0);
+  const storyContainer = useRef<HTMLDivElement>(null);
 
-  const [index, setIndex] = React.useState(0);
-  const [reportDialog, setReportDialog] = React.useState(false);
-  const [currentStory, setCurrentStory] = React.useState<StoryI | null>(null);
-  const [loading, setLoading] = React.useState(true);
-  const [linkedStories, setLinkedStories] = React.useState<LinkedStories>({
+  const [index, setIndex] = useState(0);
+  const [reportDialog, setReportDialog] = useState(false);
+  const [currentStory, setCurrentStory] = useState<StoryI | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [linkedStories, setLinkedStories] = useState<LinkedStories>({
     prevStory2: null,
     prevStory1: null,
     nextStory1: null,
     nextStory2: null,
   });
-  const [isPaused, setIsPaused] = React.useState(true);
-  const [timer, setTimer] = React.useState<Timer | null>(null);
-  const [imageLoading, setImageLoading] = React.useState(true);
+  const [isPaused, setIsPaused] = useState(true);
+  const [timer, setTimer] = useState<Timer | null>(null);
+  const [imageLoading, setImageLoading] = useState(true);
 
   function onSubmit(data: { reply: string }) {
     console.log(data.reply);
@@ -103,12 +103,12 @@ function Story({ params }: Props) {
     });
   }
 
-  function handleTouchStart(e: React.TouchEvent<HTMLButtonElement>) {
+  function handleTouchStart(e: TouchEvent<HTMLButtonElement>) {
     setIsPaused(true);
     touchStartRef.current = e.touches[0].clientX;
   }
 
-  function handleTouchEnd(e: React.TouchEvent<HTMLButtonElement>) {
+  function handleTouchEnd(e: TouchEvent<HTMLButtonElement>) {
     const touchEnd = e.changedTouches[0].clientX;
     const delta = touchEnd - touchStartRef.current;
 
@@ -196,11 +196,11 @@ function Story({ params }: Props) {
     }
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!userLoading && !stories.length) dispatch(getStories());
   }, [dispatch, userLoading, stories.length]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     function getStory() {
       setLoading(true);
       stories.map((story) => {
@@ -250,7 +250,7 @@ function Story({ params }: Props) {
     };
   }, [router, query, username, stories]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (
       !loading &&
       !currentStory?.media.length &&
@@ -261,7 +261,7 @@ function Story({ params }: Props) {
     }
   }, [loading, currentStory, skeletonLoading, stories.length]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const timer: Timer = new Timer(function () {
       nextRef.current?.click();
     }, 15000);
@@ -272,7 +272,7 @@ function Story({ params }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const animation = progressBarRef.current?.getAnimations()[0];
     if (animation) {
       isPaused ? animation.pause() : animation.play();
@@ -284,8 +284,12 @@ function Story({ params }: Props) {
     }
   }, [isPaused, timer]);
 
-  React.useEffect(() => {
-    if (currentStory && index === currentStory.media.length - 1 && !currentStory.seenBy.includes(user._id)) {
+  useEffect(() => {
+    if (
+      currentStory &&
+      index === currentStory.media.length - 1 &&
+      !currentStory.seenBy.includes(user._id)
+    ) {
       dispatch(seenStory({ storyId: currentStory._id, userId: user._id }));
     }
 
@@ -313,7 +317,7 @@ function Story({ params }: Props) {
     }
   }, [index, currentStory, router, stories, dispatch, user._id]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!currentStory) return;
     const storyIndex = stories.indexOf(currentStory);
     const prevSecondStory = stories[storyIndex - 2];
@@ -355,7 +359,7 @@ function Story({ params }: Props) {
     setLinkedStories({ prevStory2, prevStory1, nextStory1, nextStory2 });
   }, [currentStory, stories]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (imageLoading) {
       setIsPaused(true);
     } else {
@@ -480,7 +484,9 @@ function Story({ params }: Props) {
                     @{currentStory.user.username}
                   </span>
                 </div>
-                <span className="text-stone-500 text-sm">&#183; {getTimeDifference(currentStory.createdAt)}</span>
+                <span className="text-stone-500 text-sm">
+                  &#183; {getTimeDifference(currentStory.createdAt)}
+                </span>
               </Link>
               <div className="flex items-center justify-center gap-2">
                 <button

@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogClose,
@@ -36,7 +36,7 @@ interface Props {
 function ReportDialog({ open, setOpen, entityId, type }: Props) {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.user);
-  const [image, setImage] = React.useState<File | null>(null);
+  const [image, setImage] = useState<File | null>(null);
   const { loading, submitted } = useAppSelector((state) => state.report);
   const formSchema = z.object({
     title: titleSchema,

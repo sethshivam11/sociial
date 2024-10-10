@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import {useState} from "react";
 import {
   CameraIcon,
   ImageIcon,
@@ -32,10 +32,10 @@ interface Props {
 
 function MessageActions({ message, chatId }: Props) {
   const dispatch = useAppDispatch();
-  const [cameraOpen, setCameraOpen] = React.useState(false);
-  const [mediaOpen, setMediaOpen] = React.useState(false);
-  const [audioOpen, setAudioOpen] = React.useState(false);
-  const [documentOpen, setDocumentOpen] = React.useState(false);
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const [mediaOpen, setMediaOpen] = useState(false);
+  const [audioOpen, setAudioOpen] = useState(false);
+  const [documentOpen, setDocumentOpen] = useState(false);
 
   function shareLocation() {
     navigator.geolocation.getCurrentPosition(

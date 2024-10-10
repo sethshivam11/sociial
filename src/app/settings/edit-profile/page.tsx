@@ -1,7 +1,7 @@
 "use client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { nameFallback } from "@/lib/helpers";
-import React from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -58,10 +58,10 @@ function Page() {
   const { user, skeletonLoading, loading } = useAppSelector(
     (state) => state.user
   );
-  const [username, setUsername] = React.useState(user.username);
-  const [isFetchingUsername, setIsFetchingUsername] = React.useState(false);
-  const [viewDialog, setViewDialog] = React.useState(false);
-  const [usernameMessage, setUsernameMessage] = React.useState("");
+  const [username, setUsername] = useState(user.username);
+  const [isFetchingUsername, setIsFetchingUsername] = useState(false);
+  const [viewDialog, setViewDialog] = useState(false);
+  const [usernameMessage, setUsernameMessage] = useState("");
   const debounced = useDebounceCallback(setUsername, 300);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -73,7 +73,7 @@ function Page() {
     },
   });
 
-  function handleFiles(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleFiles(e: ChangeEvent<HTMLInputElement>) {
     if (!e.target.files || !e.target.files[0]) return;
     dispatch(updateAvatar(e.target.files[0])).then((response) => {
       if (response.payload?.success) {
@@ -111,7 +111,7 @@ function Page() {
     });
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (user.bio) form.setValue("bio", user.bio);
     if (user.fullName) form.setValue("fullName", user.fullName);
     if (user.username) {
@@ -120,7 +120,7 @@ function Page() {
     }
   }, [user, form]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (username === user.username) return setUsernameMessage("");
     try {
       if (username) {

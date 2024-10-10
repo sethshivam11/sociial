@@ -1,4 +1,4 @@
-import React, { Dispatch } from "react";
+import { SetStateAction, Dispatch } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "./ui/label";
 
@@ -9,7 +9,7 @@ function CheckboxWithLabel({
 }: {
   text: string;
   checked: boolean;
-  setChecked: Dispatch<React.SetStateAction<boolean>>;
+  setChecked: Dispatch<SetStateAction<boolean>>;
 }) {
   return (
     <div className="flex gap-2 items-center my-2">

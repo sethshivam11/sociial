@@ -9,14 +9,14 @@ import {
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import { useState, useEffect } from "react";
 
 function Page() {
   const dispatch = useAppDispatch();
   const { emailNotifications, loading, skeletonLoading } = useAppSelector(
     (state) => state.notificationPreference
   );
-  const [emailPreferences, setEmailPreferences] = React.useState({
+  const [emailPreferences, setEmailPreferences] = useState({
     products: true,
     announcements: true,
     support: true,
@@ -46,7 +46,7 @@ function Page() {
     });
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     dispatch(getPreferences()).then((response) => {
       if (response.payload?.success) {
         const { products, announcements, support } =
@@ -206,7 +206,8 @@ function Page() {
           size="lg"
           onClick={handleUpdatePreference}
           disabled={
-            loading || skeletonLoading ||
+            loading ||
+            skeletonLoading ||
             Object.keys(emailPreferences).every(
               (key) =>
                 emailPreferences[key as keyof typeof emailPreferences] ===

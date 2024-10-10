@@ -17,7 +17,7 @@ import {
   ShieldAlert,
   Trash2,
 } from "lucide-react";
-import React from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import {
   Form,
@@ -94,20 +94,20 @@ export default function Comment({
   const { likes, loading, comments, skeletonLoading } = useAppSelector(
     (state) => state.comment
   );
-  const [dialogOpen, setDialogOpen] = React.useState(false);
-  const [likesDialog, setLikesDialog] = React.useState({
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [likesDialog, setLikesDialog] = useState({
     open: false,
     commentId: "",
   });
-  const [deleteDialog, setDeleteDialog] = React.useState({
+  const [deleteDialog, setDeleteDialog] = useState({
     dialogOpen: false,
     commentId: "",
   });
-  const [reportDialog, setReportDialog] = React.useState({
+  const [reportDialog, setReportDialog] = useState({
     dialogOpen: false,
     commentId: "",
   });
-  const [blockDialog, setBlockDialog] = React.useState({
+  const [blockDialog, setBlockDialog] = useState({
     dialogOpen: false,
     user: {
       _id: "",
@@ -196,11 +196,11 @@ export default function Comment({
     form.setValue("comment", "");
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (dialogOpen) dispatch(getComments({ postId }));
   }, [dispatch, dialogOpen, postId]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (likesDialog.open && likesDialog.commentId)
       dispatch(getLikes(likesDialog.commentId));
   }, [dispatch, likesDialog.open, likesDialog.commentId]);

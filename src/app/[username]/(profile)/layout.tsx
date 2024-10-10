@@ -11,7 +11,7 @@ import {
   GalleryVertical,
 } from "lucide-react";
 import { notFound, usePathname, useRouter } from "next/navigation";
-import React from "react";
+import { useEffect, useState, ReactNode } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { nameFallback } from "@/lib/helpers";
 import { Button } from "@/components/ui/button";
@@ -52,7 +52,7 @@ function Profile({
   children,
   params,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   params: { username: string };
 }) {
   const dispatch = useAppDispatch();
@@ -67,10 +67,10 @@ function Profile({
   const baseUrl = process.env.NEXT_PUBLIC_LINK || "";
   const router = useRouter();
   const location = usePathname();
-  const [QR, setQR] = React.useState("");
-  const [userNotFound, setUserNotFound] = React.useState(false);
-  const [reportOpen, setReportOpen] = React.useState(false);
-  const [blockDialog, setBlockDialog] = React.useState(false);
+  const [QR, setQR] = useState("");
+  const [userNotFound, setUserNotFound] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [blockDialog, setBlockDialog] = useState(false);
   const username = params.username;
 
   function handleBlock() {
@@ -178,7 +178,7 @@ function Profile({
       }
     });
   }
-  function getButton(): React.ReactNode {
+  function getButton(): ReactNode {
     if (user.username === username)
       return (
         <Button
@@ -220,7 +220,7 @@ function Profile({
       );
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     dispatch(getFollowings({ username }));
 
     if (username)
@@ -230,7 +230,7 @@ function Profile({
       });
   }, [username, dispatch]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (userNotFound) notFound();
   }, [userNotFound]);
 

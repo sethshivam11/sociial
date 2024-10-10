@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { CircleX, History, Search as SearchIcon, X } from "lucide-react";
-import React from "react";
+import { useRef, useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { nameFallback } from "@/lib/helpers";
 import { useRouter } from "next/navigation";
@@ -28,15 +28,15 @@ interface Search {
 }
 
 function Search() {
-  const searchRef = React.useRef<HTMLInputElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
   const dispatch = useAppDispatch();
   const { searchResults, skeletonLoading } = useAppSelector(
     (state) => state.user
   );
   const router = useRouter();
-  const [search, setSearch] = React.useState("");
+  const [search, setSearch] = useState("");
   const debounced = useDebounceCallback(setSearch, 500);
-  const [recentSearches, setRecentSearches] = React.useState<string[]>([]);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
 
   function clearRecentSearches() {
     setRecentSearches([]);
@@ -53,7 +53,7 @@ function Search() {
     );
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     dispatch(searchUsers(search)).then((response) => {
       if (
         !response.payload?.success &&
@@ -64,7 +64,7 @@ function Search() {
     });
   }, [search, dispatch]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const savedRecentSearches = localStorage.getItem("recentSearches");
     if (savedRecentSearches) {
       setRecentSearches(JSON.parse(savedRecentSearches));

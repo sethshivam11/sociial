@@ -1,7 +1,7 @@
 "use client";
-import React from "react";
+import { useState, useEffect, useRef, ReactNode } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ChatEventEnum, nameFallback, themes } from "@/lib/helpers";
+import { nameFallback, themes } from "@/lib/helpers";
 import {
   ChevronLeft,
   DownloadIcon,
@@ -11,8 +11,8 @@ import {
   Video,
   X,
   PlayIcon,
-  MapPinnedIcon,
   Info,
+  ArrowDown,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -53,31 +53,10 @@ import ChatLoading from "@/components/skeletons/ChatLoading";
 import Link from "next/link";
 import MessageActions from "@/components/MessageActions";
 import { checkForAssets } from "@/lib/helpers";
-import { socket } from "@/socket";
-
-interface Message {
-  id: string;
-  content: string;
-  type: "sent" | "reply";
-  kind?: "message" | "location" | "image" | "video" | "audio" | "document";
-  time: string;
-  reply?: {
-    username: string;
-    content: string;
-  };
-  reacts?: {
-    id: string;
-    emoji: string;
-    fullName: string;
-    username: string;
-    avatar: string;
-  }[];
-}
 
 function Page({ params }: { params: { chatId: string } }) {
   const dispatch = useAppDispatch();
   const location = usePathname();
-  const router = useRouter();
 
   const { user } = useAppSelector((state) => state.user);
   const {
@@ -88,8 +67,10 @@ function Page({ params }: { params: { chatId: string } }) {
   const { messages, skeletonLoading, typing, loadingMore, loading } =
     useAppSelector((state) => state.message);
 
-  const lastMessageRef = React.useRef<HTMLDivElement>(null);
-  const inputRef = React.useRef<HTMLInputElement>(null);
+  const lastMessageRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
   const formSchema = z.object({
     message: z.string(),
@@ -107,7 +88,7 @@ function Page({ params }: { params: { chatId: string } }) {
     },
   });
 
-  const [theme, setTheme] = React.useState(themes[0]);
+  const [theme, setTheme] = useState(themes[0]);
   const chatId = params.chatId;
   const message = form.watch("message");
 
@@ -143,7 +124,7 @@ function Page({ params }: { params: { chatId: string } }) {
       }
     });
   }
-  function giveAssets(content: string, kind: string): React.ReactNode {
+  function giveAssets(content: string, kind: string): ReactNode {
     switch (kind) {
       case "location":
         return (
@@ -289,7 +270,7 @@ function Page({ params }: { params: { chatId: string } }) {
     }
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     const savedMessageTheme = JSON.parse(
       localStorage.getItem("message-theme") || "{}"
     );
@@ -313,12 +294,34 @@ function Page({ params }: { params: { chatId: string } }) {
       }
     }
 
-    document.addEventListener("keydown", handleTyping);
+    window.addEventListener("keydown", handleTyping);
 
     return () => {
-      document.removeEventListener("keydown", handleTyping);
+      window.removeEventListener("keydown", handleTyping);
     };
   }, [dispatch, chatId, setCurrentChat]);
+
+  // useEffect(() => {
+  //   console.log(window.scrollY, window.innerHeight, document.body.scrollHeight);
+  //   function handleScroll() {
+  //     const scrollPosition = window.scrollY + window.innerHeight;
+  //     const pageHeight = containerRef.current?.scrollHeight;
+  //     console.log(scrollPosition, pageHeight);
+
+  //     if (pageHeight && scrollPosition >= pageHeight - 50) {
+  //       setIsVisible(false);
+  //     } else {
+  //       setIsVisible(true);
+  //     }
+  //   }
+  //   lastMessageRef.current?.scrollIntoView({ behavior: "instant" });
+
+  //   window.addEventListener("scroll", handleScroll);
+
+  //   return () => {
+  //     window.removeEventListener("scroll", handleScroll);
+  //   };
+  // }, []);
 
   return (
     <div
@@ -326,6 +329,18 @@ function Page({ params }: { params: { chatId: string } }) {
         location !== "/messages" ? "" : "hidden"
       } `}
     >
+      {isVisible && (
+        <Button
+          variant="outline"
+          size="icon"
+          className="border-2 border-stone-500 rounded-full absolute z-30 bottom-20 left-1/2 -translate-x-1/2 "
+          onClick={() =>
+            lastMessageRef.current?.scrollIntoView({ behavior: "smooth" })
+          }
+        >
+          <ArrowDown />
+        </Button>
+      )}
       {isChatLoading ? (
         <ChatLoading />
       ) : (
@@ -391,7 +406,10 @@ function Page({ params }: { params: { chatId: string } }) {
           </div>
         </div>
       )}
-      <div className="flex flex-col items-start justify-start w-full h-full mr-0 py-2 overflow-y-auto">
+      <div
+        className="flex flex-col items-start justify-start w-full h-full mr-0 py-2 overflow-y-auto"
+        ref={containerRef}
+      >
         {!skeletonLoading && (
           <div className="flex flex-col items-center justify-center w-full py-2 gap-2 mb-8">
             <Avatar className="w-28 h-28 select-none pointer-events-none">
@@ -517,6 +535,7 @@ function Page({ params }: { params: { chatId: string } }) {
                       });
                       inputRef.current?.focus();
                     }}
+                    createdAt={message.createdAt}
                     message={message.content}
                     type={
                       message.sender.username !== user.username

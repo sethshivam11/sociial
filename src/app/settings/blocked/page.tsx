@@ -20,13 +20,13 @@ import {
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { ChevronLeft, History, Loader2 } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import { useState, useEffect } from "react";
 
 function Page() {
   const dispatch = useAppDispatch();
   const { blocked, loading } = useAppSelector((state) => state.user);
 
-  const [blockDialog, setBlockDialog] = React.useState({
+  const [blockDialog, setBlockDialog] = useState({
     open: false,
     user: {
       _id: "",
@@ -57,7 +57,7 @@ function Page() {
     });
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     dispatch(getBlockedUsers());
   }, [dispatch]);
 

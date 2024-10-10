@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Loader2, Search, Users2 } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -21,13 +21,11 @@ function Page() {
   const { followers, skeletonLoading } = useAppSelector(
     (state) => state.follow
   );
-  const [searchResults, setSearchResults] = React.useState<typeof followers>(
-    []
-  );
-  const [search, setSearch] = React.useState("");
-  const [followingsIds, setFollowingsIds] = React.useState<string[]>([]);
+  const [searchResults, setSearchResults] = useState<typeof followers>([]);
+  const [search, setSearch] = useState("");
+  const [followingsIds, setFollowingsIds] = useState<string[]>([]);
 
-  const fetchFollowings = React.useCallback(
+  const fetchFollowings = useCallback(
     async (username: string) => {
       dispatch(getFollowings({ username })).then((response) => {
         if (response.payload?.success) {
@@ -91,12 +89,12 @@ function Page() {
       .finally(() => setLoading(userId, false));
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!profile.username) return;
     fetchFollowings(profile.username);
   }, [fetchFollowings, profile.username]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (search) {
       setSearchResults(
         followers.filter((follower) => {

@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 import { Loader2, MonitorPlay, X } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import { useState, useRef } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -53,10 +53,10 @@ function Page() {
     },
   });
 
-  const [video, setVideo] = React.useState("");
-  const [videoFile, setVideoFile] = React.useState<File | null>(null);
-  const dragContainer = React.useRef<HTMLDivElement>(null);
-  const inputRef = React.useRef<HTMLInputElement>(null);
+  const [video, setVideo] = useState("");
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const dragContainer = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   function onSubmit({ caption }: z.infer<typeof formSchema>) {
     if (!videoFile) return;

@@ -1,4 +1,4 @@
-import React from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "./ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { nameFallback } from "@/lib/helpers";
@@ -16,11 +16,11 @@ function LikeDialog({
   likesCount: number;
   postId: string;
 }) {
-  const [dialogOpen, setDialogOpen] = React.useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const { likes, loading } = useAppSelector((state) => state.post);
   const dispatch = useAppDispatch();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!dialogOpen) return;
     dispatch(fetchLikes(postId)).then((response) => {
       if (

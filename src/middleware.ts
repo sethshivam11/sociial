@@ -22,7 +22,7 @@ export const config = {
 
 export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
-  const token = request.cookies.get("accessToken");
+  const token = request.cookies.get("token");
   const publicPaths = [
     "/sign-in",
     "/sign-up",
@@ -35,10 +35,13 @@ export function middleware(request: NextRequest) {
   }
 
   if (token && publicPaths.includes(path)) {
-    if (path !== "/verify-code" && !request.nextUrl.searchParams.has("username")) {
+    if (
+      path !== "/verify-code" &&
+      !request.nextUrl.searchParams.has("username")
+    ) {
       return NextResponse.redirect(new URL("/", request.url));
     } else {
-      return NextResponse.next()
+      return NextResponse.next();
     }
   }
 

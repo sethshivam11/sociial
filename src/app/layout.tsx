@@ -4,7 +4,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import Navbar from "@/components/Navbar";
 import { ThemeProvider } from "@/context/ThemeProvider";
-import React from "react";
+import { ReactNode } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { StoreProvider } from "@/lib/store/provider";
 
@@ -16,11 +16,11 @@ const fontSans = FontSans({
 const baseUrl = process.env.NEXT_PUBLIC_LINK || "";
 
 export const viewport: Viewport = {
-  width: 'device-width',
+  width: "device-width",
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-}
+};
 
 export const metadata: Metadata = {
   title: "Sociial",
@@ -68,13 +68,13 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
 }>) {
   return (
     <html lang="en">
       <body
         className={cn(
-          "min-h-screen grid grid-cols-10 bg-background font-sans antialiased",
+          "min-h-[100dvh] grid grid-cols-10 bg-background font-sans antialiased",
           fontSans.variable
         )}
       >

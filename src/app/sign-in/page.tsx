@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -29,11 +29,9 @@ import {
 } from "@/lib/store/features/slices/userSlice";
 import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/use-toast";
-import { useSearchParams } from "next/navigation";
 
 function SignInPage() {
   const router = useRouter();
-  const query = useSearchParams();
   const dispatch = useAppDispatch();
 
   const formSchema = z.object({
@@ -50,8 +48,21 @@ function SignInPage() {
   });
 
   const { loading } = useAppSelector((state) => state.user);
-  const [showPwd, setShowPwd] = React.useState<boolean>(false);
+  const [showPwd, setShowPwd] = useState<boolean>(false);
+  const [currentDevice, setCurrentDevice] = useState({
+    name: "",
+    location: "",
+  });
 
+  function getDevice(userAgent: string) {
+    if (userAgent.includes("Android")) return "Android";
+    if (userAgent.includes("Mac")) return "Macintosh";
+    if (userAgent.includes("Linux")) return "Linux";
+    if (userAgent.includes("like Mac")) return "iPhone";
+    if (userAgent.includes("BlackBerry")) return "BlackBerry";
+    if (userAgent.includes("Win")) return "Windows";
+    return "Unknown";
+  }
   async function onSubmit(data: z.infer<typeof formSchema>) {
     let username = "";
     let email = "";
@@ -61,7 +72,13 @@ function SignInPage() {
       email = data.identifier.trim();
     }
     const response = await dispatch(
-      loginUser({ email, username, password: data.password })
+      loginUser({
+        email,
+        username,
+        password: data.password,
+        location: currentDevice.location,
+        device: currentDevice.name,
+      })
     );
     if (response.payload?.success) {
       if (!response.payload.data.user.isMailVerified) {
@@ -88,10 +105,20 @@ function SignInPage() {
       }
     }
   }
-
-  React.useEffect(() => {
+  
+  useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (token) router.push("/");
+    else {
+      fetch("https://ipapi.co/json")
+        .then((parsed) => parsed.json())
+        .then((response) => {
+          setCurrentDevice({
+            name: getDevice(navigator?.userAgent),
+            location: `${response.city}, ${response.country}`,
+          });
+        });
+    }
   }, [router]);
 
   return (

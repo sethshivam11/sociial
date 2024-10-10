@@ -1,10 +1,6 @@
-import React from "react";
+import { useRef, useState } from "react";
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from "./ui/dialog";
-import {
-  FileIcon,
-  PlusCircle,
-  SendHorizonal,
-} from "lucide-react";
+import { FileIcon, PlusCircle, SendHorizonal } from "lucide-react";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { toast } from "./ui/use-toast";
@@ -15,8 +11,8 @@ interface Props {
 }
 
 function DocumentDialog({ open, setOpen }: Props) {
-  const inputRef = React.useRef<HTMLInputElement>(null);
-  const [files, setFiles] = React.useState<
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [files, setFiles] = useState<
     { name: String; file: File; type: string }[]
   >([]);
   return (
@@ -27,7 +23,10 @@ function DocumentDialog({ open, setOpen }: Props) {
         setFiles([]);
       }}
     >
-      <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-sm:h-full">
+      <DialogContent
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        className="max-sm:h-full"
+      >
         <DialogTitle>
           {files.length ? "Send Document" : "Add Files"}
         </DialogTitle>

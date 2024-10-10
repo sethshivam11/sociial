@@ -218,166 +218,178 @@ const chatSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(getChats.pending, (state) => {
-      state.skeletonLoading = true;
-    });
-    builder.addCase(getChats.fulfilled, (state, action) => {
-      state.skeletonLoading = false;
-      if (action.payload?.success) {
-        state.chats = action.payload.data;
-      }
-    });
-    builder.addCase(getChats.rejected, (state) => {
-      state.skeletonLoading = false;
-    });
+    builder
+      .addCase(getChats.pending, (state) => {
+        state.skeletonLoading = true;
+      })
+      .addCase(getChats.fulfilled, (state, action) => {
+        state.skeletonLoading = false;
+        if (action.payload?.success) {
+          state.chats = action.payload.data;
+        }
+      })
+      .addCase(getChats.rejected, (state) => {
+        state.skeletonLoading = false;
+      });
 
-    builder.addCase(getMoreChats.pending, (state) => {
-      state.loadingMore = true;
-    });
-    builder.addCase(getMoreChats.fulfilled, (state, action) => {
-      state.loadingMore = false;
-      if (action.payload?.success) {
-        state.chats = [...state.chats, ...action.payload.data];
-      }
-    });
-    builder.addCase(getMoreChats.rejected, (state) => {
-      state.loadingMore = false;
-    });
+    builder
+      .addCase(getMoreChats.pending, (state) => {
+        state.loadingMore = true;
+      })
+      .addCase(getMoreChats.fulfilled, (state, action) => {
+        state.loadingMore = false;
+        if (action.payload?.success) {
+          state.chats = [...state.chats, ...action.payload.data];
+        }
+      })
+      .addCase(getMoreChats.rejected, (state) => {
+        state.loadingMore = false;
+      });
 
-    builder.addCase(newChat.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(newChat.fulfilled, (state, action) => {
-      state.loading = false;
-      if (action.payload?.success) {
-        state.chats = [action.payload.data, ...state.chats];
-      }
-    });
-    builder.addCase(newChat.rejected, (state) => {
-      state.loading = false;
-    });
+    builder
+      .addCase(newChat.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(newChat.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload?.success) {
+          state.chats = [action.payload.data, ...state.chats];
+        }
+      })
+      .addCase(newChat.rejected, (state) => {
+        state.loading = false;
+      });
 
-    builder.addCase(newGroupChat.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(newGroupChat.fulfilled, (state, action) => {
-      state.loading = false;
-      if (action.payload?.success) {
-        state.chats = [action.payload.data, ...state.chats];
-      }
-    });
-    builder.addCase(newGroupChat.rejected, (state) => {
-      state.loading = false;
-    });
+    builder
+      .addCase(newGroupChat.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(newGroupChat.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload?.success) {
+          state.chats = [action.payload.data, ...state.chats];
+        }
+      })
+      .addCase(newGroupChat.rejected, (state) => {
+        state.loading = false;
+      });
 
-    builder.addCase(addParticipants.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(addParticipants.fulfilled, (state, action) => {
-      state.loading = false;
-      if (action.payload?.success) {
-        state.chat.users = action.payload.data.users;
-      }
-    });
-    builder.addCase(addParticipants.rejected, (state) => {
-      state.loading = false;
-    });
+    builder
+      .addCase(addParticipants.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(addParticipants.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload?.success) {
+          state.chat.users = action.payload.data.users;
+        }
+      })
+      .addCase(addParticipants.rejected, (state) => {
+        state.loading = false;
+      });
 
-    builder.addCase(removeParticipants.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(removeParticipants.fulfilled, (state, action) => {
-      state.loading = false;
-      if (action.payload?.success) {
-        state.chat.users = action.payload.data.users;
-      }
-    });
-    builder.addCase(removeParticipants.rejected, (state) => {
-      state.loading = false;
-    });
+    builder
+      .addCase(removeParticipants.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(removeParticipants.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload?.success) {
+          state.chat.users = action.payload.data.users;
+        }
+      })
+      .addCase(removeParticipants.rejected, (state) => {
+        state.loading = false;
+      });
 
-    builder.addCase(updateGroupChat.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(updateGroupChat.fulfilled, (state, action) => {
-      state.loading = false;
-      if (action.payload?.success) {
-        state.chat.groupIcon = action.payload.data.groupIcon;
-        state.chat.groupName = action.payload.data.groupName;
-      }
-    });
-    builder.addCase(updateGroupChat.rejected, (state) => {
-      state.loading = false;
-    });
+    builder
+      .addCase(updateGroupChat.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(updateGroupChat.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload?.success) {
+          state.chat.groupIcon = action.payload.data.groupIcon;
+          state.chat.groupName = action.payload.data.groupName;
+        }
+      })
+      .addCase(updateGroupChat.rejected, (state) => {
+        state.loading = false;
+      });
 
-    builder.addCase(removeGroupImage.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(removeGroupImage.fulfilled, (state, action) => {
-      state.loading = false;
-      if (action.payload?.success) {
-        state.chat.groupIcon = action.payload.data.groupIcon;
-      }
-    });
-    builder.addCase(removeGroupImage.rejected, (state) => {
-      state.loading = false;
-    });
+    builder
+      .addCase(removeGroupImage.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(removeGroupImage.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload?.success) {
+          state.chat.groupIcon = action.payload.data.groupIcon;
+        }
+      })
+      .addCase(removeGroupImage.rejected, (state) => {
+        state.loading = false;
+      });
 
-    builder.addCase(leaveGroupChat.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(leaveGroupChat.fulfilled, (state, action) => {
-      state.loading = false;
-      if (action.payload?.success) {
-        state.chats = state.chats.filter(
-          (chat) => chat._id !== action.payload.data
-        );
-      }
-    });
-    builder.addCase(leaveGroupChat.rejected, (state) => {
-      state.loading = false;
-    });
+    builder
+      .addCase(leaveGroupChat.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(leaveGroupChat.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload?.success) {
+          state.chats = state.chats.filter(
+            (chat) => chat._id !== action.meta.arg
+          );
+        }
+      })
+      .addCase(leaveGroupChat.rejected, (state) => {
+        state.loading = false;
+      });
 
-    builder.addCase(deleteGroupChat.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(deleteGroupChat.fulfilled, (state, action) => {
-      state.loading = false;
-      if (action.payload?.success) {
-        state.chats = state.chats.filter(
-          (chat) => chat._id !== action.payload.data
-        );
-      }
-    });
-    builder.addCase(deleteGroupChat.rejected, (state) => {
-      state.loading = false;
-    });
+    builder
+      .addCase(deleteGroupChat.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(deleteGroupChat.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload?.success) {
+          state.chats = state.chats.filter(
+            (chat) => chat._id !== action.payload.data
+          );
+        }
+      })
+      .addCase(deleteGroupChat.rejected, (state) => {
+        state.loading = false;
+      });
 
-    builder.addCase(makeAdmin.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(makeAdmin.fulfilled, (state, action) => {
-      state.loading = false;
-      if (action.payload?.success) {
-        state.chat.admin = action.payload.data.admin;
-      }
-    });
-    builder.addCase(makeAdmin.rejected, (state) => {
-      state.loading = false;
-    });
+    builder
+      .addCase(makeAdmin.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(makeAdmin.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload?.success) {
+          state.chat.admin = action.payload.data.admin;
+        }
+      })
+      .addCase(makeAdmin.rejected, (state) => {
+        state.loading = false;
+      });
 
-    builder.addCase(removeAdmin.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(removeAdmin.fulfilled, (state, action) => {
-      state.loading = false;
-      if (action.payload?.success) {
-        state.chat.admin = action.payload.data.admin;
-      }
-    });
-    builder.addCase(removeAdmin.rejected, (state) => {
-      state.loading = false;
-    });
+    builder
+      .addCase(removeAdmin.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(removeAdmin.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload?.success) {
+          state.chat.admin = action.payload.data.admin;
+        }
+      })
+      .addCase(removeAdmin.rejected, (state) => {
+        state.loading = false;
+      });
   },
 });
 

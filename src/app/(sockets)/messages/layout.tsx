@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import { useState, useEffect, ReactNode } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { checkForAssets, nameFallback } from "@/lib/helpers";
 import { History } from "lucide-react";
@@ -16,16 +16,16 @@ import { getFollowings } from "@/lib/store/features/slices/followSlice";
 import NewGroupChatDialog from "@/components/NewGroupChatDialog";
 import { usePathname } from "next/navigation";
 
-function Messages({ children }: { children: React.ReactNode }) {
+function Messages({ children }: { children: ReactNode }) {
   const dispatch = useAppDispatch();
   const { user, skeletonLoading: userLoading } = useAppSelector(
     (state) => state.user
   );
   const { chats, skeletonLoading } = useAppSelector((state) => state.chat);
   const location = usePathname();
-  const [newChatDialog, setNewChatDialog] = React.useState(false);
+  const [newChatDialog, setNewChatDialog] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     dispatch(getChats()).then((response) => {
       if (!response.payload?.success) {
         return toast({
@@ -37,7 +37,7 @@ function Messages({ children }: { children: React.ReactNode }) {
     });
   }, [dispatch]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (newChatDialog && !userLoading) {
       dispatch(getFollowings({ userId: user._id })).then((response) => {
         if (!response.payload?.success) {
@@ -92,13 +92,17 @@ function Messages({ children }: { children: React.ReactNode }) {
                   />
                   <AvatarFallback>
                     {nameFallback(
-                      chat.isGroupChat ? chat.groupName : chat?.users[0]?.fullName
+                      chat.isGroupChat
+                        ? chat.groupName
+                        : chat?.users[0]?.fullName
                     )}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col items-start justify-center w-full">
                   <p>
-                    {chat.isGroupChat ? chat.groupName : chat?.users[0]?.fullName}
+                    {chat.isGroupChat
+                      ? chat.groupName
+                      : chat?.users[0]?.fullName}
                   </p>
                   <p className="text-sm md:w-40 sm:w-80 w-40 text-left text-stone-500 text-ellipsis whitespace-nowrap overflow-x-hidden">
                     {chat?.lastMessage

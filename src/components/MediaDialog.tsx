@@ -1,4 +1,4 @@
-import React from "react";
+import { useRef, useState } from "react";
 import { Dialog, DialogContent, DialogTitle, DialogFooter } from "./ui/dialog";
 import {
   Carousel,
@@ -19,8 +19,8 @@ interface Props {
 }
 
 function MediaDialog({ open, setOpen }: Props) {
-  const inputRef = React.useRef<HTMLInputElement>(null);
-  const [files, setFiles] = React.useState<{ url: string; type: string }[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [files, setFiles] = useState<{ url: string; type: string }[]>([]);
 
   return (
     <Dialog

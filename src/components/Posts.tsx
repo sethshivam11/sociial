@@ -1,7 +1,7 @@
 "use client";
 import { Globe, Heart, Loader2, PlayIcon } from "lucide-react";
 import Image from "next/image";
-import React from "react";
+import { useState, useEffect, useRef } from "react";
 import Comment from "./Comment";
 import PostOptions from "./PostOptions";
 import Share from "./Share";
@@ -52,8 +52,8 @@ interface Props {
 
 function Posts({ feed }: Props) {
   const router = useRouter();
-  const timerRef = React.useRef<NodeJS.Timeout>();
-  const [savingToken, setSavingToken] = React.useState(false);
+  const timerRef = useRef<NodeJS.Timeout>();
+  const [savingToken, setSavingToken] = useState(false);
   const dispatch = useAppDispatch();
   const { user, profile } = useAppSelector((state) => state.user);
   const {
@@ -65,20 +65,8 @@ function Posts({ feed }: Props) {
     loading,
     maxExplorePosts,
   } = useAppSelector((state) => state.post);
-  const [consentDialog, setConsentDialog] = React.useState(false);
-  const [showExplorePosts, setShowExplorePosts] = React.useState(true);
-
-  async function handleSaveToken() {
-    setSavingToken(true);
-    const response = await handleConsent();
-    if (response?.toast) {
-      toast(response.toast);
-    } else if (response.token) {
-      await dispatch(saveToken(response.token));
-      setConsentDialog(false);
-    }
-    setSavingToken(false);
-  }
+  const [consentDialog, setConsentDialog] = useState(false);
+  const [showExplorePosts, setShowExplorePosts] = useState(true);
 
   function handleLike(postId: string, type: "posts" | "explore") {
     dispatch(
@@ -96,7 +84,6 @@ function Posts({ feed }: Props) {
       }
     });
   }
-
   function handleUnlike(postId: string, type: "posts" | "explore") {
     dispatch(
       unlikePost({
@@ -113,8 +100,19 @@ function Posts({ feed }: Props) {
       }
     });
   }
+  async function handleSaveToken() {
+    setSavingToken(true);
+    const response = await handleConsent();
+    if (response?.toast) {
+      toast(response.toast);
+    } else if (response.token) {
+      await dispatch(saveToken(response.token));
+      setConsentDialog(false);
+    }
+    setSavingToken(false);
+  }
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!feed) {
       dispatch(getFeed(1));
     } else if (profile.username) {
@@ -159,9 +157,7 @@ function Posts({ feed }: Props) {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile.username, dispatch, feed]);
-
-  React.useEffect(() => {
-    console.log("Explore posts", user._id);
+  useEffect(() => {
     if (!user._id || feed) return;
     dispatch(exploreFeed({ page: 1, userId: user._id }));
   }, [dispatch, user._id, feed]);
@@ -340,65 +336,68 @@ function Posts({ feed }: Props) {
           )}
         </InfiniteScroll>
       )}
-      {!skeletonLoading && !feed && posts.length !== 0 && (
-        <div
-          className={`flex flex-col items-center justify-center gap-2 sm:my-8 ${
-            showExplorePosts ? "my-5" : "mt-5 mb-20"
-          }`}
-        >
-          <Globe size="60" />
-          <h2 className="text-xl font-bold tracking-tight">
-            You&apos;ve got to the end of your scroll
-          </h2>
-          <p>
-            <span className="text-stone-500">
+      {!skeletonLoading &&
+        !feed &&
+        posts.length !== 0 &&
+        explorePosts.length !== 0 && (
+          <div
+            className={`flex flex-col items-center justify-center gap-2 sm:my-8 ${
+              showExplorePosts ? "my-5" : "mt-5 mb-20"
+            }`}
+          >
+            <Globe size="60" />
+            <h2 className="text-xl font-bold tracking-tight">
+              You&apos;ve got to the end of your scroll
+            </h2>
+            <p>
+              <span className="text-stone-500">
+                {showExplorePosts ? (
+                  "Now showing Explore posts"
+                ) : (
+                  <>You&apos;re missing out many posts you may like</>
+                )}
+              </span>
+              &nbsp;
               {showExplorePosts ? (
-                "Now showing Explore posts"
+                <AlertDialog>
+                  <AlertDialogTrigger className="text-blue-500">
+                    Turn off
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogTitle>
+                      You&apos;re missing out many posts you may like
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      You can turn on Explore posts to see more posts from other
+                      users.
+                    </AlertDialogDescription>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => {
+                          localStorage.setItem("explorePostsConsent", "false");
+                          setShowExplorePosts(false);
+                        }}
+                      >
+                        Confirm
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               ) : (
-                <>You&apos;re missing out many posts you may like</>
+                <button
+                  className="text-blue-500"
+                  onClick={() => {
+                    setShowExplorePosts(!showExplorePosts);
+                    localStorage.setItem("explorePostsConsent", "true");
+                  }}
+                >
+                  Turn on
+                </button>
               )}
-            </span>
-            &nbsp;
-            {showExplorePosts ? (
-              <AlertDialog>
-                <AlertDialogTrigger className="text-blue-500">
-                  Turn off
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogTitle>
-                    You&apos;re missing out many posts you may like
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    You can turn on Explore posts to see more posts from other
-                    users.
-                  </AlertDialogDescription>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => {
-                        localStorage.setItem("explorePostsConsent", "false");
-                        setShowExplorePosts(false);
-                      }}
-                    >
-                      Confirm
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            ) : (
-              <button
-                className="text-blue-500"
-                onClick={() => {
-                  setShowExplorePosts(!showExplorePosts);
-                  localStorage.setItem("explorePostsConsent", "true");
-                }}
-              >
-                Turn on
-              </button>
-            )}
-          </p>
-        </div>
-      )}
+            </p>
+          </div>
+        )}
       {showExplorePosts && !feed && (
         <InfiniteScroll
           dataLength={explorePosts.length}

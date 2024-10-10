@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Menubar,
   MenubarContent,
@@ -28,6 +27,7 @@ interface Props {
   message: string;
   type: string;
   kind: string;
+  createdAt: string;
 }
 
 function MessageOptions({
@@ -36,6 +36,7 @@ function MessageOptions({
   type,
   username,
   kind,
+  createdAt,
   setReply,
 }: Props) {
   const dispatch = useAppDispatch();
@@ -103,6 +104,10 @@ function MessageOptions({
             <MoreHorizontal size="15" />
           </MenubarTrigger>
           <MenubarContent className="rounded-xl">
+            <div className="text-stone-500 text-sm px-2 py-1">
+              {new Date(createdAt).toLocaleString("en-IN")}
+            </div>
+            <hr className="w-full text-stone-500" />
             <MenubarItem
               className=" rounded-lg py-2.5"
               onClick={() =>

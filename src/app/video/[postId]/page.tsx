@@ -25,23 +25,23 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { notFound, useRouter } from "next/navigation";
-import React from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 
 function Page({ params }: { params: { postId: string } }) {
   const router = useRouter();
-  const containerRef = React.useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
   const { post, skeletonLoading, loading } = useAppSelector(
     (state) => state.post
   );
   const { user } = useAppSelector((state) => state.user);
 
-  const [videoRef, setVideoRef] = React.useState<HTMLVideoElement | null>(null);
-  const [isMuted, setIsMuted] = React.useState(true);
-  const [isPaused, setIsPaused] = React.useState(false);
-  const [sliderValue, setSliderValue] = React.useState(0);
-  const [seeking, setSeeking] = React.useState(false);
-  const [notFoundError, setNotFoundError] = React.useState(false);
+  const [videoRef, setVideoRef] = useState<HTMLVideoElement | null>(null);
+  const [isMuted, setIsMuted] = useState(true);
+  const [isPaused, setIsPaused] = useState(false);
+  const [sliderValue, setSliderValue] = useState(0);
+  const [seeking, setSeeking] = useState(false);
+  const [notFoundError, setNotFoundError] = useState(false);
 
   function handleLike(postId: string) {
     dispatch(
@@ -77,7 +77,7 @@ function Page({ params }: { params: { postId: string } }) {
     });
   }
 
-  const handleKeys = React.useCallback(
+  const handleKeys = useCallback(
     (e: KeyboardEvent) => {
       switch (e.code) {
         case "Space":
@@ -101,7 +101,7 @@ function Page({ params }: { params: { postId: string } }) {
     [isPaused, isMuted, videoRef]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isPaused || seeking) {
       videoRef?.pause();
     } else {
@@ -109,7 +109,7 @@ function Page({ params }: { params: { postId: string } }) {
     }
   }, [isPaused, seeking, videoRef]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     window.addEventListener("keydown", handleKeys);
 
     return () => {
@@ -117,7 +117,7 @@ function Page({ params }: { params: { postId: string } }) {
     };
   }, [handleKeys]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const postId = params.postId;
     if (!postId) return;
     dispatch(getPost(postId)).then((response) => {

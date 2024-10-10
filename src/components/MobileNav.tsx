@@ -1,10 +1,9 @@
 "use client";
 import { useAppSelector } from "@/lib/store/store";
-import { Bell, Mail, Settings, Tv } from "lucide-react";
+import { Bell, Mail, Settings } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React from "react";
 
 interface Props {
   hideButtons?: boolean;

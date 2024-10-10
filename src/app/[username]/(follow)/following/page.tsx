@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Loader2, Search, Users2 } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -20,11 +20,9 @@ function Page() {
     (state) => state.follow
   );
   const { profile } = useAppSelector((state) => state.user);
-  const [searchResults, setSearchResults] = React.useState<typeof followings>(
-    []
-  );
-  const [search, setSearch] = React.useState("");
-  const [followingsIds, setFollowingsIds] = React.useState<string[]>([]);
+  const [searchResults, setSearchResults] = useState<typeof followings>([]);
+  const [search, setSearch] = useState("");
+  const [followingsIds, setFollowingsIds] = useState<string[]>([]);
 
   function setLoading(userId: string, loading: boolean) {
     setSearchResults((prev) =>
@@ -70,7 +68,7 @@ function Page() {
       .finally(() => setLoading(userId, false));
   }
 
-  const fetchFollowings = React.useCallback(
+  const fetchFollowings = useCallback(
     async (username: string) => {
       const response = await dispatch(getFollowings({ username }));
       if (response.payload?.success) {
@@ -85,7 +83,7 @@ function Page() {
     [dispatch]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (search) {
       setSearchResults(
         followings.filter((follower) => {
@@ -101,7 +99,7 @@ function Page() {
     }
   }, [search, followings]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!profile.username) return;
     fetchFollowings(profile.username);
   }, [fetchFollowings, profile.username]);

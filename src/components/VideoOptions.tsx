@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,8 +30,8 @@ interface Props {
 
 function VideoOptions({ username, fullName, avatar, postId }: Props) {
   const router = useRouter();
-  const [unfollowDialog, setUnfollowDialog] = React.useState(false);
-  const [reportDialog, setReportDialog] = React.useState(false);
+  const [unfollowDialog, setUnfollowDialog] = useState(false);
+  const [reportDialog, setReportDialog] = useState(false);
   function unfollow(username: string) {
     console.log(`Unfollowed user ${username}`);
   }

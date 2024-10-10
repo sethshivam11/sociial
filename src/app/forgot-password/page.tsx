@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import { useState, useEffect } from "react";
 import { toast } from "@/components/ui/use-toast";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -56,7 +56,7 @@ const ForgotPasswordPage = () => {
     );
   const { loading } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
-  const [timer, setTimer] = React.useState(0);
+  const [timer, setTimer] = useState(0);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -127,7 +127,7 @@ const ForgotPasswordPage = () => {
     }
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (timer > 0) {
       const runningTimer = setInterval(() => {
         setTimer((timer) => (timer -= 1));

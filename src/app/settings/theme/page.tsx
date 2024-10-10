@@ -1,10 +1,8 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ChevronLeft } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
-import React from "react";
 
 function Page() {
   const { theme, setTheme } = useTheme();

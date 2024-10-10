@@ -2,7 +2,6 @@
 import {
   ChevronLeft,
   ChevronRight,
-  Eye,
   Heart,
   Loader2,
   MoreHorizontal,
@@ -10,7 +9,7 @@ import {
   PlayIcon,
   X,
 } from "lucide-react";
-import React from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
@@ -46,19 +45,19 @@ function Story() {
   const router = useRouter();
   const { loading: userLoading } = useAppSelector((state) => state.user);
   const { userStory, loading } = useAppSelector((state) => state.story);
-  const nextRef = React.useRef<HTMLButtonElement>(null);
-  const prevRef = React.useRef<HTMLButtonElement>(null);
-  const closeRef1 = React.useRef<HTMLButtonElement>(null);
-  const closeRef2 = React.useRef<HTMLButtonElement>(null);
-  const progressBarRef = React.useRef<HTMLSpanElement>(null);
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const storyContainer = React.useRef<HTMLDivElement>(null);
+  const nextRef = useRef<HTMLButtonElement>(null);
+  const prevRef = useRef<HTMLButtonElement>(null);
+  const closeRef1 = useRef<HTMLButtonElement>(null);
+  const closeRef2 = useRef<HTMLButtonElement>(null);
+  const progressBarRef = useRef<HTMLSpanElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const storyContainer = useRef<HTMLDivElement>(null);
 
-  const [index, setIndex] = React.useState(0);
-  const [deleteDialog, setDeleteDialog] = React.useState(false);
-  const [isPaused, setIsPaused] = React.useState(true);
-  const [timer, setTimer] = React.useState<Timer | null>(null);
-  const [imageLoading, setImageLoading] = React.useState(true);
+  const [index, setIndex] = useState(0);
+  const [deleteDialog, setDeleteDialog] = useState(false);
+  const [isPaused, setIsPaused] = useState(true);
+  const [timer, setTimer] = useState<Timer | null>(null);
+  const [imageLoading, setImageLoading] = useState(true);
 
   function handleDelete() {
     if (!userStory) return;
@@ -118,11 +117,11 @@ function Story() {
     }
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!userLoading && !userStory?.media.length) dispatch(getUserStory());
   }, [dispatch, userLoading, userStory?.media]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const timer: Timer = new Timer(function () {
       nextRef.current?.click();
     }, 15000);
@@ -133,7 +132,7 @@ function Story() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const animation = progressBarRef.current?.getAnimations()[0];
     if (animation) {
       isPaused ? animation.pause() : animation.play();
@@ -145,7 +144,7 @@ function Story() {
     }
   }, [isPaused, timer]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     progressBarRef.current?.parentNode?.parentElement?.children[
       index - 1
     ]?.children[0]
@@ -167,7 +166,7 @@ function Story() {
     }
   }, [index, userStory, router]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (imageLoading) {
       setIsPaused(true);
     } else {
@@ -175,7 +174,7 @@ function Story() {
     }
   }, [imageLoading]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       switch (e.code) {
         case "Space":
@@ -207,7 +206,7 @@ function Story() {
     };
   }, [router, userStory]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (userStory?.selfSeen || index + 1 !== userStory?.media.length) return;
     dispatch(markSelfSeen());
   }, [dispatch, userStory?.selfSeen, userStory?.media.length, index]);

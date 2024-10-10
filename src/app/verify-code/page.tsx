@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -54,11 +54,11 @@ function VerifyCodePage({ searchParams }: Props) {
     },
   });
 
-  const [timer, setTimer] = React.useState(0);
+  const [timer, setTimer] = useState(0);
 
   async function handleSendCode() {
     const response = await dispatch(
-      resendVerificationCode({username: form.watch("username")})
+      resendVerificationCode({ username: form.watch("username") })
     );
     if (response.payload.success) {
       toast({
@@ -98,7 +98,7 @@ function VerifyCodePage({ searchParams }: Props) {
     }
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     try {
       if (searchParams.username) {
         form.setValue("username", searchParams.username);
@@ -113,7 +113,7 @@ function VerifyCodePage({ searchParams }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (timer > 0) {
       const runningTimer = setInterval(() => {
         setTimer((timer) => (timer -= 1));

@@ -11,14 +11,14 @@ import {
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { ChevronLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import { useState, useEffect } from "react";
 
 function Page() {
   const dispatch = useAppDispatch();
   const { pushNotifications, loading, skeletonLoading } = useAppSelector(
     (state) => state.notificationPreference
   );
-  const [notificationPreferences, setNotificationPreferences] = React.useState({
+  const [notificationPreferences, setNotificationPreferences] = useState({
     likes: false,
     comments: false,
     commentLikes: false,
@@ -27,8 +27,8 @@ function Page() {
     newMessages: false,
     newGroups: false,
   });
-  const [pauseAll, setPauseAll] = React.useState(false);
-  const [permission, setPermission] = React.useState(false);
+  const [pauseAll, setPauseAll] = useState(false);
+  const [permission, setPermission] = useState(false);
 
   function handleUpdatePreferences() {
     const {
@@ -129,7 +129,7 @@ function Page() {
     }
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (Notification.permission === "granted") {
       setPermission(true);
     }

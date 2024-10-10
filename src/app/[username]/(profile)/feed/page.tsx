@@ -1,5 +1,4 @@
 import Posts from '@/components/Posts'
-import React from 'react'
 
 function page() {
   return (
