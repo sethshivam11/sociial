@@ -12,20 +12,48 @@ import {
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { socket } from "@/socket";
 import { MessageI } from "@/types/types";
-import React from "react";
+import {
+  useState,
+  createContext,
+  PropsWithChildren,
+  useEffect,
+  useContext,
+} from "react";
 
 const initialState = {
   connected: false,
+  transport: "N/A",
 };
 
-const SocketContext = React.createContext(initialState);
+const SocketContext = createContext(initialState);
 
-export function SocketProvider({ children }: React.PropsWithChildren<{}>) {
-  const [connected, setConnected] = React.useState(false);
+export function SocketProvider({ children }: PropsWithChildren<{}>) {
+  const [connected, setConnected] = useState(false);
+  const [transport, setTransport] = useState("N/A");
 
   const dispatch = useAppDispatch();
   const { chat } = useAppSelector((state) => state.chat);
-  React.useEffect(() => {
+
+  useEffect(() => {
+    if (socket.connected) {
+      onConnect();
+    }
+    function onConnect() {
+      console.log("connected");
+      setConnected(true);
+      setTransport(socket.io.engine.transport.name);
+
+      socket.io.engine.on("upgrade", (transport) => {
+        setTransport(transport.name);
+      });
+    }
+
+    function onDisconnect() {
+      console.log("disconnected");
+      setConnected(false);
+      setTransport("N/A");
+    }
+
     const accessToken = localStorage.getItem("accessToken");
     const refreshToken = localStorage.getItem("refreshToken");
     if (accessToken) {
@@ -33,14 +61,6 @@ export function SocketProvider({ children }: React.PropsWithChildren<{}>) {
     }
     if (refreshToken) {
       document.cookie = `refreshToken=${refreshToken}`;
-    }
-    function handleConnection() {
-      setConnected(true);
-      console.log("Connected to socket server");
-    }
-    function handleDisconnection() {
-      setConnected(false);
-      console.log("Disconnected from socket server");
     }
     function typingEventStarted() {
       console.log("typing started");
@@ -51,6 +71,8 @@ export function SocketProvider({ children }: React.PropsWithChildren<{}>) {
       setTyping(false);
     }
     function handleMessageReceived(payload: MessageI) {
+      console.log(payload);
+      console.log(chat?._id);
       if (chat?._id === payload.chat) {
         dispatch(messageReceived(payload));
       }
@@ -70,20 +92,22 @@ export function SocketProvider({ children }: React.PropsWithChildren<{}>) {
       content: string;
       chat: string;
     }) {
-      console.log(payload);
       if (chat?._id === payload.chat) {
         dispatch(reacted(payload));
       }
     }
     function handleUnreact(payload: { user: string; chat: string }) {
-      console.log(payload);
       if (chat?._id === payload.chat) {
         dispatch(unreacted(payload));
       }
     }
+    function handleError(error: any) {
+      console.log("error", error);
+    }
 
-    socket.on("connect", handleConnection);
-    socket.on("disconnect", handleDisconnection);
+    socket.on("connect", onConnect);
+    socket.on("disconnect", onDisconnect);
+    socket.on("error", handleError);
     socket.on(ChatEventEnum.MESSAGE_RECIEVED_EVENT, handleMessageReceived);
     socket.on(ChatEventEnum.MESSAGE_DELETE_EVENT, handleMessageDelete);
     socket.on(ChatEventEnum.TYPING_EVENT, typingEventStarted);
@@ -93,8 +117,9 @@ export function SocketProvider({ children }: React.PropsWithChildren<{}>) {
     socket.on(ChatEventEnum.NEW_UNREACT_EVENT, handleUnreact);
 
     return () => {
-      socket.off("connect", handleConnection);
-      socket.off("disconnect", handleDisconnection);
+      socket.off("connect", onConnect);
+      socket.off("disconnect", onDisconnect);
+      socket.off("error", handleError);
       socket.off(ChatEventEnum.MESSAGE_RECIEVED_EVENT, handleMessageReceived);
       socket.off(ChatEventEnum.MESSAGE_DELETE_EVENT, handleMessageDelete);
       socket.off(ChatEventEnum.TYPING_EVENT, typingEventStarted);
@@ -103,13 +128,13 @@ export function SocketProvider({ children }: React.PropsWithChildren<{}>) {
       socket.off(ChatEventEnum.NEW_REACT_EVENT, handleReact);
       socket.off(ChatEventEnum.NEW_UNREACT_EVENT, handleUnreact);
     };
-  }, [chat?._id, dispatch]);
+  }, [chat, dispatch]);
 
   return (
-    <SocketContext.Provider value={{ connected }}>
+    <SocketContext.Provider value={{ connected, transport }}>
       {children}
     </SocketContext.Provider>
   );
 }
 
-export const useSocket = () => React.useContext(SocketContext);
+export const useSocket = () => useContext(SocketContext);

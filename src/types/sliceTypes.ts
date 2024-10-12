@@ -140,8 +140,8 @@ export interface MessageSliceI {
   loading: boolean;
   skeletonLoading: boolean;
   reactions: ReactI[];
-  loadingMore: boolean;
   page: number;
+  maxMessages: number;
   editingMessage: boolean;
 }
 

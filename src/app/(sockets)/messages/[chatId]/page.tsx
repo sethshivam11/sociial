@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef, ReactNode } from "react";
+import React, { useState, useEffect, useRef, ReactNode } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { nameFallback, themes } from "@/lib/helpers";
 import {
@@ -12,9 +12,11 @@ import {
   X,
   PlayIcon,
   Info,
+  Loader2,
   ArrowDown,
+  Plus,
 } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -53,6 +55,8 @@ import ChatLoading from "@/components/skeletons/ChatLoading";
 import Link from "next/link";
 import MessageActions from "@/components/MessageActions";
 import { checkForAssets } from "@/lib/helpers";
+import ScrollableFeed from "react-scrollable-feed";
+import { useDebounceCallback } from "usehooks-ts";
 
 function Page({ params }: { params: { chatId: string } }) {
   const dispatch = useAppDispatch();
@@ -64,13 +68,14 @@ function Page({ params }: { params: { chatId: string } }) {
     chats,
     skeletonLoading: isChatLoading,
   } = useAppSelector((state) => state.chat);
-  const { messages, skeletonLoading, typing, loadingMore, loading } =
+  const { messages, skeletonLoading, typing, maxMessages, page } =
     useAppSelector((state) => state.message);
 
-  const lastMessageRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
+  const containerRef = useRef<ScrollableFeed>(null);
+  const feedRef = useRef<HTMLDivElement>(null);
+  const oldMessageCount = useRef<number>(messages.length);
+  const firstMessageRef = useRef<HTMLDivElement>(null);
 
   const formSchema = z.object({
     message: z.string(),
@@ -89,8 +94,13 @@ function Page({ params }: { params: { chatId: string } }) {
   });
 
   const [theme, setTheme] = useState(themes[0]);
+  const [isAtBottom, setIsAtBottom] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+
   const chatId = params.chatId;
   const message = form.watch("message");
+
+  const setDebouncedBottom = useDebounceCallback(setIsAtBottom, 200);
 
   function handleDownload(content: string) {
     const fileURL = content.replace("/upload", "/upload/fl_attachment");
@@ -114,13 +124,7 @@ function Page({ params }: { params: { chatId: string } }) {
         });
       } else {
         form.reset();
-        setTimeout(() => {
-          lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
-          form.setValue("reply", {
-            username: "",
-            content: "",
-          });
-        }, 10);
+        containerRef.current?.scrollToBottom();
       }
     });
   }
@@ -249,7 +253,7 @@ function Page({ params }: { params: { chatId: string } }) {
           </div>
         );
       default:
-        if (content.includes("https://")) {
+        if (content?.includes("https://")) {
           const urlIdx = content.indexOf("https://");
           const url = content.slice(urlIdx).split(" ")[0];
           return (
@@ -280,7 +284,7 @@ function Page({ params }: { params: { chatId: string } }) {
       setTheme(themes[0]);
     }
 
-    dispatch(getMessages(chatId));
+    dispatch(getMessages({ chatId, page: 1 }));
     if (!chats.length)
       dispatch(getChats()).then((response) => {
         if (response.payload?.success) dispatch(setCurrentChat(chatId));
@@ -301,27 +305,9 @@ function Page({ params }: { params: { chatId: string } }) {
     };
   }, [dispatch, chatId, setCurrentChat]);
 
-  // useEffect(() => {
-  //   console.log(window.scrollY, window.innerHeight, document.body.scrollHeight);
-  //   function handleScroll() {
-  //     const scrollPosition = window.scrollY + window.innerHeight;
-  //     const pageHeight = containerRef.current?.scrollHeight;
-  //     console.log(scrollPosition, pageHeight);
-
-  //     if (pageHeight && scrollPosition >= pageHeight - 50) {
-  //       setIsVisible(false);
-  //     } else {
-  //       setIsVisible(true);
-  //     }
-  //   }
-  //   lastMessageRef.current?.scrollIntoView({ behavior: "instant" });
-
-  //   window.addEventListener("scroll", handleScroll);
-
-  //   return () => {
-  //     window.removeEventListener("scroll", handleScroll);
-  //   };
-  // }, []);
+  useEffect(() => {
+    console.log(firstMessageRef.current);
+  }, [messages.length]);
 
   return (
     <div
@@ -329,14 +315,12 @@ function Page({ params }: { params: { chatId: string } }) {
         location !== "/messages" ? "" : "hidden"
       } `}
     >
-      {isVisible && (
+      {isAtBottom && (
         <Button
           variant="outline"
           size="icon"
           className="border-2 border-stone-500 rounded-full absolute z-30 bottom-20 left-1/2 -translate-x-1/2 "
-          onClick={() =>
-            lastMessageRef.current?.scrollIntoView({ behavior: "smooth" })
-          }
+          onClick={() => containerRef.current?.scrollToBottom()}
         >
           <ArrowDown />
         </Button>
@@ -406,76 +390,96 @@ function Page({ params }: { params: { chatId: string } }) {
           </div>
         </div>
       )}
-      <div
-        className="flex flex-col items-start justify-start w-full h-full mr-0 py-2 overflow-y-auto"
+      <ScrollableFeed
         ref={containerRef}
+        className="w-full"
+        onScroll={(isAtBottom) => setDebouncedBottom(!isAtBottom)}
       >
-        {!skeletonLoading && (
-          <div className="flex flex-col items-center justify-center w-full py-2 gap-2 mb-8">
-            <Avatar className="w-28 h-28 select-none pointer-events-none">
-              <AvatarImage
-                src={chat.groupIcon || chat.users[0]?.avatar}
-                alt=""
-              />
-              <AvatarFallback>
-                {nameFallback(chat.groupName || chat.users[0]?.fullName)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="grid place-items-center">
-              <h1 className="text-2xl font-bold tracking-tight flex items-center justify-start">
-                {chat.groupName || chat.users[0]?.fullName}
-              </h1>
-              <p className="text-sm text-stone-500">
-                {chat.isGroupChat
-                  ? `Created on ${new Date(chat.createdAt).toLocaleDateString(
-                      "en-IN"
-                    )}`
-                  : `@${chat.users[0]?.username}`}
-              </p>
-            </div>
-            {!chat.isGroupChat && (
-              <Link href={`/${chat.users[0]?.username}`}>
-                <Button variant="outline" className="my-2">
-                  View profile
-                </Button>
-              </Link>
+        <div className="mr-0 p-2" ref={feedRef}>
+          <div className="flex items-center justify-center w-full">
+            {loadingMore && <Loader2 className="animate-spin" />}
+            {!loadingMore && maxMessages !== messages.length && (
+              <Button
+                variant="outline"
+                size="icon"
+                className="rounded-full mx-auto"
+                onClick={() => {
+                  setLoadingMore(true);
+                  dispatch(getMessages({ chatId, page: page + 1 })).finally(
+                    () => setLoadingMore(false)
+                  );
+                }}
+              >
+                <Plus />
+              </Button>
+            )}
+            {maxMessages === messages.length && (
+              <div className="flex flex-col items-center justify-center w-full py-2 gap-2 mb-8">
+                <Avatar className="w-28 h-28 select-none pointer-events-none">
+                  <AvatarImage
+                    src={chat.groupIcon || chat.users[0]?.avatar}
+                    alt=""
+                  />
+                  <AvatarFallback>
+                    {nameFallback(chat.groupName || chat.users[0]?.fullName)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="grid place-items-center">
+                  <h1 className="text-2xl font-bold tracking-tight flex items-center justify-start">
+                    {chat.groupName || chat.users[0]?.fullName}
+                  </h1>
+                  <p className="text-sm text-stone-500">
+                    {chat.isGroupChat
+                      ? `Created on ${new Date(
+                          chat.createdAt
+                        ).toLocaleDateString("en-IN")}`
+                      : `@${chat.users[0]?.username}`}
+                  </p>
+                </div>
+                {!chat.isGroupChat && (
+                  <Link href={`/${chat.users[0]?.username}`}>
+                    <Button variant="outline" className="my-2">
+                      View profile
+                    </Button>
+                  </Link>
+                )}
+              </div>
             )}
           </div>
-        )}
-        <div className="flex flex-col items-center justify-start gap-2 px-2 w-full">
           {skeletonLoading ? (
             <MessagesLoading />
           ) : (
             messages.map((message, index) => (
               <div
+                key={index}
                 className={`group flex items-center justify-start w-full ${
-                  message.sender.username !== user.username
+                  message.sender?.username !== user.username
                     ? "flex-row"
                     : "flex-row-reverse ml-auto"
                 }`}
-                key={index}
+                ref={index === 0 ? firstMessageRef : undefined}
               >
-                {message.sender.username !== user.username &&
+                {message.sender?.username !== user.username &&
                   chat?.isGroupChat && (
                     <div className="flex h-full items-end pb-2">
                       <Avatar className="w-5 h-5">
-                        <AvatarImage src={message.sender.avatar} />
+                        <AvatarImage src={message.sender?.avatar} />
                         <AvatarFallback>
-                          {nameFallback(message.sender.fullName)}
+                          {nameFallback(message.sender?.fullName)}
                         </AvatarFallback>
                       </Avatar>
                     </div>
                   )}
                 <div
                   className={`flex flex-col gap-0 overflow-hidden ${
-                    message.sender.username !== user.username
+                    message.sender?.username !== user.username
                       ? "items-start"
                       : "items-end"
                   }`}
                 >
                   <span
                     className={`py-1 rounded-xl -mb-1 px-3 opacity-70 truncate max-w-full ${
-                      message.sender.username !== user.username
+                      message.sender?.username !== user.username
                         ? `${theme.color} text-${theme.text}`
                         : "bg-stone-300 dark:bg-stone-800"
                     } ${!message?.reply?.content?.length ? "hidden" : ""}`}
@@ -484,29 +488,24 @@ function Page({ params }: { params: { chatId: string } }) {
                   </span>
                   <div
                     className={`py-2 px-4 rounded-2xl w-fit relative ${
-                      message.sender.username !== user.username
+                      message.sender?.username !== user.username
                         ? `${theme.color} text-${theme.text} max-w-3/4`
                         : "bg-stone-300 dark:bg-stone-800 max-w-3/4"
                     } ${
-                      messages[index - 1]?.sender.username ===
-                      message.sender.username
+                      messages[index - 1]?.sender?.username ===
+                      message.sender?.username
                         ? "mb-1"
                         : "mb-3"
                     }
-                  ${message.reacts ? "mb-4" : "mb-1"}`}
-                    ref={
-                      messages[messages.length - 1]._id === message._id
-                        ? lastMessageRef
-                        : null
-                    }
+                  ${message?.reacts ? "mb-4" : "mb-1"}`}
                   >
                     {giveAssets(message.content, message.kind || "message")}
-                    {message.reacts.length > 0 && (
+                    {message?.reacts?.length > 0 && (
                       <MessageReacts
                         messageId={message._id}
-                        reacts={message.reacts}
+                        reacts={message?.reacts}
                         type={
-                          message.sender.username !== user.username
+                          message.sender?.username !== user.username
                             ? "reply"
                             : "sent"
                         }
@@ -516,7 +515,7 @@ function Page({ params }: { params: { chatId: string } }) {
                 </div>
                 <div
                   className={`flex group-hover:visible invisible w-fit mb-2 mx-0.5 gap-0 ${
-                    message.sender.username !== user.username
+                    message.sender?.username !== user.username
                       ? "flex-row"
                       : "flex-row-reverse"
                   }`}
@@ -538,7 +537,7 @@ function Page({ params }: { params: { chatId: string } }) {
                     createdAt={message.createdAt}
                     message={message.content}
                     type={
-                      message.sender.username !== user.username
+                      message.sender?.username !== user.username
                         ? "reply"
                         : "sent"
                     }
@@ -549,7 +548,7 @@ function Page({ params }: { params: { chatId: string } }) {
             ))
           )}
         </div>
-      </div>
+      </ScrollableFeed>
       {!skeletonLoading && (
         <div className="bg-white dark:bg-black bottom-0 right-0 w-full px-2.5 flex items-center justify-center z-20">
           <Form {...form}>

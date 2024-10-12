@@ -7,7 +7,7 @@ const initialState: MessageSliceI = {
   loading: false,
   typing: false,
   skeletonLoading: false,
-  loadingMore: false,
+  maxMessages: 0,
   editingMessage: false,
   page: 1,
 };
@@ -41,17 +41,9 @@ export const sendMessage = createAsyncThunk(
 
 export const getMessages = createAsyncThunk(
   "messages/getMessages",
-  async (chatId: string) => {
-    const parsed = await fetch(`/api/v1/messages/get?chatId=${chatId}`);
-    return parsed.json();
-  }
-);
-
-export const getMoreMessages = createAsyncThunk(
-  "messages/getMoreMessages",
   async ({ chatId, page }: { chatId: string; page: number }) => {
     const parsed = await fetch(
-      `/api/v1/messages/getMore?chatId=${chatId}&page=${page}`
+      `/api/v1/messages/get?chatId=${chatId}${page ? `&page=${page}` : ""}`
     );
     return parsed.json();
   }
@@ -184,33 +176,32 @@ const messageSlice = createSlice({
       });
 
     builder
-      .addCase(getMessages.pending, (state) => {
-        state.skeletonLoading = true;
+      .addCase(getMessages.pending, (state, action) => {
+        if (action.meta.arg.page === 1) {
+          state.skeletonLoading = true;
+        }
       })
       .addCase(getMessages.fulfilled, (state, action) => {
-        state.skeletonLoading = false;
+        if (action.meta.arg.page === 1) {
+          state.skeletonLoading = false;
+        }
         if (action.payload?.success) {
-          state.messages = action.payload.data.messages;
+          state.messages = [
+            ...action.payload.data.messages,
+            ...state.messages,
+          ].filter(
+            (message, index, self) =>
+              index === self.findIndex((msg) => msg._id === message._id)
+          );
+          state.maxMessages = action.payload.data.max;
         } else if (action.payload?.message === "No messages found") {
           state.messages = [];
         }
       })
-      .addCase(getMessages.rejected, (state) => {
-        state.skeletonLoading = false;
-      });
-
-    builder
-      .addCase(getMoreMessages.pending, (state) => {
-        state.loadingMore = true;
-      })
-      .addCase(getMoreMessages.fulfilled, (state, action) => {
-        state.loadingMore = false;
-        if (action.payload?.success) {
-          state.messages = [...state.messages, ...action.payload.data];
+      .addCase(getMessages.rejected, (state, action) => {
+        if (action.meta.arg.page === 1) {
+          state.skeletonLoading = false;
         }
-      })
-      .addCase(getMoreMessages.rejected, (state) => {
-        state.loadingMore = false;
       });
 
     builder
