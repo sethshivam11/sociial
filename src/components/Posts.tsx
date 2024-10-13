@@ -1,5 +1,5 @@
 "use client";
-import { Globe, Heart, Loader2, PlayIcon } from "lucide-react";
+import { Bookmark, Globe, Heart, Loader2, PlayIcon } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import Comment from "./Comment";
@@ -37,7 +37,6 @@ import {
   likePost,
   unlikePost,
 } from "@/lib/store/features/slices/postSlice";
-import SavePost from "./SavePost";
 import PostCaption from "./PostCaption";
 import { useRouter } from "next/navigation";
 import {
@@ -45,6 +44,7 @@ import {
   saveToken,
 } from "@/lib/store/features/slices/notificationPreferenceSlice";
 import { getBasicFollow } from "@/lib/store/features/slices/followSlice";
+import { savePost, unsavePost } from "@/lib/store/features/slices/userSlice";
 
 interface Props {
   feed?: boolean;
@@ -96,6 +96,32 @@ function Posts({ feed }: Props) {
         toast({
           title: "Cannot unlike post",
           description: "Please try again later.",
+        });
+      }
+    });
+  }
+  function handleSave(postId: string) {
+    dispatch(savePost(postId)).then((response) => {
+      if (response.payload?.success) {
+        toast({ title: "Post saved" });
+      } else if (!response.payload?.success) {
+        toast({
+          title: "Failed to save post",
+          description: response.payload?.message || "Something went wrong",
+          variant: "destructive",
+        });
+      }
+    });
+  }
+  function handleUnsave(postId: string) {
+    dispatch(unsavePost(postId)).then((response) => {
+      if (response.payload?.success) {
+        toast({ title: "Post unsaved" });
+      } else if (!response.payload?.success) {
+        toast({
+          title: "Failed to unsave post",
+          description: response.payload?.message || "Something went wrong",
+          variant: "destructive",
         });
       }
     });
@@ -314,7 +340,24 @@ function Posts({ feed }: Props) {
                       />
                       <Share _id={post._id} />
                     </div>
-                    <SavePost post={post} />
+                    <button
+                      onClick={() => {
+                        if (user.savedPosts.includes(post._id)) {
+                          handleUnsave(post._id);
+                        } else {
+                          handleSave(post._id);
+                        }
+                      }}
+                    >
+                      <Bookmark
+                        size="30"
+                        fill={
+                          user.savedPosts.includes(post._id)
+                            ? "currentColor"
+                            : "none"
+                        }
+                      />
+                    </button>
                   </div>
                   <p className="text-sm text-stone-400 mt-1 select-none">
                     <LikeDialog
@@ -549,7 +592,24 @@ function Posts({ feed }: Props) {
                       />
                       <Share _id={post._id} />
                     </div>
-                    <SavePost post={post} />
+                    <button
+                      onClick={() => {
+                        if (user.savedPosts.includes(post._id)) {
+                          handleUnsave(post._id);
+                        } else {
+                          handleSave(post._id);
+                        }
+                      }}
+                    >
+                      <Bookmark
+                        size="30"
+                        fill={
+                          user.savedPosts.includes(post._id)
+                            ? "currentColor"
+                            : "none"
+                        }
+                      />
+                    </button>
                   </div>
                   <p className="text-sm text-stone-400 mt-1 select-none">
                     <LikeDialog

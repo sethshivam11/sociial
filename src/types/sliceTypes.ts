@@ -25,6 +25,7 @@ export interface UserSliceI {
     isMailVerified: boolean;
     bio: string;
     blocked: string[];
+    savedPosts: string[];
   };
   searchResults: BasicUserI[];
   blocked: BasicUserI[];

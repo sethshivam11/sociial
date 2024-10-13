@@ -26,7 +26,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "./ui/use-toast";
 import { ScrollArea } from "./ui/scroll-area";
 import FollowersLoadingSkeleton from "./skeletons/FollowersLoading";
-import { useAppSelector } from "@/lib/store/store";
+import { useAppDispatch, useAppSelector } from "@/lib/store/store";
+import { getFollowers } from "@/lib/store/features/slices/followSlice";
 
 interface Props {
   isVideo?: boolean;
@@ -34,7 +35,11 @@ interface Props {
 }
 
 export default function Share({ isVideo, _id }: Props) {
-  const { skeletonLoading } = useAppSelector((state) => state.follow);
+  const dispatch = useAppDispatch();
+  const { skeletonLoading, followers } = useAppSelector(
+    (state) => state.follow
+  );
+  const { user } = useAppSelector((state) => state.user);
   const formSchema = z.object({
     message: z.string().optional(),
   });
@@ -46,46 +51,8 @@ export default function Share({ isVideo, _id }: Props) {
   });
 
   const [search, setSearch] = useState("");
-
-  const followers = [
-    {
-      fullName: "John Doe",
-      username: "johndoe",
-      avatar: "https://github.com/shadcn.png",
-    },
-    {
-      fullName: "Jane Smith",
-      username: "janesmith",
-      avatar: "https://github.com/shadcn.png",
-    },
-    {
-      fullName: "Alex Johnson",
-      username: "alexjohnson",
-      avatar: "https://github.com/shadcn.png",
-    },
-    {
-      fullName: "Maria Garcia",
-      username: "mariagarcia",
-      avatar: "https://github.com/shadcn.png",
-    },
-    {
-      fullName: "James Wilson",
-      username: "jameswilson",
-      avatar: "https://github.com/shadcn.png",
-    },
-    {
-      fullName: "Linda Brown",
-      username: "lindabrown",
-      avatar: "https://github.com/shadcn.png",
-    },
-    {
-      fullName: "Robert Davis",
-      username: "robertdavis",
-      avatar: "https://github.com/shadcn.png",
-    },
-  ];
-
   const [shareToPeople, setShareToPeople] = useState<typeof followers>([]);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
@@ -118,8 +85,16 @@ export default function Share({ isVideo, _id }: Props) {
     });
   }
 
+  useEffect(() => {
+    if (dialogOpen) {
+      dispatch(getFollowers({ userId: user._id }));
+    } else {
+      setShareToPeople([]);
+    }
+  }, [dispatch, dialogOpen]);
+
   return (
-    <Dialog>
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger title="Share" className="sm:hover:opacity-60 dark:invert">
         <Image src="/share.svg" width={30} height={30} alt="Share" />
       </DialogTrigger>

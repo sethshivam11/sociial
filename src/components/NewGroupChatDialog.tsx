@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Users } from "lucide-react";
+import { Loader2, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Dialog,
@@ -25,29 +25,38 @@ import { useDebounceCallback } from "usehooks-ts";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAppSelector } from "@/lib/store/store";
+import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { ScrollArea } from "./ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { nameFallback } from "@/lib/helpers";
 import Image from "next/image";
+import { getFollowings } from "@/lib/store/features/slices/followSlice";
+import { toast } from "./ui/use-toast";
+import { newGroupChat } from "@/lib/store/features/slices/chatSlice";
+import { useRouter } from "next/navigation";
 
-interface Props {
-  open: boolean;
-  setOpen: (value: boolean) => void;
-}
-
-function NewGroupChatDialog({ open, setOpen }: Props) {
+function NewGroupChatDialog() {
+  const router = useRouter();
+  const dispatch = useAppDispatch();
   const defaultIcon =
     "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1725736840/sociial/settings/feahtus4algwiixi0zmi.png";
+
+  const { followings } = useAppSelector((state) => state.follow);
+  const { user, skeletonLoading: userLoading } = useAppSelector(
+    (state) => state.user
+  );
+  const { loading } = useAppSelector((state) => state.chat);
+
   const [level, setLevel] = useState<"1" | "2">("1");
   const [searchFollowers, setSearchFollowers] = useState("");
-  const { followings } = useAppSelector((state) => state.follow);
   const [groupIcon, setGroupIcon] = useState(defaultIcon);
+  const [open, setOpen] = useState(false);
   const followersLoading = useAppSelector(
     (state) => state.follow.skeletonLoading
   );
   const [participants, setParticipants] = useState<string[]>([]);
   const [followers, setFollowers] = useState<typeof followings>([]);
+
   const formSchema = z.object({
     name: z
       .string()
@@ -67,9 +76,34 @@ function NewGroupChatDialog({ open, setOpen }: Props) {
     resolver: zodResolver(formSchema),
   });
   const setFollowersDebounced = useDebounceCallback(setSearchFollowers, 500);
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    console.log(data, participants);
-    setOpen(false);
+
+  async function onSubmit({ name, description }: z.infer<typeof formSchema>) {
+    let image: File | undefined = undefined;
+    if (groupIcon !== defaultIcon) {
+      const response = await fetch(groupIcon);
+      const blob = await response.blob();
+      image = new File([blob], `${Date.now()}.jpg`, {
+        type: blob.type,
+      });
+    }
+    dispatch(newGroupChat({ participants, name, description, image })).then(
+      (response) => {
+        if (!response.payload?.success) {
+          return toast({
+            title: "Error",
+            description:
+              response.payload?.message ||
+              "Something went wrong, while creating group",
+            variant: "destructive",
+          });
+        } else {
+          router.push(`/messages/${response.payload?.data._id}`);
+          setOpen(false);
+          setLevel("1");
+          form.reset();
+        }
+      }
+    );
   }
 
   useEffect(() => {
@@ -83,6 +117,26 @@ function NewGroupChatDialog({ open, setOpen }: Props) {
       setFollowers(followings);
     }
   }, [searchFollowers, followings]);
+
+  useEffect(() => {
+    if (open && !userLoading) {
+      dispatch(getFollowings({ userId: user._id })).then((response) => {
+        if (
+          !response.payload?.success &&
+          response.payload?.message !== "Followers not found"
+        ) {
+          return toast({
+            title: "Error",
+            description:
+              response.payload?.message ||
+              "Something went wrong, while fetching followers",
+            variant: "destructive",
+          });
+        }
+      });
+    }
+  }, [dispatch, open, user._id, userLoading]);
+
   return (
     <Dialog
       open={open}
@@ -256,8 +310,8 @@ function NewGroupChatDialog({ open, setOpen }: Props) {
                 >
                   Back
                 </Button>
-                <Button type="submit" className="rounded-xl">
-                  Create
+                <Button type="submit" className="rounded-xl" disabled={loading}>
+                  {loading ? <Loader2 className="animate-spin" /> : "Create"}
                 </Button>
               </DialogFooter>
             </form>

@@ -18,12 +18,8 @@ import { usePathname } from "next/navigation";
 
 function Messages({ children }: { children: ReactNode }) {
   const dispatch = useAppDispatch();
-  const { user, skeletonLoading: userLoading } = useAppSelector(
-    (state) => state.user
-  );
   const { chats, skeletonLoading } = useAppSelector((state) => state.chat);
   const location = usePathname();
-  const [newChatDialog, setNewChatDialog] = useState(false);
 
   useEffect(() => {
     dispatch(getChats()).then((response) => {
@@ -37,20 +33,6 @@ function Messages({ children }: { children: ReactNode }) {
     });
   }, [dispatch]);
 
-  useEffect(() => {
-    if (newChatDialog && !userLoading) {
-      dispatch(getFollowings({ userId: user._id })).then((response) => {
-        if (!response.payload?.success) {
-          return toast({
-            title: "Error",
-            description: "Something went wrong, while fetching followers",
-            variant: "destructive",
-          });
-        }
-      });
-    }
-  }, [dispatch, newChatDialog, user._id, userLoading]);
-
   return (
     <div className="grid h-[100dvh] sm:min-h-[42rem] max-sm:max-h-[100dvh] xl:col-span-8 pl-8 md:pl-4 max-sm:pl-0 sm:col-span-9 col-span-10 sm:grid-cols-10">
       <div
@@ -62,7 +44,7 @@ function Messages({ children }: { children: ReactNode }) {
           <h1 className="text-2xl tracking-tight font-bold text-left p-2.5">
             Conversations
           </h1>
-          <NewGroupChatDialog open={newChatDialog} setOpen={setNewChatDialog} />
+          <NewGroupChatDialog />
         </div>
         <ScrollArea className="py-3 w-full h-full p-2.5 max-sm:hidden">
           {skeletonLoading ? (

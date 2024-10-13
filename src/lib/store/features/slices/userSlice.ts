@@ -13,6 +13,7 @@ const initialState: UserSliceI = {
     followersCount: 0,
     postsCount: 0,
     isMailVerified: false,
+    savedPosts: [],
     bio: "",
     blocked: [],
   },
@@ -673,8 +674,11 @@ export const userSlice = createSlice({
       .addCase(savePost.pending, (state) => {
         state.loading = true;
       })
-      .addCase(savePost.fulfilled, (state) => {
+      .addCase(savePost.fulfilled, (state, action) => {
         state.loading = false;
+        if (action.payload?.success) {
+          state.user.savedPosts.push(action.meta.arg);
+        }
       })
       .addCase(savePost.rejected, (state) => {
         state.loading = false;
@@ -686,6 +690,11 @@ export const userSlice = createSlice({
       })
       .addCase(unsavePost.fulfilled, (state, action) => {
         state.loading = false;
+        if (action.payload?.success) {
+          state.user.savedPosts = state.user.savedPosts.filter(
+            (post) => post !== action.meta.arg
+          );
+        }
       })
       .addCase(unsavePost.rejected, (state) => {
         state.loading = false;

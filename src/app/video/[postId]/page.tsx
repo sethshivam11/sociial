@@ -1,7 +1,6 @@
 "use client";
 import Comment from "@/components/Comment";
 import PostCaption from "@/components/PostCaption";
-import SavePost from "@/components/SavePost";
 import Share from "@/components/Share";
 import VideoLoading from "@/components/skeletons/VideoLoading";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -14,8 +13,10 @@ import {
   likePost,
   unlikePost,
 } from "@/lib/store/features/slices/postSlice";
+import { savePost, unsavePost } from "@/lib/store/features/slices/userSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import {
+  Bookmark,
   ChevronLeft,
   Heart,
   Pause,
@@ -59,7 +60,6 @@ function Page({ params }: { params: { postId: string } }) {
       }
     });
   }
-
   function handleUnlike(postId: string) {
     dispatch(
       unlikePost({
@@ -76,7 +76,32 @@ function Page({ params }: { params: { postId: string } }) {
       }
     });
   }
-
+  function handleSave(postId: string) {
+    dispatch(savePost(postId)).then((response) => {
+      if (response.payload?.success) {
+        toast({ title: "Post saved" });
+      } else if (!response.payload?.success) {
+        toast({
+          title: "Failed to save post",
+          description: response.payload?.message || "Something went wrong",
+          variant: "destructive",
+        });
+      }
+    });
+  }
+  function handleUnsave(postId: string) {
+    dispatch(unsavePost(postId)).then((response) => {
+      if (response.payload?.success) {
+        toast({ title: "Post unsaved" });
+      } else if (!response.payload?.success) {
+        toast({
+          title: "Failed to unsave post",
+          description: response.payload?.message || "Something went wrong",
+          variant: "destructive",
+        });
+      }
+    });
+  }
   const handleKeys = useCallback(
     (e: KeyboardEvent) => {
       switch (e.code) {
@@ -238,7 +263,25 @@ function Page({ params }: { params: { postId: string } }) {
                   commentsCount={post.commentsCount}
                   isVideo={true}
                 />
-                <SavePost post={post} isVideo />
+                <button
+                  onClick={() => {
+                    if (user.savedPosts.includes(post._id)) {
+                      handleUnsave(post._id);
+                    } else {
+                      handleSave(post._id);
+                    }
+                  }}
+                >
+                  <Bookmark
+                    size="30"
+                    fill={
+                      user.savedPosts.includes(post._id)
+                        ? "currentColor"
+                        : "none"
+                    }
+                    className="mb-1"
+                  />
+                </button>
                 <Share _id={post._id} isVideo={true} />
               </div>
               <div className="flex flex-col items-center justify-start h-fit bg-gradient-to-b from-transparent via-transparent/50 to-transparent/60">
@@ -327,7 +370,23 @@ function Page({ params }: { params: { postId: string } }) {
               commentsCount={post.commentsCount}
               isVideo={true}
             />
-            <SavePost post={post} isVideo />
+            <button
+              onClick={() => {
+                if (user.savedPosts.includes(post._id)) {
+                  handleUnsave(post._id);
+                } else {
+                  handleSave(post._id);
+                }
+              }}
+            >
+              <Bookmark
+                size="30"
+                fill={
+                  user.savedPosts.includes(post._id) ? "currentColor" : "none"
+                }
+                className="mb-1"
+              />
+            </button>
             <Share _id={post._id} isVideo={true} />
           </div>
         </section>

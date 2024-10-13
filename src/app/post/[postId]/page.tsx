@@ -13,7 +13,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { getTimeDifference, nameFallback } from "@/lib/helpers";
-import { Heart, History } from "lucide-react";
+import { Bookmark, Heart, History } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
@@ -23,10 +23,10 @@ import {
   likePost,
   unlikePost,
 } from "@/lib/store/features/slices/postSlice";
-import SavePost from "@/components/SavePost";
 import { toast } from "@/components/ui/use-toast";
 import LikeDialog from "@/components/LikeDialog";
 import { notFound } from "next/navigation";
+import { savePost, unsavePost } from "@/lib/store/features/slices/userSlice";
 
 function Page({ params }: { params: { postId: string } }) {
   const dispatch = useAppDispatch();
@@ -52,7 +52,6 @@ function Page({ params }: { params: { postId: string } }) {
       }
     });
   }
-
   function handleUnlike(postId: string) {
     dispatch(
       unlikePost({
@@ -65,6 +64,32 @@ function Page({ params }: { params: { postId: string } }) {
         toast({
           title: "Cannot unlike post",
           description: "Please try again later.",
+        });
+      }
+    });
+  }
+  function handleSave(postId: string) {
+    dispatch(savePost(postId)).then((response) => {
+      if (response.payload?.success) {
+        toast({ title: "Post saved" });
+      } else if (!response.payload?.success) {
+        toast({
+          title: "Failed to save post",
+          description: response.payload?.message || "Something went wrong",
+          variant: "destructive",
+        });
+      }
+    });
+  }
+  function handleUnsave(postId: string) {
+    dispatch(unsavePost(postId)).then((response) => {
+      if (response.payload?.success) {
+        toast({ title: "Post unsaved" });
+      } else if (!response.payload?.success) {
+        toast({
+          title: "Failed to unsave post",
+          description: response.payload?.message || "Something went wrong",
+          variant: "destructive",
         });
       }
     });
@@ -196,7 +221,22 @@ function Page({ params }: { params: { postId: string } }) {
                 />
                 <Share _id={post._id} />
               </div>
-              <SavePost post={post} />
+              <button
+                onClick={() => {
+                  if (user.savedPosts.includes(post._id)) {
+                    handleUnsave(post._id);
+                  } else {
+                    handleSave(post._id);
+                  }
+                }}
+              >
+                <Bookmark
+                  size="30"
+                  fill={
+                    user.savedPosts.includes(post._id) ? "currentColor" : "none"
+                  }
+                />
+              </button>
             </div>
             <p className="text-sm text-stone-500 mt-1 select-none">
               <LikeDialog likesCount={post.likesCount} postId={post._id} />

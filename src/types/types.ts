@@ -50,6 +50,7 @@ export interface ChatI {
   users: BasicUserI[];
   groupName: string;
   groupIcon: string;
+  description?: string;
   isGroupChat: boolean;
   lastMessage: null | {
     _id: string;
@@ -140,4 +141,3 @@ export interface ReactI {
   user: BasicUserI;
   content: string;
 }
-

@@ -73,8 +73,6 @@ function Page({ params }: { params: { chatId: string } }) {
 
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<ScrollableFeed>(null);
-  const feedRef = useRef<HTMLDivElement>(null);
-  const oldMessageCount = useRef<number>(messages.length);
   const firstMessageRef = useRef<HTMLDivElement>(null);
 
   const formSchema = z.object({
@@ -258,7 +256,7 @@ function Page({ params }: { params: { chatId: string } }) {
           const url = content.slice(urlIdx).split(" ")[0];
           return (
             <>
-              {content.slice(0, urlIdx)}&nbsp;
+              {content.slice(0, urlIdx)}
               <Link
                 href={url}
                 target="_blank"
@@ -304,10 +302,6 @@ function Page({ params }: { params: { chatId: string } }) {
       window.removeEventListener("keydown", handleTyping);
     };
   }, [dispatch, chatId, setCurrentChat]);
-
-  useEffect(() => {
-    console.log(firstMessageRef.current);
-  }, [messages.length]);
 
   return (
     <div
@@ -392,162 +386,161 @@ function Page({ params }: { params: { chatId: string } }) {
       )}
       <ScrollableFeed
         ref={containerRef}
-        className="w-full"
+        className="w-full flex flex-col gap-1 p-2"
         onScroll={(isAtBottom) => setDebouncedBottom(!isAtBottom)}
       >
-        <div className="mr-0 p-2" ref={feedRef}>
-          <div className="flex items-center justify-center w-full">
-            {loadingMore && <Loader2 className="animate-spin" />}
-            {!loadingMore && maxMessages !== messages.length && (
-              <Button
-                variant="outline"
-                size="icon"
-                className="rounded-full mx-auto"
-                onClick={() => {
-                  setLoadingMore(true);
-                  dispatch(getMessages({ chatId, page: page + 1 })).finally(
-                    () => setLoadingMore(false)
-                  );
-                }}
-              >
-                <Plus />
-              </Button>
-            )}
-            {maxMessages === messages.length && (
-              <div className="flex flex-col items-center justify-center w-full py-2 gap-2 mb-8">
-                <Avatar className="w-28 h-28 select-none pointer-events-none">
-                  <AvatarImage
-                    src={chat.groupIcon || chat.users[0]?.avatar}
-                    alt=""
-                  />
-                  <AvatarFallback>
-                    {nameFallback(chat.groupName || chat.users[0]?.fullName)}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="grid place-items-center">
-                  <h1 className="text-2xl font-bold tracking-tight flex items-center justify-start">
-                    {chat.groupName || chat.users[0]?.fullName}
-                  </h1>
-                  <p className="text-sm text-stone-500">
-                    {chat.isGroupChat
-                      ? `Created on ${new Date(
-                          chat.createdAt
-                        ).toLocaleDateString("en-IN")}`
-                      : `@${chat.users[0]?.username}`}
-                  </p>
-                </div>
-                {!chat.isGroupChat && (
-                  <Link href={`/${chat.users[0]?.username}`}>
-                    <Button variant="outline" className="my-2">
-                      View profile
-                    </Button>
-                  </Link>
-                )}
+        <div className="flex items-center justify-center w-full">
+          {loadingMore && <Loader2 className="animate-spin" />}
+          {!loadingMore && maxMessages !== messages.length && (
+            <Button
+              variant="outline"
+              size="icon"
+              className="rounded-full mx-auto"
+              onClick={() => {
+                setLoadingMore(true);
+                dispatch(getMessages({ chatId, page: page + 1 })).finally(() =>
+                  setLoadingMore(false)
+                );
+              }}
+            >
+              <Plus />
+            </Button>
+          )}
+          {maxMessages === messages.length && (
+            <div className="flex flex-col items-center justify-center w-full py-2 gap-2 mb-8">
+              <Avatar className="w-28 h-28 select-none pointer-events-none">
+                <AvatarImage
+                  src={chat.groupIcon || chat.users[0]?.avatar}
+                  alt=""
+                />
+                <AvatarFallback>
+                  {nameFallback(chat.groupName || chat.users[0]?.fullName)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="grid place-items-center">
+                <h1 className="text-2xl font-bold tracking-tight flex items-center justify-start">
+                  {chat.groupName || chat.users[0]?.fullName}
+                </h1>
+                <p className="text-sm text-stone-500">
+                  {chat.isGroupChat
+                    ? `Created on ${new Date(chat.createdAt).toLocaleDateString(
+                        "en-IN"
+                      )}`
+                    : `@${chat.users[0]?.username}`}
+                </p>
               </div>
-            )}
-          </div>
-          {skeletonLoading ? (
-            <MessagesLoading />
-          ) : (
-            messages.map((message, index) => (
-              <div
-                key={index}
-                className={`group flex items-center justify-start w-full ${
-                  message.sender?.username !== user.username
-                    ? "flex-row"
-                    : "flex-row-reverse ml-auto"
-                }`}
-                ref={index === 0 ? firstMessageRef : undefined}
-              >
-                {message.sender?.username !== user.username &&
-                  chat?.isGroupChat && (
-                    <div className="flex h-full items-end pb-2">
-                      <Avatar className="w-5 h-5">
-                        <AvatarImage src={message.sender?.avatar} />
-                        <AvatarFallback>
-                          {nameFallback(message.sender?.fullName)}
-                        </AvatarFallback>
-                      </Avatar>
-                    </div>
-                  )}
-                <div
-                  className={`flex flex-col gap-0 overflow-hidden ${
-                    message.sender?.username !== user.username
-                      ? "items-start"
-                      : "items-end"
-                  }`}
-                >
-                  <span
-                    className={`py-1 rounded-xl -mb-1 px-3 opacity-70 truncate max-w-full ${
-                      message.sender?.username !== user.username
-                        ? `${theme.color} text-${theme.text}`
-                        : "bg-stone-300 dark:bg-stone-800"
-                    } ${!message?.reply?.content?.length ? "hidden" : ""}`}
-                  >
-                    {message?.reply?.content}
-                  </span>
-                  <div
-                    className={`py-2 px-4 rounded-2xl w-fit relative ${
-                      message.sender?.username !== user.username
-                        ? `${theme.color} text-${theme.text} max-w-3/4`
-                        : "bg-stone-300 dark:bg-stone-800 max-w-3/4"
-                    } ${
-                      messages[index - 1]?.sender?.username ===
-                      message.sender?.username
-                        ? "mb-1"
-                        : "mb-3"
-                    }
-                  ${message?.reacts ? "mb-4" : "mb-1"}`}
-                  >
-                    {giveAssets(message.content, message.kind || "message")}
-                    {message?.reacts?.length > 0 && (
-                      <MessageReacts
-                        messageId={message._id}
-                        reacts={message?.reacts}
-                        type={
-                          message.sender?.username !== user.username
-                            ? "reply"
-                            : "sent"
-                        }
-                      />
-                    )}
-                  </div>
-                </div>
-                <div
-                  className={`flex group-hover:visible invisible w-fit mb-2 mx-0.5 gap-0 ${
-                    message.sender?.username !== user.username
-                      ? "flex-row"
-                      : "flex-row-reverse"
-                  }`}
-                >
-                  <MessageOptions
-                    messageId={message._id}
-                    username={chat.users[0]?.username}
-                    setReply={(reply) => {
-                      const filteredReply = checkForAssets(
-                        reply.content,
-                        reply.kind
-                      );
-                      form.setValue("reply", {
-                        username: reply.username,
-                        content: filteredReply,
-                      });
-                      inputRef.current?.focus();
-                    }}
-                    createdAt={message.createdAt}
-                    message={message.content}
-                    type={
-                      message.sender?.username !== user.username
-                        ? "reply"
-                        : "sent"
-                    }
-                    kind={message.kind || "message"}
-                  />
-                </div>
-              </div>
-            ))
+              {!chat.isGroupChat && (
+                <Link href={`/${chat.users[0]?.username}`}>
+                  <Button variant="outline" className="my-2">
+                    View profile
+                  </Button>
+                </Link>
+              )}
+            </div>
           )}
         </div>
+        {skeletonLoading ? (
+          <MessagesLoading />
+        ) : (
+          messages.map((message, index) => (
+            <div
+              key={index}
+              className={`group flex items-center justify-start w-full ${
+                message.sender?.username !== user.username
+                  ? "flex-row"
+                  : "flex-row-reverse ml-auto"
+              }`}
+              ref={index === 0 ? firstMessageRef : undefined}
+            >
+              {message.sender?.username !== user.username &&
+                chat?.isGroupChat && (
+                  <div className="flex h-full items-end">
+                    <Avatar className="w-5 h-5">
+                      <AvatarImage src={message.sender?.avatar} />
+                      <AvatarFallback>
+                        {nameFallback(message.sender?.fullName)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
+                )}
+              <div
+                className={`flex flex-col gap-0 overflow-hidden ${
+                  message.sender?.username !== user.username
+                    ? "items-start"
+                    : "items-end"
+                }`}
+              >
+                <span
+                  className={`py-1 rounded-xl -mb-1 px-3 opacity-70 truncate max-w-full ${
+                    message.sender?.username !== user.username
+                      ? `${theme.color} text-${theme.text}`
+                      : "bg-stone-300 dark:bg-stone-800"
+                  } ${!message?.reply?.content?.length ? "hidden" : ""}`}
+                >
+                  {message?.reply?.content}
+                </span>
+                <div
+                  className={`py-2 px-4 rounded-2xl w-fit relative ${
+                    message.sender?.username !== user.username
+                      ? `${theme.color} text-${theme.text} max-w-3/4`
+                      : "bg-stone-300 dark:bg-stone-800 max-w-3/4"
+                  } ${
+                    messages[index - 1]?.sender?.username ===
+                    message.sender?.username
+                      ? "mb-1"
+                      : "mb-3"
+                  }
+                  ${message?.reacts ? "mb-4" : "mb-1"}`}
+                >
+                  {giveAssets(message.content, message.kind || "message")}
+                  {message?.reacts?.length > 0 && (
+                    <MessageReacts
+                      messageId={message._id}
+                      reacts={message?.reacts}
+                      type={
+                        message.sender?.username !== user.username
+                          ? "reply"
+                          : "sent"
+                      }
+                    />
+                  )}
+                </div>
+              </div>
+              <div
+                className={`flex group-hover:visible invisible w-fit mb-2 mx-0.5 gap-0 ${
+                  message.sender?.username !== user.username
+                    ? "flex-row"
+                    : "flex-row-reverse"
+                }`}
+              >
+                <MessageOptions
+                  isGroupChat={chat.isGroupChat}
+                  messageId={message._id}
+                  username={message.sender?.username}
+                  setReply={(reply) => {
+                    const filteredReply = checkForAssets(
+                      reply.content,
+                      reply.kind
+                    );
+                    form.setValue("reply", {
+                      username: reply.username,
+                      content: filteredReply,
+                    });
+                    inputRef.current?.focus();
+                  }}
+                  createdAt={message.createdAt}
+                  message={message.content}
+                  type={
+                    message.sender?.username !== user.username
+                      ? "reply"
+                      : "sent"
+                  }
+                  kind={message.kind || "message"}
+                />
+              </div>
+            </div>
+          ))
+        )}
       </ScrollableFeed>
       {!skeletonLoading && (
         <div className="bg-white dark:bg-black bottom-0 right-0 w-full px-2.5 flex items-center justify-center z-20">

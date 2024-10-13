@@ -28,6 +28,7 @@ interface Props {
   type: string;
   kind: string;
   createdAt: string;
+  isGroupChat: boolean;
 }
 
 function MessageOptions({
@@ -37,6 +38,7 @@ function MessageOptions({
   username,
   kind,
   createdAt,
+  isGroupChat,
   setReply,
 }: Props) {
   const dispatch = useAppDispatch();
@@ -104,10 +106,14 @@ function MessageOptions({
             <MoreHorizontal size="15" />
           </MenubarTrigger>
           <MenubarContent className="rounded-xl">
-            <div className="text-stone-500 text-sm px-2 py-1">
-              {new Date(createdAt).toLocaleString("en-IN")}
-            </div>
-            <hr className="w-full text-stone-500" />
+            {isGroupChat && type === "reply" && (
+              <>
+                <div className="text-stone-500 text-sm px-2 py-1">
+                  {username}
+                </div>
+                <hr className="w-full text-stone-500" />
+              </>
+            )}
             <MenubarItem
               className=" rounded-lg py-2.5"
               onClick={() =>
@@ -136,6 +142,10 @@ function MessageOptions({
                 Unsend
               </MenubarItem>
             )}
+            <hr className="w-full text-stone-500" />
+            <div className="text-stone-500 text-sm px-2 py-1">
+              {new Date(createdAt).toLocaleString("en-IN")}
+            </div>
           </MenubarContent>
         </MenubarMenu>
       </Menubar>

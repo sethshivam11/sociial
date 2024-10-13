@@ -5,9 +5,11 @@ import { Label } from "@/components/ui/label";
 import {
   Bell,
   Check,
+  Loader2,
   MoreHorizontal,
   MoreVertical,
   Palette,
+  SquarePen,
   Trash2,
   UserPlus,
   Users,
@@ -69,12 +71,16 @@ interface Theme {
 function Info({ params }: { params: { chatId: string } }) {
   const dispatch = useAppDispatch();
   const router = useRouter();
+
   const { chatId } = params;
   const { skeletonLoading, followers } = useAppSelector(
     (state) => state.follow
   );
-  const { chat, chats } = useAppSelector((state) => state.chat);
-  const { user: currentUser } = useAppSelector((state) => state.user);
+  const { chat, chats, loading } = useAppSelector((state) => state.chat);
+  const { user: currentUser, loading: userLoading } = useAppSelector(
+    (state) => state.user
+  );
+  
   const [participants, setParticipants] = useState<typeof followers>([]);
   const [reportDialog, setReportDialog] = useState(false);
   const [currentTheme, setCurrentTheme] = useState<Theme>(themes[0]);
@@ -213,6 +219,36 @@ function Info({ params }: { params: { chatId: string } }) {
         </Link>
       </div>
       <hr className="bg-stone-500 w-full" />
+      <div className="flex flex-col items-center justify-center w-full py-2 gap-2 mb-8">
+        <Avatar className="w-28 h-28 select-none pointer-events-none">
+          <AvatarImage src={chat.groupIcon || chat.users[0]?.avatar} alt="" />
+          <AvatarFallback>
+            {nameFallback(chat.groupName || chat.users[0]?.fullName)}
+          </AvatarFallback>
+        </Avatar>
+        <div className="grid place-items-center">
+          <h1 className="text-2xl font-bold tracking-tight flex items-center justify-start">
+            {chat.groupName || chat.users[0]?.fullName}
+          </h1>
+          <p className="text-stone-800 dark:text-stone-200 font-light">
+            {chat.description}
+          </p>
+          <p className="text-sm text-stone-500">
+            {chat.isGroupChat
+              ? `Created on ${new Date(chat.createdAt).toLocaleDateString(
+                  "en-IN"
+                )}`
+              : `@${chat.users[0]?.username}`}
+          </p>
+        </div>
+        {!chat.isGroupChat && (
+          <Link href={`/${chat.users[0]?.username}`}>
+            <Button variant="outline" className="my-2">
+              View profile
+            </Button>
+          </Link>
+        )}
+      </div>
       {chat.isGroupChat && <h3 className="mx-1">Members</h3>}
       <ScrollArea className="max-h-full">
         <div className="flex items-center justify-start gap-2 w-full p-3 hover:bg-stone-100 hover:dark:bg-stone-900 rounded-xl">
@@ -228,7 +264,7 @@ function Info({ params }: { params: { chatId: string } }) {
             </span>
             <span className="text-sm text-stone-500">You</span>
           </div>
-          {chat.admin.includes(currentUser._id) && <Badge>Group Admin</Badge>}
+          {chat.admin.includes(currentUser._id) && <Badge>Admin</Badge>}
         </div>
         {chat.users.map((user, index) => (
           <div
@@ -250,13 +286,22 @@ function Info({ params }: { params: { chatId: string } }) {
               </span>
               <span className="text-sm text-stone-500">@{user.username}</span>
             </Link>
+            {chat.admin.includes(user._id) && <Badge>Admin</Badge>}
             {chat.isGroupChat && chat.admin.includes(currentUser._id) && (
               <Menubar className="bg-transparent border-transparent xl:justify-start justify-center w-fit p-0">
                 <MenubarMenu>
                   <MenubarTrigger className="px-1.5 rounded-lg cursor-pointer">
                     <MoreHorizontal />
                   </MenubarTrigger>
-                  <MenubarContent className="rounded-xl">
+                  <MenubarContent className="rounded-xl" align="center">
+                    <Link href={`/${user.username}`}>
+                      <MenubarItem
+                        className=" rounded-lg py-2.5"
+                        onClick={() => handleRemoveAdmin(user._id)}
+                      >
+                        View Profile
+                      </MenubarItem>
+                    </Link>
                     {chat.admin.includes(user._id) ? (
                       <MenubarItem
                         className=" rounded-lg py-2.5"
@@ -361,6 +406,27 @@ function Info({ params }: { params: { chatId: string } }) {
           </Button>
         )}
       </div>
+      <AlertDialog open={leaveDialog}>
+        <AlertDialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
+          <AlertDialogTitle className="font-normal">
+            Leave this group?
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            You will no longer receive messages from this group.
+          </AlertDialogDescription>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setLeaveDialog(false)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleLeaveGroup}
+              className="bg-destructive hover:bg-destructive/80 text-white"
+            >
+              {loading ? <Loader2 className="animate-spin" /> : "Leave"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <AlertDialog open={blockDialog}>
         <AlertDialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
           <AlertDialogTitle className="font-normal">
@@ -375,9 +441,9 @@ function Info({ params }: { params: { chatId: string } }) {
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => handleBlockUser(chat.users[0]?._id)}
-              asChild
+              className="bg-destructive hover:bg-destructive/80 text-white"
             >
-              <Button variant="destructive">Block</Button>
+              {userLoading ? <Loader2 className="animate-spin" /> : "Block"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -394,26 +460,11 @@ function Info({ params }: { params: { chatId: string } }) {
             <AlertDialogCancel onClick={() => setLeaveDialog(false)}>
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction onClick={handleLeaveGroup} asChild>
-              <Button variant="destructive">Delete</Button>
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-      <AlertDialog open={leaveDialog}>
-        <AlertDialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
-          <AlertDialogTitle className="font-normal">
-            Leave this group?
-          </AlertDialogTitle>
-          <AlertDialogDescription>
-            You will no longer receive messages from this group.
-          </AlertDialogDescription>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setLeaveDialog(false)}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={handleLeaveGroup} asChild>
-              <Button variant="destructive">Leave</Button>
+            <AlertDialogAction
+              onClick={handleDeleteGroup}
+              className="bg-destructive hover:bg-destructive/80 text-white"
+            >
+              {loading ? <Loader2 className="animate-spin" /> : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -433,9 +484,9 @@ function Info({ params }: { params: { chatId: string } }) {
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => handleRemoveUser(removeDialog.userId)}
-              asChild
+              className="bg-destructive hover:bg-destructive/80 text-white"
             >
-              <Button variant="destructive">Remove</Button>
+              {loading ? <Loader2 className="animate-spin" /> : "Remove"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

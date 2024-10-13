@@ -1,7 +1,6 @@
 "use client";
 import Comment from "@/components/Comment";
 import PostCaption from "@/components/PostCaption";
-import SavePost from "@/components/SavePost";
 import Share from "@/components/Share";
 import VideoLoading from "@/components/skeletons/VideoLoading";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -14,8 +13,10 @@ import {
   unlikePost,
   videoFeed,
 } from "@/lib/store/features/slices/postSlice";
+import { savePost, unsavePost } from "@/lib/store/features/slices/userSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import {
+  Bookmark,
   ChevronLeft,
   Heart,
   Pause,
@@ -61,7 +62,6 @@ function Videos() {
       }
     });
   }
-
   function handleUnlike(postId: string) {
     dispatch(
       unlikePost({
@@ -74,6 +74,32 @@ function Videos() {
         toast({
           title: "Cannot unlike post",
           description: "Please try again later.",
+        });
+      }
+    });
+  }
+  function handleSave(postId: string) {
+    dispatch(savePost(postId)).then((response) => {
+      if (response.payload?.success) {
+        toast({ title: "Post saved" });
+      } else if (!response.payload?.success) {
+        toast({
+          title: "Failed to save post",
+          description: response.payload?.message || "Something went wrong",
+          variant: "destructive",
+        });
+      }
+    });
+  }
+  function handleUnsave(postId: string) {
+    dispatch(unsavePost(postId)).then((response) => {
+      if (response.payload?.success) {
+        toast({ title: "Post unsaved" });
+      } else if (!response.payload?.success) {
+        toast({
+          title: "Failed to unsave post",
+          description: response.payload?.message || "Something went wrong",
+          variant: "destructive",
         });
       }
     });
@@ -293,7 +319,25 @@ function Videos() {
                       commentsCount={post.commentsCount}
                       isVideo
                     />
-                    <SavePost post={post} isVideo />
+                    <button
+                      onClick={() => {
+                        if (user.savedPosts.includes(post._id)) {
+                          handleUnsave(post._id);
+                        } else {
+                          handleSave(post._id);
+                        }
+                      }}
+                    >
+                      <Bookmark
+                        size="30"
+                        fill={
+                          user.savedPosts.includes(post._id)
+                            ? "currentColor"
+                            : "none"
+                        }
+                        className="mb-1"
+                      />
+                    </button>
                     <Share _id={post._id} isVideo />
                   </div>
                   <div className="px-6">
@@ -383,7 +427,25 @@ function Videos() {
                   commentsCount={post.commentsCount}
                   isVideo
                 />
-                <SavePost post={post} isVideo />
+                <button
+                  onClick={() => {
+                    if (user.savedPosts.includes(post._id)) {
+                      handleUnsave(post._id);
+                    } else {
+                      handleSave(post._id);
+                    }
+                  }}
+                >
+                  <Bookmark
+                    size="30"
+                    fill={
+                      user.savedPosts.includes(post._id)
+                        ? "currentColor"
+                        : "none"
+                    }
+                    className="mb-1"
+                  />
+                </button>
                 <Share _id={post._id} isVideo />
               </div>
             </section>

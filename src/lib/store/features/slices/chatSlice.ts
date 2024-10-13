@@ -56,19 +56,22 @@ export const newGroupChat = createAsyncThunk(
   "chats/newGroupChat",
   async ({
     participants,
-    groupName,
-    groupImage,
+    name,
+    description,
+    image,
   }: {
     participants: string[];
-    groupName: string;
-    groupImage?: File;
+    name: string;
+    image?: File;
+    description?: string;
   }) => {
     const formData = new FormData();
-    formData.append("groupName", groupName);
-    if (groupImage) formData.append("groupImage", groupImage);
+    formData.append("groupName", name);
     participants.forEach((participant) => {
       formData.append("participants", participant);
     });
+    if (description) formData.append("groupDescription", description);
+    if (image) formData.append("groupImage", image);
     const parsed = await fetch("/api/v1/chats/newGroup", {
       method: "POST",
       body: formData,
@@ -162,6 +165,9 @@ export const makeAdmin = createAsyncThunk(
     const parsed = await fetch("/api/v1/chats/makeAdmin", {
       method: "PATCH",
       body: JSON.stringify({ userId, chatId }),
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
     return parsed.json();
   }
@@ -173,6 +179,9 @@ export const removeAdmin = createAsyncThunk(
     const parsed = await fetch("/api/v1/chats/removeAdmin", {
       method: "PATCH",
       body: JSON.stringify({ userId, chatId }),
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
     return parsed.json();
   }
@@ -254,6 +263,7 @@ const chatSlice = createSlice({
         state.loading = false;
         if (action.payload?.success) {
           state.chats = [action.payload.data, ...state.chats];
+          state.chat = action.payload.data;
         }
       })
       .addCase(newChat.rejected, (state) => {
@@ -268,6 +278,7 @@ const chatSlice = createSlice({
         state.loading = false;
         if (action.payload?.success) {
           state.chats = [action.payload.data, ...state.chats];
+          state.chat = action.payload.data;
         }
       })
       .addCase(newGroupChat.rejected, (state) => {
