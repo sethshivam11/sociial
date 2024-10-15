@@ -12,9 +12,7 @@ import {
   X,
   PlayIcon,
   Info,
-  Loader2,
   ArrowDown,
-  Plus,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -68,8 +66,9 @@ function Page({ params }: { params: { chatId: string } }) {
     chats,
     skeletonLoading: isChatLoading,
   } = useAppSelector((state) => state.chat);
-  const { messages, skeletonLoading, typing, maxMessages, page } =
-    useAppSelector((state) => state.message);
+  const { messages, skeletonLoading, typing } = useAppSelector(
+    (state) => state.message
+  );
 
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<ScrollableFeed>(null);
@@ -93,11 +92,9 @@ function Page({ params }: { params: { chatId: string } }) {
 
   const [theme, setTheme] = useState(themes[0]);
   const [isAtBottom, setIsAtBottom] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
 
   const chatId = params.chatId;
   const message = form.watch("message");
-
   const setDebouncedBottom = useDebounceCallback(setIsAtBottom, 200);
 
   function handleDownload(content: string) {
@@ -307,7 +304,7 @@ function Page({ params }: { params: { chatId: string } }) {
     <div
       className={`md:border-l-2 border-stone-200 dark:border-stone-800 md:flex flex flex-col items-start justify-between lg:col-span-7 md:col-span-6 col-span-10 overflow-x-hidden h-[100dvh] sm:min-h-[42rem] relative ${
         location !== "/messages" ? "" : "hidden"
-      } `}
+      }`}
     >
       {isAtBottom && (
         <Button
@@ -362,7 +359,7 @@ function Page({ params }: { params: { chatId: string } }) {
           <div className="flex items-center justify-center px-4 gap-0.5">
             {!chat.isGroupChat && (
               <>
-                <Link
+                {/* <Link
                   href={`/call?username=${chat.users[0]?.username}&video=false`}
                   target="_blank"
                   className="inline-block p-2"
@@ -375,7 +372,49 @@ function Page({ params }: { params: { chatId: string } }) {
                   className="inline-block p-2"
                 >
                   <Video />
-                </Link>
+                </Link> */}
+                <button
+                  className="inline-block p-2"
+                  onClick={() => {
+                    toast({
+                      title: "ABC is calling you",
+                      action: (
+                        <div className="flex gap-2 items-center justify-center">
+                          <Button size="icon">
+                            <Phone />
+                          </Button>
+                          <Button variant="destructive" size="icon">
+                            <Phone className="rotate-[135deg]" />
+                          </Button>
+                        </div>
+                      ),
+                      duration: 30000,
+                    });
+                  }}
+                >
+                  <Phone size="20" />
+                </button>
+                <button
+                  className="inline-block p-2"
+                  onClick={() => {
+                    toast({
+                      title: "ABC is calling you",
+                      action: (
+                        <div className="flex gap-2 items-center justify-center">
+                          <Button size="icon">
+                            <Phone />
+                          </Button>
+                          <Button variant="destructive" size="icon">
+                            <Phone className="rotate-[135deg]" />
+                          </Button>
+                        </div>
+                      ),
+                      duration: 30000,
+                    });
+                  }}
+                >
+                  <Video />
+                </button>
               </>
             )}
             <Link href={`/messages/${chatId}/info`} className="p-2">
@@ -389,54 +428,31 @@ function Page({ params }: { params: { chatId: string } }) {
         className="w-full flex flex-col gap-1 p-2"
         onScroll={(isAtBottom) => setDebouncedBottom(!isAtBottom)}
       >
-        <div className="flex items-center justify-center w-full">
-          {loadingMore && <Loader2 className="animate-spin" />}
-          {!loadingMore && maxMessages !== messages.length && (
-            <Button
-              variant="outline"
-              size="icon"
-              className="rounded-full mx-auto"
-              onClick={() => {
-                setLoadingMore(true);
-                dispatch(getMessages({ chatId, page: page + 1 })).finally(() =>
-                  setLoadingMore(false)
-                );
-              }}
-            >
-              <Plus />
-            </Button>
-          )}
-          {maxMessages === messages.length && (
-            <div className="flex flex-col items-center justify-center w-full py-2 gap-2 mb-8">
-              <Avatar className="w-28 h-28 select-none pointer-events-none">
-                <AvatarImage
-                  src={chat.groupIcon || chat.users[0]?.avatar}
-                  alt=""
-                />
-                <AvatarFallback>
-                  {nameFallback(chat.groupName || chat.users[0]?.fullName)}
-                </AvatarFallback>
-              </Avatar>
-              <div className="grid place-items-center">
-                <h1 className="text-2xl font-bold tracking-tight flex items-center justify-start">
-                  {chat.groupName || chat.users[0]?.fullName}
-                </h1>
-                <p className="text-sm text-stone-500">
-                  {chat.isGroupChat
-                    ? `Created on ${new Date(chat.createdAt).toLocaleDateString(
-                        "en-IN"
-                      )}`
-                    : `@${chat.users[0]?.username}`}
-                </p>
-              </div>
-              {!chat.isGroupChat && (
-                <Link href={`/${chat.users[0]?.username}`}>
-                  <Button variant="outline" className="my-2">
-                    View profile
-                  </Button>
-                </Link>
-              )}
-            </div>
+        <div className="flex flex-col items-center justify-center w-full py-2 gap-2 mb-8">
+          <Avatar className="w-28 h-28 select-none pointer-events-none">
+            <AvatarImage src={chat.groupIcon || chat.users[0]?.avatar} alt="" />
+            <AvatarFallback>
+              {nameFallback(chat.groupName || chat.users[0]?.fullName)}
+            </AvatarFallback>
+          </Avatar>
+          <div className="grid place-items-center">
+            <h1 className="text-2xl font-bold tracking-tight flex items-center justify-start">
+              {chat.groupName || chat.users[0]?.fullName}
+            </h1>
+            <p className="text-sm text-stone-500">
+              {chat.isGroupChat
+                ? `Created on ${new Date(chat.createdAt).toLocaleDateString(
+                    "en-IN"
+                  )}`
+                : `@${chat.users[0]?.username}`}
+            </p>
+          </div>
+          {!chat.isGroupChat && (
+            <Link href={`/${chat.users[0]?.username}`}>
+              <Button variant="outline" className="my-2">
+                View profile
+              </Button>
+            </Link>
           )}
         </div>
         {skeletonLoading ? (

@@ -30,14 +30,6 @@ export const getChats = createAsyncThunk("chats/getChats", async () => {
   return parsed.json();
 });
 
-export const getMoreChats = createAsyncThunk(
-  "chats/getMoreChats",
-  async (page: number) => {
-    const parsed = await fetch(`/api/v1/chats/get?page=${page}`);
-    return parsed.json();
-  }
-);
-
 export const newChat = createAsyncThunk(
   "chats/newChat",
   async (userId: string) => {
@@ -82,10 +74,19 @@ export const newGroupChat = createAsyncThunk(
 
 export const addParticipants = createAsyncThunk(
   "chats/addParticipants",
-  async (participants: string[]) => {
-    const parsed = await fetch("/api/v1/addParticipants", {
+  async ({
+    participants,
+    chatId,
+  }: {
+    participants: string[];
+    chatId: string;
+  }) => {
+    const parsed = await fetch("/api/v1/chats/addParticipants", {
       method: "PATCH",
-      body: JSON.stringify({ participants }),
+      body: JSON.stringify({ participants, chatId }),
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
     return parsed.json();
   }
@@ -100,29 +101,46 @@ export const removeParticipants = createAsyncThunk(
     chatId: string;
     participants: string[];
   }) => {
-    const parsed = await fetch("/api/v1/removeParticipants", {
+    const parsed = await fetch("/api/v1/chats/removeParticipants", {
       method: "PATCH",
       body: JSON.stringify({ participants, chatId }),
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
     return parsed.json();
   }
 );
 
-export const updateGroupChat = createAsyncThunk(
-  "chats/updateGroupChat",
+export const updateGroupDetails = createAsyncThunk(
+  "chats/updateGroupDetails",
   async ({
     chatId,
-    groupName,
-    groupImage,
+    name,
+    description,
+    image,
   }: {
     chatId: string;
-    groupName: string;
-    groupImage: File;
+    name?: string;
+    description?: string;
+    image?: File;
   }) => {
+    if (!name && !description && !image) {
+      return {
+        success: false,
+        message: "Atleast 1 field is required",
+        data: null,
+        status: 400,
+      };
+    }
+
     const formData = new FormData();
     formData.append("chatId", chatId);
-    formData.append("groupName", groupName);
-    formData.append("groupImage", groupImage);
+    if (name) formData.append("groupName", name);
+    if (image) formData.append("groupImage", image);
+    if (description || description === "")
+      formData.append("description", description);
+
     const parsed = await fetch("/api/v1/chats/updateGroup", {
       method: "PUT",
       body: formData,
@@ -242,20 +260,6 @@ const chatSlice = createSlice({
       });
 
     builder
-      .addCase(getMoreChats.pending, (state) => {
-        state.loadingMore = true;
-      })
-      .addCase(getMoreChats.fulfilled, (state, action) => {
-        state.loadingMore = false;
-        if (action.payload?.success) {
-          state.chats = [...state.chats, ...action.payload.data];
-        }
-      })
-      .addCase(getMoreChats.rejected, (state) => {
-        state.loadingMore = false;
-      });
-
-    builder
       .addCase(newChat.pending, (state) => {
         state.loading = true;
       })
@@ -292,7 +296,13 @@ const chatSlice = createSlice({
       .addCase(addParticipants.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload?.success) {
-          state.chat.users = action.payload.data.users;
+          state.chat.users = [...state.chat.users, ...action.payload.data];
+          state.chats.map((chat) => {
+            if (chat._id === action.meta.arg.chatId) {
+              chat.users = [...chat.users, ...action.payload.data];
+            }
+            return chat;
+          });
         }
       })
       .addCase(addParticipants.rejected, (state) => {
@@ -306,7 +316,22 @@ const chatSlice = createSlice({
       .addCase(removeParticipants.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload?.success) {
-          state.chat.users = action.payload.data.users;
+          state.chat.users = state.chat.users.filter(
+            (user) => !action.meta.arg.participants.includes(user._id)
+          );
+          state.chat.admin = state.chat.admin.filter(
+            (user) => !action.meta.arg.participants.includes(user)
+          );
+          state.chats.map((chat) => {
+            if (chat._id === action.meta.arg.chatId) {
+              chat.users = chat.users.filter(
+                (user) => !action.meta.arg.participants.includes(user._id)
+              );
+              chat.admin = chat.admin.filter(
+                (user) => !action.meta.arg.participants.includes(user)
+              );
+            }
+          });
         }
       })
       .addCase(removeParticipants.rejected, (state) => {
@@ -314,17 +339,26 @@ const chatSlice = createSlice({
       });
 
     builder
-      .addCase(updateGroupChat.pending, (state) => {
+      .addCase(updateGroupDetails.pending, (state) => {
         state.loading = true;
       })
-      .addCase(updateGroupChat.fulfilled, (state, action) => {
+      .addCase(updateGroupDetails.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload?.success) {
           state.chat.groupIcon = action.payload.data.groupIcon;
           state.chat.groupName = action.payload.data.groupName;
+          state.chat.description = action.payload.data.description;
+          state.chats.map((chat) => {
+            if (chat._id === action.meta.arg.chatId) {
+              chat.groupIcon = action.payload.data.groupIcon;
+              chat.groupName = action.payload.data.groupName;
+              chat.description = action.payload.data.description;
+            }
+            return chat;
+          });
         }
       })
-      .addCase(updateGroupChat.rejected, (state) => {
+      .addCase(updateGroupDetails.rejected, (state) => {
         state.loading = false;
       });
 
@@ -335,7 +369,15 @@ const chatSlice = createSlice({
       .addCase(removeGroupImage.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload?.success) {
-          state.chat.groupIcon = action.payload.data.groupIcon;
+          const defaultIcon =
+            "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1725736840/sociial/settings/feahtus4algwiixi0zmi.png";
+          state.chat.groupIcon = defaultIcon;
+          state.chats.map((chat) => {
+            if (chat._id === action.meta.arg) {
+              chat.groupIcon = defaultIcon;
+            }
+            return chat;
+          });
         }
       })
       .addCase(removeGroupImage.rejected, (state) => {
@@ -366,7 +408,7 @@ const chatSlice = createSlice({
         state.loading = false;
         if (action.payload?.success) {
           state.chats = state.chats.filter(
-            (chat) => chat._id !== action.payload.data
+            (chat) => chat._id !== action.meta.arg
           );
         }
       })
@@ -381,7 +423,13 @@ const chatSlice = createSlice({
       .addCase(makeAdmin.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload?.success) {
-          state.chat.admin = action.payload.data.admin;
+          state.chat.admin = [...state.chat.admin, action.meta.arg.userId];
+          state.chats.map((chat) => {
+            if (chat._id === action.meta.arg.chatId) {
+              chat.admin = [...chat.admin, action.meta.arg.userId];
+            }
+            return chat;
+          });
         }
       })
       .addCase(makeAdmin.rejected, (state) => {
@@ -395,7 +443,17 @@ const chatSlice = createSlice({
       .addCase(removeAdmin.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload?.success) {
-          state.chat.admin = action.payload.data.admin;
+          state.chat.admin = state.chat.admin.filter(
+            (user) => user !== action.meta.arg.userId
+          );
+          state.chats.map((chat) => {
+            if (chat._id === action.meta.arg.chatId) {
+              chat.admin = chat.admin.filter(
+                (user) => user !== action.meta.arg.userId
+              );
+            }
+            return chat;
+          });
         }
       })
       .addCase(removeAdmin.rejected, (state) => {

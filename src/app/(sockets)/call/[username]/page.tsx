@@ -34,30 +34,26 @@ function Page() {
     stopCamera();
     router.push(`/call/ended?username=${user.username}`);
   }
-
   function switchCamera() {
-    // if (!multipleCamAvailalble) return;
-    // stopCamera();
-    // console.log(activeCamera);
-    // if (activeCamera === "user") {
-    //   getUserMedia(true, "environment");
-    // } else {
-    //   getUserMedia(true, "user");
-    // }
-  }
+    if (!multipleCamAvailalble) return;
 
+    stopCamera();
+    console.log(activeCamera);
+    if (activeCamera === "user") {
+      getUserMedia(true, "environment");
+    } else {
+      getUserMedia(true, "user");
+    }
+  }
   function stopCamera() {
-    console.log(stream);
     if (stream) {
       stream.getTracks().forEach((track) => {
         track.stop();
       });
       setStream(null);
     }
-    // if (selfVideoRef.current) selfVideoRef.current.srcObject = null;
-    // if (peerVideoRef.current) peerVideoRef.current.srcObject = null;
+    if (selfVideoRef.current) selfVideoRef.current.srcObject = null;
   }
-
   function handleSelfVideoPause() {
     if (!isVideoCall) {
       setSelfVideoPaused(false);
@@ -73,7 +69,7 @@ function Page() {
       setSelfVideoPaused(true);
     }
   }
-
+  
   const getUserMedia = useCallback(
     async (
       video: boolean,
@@ -83,7 +79,6 @@ function Page() {
       const videoMode = video
         ? { facingMode: { exact: mode || "user" } }
         : false;
-      console.log(videoMode);
       await navigator.mediaDevices
         .getUserMedia({
           video: videoMode,
@@ -93,15 +88,16 @@ function Page() {
           setStream(stream);
           if (!selfVideoRef.current || !peerVideoRef.current) return;
           selfVideoRef.current.srcObject = stream;
-          peerVideoRef.current.srcObject = stream;
-          const capabilties = stream.getTracks()[0].getCapabilities();
-          if (capabilties.facingMode) {
+          // peerVideoRef.current.srcObject = stream;
+          const capabilties = stream
+            ?.getTracks()
+            .filter(({ kind }) => kind === "video")[0]
+            .getCapabilities();
+          if (capabilties?.facingMode) {
             setActiveCamera(capabilties.facingMode[0]);
           }
-          console.log(stream.getTracks()[0]);
         })
         .catch((err) => {
-          console.log(err);
           if (convertingToVideo) {
             console.log("converting to video");
             toast({
@@ -113,11 +109,18 @@ function Page() {
             setSelfVideoPaused(true);
           }
         });
-      navigator.mediaDevices.enumerateDevices().then((devices) => {
-        if (devices.filter(({ kind }) => kind === "videoinput").length > 1) {
-          setMultipleCamAvailable(true);
-        }
-      });
+      navigator.mediaDevices
+        .enumerateDevices()
+        .then((devices) => {
+          if (devices.filter(({ kind }) => kind === "videoinput").length > 1) {
+            setMultipleCamAvailable(true);
+          }
+        })
+        .catch((err) => console.log(err));
+
+      return () => {
+        stopCamera();
+      };
     },
     []
   );

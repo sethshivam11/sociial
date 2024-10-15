@@ -1,9 +1,9 @@
 import React from "react";
 import { Skeleton } from "../ui/skeleton";
 
-function FollowersLoading({ length = 5 }) {
+function FollowersLoading({ length = 7 }) {
   return (
-    <div className="space-y-3 py-1">
+    <div className="space-y-3 py-1 w-full h-96 p-4">
       {Array.from({ length }).map((_, index) => (
         <div
           className="flex items-center justify-between w-full space-x-2"

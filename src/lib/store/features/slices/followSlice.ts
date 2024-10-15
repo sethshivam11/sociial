@@ -139,7 +139,10 @@ const followSlice = createSlice({
       })
       .addCase(getFollowers.fulfilled, (state, action) => {
         state.skeletonLoading = false;
-        if (action.payload?.success) {
+        if (
+          action.payload?.success ||
+          action.payload?.message === "Followers not found"
+        ) {
           state.followers = action.payload.data.followers.map(
             (user: { loading: boolean }) => ({
               ...user,
@@ -158,7 +161,10 @@ const followSlice = createSlice({
       })
       .addCase(getFollowings.fulfilled, (state, action) => {
         state.skeletonLoading = false;
-        if (action.payload?.success) {
+        if (
+          action.payload?.success ||
+          action.payload?.message === "Followings not found"
+        ) {
           state.followings = action.payload.data.followings.map(
             (user: { loading: boolean }) => ({
               ...user,

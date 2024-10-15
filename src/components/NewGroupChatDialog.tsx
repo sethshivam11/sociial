@@ -34,6 +34,7 @@ import { getFollowings } from "@/lib/store/features/slices/followSlice";
 import { toast } from "./ui/use-toast";
 import { newGroupChat } from "@/lib/store/features/slices/chatSlice";
 import { useRouter } from "next/navigation";
+import { groupDescriptionSchema, groupNameSchema } from "@/schemas/chatSchema";
 
 function NewGroupChatDialog() {
   const router = useRouter();
@@ -55,18 +56,11 @@ function NewGroupChatDialog() {
     (state) => state.follow.skeletonLoading
   );
   const [participants, setParticipants] = useState<string[]>([]);
-  const [followers, setFollowers] = useState<typeof followings>([]);
+  const [friends, setFriends] = useState<typeof followings>([]);
 
   const formSchema = z.object({
-    name: z
-      .string()
-      .min(3, {
-        message: "Group Name must be at least 3 characters long",
-      })
-      .max(50, {
-        message: "Group Name must be at most 50 characters long",
-      }),
-    description: z.string(),
+    name: groupNameSchema,
+    description: groupDescriptionSchema,
   });
   const form = useForm({
     defaultValues: {
@@ -108,13 +102,13 @@ function NewGroupChatDialog() {
 
   useEffect(() => {
     if (searchFollowers) {
-      setFollowers(
+      setFriends(
         followings.filter((user) =>
           user.fullName.toLowerCase().includes(searchFollowers.toLowerCase())
         )
       );
     } else {
-      setFollowers(followings);
+      setFriends(followings);
     }
   }, [searchFollowers, followings]);
 
@@ -175,7 +169,7 @@ function NewGroupChatDialog() {
               {followersLoading ? (
                 <FollowersLoadingSkeleton />
               ) : (
-                followers.map((follower, index) => {
+                friends.map((friend, index) => {
                   return (
                     <div
                       className="flex items-center justify-between w-full px-2 mb-3 gap-3 rounded-lg"
@@ -187,18 +181,16 @@ function NewGroupChatDialog() {
                       >
                         <div className="w-8 h-8">
                           <Avatar className="w-full h-full rounded-full pointer-events-none select-none">
-                            <AvatarImage src={follower.avatar} />
+                            <AvatarImage src={friend.avatar} />
                             <AvatarFallback>
-                              {nameFallback(follower.fullName)}
+                              {nameFallback(friend.fullName)}
                             </AvatarFallback>
                           </Avatar>
                         </div>
                         <div>
-                          <p className="text-lg leading-5">
-                            {follower.fullName}
-                          </p>
+                          <p className="text-lg leading-5">{friend.fullName}</p>
                           <p className="text-sm text-gray-500">
-                            @{follower.username}
+                            @{friend.username}
                           </p>
                         </div>
                       </Label>
@@ -207,14 +199,14 @@ function NewGroupChatDialog() {
                         className="rounded-full w-5 h-5 data-[state=checked]:bg-blue-500 data-[state=checked]:text-white border-2 data-[state=checked]:border-0"
                         onCheckedChange={(checked) => {
                           checked
-                            ? setParticipants([...participants, follower._id])
+                            ? setParticipants([...participants, friend._id])
                             : setParticipants((prevParticipants) =>
                                 prevParticipants.filter(
-                                  (user) => user !== follower._id
+                                  (user) => user !== friend._id
                                 )
                               );
                         }}
-                        defaultChecked={participants.includes(follower._id)}
+                        defaultChecked={participants.includes(friend._id)}
                       />
                     </div>
                   );

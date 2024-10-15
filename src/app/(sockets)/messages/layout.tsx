@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, ReactNode } from "react";
+import { useEffect, ReactNode } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { checkForAssets, nameFallback } from "@/lib/helpers";
 import { History } from "lucide-react";
@@ -46,7 +46,7 @@ function Messages({ children }: { children: ReactNode }) {
           </h1>
           <NewGroupChatDialog />
         </div>
-        <ScrollArea className="py-3 w-full h-full p-2.5 max-sm:hidden">
+        <ScrollArea className="py-3 w-full h-full p-2.5 max-sm:hidden min-h-96">
           {skeletonLoading ? (
             <ChatsLoadingSkeleton />
           ) : chats.length > 0 ? (
