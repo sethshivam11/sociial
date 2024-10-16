@@ -2,7 +2,7 @@
 import { useEffect, ReactNode } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { checkForAssets, nameFallback } from "@/lib/helpers";
-import { History } from "lucide-react";
+import { History, PhoneCall } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import ChatsLoadingSkeleton from "@/components/skeletons/ChatsLoading";
@@ -44,7 +44,12 @@ function Messages({ children }: { children: ReactNode }) {
           <h1 className="text-2xl tracking-tight font-bold text-left p-2.5">
             Conversations
           </h1>
-          <NewGroupChatDialog />
+          <div className="flex items-center justify-center gap-1">
+            <Link href="call-logs" className="p-2" title="Call Logs">
+              <PhoneCall />
+            </Link>
+            <NewGroupChatDialog />
+          </div>
         </div>
         <ScrollArea className="py-3 w-full h-full p-2.5 max-sm:hidden min-h-96">
           {skeletonLoading ? (
@@ -98,7 +103,7 @@ function Messages({ children }: { children: ReactNode }) {
               </Link>
             ))
           ) : (
-            <div className="w-full flex flex-col items-center justify-center gap-4 text-center h-[100dvh]">
+            <div className="w-full flex flex-col items-center justify-center gap-4 text-center h-[80dvh]">
               <History size="60" />
               <div>
                 <h2 className="text-2xl tracking-tight font-bold">

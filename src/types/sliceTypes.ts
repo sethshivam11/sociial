@@ -1,5 +1,6 @@
 import {
   BasicUserI,
+  CallI,
   ChatI,
   CommentI,
   EmailNotificationI,
@@ -149,4 +150,11 @@ export interface MessageSliceI {
 export interface LikeSliceI {
   loading: boolean;
   likes: BasicUserI[];
+}
+
+export interface CallSliceI {
+  skeletonLoading: boolean;
+  loading: boolean;
+  calls: CallI[];
+  call: CallI;
 }

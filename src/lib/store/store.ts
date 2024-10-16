@@ -11,11 +11,13 @@ import messageSlice from "./features/slices/messageSlice";
 import reportSlice from "./features/slices/reportSlice";
 import storySlice from "./features/slices/storySlice";
 import notificationPreferenceSlice from "./features/slices/notificationPreferenceSlice";
+import callSlice from "./features/slices/callSlice";
 
 export const store = configureStore({
   reducer: {
     user: userSlice,
     post: postSlice,
+    call: callSlice,
     chat: chatSlice,
     story: storySlice,
     follow: followSlice,

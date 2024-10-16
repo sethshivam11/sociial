@@ -51,6 +51,13 @@ import {
 import { toast } from "./ui/use-toast";
 import ReportDialog from "./ReportDialog";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
+import { Lobster_Two } from "next/font/google";
+
+const lobster = Lobster_Two({
+  subsets: ["latin"],
+  weight: "700",
+  style: ["italic"],
+});
 
 function Navbar() {
   const location = usePathname();
@@ -120,7 +127,7 @@ function Navbar() {
         if (response.payload?.success && location === "/sign-in") {
           router.push("/");
         } else if (
-          response.payload?.status === 401 &&
+          response.payload?.statusCode === 401 &&
           location !== "/sign-in"
         ) {
           localStorage.removeItem("token");
@@ -151,7 +158,7 @@ function Navbar() {
     >
       <div className="sm:bg-stone-100 sm:dark:bg-stone-900 min-h-14 bg-stone-100/50 dark:bg-stone-900/50 backdrop-blur-sm blur-bg h-full w-full sm:rounded-3xl rounded-2xl xl:p-6 sm:px-2 sm:py-4 sm:w-fit xl:w-full flex flex-col items-center justify-between">
         <Link href="/" className="sm:inline hidden w-full" title="Sociial">
-          <div className="text-3xl tracking-tighter font-extrabold flex items-center md:justify-start md:pt-0 justify-center gap-2 w-full px-2">
+          <div className="text-4xl tracking-tighter font-extrabold flex items-center md:pt-0 max-xl:justify-center gap-2 w-full px-2">
             <Image
               src="/logo.svg"
               alt=""
@@ -160,7 +167,9 @@ function Navbar() {
               className="pointer-events-none select-none"
               priority={true}
             />
-            <span className="xl:inline hidden">Sociial</span>
+            <span className={`xl:inline hidden ${lobster.className}`}>
+              Sociial
+            </span>
           </div>
         </Link>
         <div className="flex sm:flex-col flex-row w-full md:items-start items-center sm:justify-start justify-evenly p-2 text-lg gap-4 h-fit">

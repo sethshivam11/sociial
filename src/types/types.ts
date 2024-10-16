@@ -141,3 +141,12 @@ export interface ReactI {
   user: BasicUserI;
   content: string;
 }
+
+export interface CallI {
+  _id: string;
+  user: BasicUserI;
+  kind: "audio" | "video";
+  type: "incoming" | "outgoing";
+  duration: number;
+  createdAt: string;
+}

@@ -212,36 +212,111 @@ const chatSlice = createSlice({
     setPage: (state, action) => {
       state.page = action.payload;
     },
-    addedToGroup: (state, action) => {
-      state.chats = [action.payload.data, ...state.chats];
-    },
-    leftGroup: (state, action) => {
-      state.chat.users = state.chat.users.filter(
-        (user) => user.username !== action.payload.data.username
-      );
-    },
-    groupDeleted: (state, action) => {
-      state.chats = state.chats.filter(
-        (chat) => chat._id !== action.payload.data._id
-      );
-    },
-    groupDetailsUpdated: (state, action) => {
-      state.chat.groupName = action.payload.data.groupName;
-      state.chat.groupIcon = action.payload.data.groupIcon;
-    },
-    newAdmin: (state, action) => {
-      state.chat.admin = action.payload.data.admin;
-    },
-    removedAdmin: (state, action) => {
-      state.chat.admin = action.payload.data.admin;
-    },
     newChatStarted: (state, action) => {
       state.chats = [action.payload.data, ...state.chats];
+    },
+    newGroup: (state, action) => {
+      state.chats = [action.payload.chat, ...state.chats];
     },
     setCurrentChat: (state, action) => {
       state.chat = state.chats.find(
         (chat) => chat._id === action.payload
       ) as ChatI;
+    },
+    groupDeleted: (state, action) => {
+      state.chats = state.chats.filter(
+        (chat) => chat._id !== action.payload.chat._id
+      );
+    },
+    addedToGroup: (state, action) => {
+      if (state.chat._id === action.payload.chat._id) {
+        state.chat.users = [
+          ...state.chat.users,
+          ...action.payload.participants,
+        ];
+      }
+      state.chats.map((chat) => {
+        if (chat._id === action.payload.chat._id) {
+          chat.users = [...chat.users, ...action.payload.participants];
+        }
+        return chat;
+      });
+    },
+    removedFromGroup: (state, action) => {
+      if (state.chat._id === action.payload.chat._id) {
+        state.chat.users = state.chat.users.filter(
+          (user) => !action.payload.participants.includes(user._id)
+        );
+      }
+      state.chats.map((chat) => {
+        if (chat._id === action.payload.chat._id) {
+          chat.users = chat.users.filter(
+            (user) => !action.payload.participants.includes(user._id)
+          );
+        }
+        return chat;
+      });
+    },
+    groupDetailsUpdated: (state, action) => {
+      if (state.chat._id === action.payload.chat._id) {
+        if (state.chat.groupName !== action.payload.chat.groupName)
+          state.chat.groupName = action.payload.chat.groupName;
+        if (state.chat.description !== action.payload.chat.description)
+          state.chat.description = action.payload.chat.description;
+        if (state.chat.groupIcon !== action.payload.chat.groupIcon)
+          state.chat.groupIcon = action.payload.chat.groupIcon;
+      }
+      state.chats.map((chat) => {
+        if (chat._id === action.payload.chat._id) {
+          if (chat.groupName !== action.payload.chat.groupName)
+            chat.groupName = action.payload.chat.groupName;
+          if (chat.description !== action.payload.chat.description)
+            chat.description = action.payload.chat.description;
+          if (chat.groupIcon !== action.payload.chat.groupIcon)
+            chat.groupIcon = action.payload.chat.groupIcon;
+        }
+        return chat;
+      });
+    },
+    leftGroup: (state, action) => {
+      if (state.chat._id === action.payload.chat._id) {
+        state.chat.users = state.chat.users.filter(
+          (user) => user._id !== action.payload.user._id
+        );
+      }
+      state.chats.map((chat) => {
+        if (chat._id === action.payload.chat._id) {
+          chat.users = chat.users.filter(
+            (user) => user._id !== action.payload.user._id
+          );
+        }
+        return chat;
+      });
+    },
+    newAdmin: (state, action) => {
+      if (state.chat._id === action.payload.chat._id) {
+        state.chat.admin = [...state.chat.admin, ...action.payload.newAdmins];
+      }
+      state.chats.map((chat) => {
+        if (chat._id === action.payload.chat._id) {
+          chat.admin = [...chat.admin, ...action.payload.newAdmins];
+        }
+      });
+    },
+    removedAdmin: (state, action) => {
+      if (state.chat._id === action.payload.chat._id) {
+        state.chat.admin = state.chat.admin.filter(
+          (user) => !action.payload.removedAdmins.includes(user)
+        );
+      }
+      state.chats.map((chat) => {
+        if (chat._id === action.payload.chat._id) {
+          chat.admin = chat.admin.filter(
+            (user) => !action.payload.removedAdmins.includes(user)
+          );
+        }
+        return chat;
+      });
     },
   },
   extraReducers: (builder) => {
@@ -472,6 +547,8 @@ export const {
   removedAdmin,
   newChatStarted,
   setCurrentChat,
+  newGroup,
+  removedFromGroup,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;
