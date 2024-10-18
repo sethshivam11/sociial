@@ -144,9 +144,9 @@ export interface ReactI {
 
 export interface CallI {
   _id: string;
-  user: BasicUserI;
-  kind: "audio" | "video";
-  type: "incoming" | "outgoing";
+  caller: BasicUserI;
+  callee: BasicUserI;
+  type: "audio" | "video";
   duration: number;
   createdAt: string;
 }

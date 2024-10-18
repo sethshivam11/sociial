@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/context/ThemeProvider";
 import { ReactNode } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { StoreProvider } from "@/lib/store/provider";
+import { SocketProvider } from "@/context/SocketProvider";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -80,9 +81,11 @@ export default function RootLayout({
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <StoreProvider>
-            <Navbar />
-            {children}
-            <Toaster />
+            <SocketProvider>
+              <Navbar />
+              {children}
+              <Toaster />
+            </SocketProvider>
           </StoreProvider>
         </ThemeProvider>
       </body>

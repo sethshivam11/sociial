@@ -27,6 +27,7 @@ function Layout({ children }: { children: ReactNode }) {
   const location = usePathname();
   const dispatch = useAppDispatch();
   const { skeletonLoading, calls } = useAppSelector((state) => state.call);
+  const { user } = useAppSelector((state) => state.user);
 
   return (
     <div className="grid h-[100dvh] sm:min-h-[42rem] max-sm:max-h-[100dvh] xl:col-span-8 pl-8 md:pl-4 max-sm:pl-0 sm:col-span-9 col-span-10 sm:grid-cols-10">
@@ -65,18 +66,30 @@ function Layout({ children }: { children: ReactNode }) {
               >
                 <Avatar className="w-10 h-10">
                   <AvatarImage
-                    src={call.user.avatar}
+                    src={
+                      user._id === call.callee._id
+                        ? call.callee.avatar
+                        : call.caller.avatar
+                    }
                     alt=""
                     className="pointer-events-none select-none object-contain"
                   />
                   <AvatarFallback>
-                    {nameFallback(call.user.fullName)}
+                    {nameFallback(
+                      user._id === call.callee._id
+                        ? call.callee.fullName
+                        : call.caller.fullName
+                    )}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col items-start justify-center w-full">
-                  <p>{call.user.fullName}</p>
+                  <p>
+                    {user._id === call.callee._id
+                      ? call.callee.fullName
+                      : call.caller.fullName}
+                  </p>
                   <div className="flex items-center justify-center gap-2 text-sm text-stone-500">
-                    {call.type === "incoming" ? (
+                    {call.caller._id === user._id ? (
                       <>
                         <ArrowDownLeft size="16" />
                         Incoming Call
@@ -90,7 +103,7 @@ function Layout({ children }: { children: ReactNode }) {
                   </div>
                 </div>
                 <div className="mr-2">
-                  {call.kind === "audio" ? (
+                  {call.type === "audio" ? (
                     <Phone size="18" />
                   ) : (
                     <Video size="18" />
@@ -126,18 +139,30 @@ function Layout({ children }: { children: ReactNode }) {
               >
                 <Avatar className="w-10 h-10">
                   <AvatarImage
-                    src={call.user.avatar}
+                    src={
+                      user._id === call.callee._id
+                        ? call.callee.avatar
+                        : call.caller.avatar
+                    }
                     alt=""
                     className="pointer-events-none select-none"
                   />
                   <AvatarFallback>
-                    {nameFallback(call.user.fullName)}
+                    {nameFallback(
+                      user._id === call.callee._id
+                        ? call.callee.fullName
+                        : call.caller.fullName
+                    )}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col items-start justify-center w-full">
-                  <p>{call.user.fullName}</p>
+                  <p>
+                    {user._id === call.callee._id
+                      ? call.callee.fullName
+                      : call.caller.fullName}
+                  </p>
                   <div className="flex items-center justify-center gap-2 text-sm text-stone-500">
-                    {call.type === "incoming" ? (
+                    {call.caller._id === user._id ? (
                       <>
                         <ArrowDownLeft size="16" />
                         Incoming Call
@@ -151,7 +176,7 @@ function Layout({ children }: { children: ReactNode }) {
                   </div>
                 </div>
                 <div className="mr-2">
-                  {call.kind === "audio" ? (
+                  {call.type === "audio" ? (
                     <Phone size="18" />
                   ) : (
                     <Video size="18" />

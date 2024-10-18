@@ -130,7 +130,6 @@ function Navbar() {
           response.payload?.statusCode === 401 &&
           location !== "/sign-in"
         ) {
-          localStorage.removeItem("token");
           dispatch(clearCookies()).then(() => router.push("/sign-in"));
         }
       })

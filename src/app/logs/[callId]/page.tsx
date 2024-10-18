@@ -11,6 +11,7 @@ import React, { useEffect } from "react";
 function Page({ params }: { params: { callId: string } }) {
   const dispatch = useAppDispatch();
   const { call, calls } = useAppSelector((state) => state.call);
+  const { user } = useAppSelector((state) => state.user);
   const { callId } = params;
 
   function getTime(totalSeconds: number) {
@@ -40,26 +41,53 @@ function Page({ params }: { params: { callId: string } }) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Avatar className="w-32 h-32 pointer-events-none select-none">
-              <AvatarImage src={call.user?.avatar} />
+              <AvatarImage
+                src={
+                  user._id === call.callee._id
+                    ? call.callee?.avatar
+                    : call.caller.avatar
+                }
+              />
               <AvatarFallback>
-                {nameFallback(call.user?.fullName)}
+                {nameFallback(
+                  user._id === call.callee._id
+                    ? call.callee?.fullName
+                    : call.caller.fullName
+                )}
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col justify-center">
               <h1 className="text-2xl font-bold text-center">
-                {call.user?.fullName}
+                {user._id === call.callee._id
+                  ? call.callee?.fullName
+                  : call.caller.fullName}
               </h1>
-              <p className="text-stone-500">@{call.user.username}</p>
+              <p className="text-stone-500">
+                @
+                {user._id === call.callee._id
+                  ? call.callee?.username
+                  : call.caller.username}
+              </p>
             </div>
           </div>
           <div className="flex items-center justify-evenly gap-2">
-            <Link href={`/call/${call.user.username}?video=false`}>
+            <Link
+              href={`/call/${
+                user._id === call.callee._id
+                  ? call.callee?.username
+                  : call.caller.username
+              }?video=false`}
+            >
               <Button variant="ghost" size="icon">
                 <Phone />
               </Button>
             </Link>
             <Link
-              href={`/call/${call.user.username}?video=true`}
+              href={`/call/${
+                user._id === call.callee._id
+                  ? call.callee?.username
+                  : call.caller.username
+              }?video=true`}
               className="p-2"
             >
               <Button variant="ghost" size="icon">
@@ -79,13 +107,14 @@ function Page({ params }: { params: { callId: string } }) {
           </tr>
           <tr>
             <td className="flex items-center">
-              {call.kind === "audio" ? (
+              {call.type === "audio" ? (
                 <Phone size="18" className="mr-2" />
               ) : (
                 <Video size="18" className="mr-2" />
               )}
-              <span className="capitalize">{call.type}</span>&nbsp;
-              {call.kind === "audio" ? "voice" : "video"} call at
+              {user._id === call.callee._id ? "Incoming" : "Outgoing"}
+              &nbsp;
+              {call.type === "audio" ? "voice" : "video"} call at
             </td>
             <td>
               {new Date(call.createdAt).toLocaleString("en-IN").slice(11)}

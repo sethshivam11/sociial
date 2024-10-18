@@ -4,48 +4,26 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 const initialState: CallSliceI = {
   call: {
     _id: "",
-    user: {
+    callee: {
       _id: "",
       username: "",
       fullName: "",
       avatar: "",
     },
-    kind: "audio",
-    type: "incoming",
+    caller: {
+      _id: "",
+      username: "",
+      fullName: "",
+      avatar: "",
+    },
+    type: "audio",
     createdAt: "",
     duration: 0,
   },
-  calls: [
-    {
-      _id: "abc",
-      user: {
-        _id: "blaise",
-        username: "blaise",
-        fullName: "Blaise Pascal",
-        avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
-      },
-      kind: "audio",
-      type: "incoming",
-      createdAt: "2024-07-27T18:49:11.342Z",
-      duration: 1000,
-    },
-    {
-      _id: "abcd",
-      user: {
-        _id: "bail",
-        username: "baila",
-        fullName: "Baila",
-        avatar:
-          "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png",
-      },
-      kind: "video",
-      type: "incoming",
-      createdAt: "2024-07-27T18:49:11.342Z",
-      duration: 1000,
-    },
-  ],
+  calls: [],
   skeletonLoading: false,
+  startingCall: false,
+  endingCall: false,
   loading: false,
 };
 
@@ -53,6 +31,48 @@ export const getCalls = createAsyncThunk("call/getCalls", async () => {
   const parsed = await fetch("/api/v1/calls");
   return parsed.json();
 });
+
+export const getCall = createAsyncThunk(
+  "calls/getCall",
+  async (callId: string) => {
+    const parsed = await fetch(`/api/v1/calls/${callId}`);
+    return parsed.json();
+  }
+);
+
+export const startCall = createAsyncThunk(
+  "calls/startCall",
+  async (callData: { callee: string; type: "audio" | "video" }) => {
+    const parsed = await fetch("/api/v1/calls/start", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(callData),
+    });
+    return parsed.json();
+  }
+);
+
+export const pingCall = createAsyncThunk(
+  "calls/pingCall",
+  async (callId: string) => {
+    const parsed = await fetch(`/api/v1/calls/ping/${callId}`, {
+      method: "PATCH",
+    });
+    return parsed.json();
+  }
+);
+
+export const endCall = createAsyncThunk(
+  "calls/endCall",
+  async (callId: string) => {
+    const parsed = await fetch(`/api/v1/calls/end/${callId}`, {
+      method: "PATCH",
+    });
+    return parsed.json();
+  }
+);
 
 const callSlice = createSlice({
   name: "call",
@@ -69,12 +89,71 @@ const callSlice = createSlice({
       })
       .addCase(getCalls.fulfilled, (state, action) => {
         state.skeletonLoading = false;
-        if (action.payload?.success) {
+        if (
+          action.payload?.success ||
+          action.payload?.message === "No calls found"
+        ) {
           state.calls = action.payload.data;
         }
       })
       .addCase(getCalls.rejected, (state) => {
         state.skeletonLoading = false;
+      });
+
+    builder
+      .addCase(getCall.pending, (state) => {
+        state.loading = false;
+      })
+      .addCase(getCall.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload?.success) {
+          state.call = action.payload.data;
+        }
+      })
+      .addCase(getCall.rejected, (state) => {
+        state.loading = false;
+      });
+
+    builder
+      .addCase(startCall.pending, (state) => {
+        state.startingCall = true;
+      })
+      .addCase(startCall.fulfilled, (state, action) => {
+        state.startingCall = false;
+        if (action.payload?.success) {
+          state.call = action.payload.data;
+        }
+      })
+      .addCase(startCall.rejected, (state) => {
+        state.startingCall = false;
+      });
+
+    builder
+      .addCase(pingCall.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(pingCall.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload?.success) {
+          state.call = action.payload.data;
+        }
+      })
+      .addCase(pingCall.rejected, (state) => {
+        state.loading = false;
+      });
+
+    builder
+      .addCase(endCall.pending, (state) => {
+        state.endingCall = true;
+      })
+      .addCase(endCall.fulfilled, (state, action) => {
+        state.endingCall = false;
+        if (action.payload?.success) {
+          state.call = action.payload.data;
+        }
+      })
+      .addCase(endCall.rejected, (state) => {
+        state.endingCall = false;
       });
   },
 });

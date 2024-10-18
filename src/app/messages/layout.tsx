@@ -12,7 +12,6 @@ import {
 } from "@/lib/store/features/slices/chatSlice";
 import Link from "next/link";
 import { toast } from "@/components/ui/use-toast";
-import { getFollowings } from "@/lib/store/features/slices/followSlice";
 import NewGroupChatDialog from "@/components/NewGroupChatDialog";
 import { usePathname } from "next/navigation";
 
@@ -144,9 +143,18 @@ function Messages({ children }: { children: ReactNode }) {
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col items-start justify-center w-full">
-                  <p>{chat?.users[0]?.fullName}</p>
+                  <p>
+                    {chat.isGroupChat
+                      ? chat.groupName
+                      : chat?.users[0]?.fullName}
+                  </p>
                   <p className="text-sm md:w-40 sm:w-80 w-40 text-left text-stone-500 text-ellipsis whitespace-nowrap overflow-x-hidden">
-                    {chat?.lastMessage?.content}
+                    {chat?.lastMessage
+                      ? checkForAssets(
+                          chat.lastMessage.content,
+                          chat.lastMessage.kind
+                        )
+                      : ""}
                   </p>
                 </div>
               </Link>

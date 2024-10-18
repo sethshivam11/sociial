@@ -155,6 +155,8 @@ export interface LikeSliceI {
 export interface CallSliceI {
   skeletonLoading: boolean;
   loading: boolean;
+  startingCall: boolean;
+  endingCall: boolean;
   calls: CallI[];
   call: CallI;
 }

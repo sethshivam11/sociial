@@ -1,5 +1,6 @@
 "use client";
 
+import { ToastAction } from "@/components/ui/toast";
 import { toast } from "@/components/ui/use-toast";
 import { ChatEventEnum } from "@/lib/helpers";
 import {
@@ -23,7 +24,8 @@ import {
 } from "@/lib/store/features/slices/messageSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { socket } from "@/socket";
-import { BasicUserI, ChatI, MessageI } from "@/types/types";
+import { BasicUserI, CallI, ChatI, MessageI } from "@/types/types";
+import { Phone } from "lucide-react";
 import {
   useState,
   createContext,
@@ -32,9 +34,16 @@ import {
   useContext,
 } from "react";
 
-const initialState = {
+interface SocketContextI {
+  connected: boolean;
+  transport: string;
+  onlineUsers: string[];
+}
+
+const initialState: SocketContextI = {
   connected: false,
   transport: "N/A",
+  onlineUsers: [],
 };
 
 const SocketContext = createContext(initialState);
@@ -42,6 +51,7 @@ const SocketContext = createContext(initialState);
 export function SocketProvider({ children }: PropsWithChildren<{}>) {
   const [connected, setConnected] = useState(false);
   const [transport, setTransport] = useState("N/A");
+  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
 
   const dispatch = useAppDispatch();
   const { chat } = useAppSelector((state) => state.chat);
@@ -67,6 +77,9 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
       console.log("disconnected");
       setConnected(false);
       setTransport("N/A");
+    }
+    function handleOnlineUsers(payload: string[]) {
+      setOnlineUsers(payload);
     }
     function typingEventStarted() {
       console.log("typing started");
@@ -199,13 +212,39 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
         });
       }
     }
+    function handleOnlineStatus(payload: boolean) {
+      console.log(payload);
+    }
 
     // TODO: implement the following handlers
-    function handleCall() {}
+    function handleCall(payload: CallI) {
+      toast({
+        title: `${payload.caller.fullName} is calling...`,
+        description: "Swipe right to silent",
+        action: (
+          <div className="flex gap-2 items-center justify-center">
+            <ToastAction
+              altText="Pick up"
+              className="bg-primary hover:bg-primary/80 text-white dark:text-black"
+              onClick={() => console.log(payload)}
+            >
+              <Phone />
+            </ToastAction>
+            <ToastAction altText="Decline" onClick={() => console.log(payload)}>
+              <Phone className="rotate-[135deg]" />
+            </ToastAction>
+          </div>
+        ),
+        duration: 30000,
+        onSwipeEnd: () => console.log(payload),
+        onEscapeKeyDown: () => console.log(payload),
+      });
+    }
     function handleCallAccepted() {}
     function handleCallDisconnected() {}
     function handleNegotiate() {}
 
+    socket.on(ChatEventEnum.GET_USERS, handleOnlineUsers);
     socket.on(ChatEventEnum.CONNECTED_EVENT, onConnect);
     socket.on(ChatEventEnum.DISCONNECT_EVENT, onDisconnect);
     socket.on(ChatEventEnum.TYPING_EVENT, typingEventStarted);
@@ -232,6 +271,7 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
     socket.on(ChatEventEnum.CALL_ACCEPTED_EVENT, handleCallAccepted);
     socket.on(ChatEventEnum.CALL_DISCONNECTED_EVENT, handleCallDisconnected);
     socket.on(ChatEventEnum.NEGOTIATE_EVENT, handleNegotiate);
+    socket.on(ChatEventEnum.GET_ONLINE_STATUS, handleOnlineStatus);
 
     return () => {
       socket.off(ChatEventEnum.CONNECTED_EVENT, onConnect);
@@ -255,19 +295,20 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
         ChatEventEnum.PARTICIPANT_REMOVED_EVENT,
         handleRemovedParticipant
       );
-      socket.on(ChatEventEnum.GROUP_DETAILS_UPDATED, handleGroupUpdated);
-      socket.on(ChatEventEnum.GROUP_LEAVE_EVENT, handleGroupLeave);
-      socket.on(ChatEventEnum.NEW_ADMIN_EVENT, handleNewAdmin);
-      socket.on(ChatEventEnum.ADMIN_REMOVE_EVENT, handleAdminRemove);
-      socket.on(ChatEventEnum.NEW_CALL_EVENT, handleCall);
-      socket.on(ChatEventEnum.CALL_ACCEPTED_EVENT, handleCallAccepted);
-      socket.on(ChatEventEnum.CALL_DISCONNECTED_EVENT, handleCallDisconnected);
-      socket.on(ChatEventEnum.NEGOTIATE_EVENT, handleNegotiate);
+      socket.off(ChatEventEnum.GROUP_DETAILS_UPDATED, handleGroupUpdated);
+      socket.off(ChatEventEnum.GROUP_LEAVE_EVENT, handleGroupLeave);
+      socket.off(ChatEventEnum.NEW_ADMIN_EVENT, handleNewAdmin);
+      socket.off(ChatEventEnum.ADMIN_REMOVE_EVENT, handleAdminRemove);
+      socket.off(ChatEventEnum.NEW_CALL_EVENT, handleCall);
+      socket.off(ChatEventEnum.CALL_ACCEPTED_EVENT, handleCallAccepted);
+      socket.off(ChatEventEnum.CALL_DISCONNECTED_EVENT, handleCallDisconnected);
+      socket.off(ChatEventEnum.NEGOTIATE_EVENT, handleNegotiate);
+      socket.off(ChatEventEnum.GET_ONLINE_STATUS, handleOnlineStatus);
     };
   }, [chat, dispatch]);
 
   return (
-    <SocketContext.Provider value={{ connected, transport }}>
+    <SocketContext.Provider value={{ connected, transport, onlineUsers }}>
       {children}
     </SocketContext.Provider>
   );

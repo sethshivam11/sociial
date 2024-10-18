@@ -30,7 +30,7 @@ import MessageOptions from "@/components/MessageOptions";
 import NextImage from "next/image";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import {
   Dialog,
   DialogTrigger,
@@ -55,10 +55,12 @@ import MessageActions from "@/components/MessageActions";
 import { checkForAssets } from "@/lib/helpers";
 import ScrollableFeed from "react-scrollable-feed";
 import { useDebounceCallback } from "usehooks-ts";
+import { ToastAction, ToastClose, ToastProvider } from "@/components/ui/toast";
 
 function Page({ params }: { params: { chatId: string } }) {
   const dispatch = useAppDispatch();
   const location = usePathname();
+  const { toast, dismiss } = useToast();
 
   const { user } = useAppSelector((state) => state.user);
   const {
@@ -73,6 +75,7 @@ function Page({ params }: { params: { chatId: string } }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<ScrollableFeed>(null);
   const firstMessageRef = useRef<HTMLDivElement>(null);
+  const ringtoneRef = useRef<HTMLAudioElement>(null);
 
   const formSchema = z.object({
     message: z.string(),
@@ -268,6 +271,11 @@ function Page({ params }: { params: { chatId: string } }) {
         } else return <>{content}</>;
     }
   }
+  function handleSilence() {
+    if (!ringtoneRef.current) return;
+    ringtoneRef.current.pause();
+    ringtoneRef.current.currentTime = 0;
+  }
 
   useEffect(() => {
     const savedMessageTheme = JSON.parse(
@@ -280,10 +288,13 @@ function Page({ params }: { params: { chatId: string } }) {
     }
 
     dispatch(getMessages({ chatId, page: 1 }));
-    if (!chats.length)
+    if (!chats.length) {
       dispatch(getChats()).then((response) => {
         if (response.payload?.success) dispatch(setCurrentChat(chatId));
       });
+    } else if (chat._id !== chatId) {
+      dispatch(setCurrentChat(chatId));
+    }
 
     function handleTyping(e: KeyboardEvent) {
       if (e.target === inputRef.current && e.code === "Enter") {
@@ -300,12 +311,29 @@ function Page({ params }: { params: { chatId: string } }) {
     };
   }, [dispatch, chatId, setCurrentChat]);
 
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document?.hidden) {
+        ringtoneRef.current?.pause();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
   return (
     <div
       className={`md:border-l-2 border-stone-200 dark:border-stone-800 md:flex flex flex-col items-start justify-between lg:col-span-7 md:col-span-6 col-span-10 overflow-x-hidden h-[100dvh] sm:min-h-[42rem] relative ${
         location !== "/messages" ? "" : "hidden"
       }`}
     >
+      <audio src="/ringtone.mp3" ref={ringtoneRef} />
+      <ToastProvider>
+      </ToastProvider>
       {isAtBottom && (
         <Button
           variant="outline"
@@ -376,19 +404,34 @@ function Page({ params }: { params: { chatId: string } }) {
                 <button
                   className="inline-block p-2"
                   onClick={() => {
+                    if ("vibrate" in navigator) {
+                      navigator.vibrate([200, 50, 200]);
+                    }
+                    if (!document?.hidden) ringtoneRef.current?.play();
                     toast({
-                      title: "ABC is calling you",
+                      title: "ABC is calling...",
+                      description: "Swipe right to silence ringer",
                       action: (
                         <div className="flex gap-2 items-center justify-center">
-                          <Button size="icon">
+                          <ToastAction
+                            altText="Pick up"
+                            className="bg-primary hover:bg-primary/80 text-white dark:text-black"
+                            onClick={handleSilence}
+                          >
                             <Phone />
-                          </Button>
-                          <Button variant="destructive" size="icon">
+                          </ToastAction>
+                          <ToastAction
+                            altText="Decline"
+                            onClick={handleSilence}
+                          >
                             <Phone className="rotate-[135deg]" />
-                          </Button>
+                          </ToastAction>
                         </div>
                       ),
                       duration: 30000,
+                      onSwipeEnd: handleSilence,
+                      onEscapeKeyDown: handleSilence,
+                      onOpenChange: (open) => console.log(open),
                     });
                   }}
                 >
@@ -397,19 +440,34 @@ function Page({ params }: { params: { chatId: string } }) {
                 <button
                   className="inline-block p-2"
                   onClick={() => {
+                    if ("vibrate" in navigator) {
+                      navigator.vibrate([200, 50, 200]);
+                    }
+                    if (!document?.hidden) ringtoneRef.current?.play();
                     toast({
-                      title: "ABC is calling you",
+                      title: "ABC is calling...",
+                      description: "Swipe right to silence ringer",
                       action: (
                         <div className="flex gap-2 items-center justify-center">
-                          <Button size="icon">
-                            <Phone />
-                          </Button>
-                          <Button variant="destructive" size="icon">
+                          <ToastAction
+                            altText="Pick up"
+                            className="bg-primary hover:bg-primary/80 text-white dark:text-black"
+                            onClick={handleSilence}
+                          >
+                            <Video />
+                          </ToastAction>
+                          <ToastAction
+                            altText="Decline"
+                            onClick={handleSilence}
+                          >
                             <Phone className="rotate-[135deg]" />
-                          </Button>
+                          </ToastAction>
+                          <ToastClose />
                         </div>
                       ),
                       duration: 30000,
+                      onSwipeEnd: handleSilence,
+                      onEscapeKeyDown: handleSilence,
                     });
                   }}
                 >

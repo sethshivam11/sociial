@@ -180,6 +180,7 @@ export const themes = [
 ];
 
 export const ChatEventEnum = Object.freeze({
+  GET_USERS: "getUsers",
   CONNECTED_EVENT: "connected",
   DISCONNECT_EVENT: "disconnect",
   TYPING_EVENT: "typing",
@@ -203,4 +204,5 @@ export const ChatEventEnum = Object.freeze({
   CALL_ACCEPTED_EVENT: "callAccepted",
   CALL_DISCONNECTED_EVENT: "callDisconnected",
   NEGOTIATE_EVENT: "negotiateCall",
+  GET_ONLINE_STATUS: "getOnlineStatus",
 });
