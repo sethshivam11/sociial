@@ -41,7 +41,6 @@ export interface UserSliceI {
   skeletonLoading: boolean;
   isLoggedIn: boolean;
   isSendingMail: boolean;
-  page: number;
 }
 
 export interface FollowSliceI {
@@ -89,7 +88,6 @@ export interface ChatSliceI {
   skeletonLoading: boolean;
   loadingMore: boolean;
   loading: boolean;
-  page: number;
 }
 
 export interface NotificationPreferenceSliceI {
@@ -106,7 +104,6 @@ export interface CommentSliceI {
   likes: BasicUserI[];
   skeletonLoading: boolean;
   loadingMore: boolean;
-  page: number;
 }
 
 export interface NotificationSliceI {
@@ -142,8 +139,6 @@ export interface MessageSliceI {
   loading: boolean;
   skeletonLoading: boolean;
   reactions: ReactI[];
-  page: number;
-  maxMessages: number;
   editingMessage: boolean;
 }
 

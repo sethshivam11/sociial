@@ -22,7 +22,6 @@ const initialState: ChatSliceI = {
   skeletonLoading: false,
   loadingMore: false,
   loading: false,
-  page: 1,
 };
 
 export const getChats = createAsyncThunk("chats/getChats", async () => {
@@ -209,9 +208,6 @@ const chatSlice = createSlice({
   name: "chats",
   initialState,
   reducers: {
-    setPage: (state, action) => {
-      state.page = action.payload;
-    },
     newChatStarted: (state, action) => {
       state.chats = [action.payload.data, ...state.chats];
     },
@@ -538,7 +534,6 @@ const chatSlice = createSlice({
 });
 
 export const {
-  setPage,
   addedToGroup,
   leftGroup,
   groupDeleted,

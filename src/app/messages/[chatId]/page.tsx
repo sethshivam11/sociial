@@ -55,7 +55,7 @@ import MessageActions from "@/components/MessageActions";
 import { checkForAssets } from "@/lib/helpers";
 import ScrollableFeed from "react-scrollable-feed";
 import { useDebounceCallback } from "usehooks-ts";
-import { ToastAction, ToastClose, ToastProvider } from "@/components/ui/toast";
+import { ToastAction } from "@/components/ui/toast";
 
 function Page({ params }: { params: { chatId: string } }) {
   const dispatch = useAppDispatch();
@@ -116,7 +116,7 @@ function Page({ params }: { params: { chatId: string } }) {
     ).then((response) => {
       if (!response.payload?.success) {
         toast({
-          title: "Error",
+          title: "Cannot send message",
           description: "Something went wrong, while sending message",
           variant: "destructive",
         });
@@ -126,8 +126,45 @@ function Page({ params }: { params: { chatId: string } }) {
       }
     });
   }
-  function giveAssets(content: string, kind: string): ReactNode {
+  function giveAssets(
+    content: string,
+    kind: string,
+    post?: {
+      _id: string;
+      media: string[];
+      kind: string;
+      caption: string;
+    }
+  ): ReactNode {
     switch (kind) {
+      case "post":
+        if (!post) {
+          return (
+            <div className="flex items-center justify-center text-stone-500">
+              Post unavailable
+            </div>
+          );
+        } else {
+          return (
+            <Link
+              href={
+                post.kind === "video"
+                  ? `/video/${post._id}`
+                  : `/post/${post?._id}`
+              }
+              className="rounded-xl w-60 aspect-square"
+            >
+              <NextImage
+                src={post.media[0]}
+                width="240"
+                height="240"
+                alt=""
+                className="pointer-events-none select-none object-contain rounded-xl"
+              />
+              <span className="p-2 mt-3">{post.caption}</span>
+            </Link>
+          );
+        }
       case "location":
         return (
           <Link href={content} target="_blank">
@@ -166,11 +203,6 @@ function Page({ params }: { params: { chatId: string } }) {
                 height="160"
                 alt=""
                 className="h-full w-full object-contain m-auto"
-                onError={() => (
-                  <span className="text-black dark:text-white">
-                    Something went wrong
-                  </span>
-                )}
               />
               <DialogFooter className="max-sm:items-end items-end">
                 <Button
@@ -287,7 +319,7 @@ function Page({ params }: { params: { chatId: string } }) {
       setTheme(themes[0]);
     }
 
-    dispatch(getMessages({ chatId, page: 1 }));
+    dispatch(getMessages(chatId));
     if (!chats.length) {
       dispatch(getChats()).then((response) => {
         if (response.payload?.success) dispatch(setCurrentChat(chatId));
@@ -332,13 +364,11 @@ function Page({ params }: { params: { chatId: string } }) {
       }`}
     >
       <audio src="/ringtone.mp3" ref={ringtoneRef} />
-      <ToastProvider>
-      </ToastProvider>
       {isAtBottom && (
         <Button
           variant="outline"
           size="icon"
-          className="border-2 border-stone-500 rounded-full absolute z-30 bottom-20 left-1/2 -translate-x-1/2 "
+          className="rounded-full absolute z-30 bottom-20 left-1/2 -translate-x-1/2 "
           onClick={() => containerRef.current?.scrollToBottom()}
         >
           <ArrowDown />
@@ -462,7 +492,6 @@ function Page({ params }: { params: { chatId: string } }) {
                           >
                             <Phone className="rotate-[135deg]" />
                           </ToastAction>
-                          <ToastClose />
                         </div>
                       ),
                       duration: 30000,
@@ -566,7 +595,11 @@ function Page({ params }: { params: { chatId: string } }) {
                   }
                   ${message?.reacts ? "mb-4" : "mb-1"}`}
                 >
-                  {giveAssets(message.content, message.kind || "message")}
+                  {giveAssets(
+                    message.content,
+                    message.kind || "message",
+                    message?.post
+                  )}
                   {message?.reacts?.length > 0 && (
                     <MessageReacts
                       messageId={message._id}
@@ -615,6 +648,7 @@ function Page({ params }: { params: { chatId: string } }) {
             </div>
           ))
         )}
+        {/* TODO: Implement sending, sent, error sending */}
       </ScrollableFeed>
       {!skeletonLoading && (
         <div className="bg-white dark:bg-black bottom-0 right-0 w-full px-2.5 flex items-center justify-center z-20">

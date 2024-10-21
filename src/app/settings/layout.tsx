@@ -7,7 +7,10 @@ import {
   AlertDialogFooter,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { clearCookies, logOutUser } from "@/lib/store/features/slices/userSlice";
+import {
+  clearCookies,
+  logOutUser,
+} from "@/lib/store/features/slices/userSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import {
   Ban,

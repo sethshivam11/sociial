@@ -7,9 +7,7 @@ const initialState: MessageSliceI = {
   loading: false,
   typing: false,
   skeletonLoading: false,
-  maxMessages: 0,
   editingMessage: false,
-  page: 1,
 };
 
 export const sendMessage = createAsyncThunk(
@@ -41,10 +39,8 @@ export const sendMessage = createAsyncThunk(
 
 export const getMessages = createAsyncThunk(
   "messages/getMessages",
-  async ({ chatId, page }: { chatId: string; page: number }) => {
-    const parsed = await fetch(
-      `/api/v1/messages/get?chatId=${chatId}${page ? `&page=${page}` : ""}`
-    );
+  async (chatId: string) => {
+    const parsed = await fetch(`/api/v1/messages/get?chatId=${chatId}`);
     return parsed.json();
   }
 );
@@ -106,9 +102,7 @@ const messageSlice = createSlice({
   name: "messages",
   initialState,
   reducers: {
-    setPage: (state, action) => {
-      state.page = action.payload;
-    },
+    // TODO: Implement logic to first add the message to the array and then send the message and update the small text in bottom of message
     setEditingMessage: (state, action) => {
       state.editingMessage = action.payload;
     },
@@ -176,32 +170,22 @@ const messageSlice = createSlice({
       });
 
     builder
-      .addCase(getMessages.pending, (state, action) => {
-        if (action.meta.arg.page === 1) {
-          state.skeletonLoading = true;
-        }
+      .addCase(getMessages.pending, (state) => {
+        state.skeletonLoading = true;
       })
       .addCase(getMessages.fulfilled, (state, action) => {
-        if (action.meta.arg.page === 1) {
-          state.skeletonLoading = false;
-        }
+        state.skeletonLoading = false;
         if (action.payload?.success) {
-          state.messages = [
-            ...action.payload.data.messages,
-            ...state.messages,
-          ].filter(
+          state.messages = [...action.payload.data, ...state.messages].filter(
             (message, index, self) =>
               index === self.findIndex((msg) => msg._id === message._id)
           );
-          state.maxMessages = action.payload.data.max;
         } else if (action.payload?.message === "No messages found") {
           state.messages = [];
         }
       })
-      .addCase(getMessages.rejected, (state, action) => {
-        if (action.meta.arg.page === 1) {
-          state.skeletonLoading = false;
-        }
+      .addCase(getMessages.rejected, (state) => {
+        state.skeletonLoading = false;
       });
 
     builder

@@ -2,7 +2,7 @@
 
 import { ToastAction } from "@/components/ui/toast";
 import { toast } from "@/components/ui/use-toast";
-import { ChatEventEnum } from "@/lib/helpers";
+import { ChatEventEnum, checkForAssets } from "@/lib/helpers";
 import {
   addedToGroup,
   groupDeleted,
@@ -93,11 +93,10 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
       if (chat?._id === payload.chat) {
         dispatch(messageReceived(payload));
       } else {
-        // TODO: show notification after checking the payload
-        // toast({
-        //   title: "New Message",
-        //   description: `You have a new message from ${payload.sender.username}`,
-        // })
+        toast({
+          title: "New Message",
+          description: `You have a new message from ${payload.sender.username}`,
+        });
       }
     }
     function handleMessageDelete(payload: MessageI) {
@@ -112,14 +111,27 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
       }
     }
     function handleReact(payload: {
-      user: string;
+      user: BasicUserI;
       content: string;
       chat: string;
+      message: {
+        content: string;
+        kind: string;
+      };
     }) {
       if (chat?._id === payload.chat) {
         dispatch(reacted(payload));
       } else {
-        // TODO: check the payload and show a notification
+        toast({
+          title: "Reaction on your message",
+          description: `${payload.user?.username} reacted ${
+            payload.content
+          } to ${
+            payload?.message.kind === "message"
+              ? payload.message.content
+              : checkForAssets(payload.message.content, payload.message.kind)
+          }`,
+        });
       }
     }
     function handleUnreact(payload: { user: string; chat: string }) {

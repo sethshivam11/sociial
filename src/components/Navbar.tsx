@@ -86,7 +86,6 @@ function Navbar() {
     dispatch(logOutUser())
       .then(({ payload }) => {
         if (payload?.success || payload?.message === "Token is required") {
-          if (document && "cookie" in window) document.cookie = "";
           router.push("/sign-in");
         } else {
           dispatch(clearCookies()).then(() => router.push("/sign-in"));

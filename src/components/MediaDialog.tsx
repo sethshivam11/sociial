@@ -12,6 +12,7 @@ import { Button } from "./ui/button";
 import { ImageIcon, PlusCircle, SendHorizonal, XIcon } from "lucide-react";
 import { Label } from "./ui/label";
 import { toast } from "./ui/use-toast";
+import { useAppDispatch } from "@/lib/store/store";
 
 interface Props {
   open: boolean;
@@ -19,8 +20,13 @@ interface Props {
 }
 
 function MediaDialog({ open, setOpen }: Props) {
+  const dispatch = useAppDispatch();
   const inputRef = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<{ url: string; type: string }[]>([]);
+
+  function handleSend() {
+    console.log(files);
+  }
 
   return (
     <Dialog
@@ -128,7 +134,12 @@ function MediaDialog({ open, setOpen }: Props) {
                 </Label>
               </Button>
             )}
-            <Button size="icon" className="rounded-xl" title="Send">
+            <Button
+              size="icon"
+              className="rounded-xl"
+              title="Send"
+              onClick={handleSend}
+            >
               <SendHorizonal />
             </Button>
           </DialogFooter>

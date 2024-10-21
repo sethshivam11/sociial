@@ -39,7 +39,6 @@ const initialState: UserSliceI = {
   skeletonLoading: false,
   isLoggedIn: false,
   isSendingMail: false,
-  page: 1,
 };
 
 export const loginUser = createAsyncThunk(
@@ -376,9 +375,6 @@ export const userSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
-    setPage(state, action) {
-      state.page = action.payload;
-    },
     setSuggestionLoading(state, action) {
       state.suggestions = state.suggestions.map((suggestion) => {
         if (suggestion._id === action.payload) {
@@ -410,7 +406,7 @@ export const userSlice = createSlice({
           localStorage.setItem("token", action.payload.data.token);
         }
       })
-      .addCase(loginUser.rejected, (state, action) => {
+      .addCase(loginUser.rejected, (state) => {
         state.loading = false;
       });
 
@@ -439,7 +435,7 @@ export const userSlice = createSlice({
           state.user.isMailVerified = action.payload.isMailVerified;
         }
       })
-      .addCase(verifyCode.rejected, (state, payload) => {
+      .addCase(verifyCode.rejected, (state) => {
         state.loading = false;
       });
 
@@ -485,6 +481,7 @@ export const userSlice = createSlice({
         if (action.payload?.success) {
           state.isLoggedIn = false;
           state.user = initialState.user;
+          if (document?.cookie) document.cookie = "";
           localStorage.removeItem("token");
           localStorage.removeItem("notificationConsent");
           localStorage.removeItem("message-theme");
@@ -719,5 +716,4 @@ export const userSlice = createSlice({
 });
 
 export default userSlice.reducer;
-export const { setPage, setSuggestionLoading, setFollowing } =
-  userSlice.actions;
+export const { setSuggestionLoading, setFollowing } = userSlice.actions;

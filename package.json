@@ -36,6 +36,7 @@
     "lucide-react": "^0.381.0",
     "next": "14.2.3",
     "next-themes": "^0.3.0",
+    "peerjs": "^1.5.4",
     "qrcode": "^1.5.3",
     "react": "^18",
     "react-dom": "^18",

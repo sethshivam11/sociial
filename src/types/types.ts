@@ -118,10 +118,12 @@ export interface MessageI {
   chat: string;
   content: string;
   kind?: "message" | "location" | "call" | "media" | "audio" | "document";
-  attachments: {
-    url: string;
-    type: "image" | "video" | "audio" | "document";
-  }[];
+  post?: {
+    _id: string;
+    media: string[];
+    kind: "post" | "story";
+    caption: string;
+  };
   reacts: {
     _id: string;
     content: string;

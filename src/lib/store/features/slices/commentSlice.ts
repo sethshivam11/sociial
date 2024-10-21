@@ -21,7 +21,6 @@ const initialState: CommentSliceI = {
   loading: false,
   skeletonLoading: false,
   loadingMore: false,
-  page: 1,
 };
 
 export const createComment = createAsyncThunk(
