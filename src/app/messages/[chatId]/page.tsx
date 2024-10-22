@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef, ReactNode } from "react";
+import { useState, useEffect, useRef, ReactNode } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { nameFallback, themes } from "@/lib/helpers";
 import {
@@ -13,6 +13,7 @@ import {
   PlayIcon,
   Info,
   ArrowDown,
+  Check,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -30,7 +31,6 @@ import MessageOptions from "@/components/MessageOptions";
 import NextImage from "next/image";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useToast } from "@/components/ui/use-toast";
 import {
   Dialog,
   DialogTrigger,
@@ -41,8 +41,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import {
+  editMessage,
   getMessages,
   sendMessage,
+  setEditingMessage,
 } from "@/lib/store/features/slices/messageSlice";
 import {
   getChats,
@@ -56,11 +58,11 @@ import { checkForAssets } from "@/lib/helpers";
 import ScrollableFeed from "react-scrollable-feed";
 import { useDebounceCallback } from "usehooks-ts";
 import { ToastAction } from "@/components/ui/toast";
+import { toast } from "@/components/ui/use-toast";
 
 function Page({ params }: { params: { chatId: string } }) {
   const dispatch = useAppDispatch();
   const location = usePathname();
-  const { toast, dismiss } = useToast();
 
   const { user } = useAppSelector((state) => state.user);
   const {
@@ -68,7 +70,7 @@ function Page({ params }: { params: { chatId: string } }) {
     chats,
     skeletonLoading: isChatLoading,
   } = useAppSelector((state) => state.chat);
-  const { messages, skeletonLoading, typing } = useAppSelector(
+  const { messages, skeletonLoading, editingMessage } = useAppSelector(
     (state) => state.message
   );
 
@@ -95,6 +97,7 @@ function Page({ params }: { params: { chatId: string } }) {
 
   const [theme, setTheme] = useState(themes[0]);
   const [isAtBottom, setIsAtBottom] = useState(false);
+  const [editMessageId, setEditMessageId] = useState("");
 
   const chatId = params.chatId;
   const message = form.watch("message");
@@ -109,10 +112,15 @@ function Page({ params }: { params: { chatId: string } }) {
     a.click();
     document.body.removeChild(a);
   }
-  function onSubmit({ message, reply }: z.infer<typeof formSchema>) {
+  function handleSend({ message, reply }: z.infer<typeof formSchema>) {
     if (!message) return;
+    form.reset();
     dispatch(
-      sendMessage({ content: message, chatId, reply: reply?.content })
+      sendMessage({
+        content: message,
+        chatId,
+        reply: reply?.content,
+      })
     ).then((response) => {
       if (!response.payload?.success) {
         toast({
@@ -120,8 +128,10 @@ function Page({ params }: { params: { chatId: string } }) {
           description: "Something went wrong, while sending message",
           variant: "destructive",
         });
+        if (form.watch("message").length === 0) {
+          form.setValue("message", message);
+        }
       } else {
-        form.reset();
         containerRef.current?.scrollToBottom();
       }
     });
@@ -308,6 +318,26 @@ function Page({ params }: { params: { chatId: string } }) {
     ringtoneRef.current.pause();
     ringtoneRef.current.currentTime = 0;
   }
+  function handleEditing(content: string, messageId: string) {
+    setEditMessageId(messageId);
+    form.setValue("message", content);
+    dispatch(setEditingMessage(true));
+    inputRef.current?.focus();
+  }
+  function handleEdit() {
+    const content = form.watch("message");
+    form.reset();
+    dispatch(editMessage({ messageId: editMessageId, content })).then(
+      (response) => {
+        if (!response.payload?.success) {
+          toast({
+            title: "Cannot edit message",
+            description: response.payload?.message || "Something went wrong",
+          });
+        }
+      }
+    );
+  }
 
   useEffect(() => {
     const savedMessageTheme = JSON.parse(
@@ -331,7 +361,7 @@ function Page({ params }: { params: { chatId: string } }) {
     function handleTyping(e: KeyboardEvent) {
       if (e.target === inputRef.current && e.code === "Enter") {
         e.preventDefault();
-        form.handleSubmit(onSubmit)();
+        form.handleSubmit(handleSend)();
         return form.reset();
       }
     }
@@ -342,7 +372,6 @@ function Page({ params }: { params: { chatId: string } }) {
       window.removeEventListener("keydown", handleTyping);
     };
   }, [dispatch, chatId, setCurrentChat]);
-
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document?.hidden) {
@@ -387,7 +416,7 @@ function Page({ params }: { params: { chatId: string } }) {
             >
               <ChevronLeft />
             </Link>
-            <Link href={chat.isGroupChat ? "" : `/${chat.users[0]?.username}`}>
+            <Link href={chat?.isGroupChat ? "" : `/${chat.users[0]?.username}`}>
               <Avatar className="w-12 h-12 ml-0.5 mr-2 cursor-pointer">
                 <AvatarImage
                   src={
@@ -406,12 +435,11 @@ function Page({ params }: { params: { chatId: string } }) {
               <h1 className="text-xl tracking-tight font-bold leading-4 flex items-center justify-start gap-1 truncate py-1">
                 {chat.groupName || chat.users[0]?.fullName}
               </h1>
-              {!chat.isGroupChat && !typing && (
+              {!chat.isGroupChat && (
                 <p className="text-stone-500 text-sm">
                   @{chat.users[0]?.username}
                 </p>
               )}
-              {typing && <p className="text-stone-500 text-sm">Typing...</p>}
             </Link>
           </div>
           <div className="flex items-center justify-center px-4 gap-0.5">
@@ -512,7 +540,9 @@ function Page({ params }: { params: { chatId: string } }) {
       )}
       <ScrollableFeed
         ref={containerRef}
-        className="w-full flex flex-col gap-1 p-2"
+        className={`w-full flex flex-col gap-1 p-2 ${
+          editingMessage ? "blur-sm pointer-events-none select-none" : ""
+        }`}
         onScroll={(isAtBottom) => setDebouncedBottom(!isAtBottom)}
       >
         <div className="flex flex-col items-center justify-center w-full py-2 gap-2 mb-8">
@@ -624,6 +654,7 @@ function Page({ params }: { params: { chatId: string } }) {
                   isGroupChat={chat.isGroupChat}
                   messageId={message._id}
                   username={message.sender?.username}
+                  handleEditing={handleEditing}
                   setReply={(reply) => {
                     const filteredReply = checkForAssets(
                       reply.content,
@@ -648,13 +679,12 @@ function Page({ params }: { params: { chatId: string } }) {
             </div>
           ))
         )}
-        {/* TODO: Implement sending, sent, error sending */}
       </ScrollableFeed>
       {!skeletonLoading && (
         <div className="bg-white dark:bg-black bottom-0 right-0 w-full px-2.5 flex items-center justify-center z-20">
           <Form {...form}>
             <form
-              onSubmit={form.handleSubmit(onSubmit)}
+              onSubmit={form.handleSubmit(handleSend)}
               className="flex flex-col items-center w-full justify-center gap-2"
             >
               <div
@@ -675,7 +705,7 @@ function Page({ params }: { params: { chatId: string } }) {
                   className="top-1 right-1 h-fit w-fit hover:bg-white dark:hover:bg-black"
                   onClick={() =>
                     form.setValue("reply", {
-                      username: "baila",
+                      username: "",
                       content: "",
                     })
                   }
@@ -710,13 +740,23 @@ function Page({ params }: { params: { chatId: string } }) {
                   )}
                 />
                 <MessageActions message={message} chatId={chatId} />
-                {form.watch("message").length > 0 && (
+                {form.watch("message").length > 0 && !editingMessage && (
                   <Button
                     type="submit"
                     disabled={!message.length}
                     className={`rounded-xl ${theme.color} hover:${theme.color} hover:opacity-80 text-${theme.text}`}
                   >
                     <SendHorizonal />
+                  </Button>
+                )}
+                {form.watch("message").length > 0 && editingMessage && (
+                  <Button
+                    type="button"
+                    disabled={!message.length}
+                    className={`rounded-xl ${theme.color} hover:${theme.color} hover:opacity-80 text-${theme.text}`}
+                    onClick={handleEdit}
+                  >
+                    <Check />
                   </Button>
                 )}
               </div>

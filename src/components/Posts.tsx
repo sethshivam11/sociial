@@ -341,6 +341,9 @@ function Posts({ feed }: Props) {
                       <Share _id={post._id} />
                     </div>
                     <button
+                      title={
+                        user.savedPosts.includes(post._id) ? "Unsave" : "Save"
+                      }
                       onClick={() => {
                         if (user.savedPosts.includes(post._id)) {
                           handleUnsave(post._id);
@@ -449,7 +452,7 @@ function Posts({ feed }: Props) {
           next={() =>
             dispatch(exploreFeed({ page: page + 1, userId: user._id }))
           }
-          className="flex flex-col py-2 sm:px-4 px-2 gap-4 w-full sm:pb-4 pb-20"
+          className="flex flex-col py-2 sm:px-4 px-2 gap-4 w-full sm:pb-4 pb-20 relative"
         >
           {skeletonLoading ? (
             <PostsLoading />
@@ -593,6 +596,9 @@ function Posts({ feed }: Props) {
                       <Share _id={post._id} />
                     </div>
                     <button
+                      title={
+                        user.savedPosts.includes(post._id) ? "Unsave" : "Save"
+                      }
                       onClick={() => {
                         if (user.savedPosts.includes(post._id)) {
                           handleUnsave(post._id);

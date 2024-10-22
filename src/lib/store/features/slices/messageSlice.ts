@@ -5,7 +5,6 @@ const initialState: MessageSliceI = {
   messages: [],
   reactions: [],
   loading: false,
-  typing: false,
   skeletonLoading: false,
   editingMessage: false,
 };
@@ -83,6 +82,9 @@ export const editMessage = createAsyncThunk(
     const parsed = await fetch(`/api/v1/messages/editMessage`, {
       method: "PATCH",
       body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
     return parsed.json();
   }
@@ -102,7 +104,6 @@ const messageSlice = createSlice({
   name: "messages",
   initialState,
   reducers: {
-    // TODO: Implement logic to first add the message to the array and then send the message and update the small text in bottom of message
     setEditingMessage: (state, action) => {
       state.editingMessage = action.payload;
     },
@@ -118,15 +119,13 @@ const messageSlice = createSlice({
       );
     },
     messageUpdated: (state, action) => {
+      console.log(action.payload);
       state.messages = state.messages.map((message) => {
         if (message._id === action.payload.message._id) {
           message.content = action.payload.message.content;
         }
         return message;
       });
-    },
-    setTyping: (state, action) => {
-      state.typing = action.payload;
     },
     reacted: (state, action) => {
       state.messages = state.messages.map((message) => {
@@ -263,6 +262,7 @@ const messageSlice = createSlice({
       })
       .addCase(editMessage.fulfilled, (state, action) => {
         state.loading = false;
+        state.editingMessage = false;
         if (action.payload?.success) {
           state.messages = state.messages.map((message) => {
             if (message._id === action.payload.data._id) {
@@ -274,6 +274,7 @@ const messageSlice = createSlice({
       })
       .addCase(editMessage.rejected, (state) => {
         state.loading = false;
+        state.editingMessage = false;
       });
 
     builder
@@ -299,7 +300,6 @@ export const {
   messageReceived,
   messageDeleted,
   messageUpdated,
-  setTyping,
   reacted,
   unreacted,
 } = messageSlice.actions;

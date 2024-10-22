@@ -129,8 +129,7 @@ export interface MessageI {
     content: string;
     user: string;
   }[];
-  readBy: BasicUserI[];
-  reply: {
+  reply?: {
     username: string;
     content: string;
   };

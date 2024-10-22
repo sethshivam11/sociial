@@ -135,7 +135,6 @@ export interface StorySliceI {
 
 export interface MessageSliceI {
   messages: MessageI[];
-  typing: boolean;
   loading: boolean;
   skeletonLoading: boolean;
   reactions: ReactI[];

@@ -19,13 +19,13 @@ import {
   messageReceived,
   messageUpdated,
   reacted,
-  setTyping,
   unreacted,
 } from "@/lib/store/features/slices/messageSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { socket } from "@/socket";
 import { BasicUserI, CallI, ChatI, MessageI } from "@/types/types";
 import { Phone } from "lucide-react";
+import { useRouter } from "next/navigation";
 import {
   useState,
   createContext,
@@ -54,6 +54,7 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
 
   const dispatch = useAppDispatch();
+  const router = useRouter();
   const { chat } = useAppSelector((state) => state.chat);
 
   useEffect(() => {
@@ -81,14 +82,6 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
     function handleOnlineUsers(payload: string[]) {
       setOnlineUsers(payload);
     }
-    function typingEventStarted() {
-      console.log("typing started");
-      setTyping(true);
-    }
-    function typingEventStopped() {
-      console.log("typing stopped");
-      setTyping(false);
-    }
     function handleMessageReceived(payload: MessageI) {
       if (chat?._id === payload.chat) {
         dispatch(messageReceived(payload));
@@ -96,6 +89,14 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
         toast({
           title: "New Message",
           description: `You have a new message from ${payload.sender.username}`,
+          action: (
+            <ToastAction
+              altText="View"
+              onClick={() => router.push(`/messages/${payload.chat}`)}
+            >
+              View
+            </ToastAction>
+          ),
         });
       }
     }
@@ -104,9 +105,11 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
         dispatch(messageDeleted(payload));
       }
     }
-    function handleMessageUpdate(payload: MessageI) {
-      // TODO: implement this to update a message
-      if (chat?._id === payload.chat) {
+    function handleMessageUpdate(payload: {
+      message: MessageI;
+      user: BasicUserI;
+    }) {
+      if (chat?._id === payload.message.chat) {
         dispatch(messageUpdated(payload));
       }
     }
@@ -131,6 +134,14 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
               ? payload.message.content
               : checkForAssets(payload.message.content, payload.message.kind)
           }`,
+          action: (
+            <ToastAction
+              altText="View"
+              onClick={() => router.push(`/messages/${payload.chat}`)}
+            >
+              View
+            </ToastAction>
+          ),
         });
       }
     }
@@ -259,8 +270,6 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
     socket.on(ChatEventEnum.GET_USERS, handleOnlineUsers);
     socket.on(ChatEventEnum.CONNECTED_EVENT, onConnect);
     socket.on(ChatEventEnum.DISCONNECT_EVENT, onDisconnect);
-    socket.on(ChatEventEnum.TYPING_EVENT, typingEventStarted);
-    socket.on(ChatEventEnum.STOP_TYPING_EVENT, typingEventStopped);
     socket.on(ChatEventEnum.NEW_GROUP_CHAT_EVENT, handleNewGroup);
     socket.on(ChatEventEnum.NEW_CHAT_EVENT, handleNewChat);
     socket.on(ChatEventEnum.SOCKET_ERROR_EVENT, handleError);
@@ -288,8 +297,6 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
     return () => {
       socket.off(ChatEventEnum.CONNECTED_EVENT, onConnect);
       socket.off(ChatEventEnum.DISCONNECT_EVENT, onDisconnect);
-      socket.off(ChatEventEnum.TYPING_EVENT, typingEventStarted);
-      socket.off(ChatEventEnum.STOP_TYPING_EVENT, typingEventStopped);
       socket.off(ChatEventEnum.NEW_GROUP_CHAT_EVENT, handleNewGroup);
       socket.off(ChatEventEnum.NEW_CHAT_EVENT, handleNewChat);
       socket.off(ChatEventEnum.SOCKET_ERROR_EVENT, handleError);
@@ -320,7 +327,13 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
   }, [chat, dispatch]);
 
   return (
-    <SocketContext.Provider value={{ connected, transport, onlineUsers }}>
+    <SocketContext.Provider
+      value={{
+        connected,
+        transport,
+        onlineUsers,
+      }}
+    >
       {children}
     </SocketContext.Provider>
   );

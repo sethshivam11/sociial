@@ -29,6 +29,7 @@ interface Props {
   kind: string;
   createdAt: string;
   isGroupChat: boolean;
+  handleEditing: (content: string, messageId: string) => void;
 }
 
 function MessageOptions({
@@ -40,9 +41,11 @@ function MessageOptions({
   createdAt,
   isGroupChat,
   setReply,
+  handleEditing,
 }: Props) {
   const dispatch = useAppDispatch();
   const { theme } = useTheme();
+
   function copyMessage(message: string) {
     if (navigator.clipboard) {
       navigator.clipboard.writeText(message);
@@ -52,7 +55,6 @@ function MessageOptions({
       });
     }
   }
-
   function handleReact(content: string) {
     dispatch(reactMessage({ messageId, content })).then((response) => {
       if (!response.payload?.success) {
@@ -64,7 +66,6 @@ function MessageOptions({
       }
     });
   }
-
   function handleUnsend() {
     dispatch(unsendMessage(messageId)).then((response) => {
       if (!response.payload?.success) {
@@ -135,12 +136,20 @@ function MessageOptions({
               </MenubarItem>
             )}
             {type === "sent" && (
-              <MenubarItem
-                className="text-red-600 focus:text-red-600 rounded-lg py-2.5"
-                onClick={handleUnsend}
-              >
-                Unsend
-              </MenubarItem>
+              <>
+                <MenubarItem
+                  className="text-sky-600 focus:text-sky-600 rounded-lg py-2.5"
+                  onClick={() => handleEditing(message, messageId)}
+                >
+                  Edit
+                </MenubarItem>
+                <MenubarItem
+                  className="text-red-600 focus:text-red-600 rounded-lg py-2.5"
+                  onClick={handleUnsend}
+                >
+                  Unsend
+                </MenubarItem>
+              </>
             )}
             <hr className="w-full text-stone-500" />
             <div className="text-stone-500 text-sm px-2 py-1">

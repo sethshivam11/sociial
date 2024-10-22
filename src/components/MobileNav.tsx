@@ -4,6 +4,13 @@ import { Bell, Mail, Settings } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Lobster_Two } from "next/font/google";
+
+const lobster = Lobster_Two({
+  subsets: ["latin"],
+  weight: "700",
+  style: ["italic"],
+});
 
 interface Props {
   hideButtons?: boolean;
@@ -16,7 +23,9 @@ function MobileNav({ hideButtons }: Props) {
   const { user, skeletonLoading } = useAppSelector((state) => state.user);
   return (
     <div className="bg-stone-100 dark:bg-stone-900 h-16 p-3 top-0 left-0 col-span-10 sm:static sticky w-full sm:hidden flex items-center justify-between z-20">
-      <div className="flex items-center gap-2 text-2xl tracking-tighter font-extrabold">
+      <div
+        className={`flex items-center gap-2 text-3xl tracking-tighter font-extrabold ${lobster.className}`}
+      >
         <Image
           src="/logo.svg"
           alt=""
