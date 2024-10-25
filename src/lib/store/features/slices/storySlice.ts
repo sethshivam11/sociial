@@ -30,9 +30,23 @@ export const createStory = createAsyncThunk(
     stories.forEach((story) => {
       formData.append("media", story);
     });
-    const parsed = await fetch("/api/v1//stories/new", {
+    const parsed = await fetch("/api/v1/stories/new", {
       method: "POST",
       body: formData,
+    });
+    return parsed.json();
+  }
+);
+
+export const replyStory = createAsyncThunk(
+  "stories/reply",
+  async ({ storyId, content }: { storyId: string; content: string }) => {
+    const parsed = await fetch("/api/v1/stories/reply", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ storyId, content }),
     });
     return parsed.json();
   }
@@ -124,6 +138,17 @@ const storySlice = createSlice({
       });
 
     builder
+      .addCase(replyStory.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(replyStory.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(replyStory.rejected, (state) => {
+        state.loading = false;
+      });
+
+    builder
       .addCase(getStories.pending, (state) => {
         state.skeletonLoading = true;
       })
@@ -148,6 +173,8 @@ const storySlice = createSlice({
     builder.addCase(getUserStory.fulfilled, (state, action) => {
       if (action.payload?.success) {
         state.userStory = action.payload.data;
+      } else if (action.payload?.message === "No stories found") {
+        state.userStory = initialState.userStory;
       }
     });
 

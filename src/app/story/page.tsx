@@ -357,7 +357,7 @@ function Story() {
           onMouseDown={() => setIsPaused(true)}
           onMouseUp={() => setIsPaused(false)}
         />
-        {userStory?.seenBy.length && (
+        {userStory?.seenBy.length > 0 && (
           <Dialog onOpenChange={setIsPaused}>
             <DialogTrigger onClick={(e) => e.stopPropagation()} asChild>
               <button className="absolute flex flex-col items-start justify-center bg-gradient-to-b from-transparent to-transparent/50 bottom-2 left-2 text-stone-400 text-xs gap-1">

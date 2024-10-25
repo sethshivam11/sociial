@@ -126,11 +126,13 @@ export async function handleConsent(): Promise<{
 
 export function checkForAssets(message: string, kind: string): string {
   switch (kind) {
+    case "post":
+      return `🏞️ Post`;
     case "location":
       return `📍 Location`;
     case "image":
-      return `📷 Image`;
-    case "video":
+      return `📷 Photo`;
+    case "media":
       return `🎥 Video`;
     case "audio":
       return `🔊 Audio`;
@@ -203,6 +205,7 @@ export const ChatEventEnum = Object.freeze({
   NEW_CALL_EVENT: "newCall",
   CALL_ACCEPTED_EVENT: "callAccepted",
   CALL_DISCONNECTED_EVENT: "callDisconnected",
-  NEGOTIATE_EVENT: "negotiateCall",
-  GET_ONLINE_STATUS: "getOnlineStatus",
+  CALL_AUDIO_EVENT: "callAudio",
+  CALL_VIDEO_EVENT: "callVideo",
+  CALL_CAMERA_SWITCH_EVENT: "callCameraSwitched",
 });

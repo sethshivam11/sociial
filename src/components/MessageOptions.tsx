@@ -128,28 +128,30 @@ function MessageOptions({
               Reply
             </MenubarItem>
             {kind === "message" && (
-              <MenubarItem
-                className=" rounded-lg py-2.5"
-                onClick={() => copyMessage(message)}
-              >
-                Copy Message
-              </MenubarItem>
-            )}
-            {type === "sent" && (
               <>
                 <MenubarItem
-                  className="text-sky-600 focus:text-sky-600 rounded-lg py-2.5"
-                  onClick={() => handleEditing(message, messageId)}
+                  className=" rounded-lg py-2.5"
+                  onClick={() => copyMessage(message)}
                 >
-                  Edit
+                  Copy Message
                 </MenubarItem>
-                <MenubarItem
-                  className="text-red-600 focus:text-red-600 rounded-lg py-2.5"
-                  onClick={handleUnsend}
-                >
-                  Unsend
-                </MenubarItem>
+                {type === "sent" && (
+                  <MenubarItem
+                    className="text-sky-600 focus:text-sky-600 rounded-lg py-2.5"
+                    onClick={() => handleEditing(message, messageId)}
+                  >
+                    Edit
+                  </MenubarItem>
+                )}
               </>
+            )}
+            {type === "sent" && (
+              <MenubarItem
+                className="text-red-600 focus:text-red-600 rounded-lg py-2.5"
+                onClick={handleUnsend}
+              >
+                Unsend
+              </MenubarItem>
             )}
             <hr className="w-full text-stone-500" />
             <div className="text-stone-500 text-sm px-2 py-1">

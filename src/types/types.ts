@@ -117,12 +117,13 @@ export interface MessageI {
   sender: BasicUserI;
   chat: string;
   content: string;
-  kind?: "message" | "location" | "call" | "media" | "audio" | "document";
+  kind?: "message" | "location" | "media" | "audio" | "document" | "post";
   post?: {
     _id: string;
     media: string[];
     kind: "post" | "story";
     caption: string;
+    user: BasicUserI;
   };
   reacts: {
     _id: string;

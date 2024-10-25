@@ -36,6 +36,20 @@ export const sendMessage = createAsyncThunk(
   }
 );
 
+export const sendPost = createAsyncThunk(
+  "messages/sharePost",
+  async (data: { postId: string; people: string[] }) => {
+    const parsed = await fetch(`/api/v1/messages/sharePost`, {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return parsed.json();
+  }
+);
+
 export const getMessages = createAsyncThunk(
   "messages/getMessages",
   async (chatId: string) => {
@@ -119,7 +133,6 @@ const messageSlice = createSlice({
       );
     },
     messageUpdated: (state, action) => {
-      console.log(action.payload);
       state.messages = state.messages.map((message) => {
         if (message._id === action.payload.message._id) {
           message.content = action.payload.message.content;
@@ -165,6 +178,17 @@ const messageSlice = createSlice({
         }
       })
       .addCase(sendMessage.rejected, (state) => {
+        state.loading = false;
+      });
+
+    builder
+      .addCase(sendPost.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(sendPost.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(sendPost.rejected, (state) => {
         state.loading = false;
       });
 

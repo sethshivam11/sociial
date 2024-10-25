@@ -161,6 +161,14 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
       toast({
         title: "New Group",
         description: `${payload.user.username} added you to a group`,
+        action: (
+          <ToastAction
+            altText="View"
+            onClick={() => router.push(`/messages/${payload.chat}`)}
+          >
+            View
+          </ToastAction>
+        ),
       });
     }
     function handleGroupDelete(payload: { chat: ChatI; user: BasicUserI }) {
@@ -291,8 +299,6 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
     socket.on(ChatEventEnum.NEW_CALL_EVENT, handleCall);
     socket.on(ChatEventEnum.CALL_ACCEPTED_EVENT, handleCallAccepted);
     socket.on(ChatEventEnum.CALL_DISCONNECTED_EVENT, handleCallDisconnected);
-    socket.on(ChatEventEnum.NEGOTIATE_EVENT, handleNegotiate);
-    socket.on(ChatEventEnum.GET_ONLINE_STATUS, handleOnlineStatus);
 
     return () => {
       socket.off(ChatEventEnum.CONNECTED_EVENT, onConnect);
@@ -321,8 +327,6 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
       socket.off(ChatEventEnum.NEW_CALL_EVENT, handleCall);
       socket.off(ChatEventEnum.CALL_ACCEPTED_EVENT, handleCallAccepted);
       socket.off(ChatEventEnum.CALL_DISCONNECTED_EVENT, handleCallDisconnected);
-      socket.off(ChatEventEnum.NEGOTIATE_EVENT, handleNegotiate);
-      socket.off(ChatEventEnum.GET_ONLINE_STATUS, handleOnlineStatus);
     };
   }, [chat, dispatch]);
 

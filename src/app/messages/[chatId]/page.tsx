@@ -139,11 +139,18 @@ function Page({ params }: { params: { chatId: string } }) {
   function giveAssets(
     content: string,
     kind: string,
+    reply: boolean,
     post?: {
       _id: string;
       media: string[];
       kind: string;
       caption: string;
+      user: {
+        _id: string;
+        username: string;
+        fullName: string;
+        avatar: string;
+      };
     }
   ): ReactNode {
     switch (kind) {
@@ -156,23 +163,45 @@ function Page({ params }: { params: { chatId: string } }) {
           );
         } else {
           return (
-            <Link
-              href={
-                post.kind === "video"
-                  ? `/video/${post._id}`
-                  : `/post/${post?._id}`
-              }
-              className="rounded-xl w-60 aspect-square"
-            >
-              <NextImage
-                src={post.media[0]}
-                width="240"
-                height="240"
-                alt=""
-                className="pointer-events-none select-none object-contain rounded-xl"
-              />
-              <span className="p-2 mt-3">{post.caption}</span>
-            </Link>
+            <div className="flex flex-col gap-1">
+              <Link
+                href={
+                  post.kind === "video"
+                    ? `/video/${post._id}`
+                    : `/post/${post?._id}`
+                }
+                className="rounded-2xl aspect-square py-1 flex flex-col gap-1"
+              >
+                <div className="flex items-center p-2 pb-0 gap-2">
+                  <Avatar>
+                    <AvatarImage src={post.user.avatar} />
+                    <AvatarFallback>
+                      {nameFallback(post.user?.fullName)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col justify-center">
+                    <h1 className="font-semibold tracking-tight leading-3">
+                      {post.user.fullName}
+                    </h1>
+                    <span className="text-stone-500 text-sm">
+                      @{post.user?.username}
+                    </span>
+                  </div>
+                </div>
+                <NextImage
+                  src={post.media[0]}
+                  width="240"
+                  height="240"
+                  alt=""
+                  className={`pointer-events-none aspect-square select-none object-contain ${
+                    post.caption ? "" : "rounded-b-xl"
+                  }`}
+                />
+                <span className="px-3 pb-2 pt-1 truncate w-60">
+                  {post.caption}
+                </span>
+              </Link>
+            </div>
           );
         }
       case "location":
@@ -604,7 +633,7 @@ function Page({ params }: { params: { chatId: string } }) {
                 }`}
               >
                 <span
-                  className={`py-1 rounded-xl -mb-1 px-3 opacity-70 truncate max-w-full ${
+                  className={`rounded-xl -mb-1 py-1 px-3 opacity-70 truncate max-w-full ${
                     message.sender?.username !== user.username
                       ? `${theme.color} text-${theme.text}`
                       : "bg-stone-300 dark:bg-stone-800"
@@ -613,11 +642,14 @@ function Page({ params }: { params: { chatId: string } }) {
                   {message?.reply?.content}
                 </span>
                 <div
-                  className={`py-2 px-4 rounded-2xl w-fit relative ${
-                    message.sender?.username !== user.username
-                      ? `${theme.color} text-${theme.text} max-w-3/4`
-                      : "bg-stone-300 dark:bg-stone-800 max-w-3/4"
-                  } ${
+                  className={`rounded-2xl w-fit relative 
+                    ${message.kind === "post" ? "" : "py-2 px-4"}
+                    ${
+                      message.kind !== "post" &&
+                      message.sender?.username !== user.username
+                        ? `${theme.color} text-${theme.text} max-w-3/4`
+                        : "bg-stone-300 dark:bg-stone-800 max-w-3/4"
+                    } ${
                     messages[index - 1]?.sender?.username ===
                     message.sender?.username
                       ? "mb-1"
@@ -628,6 +660,7 @@ function Page({ params }: { params: { chatId: string } }) {
                   {giveAssets(
                     message.content,
                     message.kind || "message",
+                    message.sender?.username !== user.username,
                     message?.post
                   )}
                   {message?.reacts?.length > 0 && (
@@ -695,7 +728,7 @@ function Page({ params }: { params: { chatId: string } }) {
                 <div className="flex gap-2 text-sm overflow-hidden">
                   {form.watch("reply")?.username}:
                   <span className="text-stone-500 truncate max-w-full">
-                    {form.watch("reply")?.content.slice(0, 100)}
+                    {form.watch("reply")?.content?.slice(0, 100)}
                   </span>
                 </div>
                 <Button

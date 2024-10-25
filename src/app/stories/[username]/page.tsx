@@ -33,6 +33,7 @@ import { StoryI } from "@/types/types";
 import {
   getStories,
   likeStory,
+  replyStory,
   seenStory,
   unlikeStory,
 } from "@/lib/store/features/slices/storySlice";
@@ -69,7 +70,12 @@ function Story({ params }: Props) {
   const router = useRouter();
   const { username } = params;
   const { user, loading: userLoading } = useAppSelector((state) => state.user);
-  const { stories, skeletonLoading } = useAppSelector((state) => state.story);
+  const {
+    stories,
+    skeletonLoading,
+    loading: storyLoading,
+  } = useAppSelector((state) => state.story);
+  
   const nextRef = useRef<HTMLButtonElement>(null);
   const prevRef = useRef<HTMLButtonElement>(null);
   const closeRef1 = useRef<HTMLButtonElement>(null);
@@ -94,20 +100,24 @@ function Story({ params }: Props) {
   const [timer, setTimer] = useState<Timer | null>(null);
   const [imageLoading, setImageLoading] = useState(true);
 
-  function onSubmit(data: { reply: string }) {
-    console.log(data.reply);
-    toast({
-      title: "Cannot send reply",
-      description: "This feature is not available yet",
-      variant: "destructive",
+  function onSubmit({ reply }: { reply: string }) {
+    if (!reply) return;
+    dispatch(
+      replyStory({ content: reply, storyId: currentStory?._id || "" })
+    ).then((response) => {
+      if (!response.payload?.success) {
+        toast({
+          title: "Cannot send reply",
+          description: response.payload?.message || "Something went wrong!",
+          variant: "destructive",
+        });
+      }
     });
   }
-
   function handleTouchStart(e: TouchEvent<HTMLButtonElement>) {
     setIsPaused(true);
     touchStartRef.current = e.touches[0].clientX;
   }
-
   function handleTouchEnd(e: TouchEvent<HTMLButtonElement>) {
     const touchEnd = e.changedTouches[0].clientX;
     const delta = touchEnd - touchStartRef.current;
@@ -134,7 +144,6 @@ function Story({ params }: Props) {
       }
     }
   }
-
   function handleLike(storyId: string) {
     dispatch(likeStory({ storyId, userId: user._id })).then((response) => {
       if (!response.payload?.success) {
@@ -146,7 +155,6 @@ function Story({ params }: Props) {
       }
     });
   }
-
   function handleUnlike(storyId: string) {
     dispatch(unlikeStory({ storyId, userId: user._id })).then((response) => {
       if (!response.payload?.success) {
@@ -199,7 +207,6 @@ function Story({ params }: Props) {
   useEffect(() => {
     if (!userLoading && !stories.length) dispatch(getStories());
   }, [dispatch, userLoading, stories.length]);
-
   useEffect(() => {
     function getStory() {
       setLoading(true);
@@ -249,7 +256,6 @@ function Story({ params }: Props) {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [router, query, username, stories]);
-
   useEffect(() => {
     if (
       !loading &&
@@ -260,7 +266,6 @@ function Story({ params }: Props) {
       notFound();
     }
   }, [loading, currentStory, skeletonLoading, stories.length]);
-
   useEffect(() => {
     const timer: Timer = new Timer(function () {
       nextRef.current?.click();
@@ -271,7 +276,6 @@ function Story({ params }: Props) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
-
   useEffect(() => {
     const animation = progressBarRef.current?.getAnimations()[0];
     if (animation) {
@@ -283,7 +287,6 @@ function Story({ params }: Props) {
       timer?.resume();
     }
   }, [isPaused, timer]);
-
   useEffect(() => {
     if (
       currentStory &&
@@ -316,7 +319,6 @@ function Story({ params }: Props) {
       }
     }
   }, [index, currentStory, router, stories, dispatch, user._id]);
-
   useEffect(() => {
     if (!currentStory) return;
     const storyIndex = stories.indexOf(currentStory);
@@ -358,7 +360,6 @@ function Story({ params }: Props) {
       : null;
     setLinkedStories({ prevStory2, prevStory1, nextStory1, nextStory2 });
   }, [currentStory, stories]);
-
   useEffect(() => {
     if (imageLoading) {
       setIsPaused(true);
@@ -589,48 +590,52 @@ function Story({ params }: Props) {
                       ref={inputRef}
                       autoComplete="off"
                       inputMode="text"
-                      className="bg-transparent rounded-full placeholder:text-stone-300 ring-2 border-0 ring-stone-200 focus-visible:ring-0 dark:focus-within:ring-offset-stone-200"
                     />
                   </FormControl>
                 </FormItem>
               )}
             />
-            <Button
-              variant="ghost"
-              size="icon"
-              className="px-2 w-fit hover:bg-transparent rounded-full"
-              disabled={loading}
-              onClick={() => {
-                if (loading) return;
-                if (currentStory.likes.includes(user._id)) {
-                  handleUnlike(currentStory._id);
-                } else {
-                  handleLike(currentStory._id);
-                }
-              }}
-              type="button"
-            >
-              <Heart
-                size="30"
-                fill={
-                  currentStory.likes.includes(user._id)
-                    ? "rgb(244 63 94)"
-                    : "none"
-                }
-                className={`active:scale-110 transition-all  ${
-                  currentStory.likes.includes(user._id) ? "text-rose-500" : ""
-                }`}
-              />
-            </Button>
-            {form.watch("reply").length > 0 && (
+            {form.watch("reply").length === 0 ? (
               <Button
                 variant="ghost"
                 size="icon"
                 className="px-2 w-fit hover:bg-transparent rounded-full"
+                disabled={loading}
+                onClick={() => {
+                  if (loading) return;
+                  if (currentStory.likes.includes(user._id)) {
+                    handleUnlike(currentStory._id);
+                  } else {
+                    handleLike(currentStory._id);
+                  }
+                }}
+                type="button"
+              >
+                <Heart
+                  size="30"
+                  fill={
+                    currentStory.likes.includes(user._id)
+                      ? "rgb(244 63 94)"
+                      : "none"
+                  }
+                  className={`active:scale-110 transition-all  ${
+                    currentStory.likes.includes(user._id) ? "text-rose-500" : ""
+                  }`}
+                />
+              </Button>
+            ) : (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="ml-1 px-2"
                 disabled={form.getValues("reply") === ""}
                 type="submit"
               >
-                <SendHorizonal size="30" />
+                {storyLoading ? (
+                  <Loader2 className="animate-spin" />
+                ) : (
+                  <SendHorizonal />
+                )}
               </Button>
             )}
           </form>
