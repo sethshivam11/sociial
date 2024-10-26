@@ -324,6 +324,8 @@ const chatSlice = createSlice({
         state.skeletonLoading = false;
         if (action.payload?.success) {
           state.chats = action.payload.data;
+        } else if (action.payload?.message === "No chats found") {
+          state.chats = [];
         }
       })
       .addCase(getChats.rejected, (state) => {

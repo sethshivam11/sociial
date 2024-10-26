@@ -11,23 +11,39 @@ const initialState: MessageSliceI = {
 
 export const sendMessage = createAsyncThunk(
   "messages/sendMessage",
-  async (message: {
-    content: string;
+  async ({
+    content,
+    chatId,
+    reply,
+    kind,
+    attachment,
+  }: {
+    content?: string;
     chatId: string;
     reply?: string;
-    kind?: "message" | "location" | "call" | "media" | "audio" | "document";
-    attachment?: Blob[];
+    kind?:
+      | "message"
+      | "location"
+      | "image"
+      | "video"
+      | "audio"
+      | "document"
+      | "post";
+    attachment?: File;
   }) => {
+    if (!content && !attachment)
+      return {
+        success: false,
+        message: "message or attachment is required",
+        data: null,
+        status: 404,
+      };
     const formData = new FormData();
-    formData.append("message", message.content);
-    formData.append("chatId", message.chatId);
-    if (message.reply) formData.append("reply", message.reply);
-    if (message.attachment) {
-      message.attachment.forEach((file) => {
-        formData.append("attachments", file);
-      });
-    }
-    if (message.kind) formData.append("kind", message.kind);
+    if (content) formData.append("message", content);
+    formData.append("chatId", chatId);
+    if (reply) formData.append("reply", reply);
+    if (attachment) formData.append("attachment", attachment);
+    if (kind) formData.append("kind", kind);
     const parsed = await fetch("/api/v1/messages/send", {
       method: "POST",
       body: formData,

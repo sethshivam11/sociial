@@ -139,7 +139,6 @@ function Page({ params }: { params: { chatId: string } }) {
   function giveAssets(
     content: string,
     kind: string,
-    reply: boolean,
     post?: {
       _id: string;
       media: string[];
@@ -224,7 +223,7 @@ function Page({ params }: { params: { chatId: string } }) {
         return (
           <Dialog>
             <DialogTrigger asChild>
-              <button className="w-40 min-h-20 max-h-40 rounded-sm">
+              <button className="w-40 min-h-20 max-h-40 rounded-sm overflow-hidden">
                 <NextImage
                   src={content}
                   alt=""
@@ -259,7 +258,7 @@ function Page({ params }: { params: { chatId: string } }) {
         return (
           <Dialog>
             <DialogTrigger asChild>
-              <button className="w-40 min-h-20 max-h-40 rounded-sm relative">
+              <button className="w-40 min-h-20 max-h-40 rounded-sm relative overflow-hidden">
                 <span className="absolute z-10 top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 bg-transparent/50 rounded-full p-2">
                   <PlayIcon fill="white" color="white" />
                 </span>
@@ -308,9 +307,7 @@ function Page({ params }: { params: { chatId: string } }) {
             className={`flex items-center justify-between gap-4 rounded-full py-2 w-fit`}
           >
             <FileIcon size="40" />
-            <p className="">
-              ...{content.slice(content.length - 10, content.length)}
-            </p>
+            <p>...{content.slice(content.length - 10, content.length)}</p>
             <Button
               size="icon"
               variant="secondary"
@@ -660,7 +657,6 @@ function Page({ params }: { params: { chatId: string } }) {
                   {giveAssets(
                     message.content,
                     message.kind || "message",
-                    message.sender?.username !== user.username,
                     message?.post
                   )}
                   {message?.reacts?.length > 0 && (
@@ -746,7 +742,7 @@ function Page({ params }: { params: { chatId: string } }) {
                   <X size="30" />
                 </Button>
               </div>
-              <div className="flex items-end w-full justify-center gap-2 py-2">
+              <div className="flex justify-center items-center w-full gap-2 py-2">
                 <EmojiKeyboard
                   setMessage={(emoji: string): void =>
                     form.setValue("message", emoji)

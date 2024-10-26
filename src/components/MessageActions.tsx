@@ -6,7 +6,6 @@ import {
   MapPin,
   MicIcon,
   Paperclip,
-  History,
   FileIcon,
 } from "lucide-react";
 import {
@@ -120,10 +119,10 @@ function MessageActions({ message, chatId }: Props) {
           </MenubarContent>
         </MenubarMenu>
       </Menubar>
-      <CameraDialog open={cameraOpen} setOpen={setCameraOpen} />
-      <MediaDialog open={mediaOpen} setOpen={setMediaOpen} />
-      <AudioDialog open={audioOpen} setOpen={setAudioOpen} />
-      <DocumentDialog open={documentOpen} setOpen={setDocumentOpen} />
+      <CameraDialog open={cameraOpen} setOpen={setCameraOpen} chatId={chatId} />
+      <MediaDialog open={mediaOpen} setOpen={setMediaOpen} chatId={chatId} />
+      <AudioDialog open={audioOpen} setOpen={setAudioOpen} chatId={chatId} />
+      <DocumentDialog open={documentOpen} setOpen={setDocumentOpen} chatId={chatId} />
     </>
   );
 }

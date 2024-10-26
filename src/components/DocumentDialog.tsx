@@ -1,20 +1,45 @@
 import { useRef, useState } from "react";
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from "./ui/dialog";
-import { FileIcon, PlusCircle, SendHorizonal } from "lucide-react";
+import { FileIcon, Loader2, PlusCircle, SendHorizonal } from "lucide-react";
 import { Button } from "./ui/button";
-import { Label } from "./ui/label";
 import { toast } from "./ui/use-toast";
+import { useAppDispatch, useAppSelector } from "@/lib/store/store";
+import { sendMessage } from "@/lib/store/features/slices/messageSlice";
 
 interface Props {
   open: boolean;
   setOpen: (open: boolean) => void;
+  chatId: string;
 }
 
-function DocumentDialog({ open, setOpen }: Props) {
+function DocumentDialog({ open, setOpen, chatId }: Props) {
+  const dispatch = useAppDispatch();
+  const { loading } = useAppSelector((state) => state.message);
+
   const inputRef = useRef<HTMLInputElement>(null);
-  const [files, setFiles] = useState<
-    { name: String; file: File; type: string }[]
-  >([]);
+
+  const [files, setFiles] = useState<File[]>([]);
+
+  async function handleSend() {
+    await Promise.all(
+      files.map(async (file) => {
+        const response = await dispatch(
+          sendMessage({ attachment: file, chatId, kind: "document" })
+        );
+        if (!response.payload?.success) {
+          toast({
+            title: "Cannot send documents",
+            description: response.payload?.message || "Something went wrong",
+            variant: "destructive",
+          });
+        }
+      })
+    );
+    setOpen(false);
+    setFiles([]);
+    if (inputRef.current) inputRef.current.value = "";
+  }
+
   return (
     <Dialog
       open={open}
@@ -52,11 +77,7 @@ function DocumentDialog({ open, setOpen }: Props) {
                 } else {
                   setFiles((prevFiles) => [
                     ...prevFiles,
-                    {
-                      name: files.item(i)?.name as string,
-                      file: files.item(i) as File,
-                      type: files.item(i)?.type as string,
-                    },
+                    files.item(i) as File,
                   ]);
                 }
               }
@@ -82,10 +103,8 @@ function DocumentDialog({ open, setOpen }: Props) {
           <div className="flex flex-col items-center justify-center gap-3 sm:h-40">
             <FileIcon size="70" />
             <p className="text-sm text-gray-500">Add Files & Documents</p>
-            <Button className="rounded-xl">
-              <Label htmlFor="file-input" className="cursor-pointer">
-                Select Files
-              </Label>
+            <Button onClick={() => inputRef.current?.click()}>
+              Select Files
             </Button>
           </div>
         )}
@@ -93,21 +112,21 @@ function DocumentDialog({ open, setOpen }: Props) {
           {files.length !== 0 && (
             <>
               {files.length < 5 && (
-                <Button size="icon" variant="secondary" className="rounded-xl">
-                  <Label htmlFor="file-input" className="cursor-pointer">
-                    <PlusCircle />
-                  </Label>
+                <Button
+                  size="icon"
+                  variant="secondary"
+                  disabled={loading}
+                  onClick={() => inputRef.current?.click()}
+                >
+                  <PlusCircle />
                 </Button>
               )}
-              <Button
-                size="icon"
-                onClick={() => {
-                  setFiles([]);
-                  setOpen(false);
-                }}
-                className="rounded-xl"
-              >
-                <SendHorizonal />
+              <Button size="icon" onClick={handleSend} disabled={loading}>
+                {loading ? (
+                  <Loader2 className="animate-spin" />
+                ) : (
+                  <SendHorizonal />
+                )}
               </Button>
             </>
           )}

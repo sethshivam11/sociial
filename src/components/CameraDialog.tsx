@@ -3,6 +3,7 @@ import { useRef, useState, useEffect, useCallback } from "react";
 import { Dialog, DialogContent, DialogTitle, DialogFooter } from "./ui/dialog";
 import {
   CameraIcon,
+  Loader2,
   RepeatIcon,
   RotateCcw,
   SendHorizonal,
@@ -11,13 +12,19 @@ import {
 import { Button } from "./ui/button";
 import { toast } from "./ui/use-toast";
 import Image from "next/image";
+import { useAppDispatch, useAppSelector } from "@/lib/store/store";
+import { sendMessage } from "@/lib/store/features/slices/messageSlice";
 
 interface Props {
+  chatId: string;
   open: boolean;
   setOpen: (open: boolean) => void;
 }
 
-function CameraDialog({ open, setOpen }: Props) {
+function CameraDialog({ open, setOpen, chatId }: Props) {
+  const dispatch = useAppDispatch();
+  const { loading } = useAppSelector((state) => state.message);
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -43,9 +50,7 @@ function CameraDialog({ open, setOpen }: Props) {
 
     setImage(imageDataUrl);
     stopCamera();
-    console.log(imageDataUrl);
   }
-
   function stopCamera() {
     if (stream) {
       stream.getTracks().forEach((track) => {
@@ -53,12 +58,10 @@ function CameraDialog({ open, setOpen }: Props) {
       });
     }
   }
-
   function resetCamera() {
     stopCamera();
     setImage(undefined);
   }
-
   function switchCamera() {
     if (!multipleCamAvailalble) return;
 
@@ -68,6 +71,28 @@ function CameraDialog({ open, setOpen }: Props) {
     } else {
       getUserMedia({ exact: "user" });
     }
+  }
+  async function handleSend() {
+    if (!image) return;
+    const response = await fetch(image);
+    const blob = await response.blob();
+    const imageFile = new File([blob], `${Date.now()}.jpg`, {
+      type: blob.type,
+    });
+    dispatch(
+      sendMessage({ chatId, attachment: imageFile, kind: "image" })
+    ).then((response) => {
+      if (!response.payload?.success) {
+        toast({
+          title: "Cannot send image",
+          description: response.payload?.message || "Something went wrong!",
+          variant: "destructive",
+        });
+      } else {
+        setOpen(false);
+        resetCamera();
+      }
+    });
   }
 
   const getUserMedia = useCallback(
@@ -93,7 +118,6 @@ function CameraDialog({ open, setOpen }: Props) {
           const capabilties = stream?.getTracks()[0].getCapabilities();
           if (capabilties.facingMode) {
             setActiveCamera(capabilties.facingMode[0]);
-            console.log(capabilties.facingMode[0]);
           }
         })
         .catch((err) => {
@@ -179,8 +203,18 @@ function CameraDialog({ open, setOpen }: Props) {
               >
                 <RotateCcw />
               </Button>
-              <Button size="icon" className="rounded-xl" title="Send">
-                <SendHorizonal />
+              <Button
+                size="icon"
+                className="rounded-xl"
+                title="Send"
+                disabled={loading}
+                onClick={handleSend}
+              >
+                {loading ? (
+                  <Loader2 className="animate-spin" />
+                ) : (
+                  <SendHorizonal />
+                )}
               </Button>
             </>
           ) : (
@@ -192,7 +226,7 @@ function CameraDialog({ open, setOpen }: Props) {
                   multipleCamAvailalble ? "visible" : "invisible"
                 }`}
                 title="Switch Camera"
-                disabled={permisionDenied}
+                disabled={permisionDenied || loading}
                 onClick={() => switchCamera()}
               >
                 <RepeatIcon />

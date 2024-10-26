@@ -9,23 +9,74 @@ import {
 } from "./ui/carousel";
 import Image from "next/image";
 import { Button } from "./ui/button";
-import { ImageIcon, PlusCircle, SendHorizonal, XIcon } from "lucide-react";
-import { Label } from "./ui/label";
+import {
+  ImageIcon,
+  Loader2,
+  PlusCircle,
+  SendHorizonal,
+  XIcon,
+} from "lucide-react";
 import { toast } from "./ui/use-toast";
 import { useAppDispatch } from "@/lib/store/store";
+import { sendMessage } from "@/lib/store/features/slices/messageSlice";
 
 interface Props {
   open: boolean;
   setOpen: (open: boolean) => void;
+  chatId: string;
 }
 
-function MediaDialog({ open, setOpen }: Props) {
+function MediaDialog({ open, setOpen, chatId }: Props) {
   const dispatch = useAppDispatch();
+
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const [loading, setLoading] = useState(false);
   const [files, setFiles] = useState<{ url: string; type: string }[]>([]);
 
-  function handleSend() {
-    console.log(files);
+  async function handleSend() {
+    setLoading(true);
+    const mediaFiles: File[] = [];
+    console.log("converting files to blob");
+    await Promise.all(
+      files.map(async (file) => {
+        const response = await fetch(file.url);
+        const blob = await response.blob();
+        const mediaFile = new File(
+          [blob],
+          `${Date.now()}.${file.type.includes("image") ? "jpg" : "mp4"}`,
+          {
+            type: blob.type,
+          }
+        );
+        mediaFiles.push(mediaFile);
+      })
+    );
+    if (mediaFiles.length === 0) return setLoading(false);
+    console.log("sending files");
+    await Promise.all(
+      mediaFiles.map(async (file) => {
+        const response = await dispatch(
+          sendMessage({
+            attachment: file,
+            chatId,
+            kind: file.type.includes("image") ? "image" : "video",
+          })
+        );
+        if (!response.payload?.success) {
+          toast({
+            title: "Cannot send files",
+            description: response.payload?.message || "Something went wrong",
+            variant: "destructive",
+          });
+        }
+      })
+    ).finally(() => {
+      setOpen(false);
+      setFiles([]);
+      if (inputRef.current) inputRef.current.value = "";
+      setLoading(false);
+    });
   }
 
   return (
@@ -118,29 +169,35 @@ function MediaDialog({ open, setOpen }: Props) {
           <div className="flex flex-col items-center justify-center gap-3 max-sm:h-80 sm:min-h-96">
             <ImageIcon size="70" />
             <p className="text-sm text-gray-500">Add Photos & Videos</p>
-            <Button className="rounded-xl">
-              <Label htmlFor="file-input" className="cursor-pointer">
-                Select Files
-              </Label>
+            <Button onClick={() => inputRef.current?.click()}>
+              Select Files
             </Button>
           </div>
         )}
         {files.length !== 0 && (
           <DialogFooter className="max-sm:flex-row max-sm:justify-end max-sm:gap-2">
             {files.length < 5 && (
-              <Button variant="secondary" size="icon" className="rounded-xl">
-                <Label htmlFor="file-input" className="cursor-pointer">
-                  <PlusCircle />
-                </Label>
+              <Button
+                variant="secondary"
+                size="icon"
+                disabled={loading}
+                onClick={() => inputRef.current?.click()}
+              >
+                <PlusCircle />
               </Button>
             )}
             <Button
               size="icon"
               className="rounded-xl"
               title="Send"
+              disabled={loading}
               onClick={handleSend}
             >
-              <SendHorizonal />
+              {loading ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                <SendHorizonal />
+              )}
             </Button>
           </DialogFooter>
         )}

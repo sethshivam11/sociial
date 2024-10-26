@@ -4,6 +4,7 @@ import { Button } from "./ui/button";
 import {
   Check,
   Disc,
+  Loader2,
   Mic,
   PauseIcon,
   PlayIcon,
@@ -11,17 +12,24 @@ import {
   SendHorizontal,
 } from "lucide-react";
 import { toast } from "./ui/use-toast";
+import { useAppDispatch, useAppSelector } from "@/lib/store/store";
+import { sendMessage } from "@/lib/store/features/slices/messageSlice";
 
 interface Props {
   open: boolean;
   setOpen: (open: boolean) => void;
+  chatId: string;
 }
 
-function AudioDialog({ open, setOpen }: Props) {
+function AudioDialog({ open, setOpen, chatId }: Props) {
+  const dispatch = useAppDispatch();
+  const { loading } = useAppSelector((state) => state.message);
+
   const audioRef = useRef<HTMLAudioElement>(null);
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const progressRef = useRef<HTMLSpanElement>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+
   const [audio, setAudio] = useState("");
   const [recording, setRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -29,6 +37,29 @@ function AudioDialog({ open, setOpen }: Props) {
   const [timeStamp, setTimeStamp] = useState(0);
   const [audioDuration, setAudioDuration] = useState(0);
 
+  function stopRecording() {
+    if (mediaRecorder.current) {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+        setAudioDuration((prev) => prev + 1);
+      }
+      setIsPaused(false);
+      mediaRecorder.current.stop();
+      mediaRecorder.current.ondataavailable = (e) => {
+        const audioURL = URL.createObjectURL(e.data);
+        setAudio(audioURL);
+        if (!audioRef.current) return;
+        audioRef.current.setAttribute("src", audioURL);
+        audioRef.current.load();
+      };
+      mediaRecorder.current = null;
+      setRecording(false);
+      stream?.getTracks().forEach((track) => track.stop());
+      setStream(null);
+      setIsPaused(true);
+    }
+  }
   async function getUserAudio() {
     const devicesAvailable =
       (await navigator.mediaDevices) &&
@@ -57,29 +88,26 @@ function AudioDialog({ open, setOpen }: Props) {
         }
       });
   }
-
-  function stopRecording() {
-    if (mediaRecorder.current) {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-        timerRef.current = null;
-        setAudioDuration((prev) => prev + 1);
-      }
-      setIsPaused(false);
-      mediaRecorder.current.stop();
-      mediaRecorder.current.ondataavailable = (e) => {
-        const audioURL = URL.createObjectURL(e.data);
-        setAudio(audioURL);
-        if (!audioRef.current) return;
-        audioRef.current.setAttribute("src", audioURL);
-        audioRef.current.load();
-      };
-      mediaRecorder.current = null;
-      setRecording(false);
-      stream?.getTracks().forEach((track) => track.stop());
-      setStream(null);
-      setIsPaused(true);
-    }
+  async function handleSend() {
+    const response = await fetch(audio);
+    const blob = await response.blob();
+    const file = new File([blob], `${Date.now()}.mp3`, {
+      type: blob.type,
+    });
+    dispatch(sendMessage({ attachment: file, chatId, kind: "audio" }))
+      .then((response) => {
+        if (!response.payload?.success) {
+          toast({
+            title: "Cannot send audio",
+            description: response.payload?.message || "Something went wrong!",
+            variant: "destructive",
+          });
+        }
+      })
+      .finally(() => {
+        setAudio("");
+        setOpen(false);
+      });
   }
 
   useEffect(() => {
@@ -199,8 +227,18 @@ function AudioDialog({ open, setOpen }: Props) {
                   <PauseIcon fill="currentColor" />
                 )}
               </Button>
-              <Button size="icon" className="rounded-xl" title="Send">
-                <SendHorizontal />
+              <Button
+                size="icon"
+                className="rounded-xl"
+                title="Send"
+                onClick={handleSend}
+                disabled={loading}
+              >
+                {loading ? (
+                  <Loader2 className="animate-spin" />
+                ) : (
+                  <SendHorizontal />
+                )}
               </Button>
             </>
           ) : (

@@ -22,7 +22,10 @@ function Messages({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     dispatch(getChats()).then((response) => {
-      if (!response.payload?.success) {
+      if (
+        !response.payload?.success &&
+        response.payload?.message !== "No chats found"
+      ) {
         return toast({
           title: "Error",
           description: "Something went wrong, while fetching chats",
