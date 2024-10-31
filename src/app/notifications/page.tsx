@@ -55,16 +55,18 @@ function Page() {
 
   function handleDelete(notificationId: string) {
     if (!notificationId) return;
-    dispatch(deleteNotification(notificationId)).then((response) => {
-      if (!response.payload?.success) {
-        toast({
-          title: "Error",
-          description:
-            response.payload?.message || "Notification could not be deleted",
-          variant: "destructive",
-        });
-      }
-    });
+    dispatch(deleteNotification(notificationId))
+      .then((response) => {
+        if (!response.payload?.success) {
+          toast({
+            title: "Cannot delete notification",
+            description:
+              response.payload?.message || "Something went wrong!",
+            variant: "destructive",
+          });
+        }
+      })
+      .finally(() => setDeleteDialog({ open: false, id: "" }));
   }
 
   useEffect(() => {
@@ -126,7 +128,7 @@ function Page() {
               <div
                 className={`flex items-center justify-start ${
                   !notification.read ? "bg-stone-200 dark:bg-stone-800" : ""
-                } hover:bg-stone-300 hover:dark:bg-stone-700 rounded-lg p-2`}
+                } hover:bg-stone-200 hover:dark:bg-stone-800 rounded-lg p-2`}
                 key={index}
               >
                 <Link
@@ -163,7 +165,7 @@ function Page() {
                     </MenubarTrigger>
                     <MenubarContent>
                       <MenubarItem
-                        className="flex gap-2 text-destructive focus:text-destructive"
+                        className="flex gap-2 text-red-600 focus:text-red-600"
                         onClick={() =>
                           setDeleteDialog({
                             open: true,
@@ -190,30 +192,27 @@ function Page() {
             </div>
           </div>
         )}
-        <AlertDialog
-          open={deleteDialog.open}
-          onOpenChange={(open) => {
-            if (!loading) {
-              setDeleteDialog({
-                open,
-                id: "",
-              });
-            }
-          }}
-        >
-          <AlertDialogContent>
+        <AlertDialog open={deleteDialog.open}>
+          <AlertDialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
             <AlertDialogTitle>Delete Notification</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete this notification?
             </AlertDialogDescription>
             <AlertDialogFooter>
+              <AlertDialogCancel
+                onClick={() => {
+                  if (!loading) setDeleteDialog({ open: false, id: "" });
+                }}
+              >
+                Cancel
+              </AlertDialogCancel>
               <Button
                 variant="destructive"
                 onClick={() => handleDelete(deleteDialog.id)}
+                disabled={loading}
               >
-                Delete
+                {loading ? <Loader2 className="animate-spin" /> : "Delete"}
               </Button>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

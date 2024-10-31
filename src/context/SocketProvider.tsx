@@ -3,6 +3,7 @@
 import { ToastAction } from "@/components/ui/toast";
 import { toast } from "@/components/ui/use-toast";
 import { ChatEventEnum, checkForAssets } from "@/lib/helpers";
+import { endCall } from "@/lib/store/features/slices/callSlice";
 import {
   addedToGroup,
   groupDeleted,
@@ -24,8 +25,8 @@ import {
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { socket } from "@/socket";
 import { BasicUserI, CallI, ChatI, MessageI } from "@/types/types";
-import { Phone } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Phone, Video } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
 import {
   useState,
   createContext,
@@ -54,6 +55,7 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
 
   const dispatch = useAppDispatch();
+  const location = usePathname();
   const router = useRouter();
   const { chat } = useAppSelector((state) => state.chat);
 
@@ -243,11 +245,23 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
         });
       }
     }
-    function handleOnlineStatus(payload: boolean) {
-      console.log(payload);
+
+    function rejectCall(callId: string) {
+      dispatch(endCall(callId)).then((response) => {
+        if (!response.payload?.success) {
+          toast({
+            title: "Failed to reject call",
+            description: response.payload?.message || "Something went wrong!",
+            variant: "destructive",
+          });
+        } else {
+          if (location.includes("/call")) {
+            router.push("/call/ended");
+          }
+        }
+      });
     }
 
-    // TODO: implement the following handlers
     function handleCall(payload: CallI) {
       toast({
         title: `${payload.caller.fullName} is calling...`,
@@ -255,25 +269,33 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
         action: (
           <div className="flex gap-2 items-center justify-center">
             <ToastAction
-              altText="Pick up"
+              altText="Answer"
               className="bg-primary hover:bg-primary/80 text-white dark:text-black"
-              onClick={() => console.log(payload)}
+              onClick={() => {
+                if ("vibrate" in navigator) {
+                  navigator.vibrate([200, 50, 200, 50, 200, 50, 200]);
+                }
+                window.open(
+                  `/call?username=${payload.caller.username}&video=${
+                    payload.type === "video"
+                  }&call=${payload._id}`,
+                  "_blank"
+                );
+              }}
             >
-              <Phone />
+              {payload.type === "video" ? <Video /> : <Phone />}
             </ToastAction>
-            <ToastAction altText="Decline" onClick={() => console.log(payload)}>
+            <ToastAction
+              altText="Decline"
+              onClick={() => rejectCall(payload._id)}
+            >
               <Phone className="rotate-[135deg]" />
             </ToastAction>
           </div>
         ),
         duration: 30000,
-        onSwipeEnd: () => console.log(payload),
-        onEscapeKeyDown: () => console.log(payload),
       });
     }
-    function handleCallAccepted() {}
-    function handleCallDisconnected() {}
-    function handleNegotiate() {}
 
     socket.on(ChatEventEnum.GET_USERS, handleOnlineUsers);
     socket.on(ChatEventEnum.CONNECTED_EVENT, onConnect);
@@ -297,8 +319,6 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
     socket.on(ChatEventEnum.NEW_ADMIN_EVENT, handleNewAdmin);
     socket.on(ChatEventEnum.ADMIN_REMOVE_EVENT, handleAdminRemove);
     socket.on(ChatEventEnum.NEW_CALL_EVENT, handleCall);
-    socket.on(ChatEventEnum.CALL_ACCEPTED_EVENT, handleCallAccepted);
-    socket.on(ChatEventEnum.CALL_DISCONNECTED_EVENT, handleCallDisconnected);
 
     return () => {
       socket.off(ChatEventEnum.CONNECTED_EVENT, onConnect);
@@ -325,8 +345,6 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
       socket.off(ChatEventEnum.NEW_ADMIN_EVENT, handleNewAdmin);
       socket.off(ChatEventEnum.ADMIN_REMOVE_EVENT, handleAdminRemove);
       socket.off(ChatEventEnum.NEW_CALL_EVENT, handleCall);
-      socket.off(ChatEventEnum.CALL_ACCEPTED_EVENT, handleCallAccepted);
-      socket.off(ChatEventEnum.CALL_DISCONNECTED_EVENT, handleCallDisconnected);
     };
   }, [chat, dispatch]);
 

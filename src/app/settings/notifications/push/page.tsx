@@ -511,17 +511,7 @@ function Page() {
         <Button
           size="lg"
           onClick={handleUpdatePreferences}
-          disabled={
-            loading ||
-            pauseAll ||
-            skeletonLoading ||
-            Object.keys(notificationPreferences).every(
-              (key) =>
-                notificationPreferences[
-                  key as keyof typeof notificationPreferences
-                ] === pushNotifications[key as keyof typeof pushNotifications]
-            )
-          }
+          disabled={loading || pauseAll || skeletonLoading}
         >
           {loading ? <Loader2 className="animate-spin" /> : "Save Preferences"}
         </Button>

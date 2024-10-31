@@ -205,15 +205,7 @@ function Page() {
         <Button
           size="lg"
           onClick={handleUpdatePreference}
-          disabled={
-            loading ||
-            skeletonLoading ||
-            Object.keys(emailPreferences).every(
-              (key) =>
-                emailPreferences[key as keyof typeof emailPreferences] ===
-                emailNotifications[key as keyof typeof emailNotifications]
-            )
-          }
+          disabled={loading || skeletonLoading}
         >
           Update Preferences
         </Button>
