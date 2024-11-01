@@ -125,7 +125,9 @@ function Page({ params }: { params: { callId: string } }) {
               <Clock size="18" className="mr-2" />
               Duration
             </td>
-            <td>{getTime(call.duration)}</td>
+            <td>
+              {call.startedAt} - {call.endedAt}
+            </td>
           </tr>
         </table>
       </div>

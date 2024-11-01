@@ -17,8 +17,9 @@ const initialState: CallSliceI = {
       avatar: "",
     },
     type: "audio",
+    startedAt: "",
+    endedAt: "",
     createdAt: "",
-    duration: 0,
   },
   calls: [],
   skeletonLoading: false,
@@ -35,7 +36,7 @@ export const getCalls = createAsyncThunk("call/getCalls", async () => {
 export const getCall = createAsyncThunk(
   "calls/getCall",
   async (callId: string) => {
-    const parsed = await fetch(`/api/v1/calls/${callId}`);
+    const parsed = await fetch(`/api/v1/calls/get/${callId}`);
     return parsed.json();
   }
 );
@@ -54,10 +55,10 @@ export const startCall = createAsyncThunk(
   }
 );
 
-export const pingCall = createAsyncThunk(
-  "calls/pingCall",
+export const acceptCall = createAsyncThunk(
+  "calls/acceptCall",
   async (callId: string) => {
-    const parsed = await fetch(`/api/v1/calls/ping/${callId}`, {
+    const parsed = await fetch(`/api/v1/calls/accept/${callId}`, {
       method: "PATCH",
     });
     return parsed.json();
@@ -79,6 +80,7 @@ const callSlice = createSlice({
   initialState,
   reducers: {
     setCall: (state, action) => {
+      console.log(action.payload);
       state.call = action.payload;
     },
   },
@@ -129,16 +131,16 @@ const callSlice = createSlice({
       });
 
     builder
-      .addCase(pingCall.pending, (state) => {
+      .addCase(acceptCall.pending, (state) => {
         state.loading = true;
       })
-      .addCase(pingCall.fulfilled, (state, action) => {
+      .addCase(acceptCall.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload?.success) {
-          state.call = action.payload.data;
+          state.call.endedAt = action.payload.data.startedAt;
         }
       })
-      .addCase(pingCall.rejected, (state) => {
+      .addCase(acceptCall.rejected, (state) => {
         state.loading = false;
       });
 
@@ -149,7 +151,7 @@ const callSlice = createSlice({
       .addCase(endCall.fulfilled, (state, action) => {
         state.endingCall = false;
         if (action.payload?.success) {
-          state.call = action.payload.data;
+          state.call.endedAt = action.payload.data.endedAt;
         }
       })
       .addCase(endCall.rejected, (state) => {

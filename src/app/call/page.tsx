@@ -2,27 +2,32 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "@/components/ui/use-toast";
 import { nameFallback } from "@/lib/helpers";
+import {
+  acceptCall,
+  getCall,
+  startCall,
+} from "@/lib/store/features/slices/callSlice";
 import { getProfile } from "@/lib/store/features/slices/userSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { MicOff, VideoOff } from "lucide-react";
-import Link from "next/link";
-import { notFound, useSearchParams } from "next/navigation";
+import { notFound, useRouter, useSearchParams } from "next/navigation";
 import { useState, useCallback, useEffect } from "react";
 
 function Page() {
   const query = useSearchParams();
   const dispatch = useAppDispatch();
+  const router = useRouter();
 
-  const { user, profile, skeletonLoading } = useAppSelector(
-    (state) => state.user
-  );
+  const { profile, skeletonLoading } = useAppSelector((state) => state.user);
 
   const [username, setUsername] = useState("");
   const [videoEnabled, setVideoEnabled] = useState(false);
   const [permissions, setPermissions] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notFoundError, setNotFoundError] = useState(false);
+  const [call, setCall] = useState("");
 
   const getPermissions = useCallback((video?: boolean) => {
     navigator.mediaDevices
@@ -39,14 +44,48 @@ function Page() {
       })
       .finally(() => setLoading(false));
   }, []);
+  function handleCall() {
+    dispatch(
+      startCall({
+        callee: profile._id,
+        type: query.get("video") ? "video" : "audio",
+      })
+    ).then((response) => {
+      if (!response.payload?.success) {
+        toast({
+          title: "Cannot start call",
+          description: response.payload?.message || "Something went wrong!",
+          variant: "destructive",
+        });
+      } else {
+        router.push(`/call/${username}?video=${videoEnabled}`);
+      }
+    });
+  }
+  function handleAcceptCall() {
+    dispatch(acceptCall(call)).then((response) => {
+      if (response.payload?.success) {
+        router.push(
+          `/call/${username}?video=${videoEnabled}&call=${response.payload.data.caller}`
+        );
+      }
+    });
+  }
 
   useEffect(() => {
     const video = query.get("video");
+    const callId = query.get("call");
     setUsername(query.get("username") || "");
     getPermissions(video === "true");
     setVideoEnabled(video === "true");
+    if (callId) {
+      dispatch(getCall(callId)).then((response) => {
+        if (response.payload?.success) {
+          setCall(callId);
+        }
+      });
+    }
   }, [getPermissions, query]);
-
   useEffect(() => {
     if (!profile?._id) {
       dispatch(getProfile({ username: query.get("username") || "" })).then(
@@ -87,11 +126,21 @@ function Page() {
               </h1>
               <h6 className="text-stone-500 text-lg">@{profile.username}</h6>
             </div>
-            <Link href={`/call/${username}?video=${videoEnabled}`}>
-              <Button className="bg-blue-500 hover:bg-blue-600 text-white rounded-full">
+            {call ? (
+              <Button
+                className="bg-blue-500 hover:bg-blue-600 text-white rounded-full"
+                onClick={handleAcceptCall}
+              >
+                Join Call
+              </Button>
+            ) : (
+              <Button
+                className="bg-blue-500 hover:bg-blue-600 text-white rounded-full"
+                onClick={handleCall}
+              >
                 Start Call
               </Button>
-            </Link>
+            )}
           </>
         )}
       </div>
