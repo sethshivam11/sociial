@@ -385,8 +385,7 @@ export default function Comment({
                             <MoreHorizontal size="16" />
                           </MenubarTrigger>
                           <MenubarContent className="rounded-xl">
-                            {user.username === currentUser.username ||
-                            comment.user._id === currentUser._id ? (
+                            {user.username === currentUser.username || comment.user._id === currentUser._id ? (
                               <MenubarItem
                                 className="rounded-lg py-2 flex gap-2 items-center text-red-600 focus:text-red-600"
                                 onClick={() =>
@@ -399,6 +398,19 @@ export default function Comment({
                                 <Trash2 /> Delete
                               </MenubarItem>
                             ) : (
+                              <MenubarItem
+                                className="rounded-lg py-2 flex gap-2 items-center text-red-600 focus:text-red-600"
+                                onClick={() =>
+                                  setReportDialog({
+                                    dialogOpen: true,
+                                    commentId: comment._id,
+                                  })
+                                }
+                              >
+                                <ShieldAlert /> Report
+                              </MenubarItem>
+                            )}
+                            {user.username === currentUser.username && (
                               <MenubarItem
                                 className="rounded-lg py-2 flex gap-2 items-center text-red-600 focus:text-red-600"
                                 onClick={() =>

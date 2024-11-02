@@ -178,9 +178,11 @@ const commentSlice = createSlice({
       })
       .addCase(deleteComment.fulfilled, (state, action) => {
         state.loading = false;
-        state.comments = state.comments.filter(
-          (comment) => comment._id !== action.meta.arg
-        );
+        if (action.payload?.success) {
+          state.comments = state.comments.filter(
+            (comment) => comment._id !== action.meta.arg
+          );
+        }
       })
       .addCase(deleteComment.rejected, (state) => {
         state.loading = false;

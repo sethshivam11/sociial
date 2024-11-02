@@ -126,7 +126,7 @@ function Navbar() {
         if (response.payload?.success && location === "/sign-in") {
           router.push("/");
         } else if (
-          response.payload?.statusCode === 401 &&
+          response.payload?.message === "Token is required" &&
           location !== "/sign-in"
         ) {
           dispatch(clearCookies()).then(() => router.push("/sign-in"));
