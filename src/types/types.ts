@@ -149,7 +149,7 @@ export interface CallI {
   caller: BasicUserI;
   callee: BasicUserI;
   type: "audio" | "video";
-  startedAt: string;
+  acceptedAt: string;
   endedAt: string;
   createdAt: string;
 }

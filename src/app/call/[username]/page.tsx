@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { useSocket } from "@/context/SocketProvider";
 import { ChatEventEnum, nameFallback } from "@/lib/helpers";
-import { endCall } from "@/lib/store/features/slices/callSlice";
+import { endCall, updateCall } from "@/lib/store/features/slices/callSlice";
 import { getProfile } from "@/lib/store/features/slices/userSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import {
@@ -20,7 +20,7 @@ import {
 import { useSearchParams, useRouter, notFound } from "next/navigation";
 import { useRef, useState, useEffect, useCallback } from "react";
 import { socket } from "@/socket";
-import usePeer, { PeerProvider } from "@/context/PeerProvider";
+import Peer, { SignalData } from "simple-peer";
 
 function Page({ params }: { params: { username: string } }) {
   const router = useRouter();
@@ -29,17 +29,7 @@ function Page({ params }: { params: { username: string } }) {
   const { user, profile } = useAppSelector((state) => state.user);
   const { call } = useAppSelector((state) => state.call);
   const { onlineUsers } = useSocket();
-  const {
-    peer,
-    createOffer,
-    createAnswer,
-    sendStream,
-    setRemoteAnswer,
-    remoteStream,
-    closePeer,
-  } = usePeer();
 
-  // const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const peerVideoRef = useRef<HTMLVideoElement>(null);
   const selfVideoRef = useRef<HTMLVideoElement>(null);
   const selfVideoContainerRef = useRef<HTMLDivElement>(null);
@@ -53,7 +43,7 @@ function Page({ params }: { params: { username: string } }) {
   const [multipleCamAvailalble, setMultipleCamAvailable] = useState(false);
   const [notFoundError, setNotFoundError] = useState(false);
   const [callActive, setCallActive] = useState(false);
-  const [timer, setTimer] = useState(0);
+  const [callerSignal, setCallerSignal] = useState<SignalData>();
 
   function handleCallEnd() {
     dispatch(endCall(call._id)).then((response) => {
@@ -99,6 +89,59 @@ function Page({ params }: { params: { username: string } }) {
       setSelfVideoPaused(true);
     }
   }
+  function callPeer(userId: string) {
+    if (!stream) return;
+    const peer = new Peer({
+      initiator: true,
+      trickle: false,
+      stream,
+    });
+
+    peer.on("signal", (data: SignalData) => {
+      socket.emit(ChatEventEnum.CALL_HANDSHAKE_EVENT, {
+        userId,
+        data,
+      });
+    });
+
+    peer.on("stream", (stream) => {
+      if (selfVideoRef.current) selfVideoRef.current.srcObject = stream;
+    });
+
+    socket.on(ChatEventEnum.CALL_ACCEPTED_EVENT, ({ data }) => {
+      setCallActive(true);
+      peer.signal(data);
+    });
+  }
+  function acceptCall(userId: string, signal?: SignalData) {
+    if (!stream) return;
+    const peer = new Peer({
+      initiator: false,
+      trickle: false,
+      stream,
+    });
+
+    peer.on("signal", (data: SignalData) => {
+      console.log(data);
+      socket.emit(ChatEventEnum.CALL_ACCEPTED_EVENT, {
+        userId,
+        data,
+      });
+    });
+
+    peer.on("stream", (stream) => {
+      if (peerVideoRef.current) peerVideoRef.current.srcObject = stream;
+      dispatch(updateCall({ callId: call._id, acceptedAt: `${new Date()}` }));
+    });
+
+    if (signal) {
+      peer.signal(signal);
+    } else if (callerSignal) {
+      peer.signal(callerSignal);
+    } else {
+      console.log("Unable to connect: No signal recieved");
+    }
+  }
 
   const getUserMedia = useCallback(
     async (video: boolean, mode?: "user" | "environment") => {
@@ -114,13 +157,13 @@ function Page({ params }: { params: { username: string } }) {
           setStream(stream);
           if (!selfVideoRef.current || !peerVideoRef.current) return;
           selfVideoRef.current.srcObject = stream;
-          // const capabilties = stream
-          //   ?.getTracks()
-          //   .filter(({ kind }) => kind === "video")[0]
-          //   .getCapabilities();
-          // if (capabilties?.facingMode) {
-          //   setActiveCamera(capabilties?.facingMode[0]);
-          // }
+          const capabilties = stream
+            ?.getTracks()
+            .filter(({ kind }) => kind === "video")[0]
+            .getCapabilities();
+          if (capabilties?.facingMode) {
+            setActiveCamera(capabilties?.facingMode[0]);
+          }
         })
         .catch((err) => {
           console.log(err);
@@ -164,7 +207,6 @@ function Page({ params }: { params: { username: string } }) {
       setSelfVideoPaused(true);
       getUserMedia(false);
     }
-    const peerId = query.get("call");
   }, [getUserMedia, query]);
   useEffect(() => {
     if (!profile?._id) {
@@ -178,145 +220,136 @@ function Page({ params }: { params: { username: string } }) {
       setNotFoundError(true);
     }
   }, [dispatch, profile?._id, params]);
-  // useEffect(() => {
-  // timeoutRef.current = setTimeout(() => {
-  //   if (!call._id) {
-  //     console.log("Call not found");
-  //   }
-  // }, 30000);
+  useEffect(() => {
+    function handleHandshake({ data }: { data: SignalData }) {
+      setCallerSignal(data);
+      acceptCall(call.callee._id, data);
+    }
 
-  // function handleCallAccepted() {
-  //   setCallActive(true);
-  //   setInterval(() => {
-  //     setTimer((prevTime) => prevTime + 1);
-  //   }, 1000);
-  // }
-  // function handleCallDisconnected() {
-  //   peerInstance.current?.destroy();
-  //   stopCamera();
-  //   router.push(`/call/ended?username=${user.username}`);
-  // }
+    socket.on(ChatEventEnum.CALL_HANDSHAKE_EVENT, handleHandshake);
 
-  // socket.on(ChatEventEnum.CALL_ACCEPTED_EVENT, handleCallAccepted);
-  // socket.on(ChatEventEnum.CALL_DISCONNECTED_EVENT, handleCallDisconnected);
-
-  // return () => {
-  //   socket.off(ChatEventEnum.CALL_ACCEPTED_EVENT, handleCallAccepted);
-  //   socket.off(ChatEventEnum.CALL_DISCONNECTED_EVENT, handleCallDisconnected);
-  // };
-  // }, []);
+    return () => {
+      socket.off(ChatEventEnum.CALL_HANDSHAKE_EVENT, handleHandshake);
+    };
+  }, []);
 
   if (notFoundError) {
     notFound();
   }
 
   return (
-    <PeerProvider>
-      <div className="col-span-10 flex flex-col items-center justify-center min-h-[100dvh] max-h-[100dvh] bg-black overflow-hidden relative">
-        {isVideoCall ? (
-          <video
-            className="w-full h-full max-sm:h-1/2 sm:object-contain object-cover"
-            ref={peerVideoRef}
-            autoPlay
-            playsInline
-          />
-        ) : (
-          <>
-            <Avatar className="sm:w-40 w-32 sm:h-40 h-32 object-contain select-none pointer-events-none">
-              <AvatarImage src={profile.avatar} />
-              <AvatarFallback className="bg-stone-800">
-                {nameFallback(profile.fullName)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col items-center justify-center gap-0">
-              <h1 className="text-2xl tracking-tight font-bold">
-                {profile.fullName}
-              </h1>
-              <h6 className="text-stone-500 text-lg">@{profile.username}</h6>
-            </div>
-            {callActive ? (
-              <p className="text-stone-500">
-                {new Date(timer * 1000).toLocaleTimeString("en-IN")}
-              </p>
-            ) : (
-              <p className="text-stone-500 animate-pulse">
-                {onlineUsers.includes(profile._id)
-                  ? "Calling..."
-                  : "Ringing..."}
-              </p>
-            )}
-          </>
-        )}
-        <div className="flex items-center justify-center gap-4 absolute bottom-10 z-10">
-          <Button
-            size="icon"
-            variant="secondary"
-            className={`rounded-full p-3 h-fit w-fit shadow-xl ${
-              multipleCamAvailalble ? "" : "hidden"
-            }`}
-            onClick={switchCamera}
-          >
-            <RefreshCcw size="30" />
-          </Button>
-          {isVideoCall && (
-            <Button
-              size="icon"
-              variant="secondary"
-              className={`rounded-full p-3 w-fit h-fit shadow-xl ${
-                selfVideoPaused
-                  ? "bg-stone-200 sm:hover:bg-stone-400 text-black"
-                  : ""
-              }`}
-              onClick={handleSelfVideoPause}
-            >
-              {selfVideoPaused ? <VideoOff size="30" /> : <Video size="30" />}
-            </Button>
+    <div className="col-span-10 flex flex-col items-center justify-center min-h-[100dvh] max-h-[100dvh] bg-black overflow-hidden relative">
+      <div className="flex flex-col gap-2 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+        <Button onClick={() => callPeer(call.caller._id)}>Call caller</Button>
+        <Button onClick={() => callPeer(call.callee._id)}>Call callee</Button>
+        <Button onClick={() => acceptCall(call.callee._id)}>
+          Accept callee
+        </Button>
+        <Button onClick={() => acceptCall(call.caller._id)}>
+          Accept caller
+        </Button>
+      </div>
+      {isVideoCall ? (
+        <video
+          className="w-full h-full max-sm:h-1/2 sm:object-contain object-cover"
+          ref={peerVideoRef}
+          autoPlay
+          playsInline
+        />
+      ) : (
+        <>
+          <Avatar className="sm:w-40 w-32 sm:h-40 h-32 object-contain select-none pointer-events-none">
+            <AvatarImage src={profile.avatar} />
+            <AvatarFallback className="bg-stone-800">
+              {nameFallback(profile.fullName)}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col items-center justify-center gap-0">
+            <h1 className="text-2xl tracking-tight font-bold">
+              {profile.fullName}
+            </h1>
+            <h6 className="text-stone-500 text-lg">@{profile.username}</h6>
+          </div>
+          {callActive ? (
+            <p className="text-stone-500">
+              {/* {new Date(timer * 1000).toLocaleTimeString("en-IN")} */}
+            </p>
+          ) : (
+            <p className="text-stone-500 animate-pulse">
+              {onlineUsers.includes(profile._id) ? "Calling..." : "Ringing..."}
+            </p>
           )}
+        </>
+      )}
+      <div className="flex items-center justify-center gap-4 absolute bottom-10 z-10">
+        <Button
+          size="icon"
+          variant="secondary"
+          className={`rounded-full p-3 h-fit w-fit shadow-xl ${
+            multipleCamAvailalble ? "" : "hidden"
+          }`}
+          onClick={switchCamera}
+        >
+          <RefreshCcw size="30" />
+        </Button>
+        {isVideoCall && (
           <Button
             size="icon"
             variant="secondary"
             className={`rounded-full p-3 w-fit h-fit shadow-xl ${
-              selfMuted ? "bg-stone-200 sm:hover:bg-stone-400 text-black" : ""
+              selfVideoPaused
+                ? "bg-stone-200 sm:hover:bg-stone-400 text-black"
+                : ""
             }`}
-            onClick={() => setSelfMuted((prevMuted) => !prevMuted)}
+            onClick={handleSelfVideoPause}
           >
-            {selfMuted ? <MicOff size="30" /> : <Mic size="30" />}
+            {selfVideoPaused ? <VideoOff size="30" /> : <Video size="30" />}
           </Button>
-          <Button
-            size="icon"
-            variant="destructive"
-            className="rounded-full p-3 w-fit h-fit shadow-xl"
-            onClick={handleCallEnd}
-          >
-            <Phone size="30" className="rotate-[135deg]" />
-          </Button>
-        </div>
-        <div
-          className={`flex items-center justify-center lg:w-96 lg:h-72 sm:w-60 sm:h-44 w-full max-lg:top-4 lg:bottom-4 right-4 sm:shadow-lg sm:rounded-xl sm:absolute transition-transform max-sm:h-1/2 overflow-hidden ${
-            isVideoCall ? "visible bg-black" : "invisible bg-transparent"
+        )}
+        <Button
+          size="icon"
+          variant="secondary"
+          className={`rounded-full p-3 w-fit h-fit shadow-xl ${
+            selfMuted ? "bg-stone-200 sm:hover:bg-stone-400 text-black" : ""
           }`}
-          ref={selfVideoContainerRef}
+          onClick={() => setSelfMuted((prevMuted) => !prevMuted)}
         >
-          <button
-            className="hover:scale-110 p-2 left-0 absolute z-10 max-sm:hidden"
-            onClick={() => setHideSelfVideo((prevHidden) => !prevHidden)}
-          >
-            {hideSelfVideo ? (
-              <ChevronLeft size="30" />
-            ) : (
-              <ChevronRight size="30" />
-            )}
-          </button>
-          <video
-            className="w-full max-sm:h-full bg-black sm:object-contain object-cover sm:rounded-xl"
-            ref={selfVideoRef}
-            autoPlay
-            muted
-            playsInline
-          />
-        </div>
+          {selfMuted ? <MicOff size="30" /> : <Mic size="30" />}
+        </Button>
+        <Button
+          size="icon"
+          variant="destructive"
+          className="rounded-full p-3 w-fit h-fit shadow-xl"
+          onClick={handleCallEnd}
+        >
+          <Phone size="30" className="rotate-[135deg]" />
+        </Button>
       </div>
-    </PeerProvider>
+      <div
+        className={`flex items-center justify-center lg:w-96 lg:h-72 sm:w-60 sm:h-44 w-full max-lg:top-4 lg:bottom-4 right-4 sm:shadow-lg sm:rounded-xl sm:absolute transition-transform max-sm:h-1/2 overflow-hidden ${
+          isVideoCall ? "visible bg-black" : "invisible bg-transparent"
+        }`}
+        ref={selfVideoContainerRef}
+      >
+        <button
+          className="hover:scale-110 p-2 left-0 absolute z-10 max-sm:hidden"
+          onClick={() => setHideSelfVideo((prevHidden) => !prevHidden)}
+        >
+          {hideSelfVideo ? (
+            <ChevronLeft size="30" />
+          ) : (
+            <ChevronRight size="30" />
+          )}
+        </button>
+        <video
+          className="w-full max-sm:h-full bg-black sm:object-contain object-cover sm:rounded-xl"
+          ref={selfVideoRef}
+          autoPlay
+          muted
+          playsInline
+        />
+      </div>
+    </div>
   );
 }
 

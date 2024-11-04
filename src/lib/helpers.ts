@@ -204,6 +204,7 @@ export const ChatEventEnum = Object.freeze({
   ADMIN_REMOVE_EVENT: "someoneRemovedFromAdmin",
   NEW_CALL_EVENT: "newCall",
   CALL_ACCEPTED_EVENT: "callAccepted",
+  CALL_HANDSHAKE_EVENT: "callHandshake",
   CALL_DISCONNECTED_EVENT: "callDisconnected",
   CALL_AUDIO_EVENT: "callAudio",
   CALL_VIDEO_EVENT: "callVideo",

@@ -62,12 +62,6 @@ import {
 import Link from "next/link";
 import { toast } from "./ui/use-toast";
 import CommentsLoading from "./skeletons/CommentsLoading";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 interface Props {
   user: {
@@ -88,12 +82,13 @@ export default function Comment({
   isVideo,
 }: Props) {
   const dispatch = useAppDispatch();
-  const { user: currentUser, loading: userLoading } = useAppSelector(
+  const { user: currentUser } = useAppSelector(
     (state) => state.user
   );
   const { likes, loading, comments, skeletonLoading } = useAppSelector(
     (state) => state.comment
   );
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [likesDialog, setLikesDialog] = useState({
     open: false,
@@ -107,17 +102,15 @@ export default function Comment({
     dialogOpen: false,
     commentId: "",
   });
-  const [blockDialog, setBlockDialog] = useState({
-    dialogOpen: false,
-    user: {
-      _id: "",
-      username: "",
-      fullName: "",
-      avatar: "",
-    },
-  });
+
   const formSchema = z.object({
     comment: commentSchema,
+  });
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      comment: "",
+    },
   });
 
   function handleComment(content: string) {
@@ -131,7 +124,6 @@ export default function Comment({
       }
     });
   }
-
   function handleLike(commentId: string) {
     dispatch(likeComment({ commentId, userId: currentUser._id })).then(
       (response) => {
@@ -148,7 +140,6 @@ export default function Comment({
       }
     );
   }
-
   function handleUnlike(commentId: string) {
     dispatch(unlikeComment({ commentId, userId: currentUser._id })).then(
       (response) => {
@@ -165,32 +156,25 @@ export default function Comment({
       }
     );
   }
-
   function handleDelete() {
-    dispatch(deleteComment(deleteDialog.commentId)).then((response) => {
-      if (response.payload?.success) {
+    dispatch(deleteComment(deleteDialog.commentId))
+      .then((response) => {
+        if (!response.payload?.success) {
+          toast({
+            title: "Cannot delete comment",
+            description: response.payload?.message || "An error occurred",
+            variant: "destructive",
+          });
+        }
+      })
+      .finally(() =>
         setDeleteDialog({
           ...deleteDialog,
           commentId: "",
           dialogOpen: false,
-        });
-      } else {
-        toast({
-          title: "Cannot delete comment",
-          description: response.payload?.message || "An error occurred",
-          variant: "destructive",
-        });
-      }
-    });
+        })
+      );
   }
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      comment: "",
-    },
-  });
-
   function onSubmit(values: z.infer<typeof formSchema>) {
     handleComment(values.comment);
     form.setValue("comment", "");
@@ -199,7 +183,6 @@ export default function Comment({
   useEffect(() => {
     if (dialogOpen) dispatch(getComments({ postId }));
   }, [dispatch, dialogOpen, postId]);
-
   useEffect(() => {
     if (likesDialog.open && likesDialog.commentId)
       dispatch(getLikes(likesDialog.commentId));
@@ -259,21 +242,15 @@ export default function Comment({
                   <div className="flex flex-col gap-1">
                     <div className="font-semibold">
                       {comment.user.username}&nbsp;
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger className="text-stone-500 text-xs font-normal">
-                            &#183;&nbsp;
-                            {getTimeDifference(comment.createdAt)}
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>
-                              {new Date(comment.createdAt).toLocaleString(
-                                "en-IN"
-                              )}
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                      <span
+                        className="text-stone-500 text-xs font-normal"
+                        title={new Date(comment.createdAt).toLocaleString(
+                          "en-IN"
+                        )}
+                      >
+                        &#183;&nbsp;
+                        {getTimeDifference(comment.createdAt)}
+                      </span>
                     </div>
                     <div className="text-sm font-light">{comment.content}</div>
                     <div className="flex gap-2 items-center text-xs mt-1 text-stone-500 dark:text-stone-400 select-none">
@@ -385,7 +362,8 @@ export default function Comment({
                             <MoreHorizontal size="16" />
                           </MenubarTrigger>
                           <MenubarContent className="rounded-xl">
-                            {user.username === currentUser.username || comment.user._id === currentUser._id ? (
+                            {user.username === currentUser.username ||
+                            comment.user._id === currentUser._id ? (
                               <MenubarItem
                                 className="rounded-lg py-2 flex gap-2 items-center text-red-600 focus:text-red-600"
                                 onClick={() =>
@@ -504,7 +482,15 @@ export default function Comment({
             comment?
           </AlertDialogDescription>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel
+              onClick={() => {
+                if (!loading) {
+                  setDeleteDialog({ ...deleteDialog, dialogOpen: false });
+                }
+              }}
+            >
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive hover:bg-destructive/80 text-white"
               onClick={handleDelete}

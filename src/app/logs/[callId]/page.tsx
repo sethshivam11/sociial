@@ -126,7 +126,7 @@ function Page({ params }: { params: { callId: string } }) {
               Duration
             </td>
             <td>
-              {call.startedAt} - {call.endedAt}
+              {call.acceptedAt} - {call.endedAt}
             </td>
           </tr>
         </table>

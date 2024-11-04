@@ -46,7 +46,7 @@ function Messages({ children }: { children: ReactNode }) {
           <h1 className="text-2xl tracking-tight font-bold text-left p-2.5">
             Conversations
           </h1>
-          <div className="flex items-center justify-center gap-1">
+          <div className="hidden items-center justify-center gap-1">
             <Link href="call-logs" className="p-2" title="Call Logs">
               <PhoneCall />
             </Link>

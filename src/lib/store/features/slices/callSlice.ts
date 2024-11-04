@@ -17,7 +17,7 @@ const initialState: CallSliceI = {
       avatar: "",
     },
     type: "audio",
-    startedAt: "",
+    acceptedAt: "",
     endedAt: "",
     createdAt: "",
   },
@@ -55,11 +55,21 @@ export const startCall = createAsyncThunk(
   }
 );
 
-export const acceptCall = createAsyncThunk(
+export const updateCall = createAsyncThunk(
   "calls/acceptCall",
-  async (callId: string) => {
-    const parsed = await fetch(`/api/v1/calls/accept/${callId}`, {
+  async ({
+    callId,
+    acceptedAt,
+    endedAt,
+  }: {
+    callId: string;
+    acceptedAt?: string;
+    endedAt?: string;
+  }) => {
+    if (!acceptedAt && !endedAt) return;
+    const parsed = await fetch(`/api/v1/calls/update/${callId}`, {
       method: "PATCH",
+      body: JSON.stringify({ acceptedAt, endedAt }),
     });
     return parsed.json();
   }
@@ -131,16 +141,17 @@ const callSlice = createSlice({
       });
 
     builder
-      .addCase(acceptCall.pending, (state) => {
+      .addCase(updateCall.pending, (state) => {
         state.loading = true;
       })
-      .addCase(acceptCall.fulfilled, (state, action) => {
+      .addCase(updateCall.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload?.success) {
+          state.call.acceptedAt = action.payload.data.acceptedAt;
           state.call.endedAt = action.payload.data.startedAt;
         }
       })
-      .addCase(acceptCall.rejected, (state) => {
+      .addCase(updateCall.rejected, (state) => {
         state.loading = false;
       });
 

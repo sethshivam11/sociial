@@ -4,11 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/use-toast";
 import { nameFallback } from "@/lib/helpers";
-import {
-  acceptCall,
-  getCall,
-  startCall,
-} from "@/lib/store/features/slices/callSlice";
+import { getCall, startCall } from "@/lib/store/features/slices/callSlice";
 import { getProfile } from "@/lib/store/features/slices/userSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { MicOff, VideoOff } from "lucide-react";
@@ -62,15 +58,6 @@ function Page() {
       }
     });
   }
-  function handleAcceptCall() {
-    dispatch(acceptCall(call)).then((response) => {
-      if (response.payload?.success) {
-        router.push(
-          `/call/${username}?video=${videoEnabled}&call=${response.payload.data.caller}`
-        );
-      }
-    });
-  }
 
   useEffect(() => {
     const video = query.get("video");
@@ -85,7 +72,7 @@ function Page() {
         }
       });
     }
-  }, [getPermissions, query]);
+  }, [getPermissions, query, dispatch]);
   useEffect(() => {
     if (!profile?._id) {
       dispatch(getProfile({ username: query.get("username") || "" })).then(
@@ -129,7 +116,11 @@ function Page() {
             {call ? (
               <Button
                 className="bg-blue-500 hover:bg-blue-600 text-white rounded-full"
-                onClick={handleAcceptCall}
+                onClick={() =>
+                  router.push(
+                    `/call/${username}?video=${videoEnabled}&call=${call}`
+                  )
+                }
               >
                 Join Call
               </Button>
