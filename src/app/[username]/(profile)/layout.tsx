@@ -46,7 +46,8 @@ import {
   AlertDialogFooter,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { newChat, setCurrentChat } from "@/lib/store/features/slices/chatSlice";
+import { newChat } from "@/lib/store/features/slices/chatSlice";
+import AnonymousDialog from "@/components/AnonymousDialog";
 
 function Profile({
   children,
@@ -67,11 +68,13 @@ function Profile({
   const baseUrl = process.env.NEXT_PUBLIC_LINK || "";
   const router = useRouter();
   const location = usePathname();
+  const username = params.username;
+
   const [QR, setQR] = useState("");
   const [userNotFound, setUserNotFound] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [blockDialog, setBlockDialog] = useState(false);
-  const username = params.username;
+  const [anonymousMessageOpen, setAnonymousMessageOpen] = useState(false);
 
   function handleBlock() {
     dispatch(blockUser(profile._id)).then((response) => {
@@ -229,7 +232,6 @@ function Profile({
           setUserNotFound(true);
       });
   }, [username, dispatch]);
-
   useEffect(() => {
     if (userNotFound) notFound();
   }, [userNotFound]);
@@ -316,6 +318,9 @@ function Profile({
                       </Button>
                     )}
                     <Dialog>
+                      <DialogContent></DialogContent>
+                    </Dialog>
+                    <Dialog>
                       <DialogTrigger asChild>
                         <Button
                           variant="outline"
@@ -352,6 +357,14 @@ function Profile({
                         >
                           Share Profile
                         </DialogClose>
+                        {user._id !== profile._id && (
+                          <DialogClose
+                            className="w-full md:px-20 py-1"
+                            onClick={() => setAnonymousMessageOpen(true)}
+                          >
+                            Confess
+                          </DialogClose>
+                        )}
                         <DialogClose
                           className="w-full md:px-20 py-1"
                           onClick={() => copyLink(profile.username)}
@@ -419,6 +432,10 @@ function Profile({
                       setOpen={setReportOpen}
                       entityId={profile._id}
                       type="user"
+                    />
+                    <AnonymousDialog
+                      open={anonymousMessageOpen}
+                      setOpen={setAnonymousMessageOpen}
                     />
                   </div>
                 </div>

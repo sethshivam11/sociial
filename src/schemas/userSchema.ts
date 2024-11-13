@@ -11,6 +11,7 @@ const usernameSchema = z
   .max(20, {
     message: "Username must be less than 20 characters",
   })
+  .trim()
   .refine((value) => !value.startsWith("."), {
     message: "Username cannot start with .",
   })
@@ -29,7 +30,8 @@ const emailSchema = z
   })
   .max(50, {
     message: "Email must be less than 50 characters",
-  });
+  })
+  .trim();
 
 const passwordSchema = z
   .string()

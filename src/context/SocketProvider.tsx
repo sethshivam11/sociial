@@ -68,7 +68,6 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
       onConnect();
     }
     function onConnect() {
-      console.log("connected");
       setConnected(true);
       setTransport(socket.io.engine.transport.name);
 
@@ -77,7 +76,6 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
       });
     }
     function onDisconnect() {
-      console.log("disconnected");
       setConnected(false);
       setTransport("N/A");
     }

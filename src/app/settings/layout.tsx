@@ -12,6 +12,7 @@ import {
   logOutUser,
 } from "@/lib/store/features/slices/userSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
+import { socket } from "@/socket";
 import {
   Ban,
   Bell,
@@ -43,7 +44,10 @@ function Page({ children }: PropsWithChildren) {
           dispatch(clearCookies()).then(() => router.push("/sign-in"));
         }
       })
-      .finally(() => setOpen(false));
+      .finally(() => {
+        setOpen(false);
+        socket.disconnect();
+      });
   }
 
   useEffect(() => {

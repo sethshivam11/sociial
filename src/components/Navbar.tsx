@@ -52,6 +52,7 @@ import { toast } from "./ui/use-toast";
 import ReportDialog from "./ReportDialog";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { Lobster_Two } from "next/font/google";
+import { socket } from "@/socket";
 
 const lobster = Lobster_Two({
   subsets: ["latin"],
@@ -108,6 +109,7 @@ function Navbar() {
       })
       .finally(() => {
         setLogOutDialog(false);
+        socket.disconnect();
       });
   }
 
@@ -129,6 +131,8 @@ function Navbar() {
           response.payload?.message === "Token is required" &&
           location !== "/sign-in"
         ) {
+          dispatch(clearCookies()).then(() => router.push("/sign-in"));
+        } else if (response.payload?.message === "Invalid token!") {
           dispatch(clearCookies()).then(() => router.push("/sign-in"));
         }
       })
