@@ -118,7 +118,7 @@ function Page() {
                 className="bg-blue-500 hover:bg-blue-600 text-white rounded-full"
                 onClick={() =>
                   router.push(
-                    `/call/${username}?video=${videoEnabled}&call=${call}`
+                    `/call/${username}?video=${videoEnabled}&call=${call}&profile=${profile._id}`
                   )
                 }
               >

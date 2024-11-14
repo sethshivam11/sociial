@@ -30,7 +30,7 @@ interface Props {
   open: boolean;
   setOpen: (open: boolean) => void;
   entityId?: string;
-  type: "post" | "comment" | "user" | "chat" | "problem" | "story";
+  type: "post" | "comment" | "user" | "chat" | "problem" | "story" | "anonymous-message";
 }
 
 function ReportDialog({ open, setOpen, entityId, type }: Props) {

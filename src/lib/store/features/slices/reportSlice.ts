@@ -18,7 +18,7 @@ export const submitReport = createAsyncThunk(
     title: string;
     description: string;
     user: string;
-    kind: "post" | "comment" | "user" | "chat" | "problem" | "story";
+    kind: "post" | "comment" | "user" | "chat" | "problem" | "story" | "anonymous-message";
     entityId?: string;
     image?: File | null;
   }) => {

@@ -153,3 +153,11 @@ export interface CallI {
   endedAt: string;
   createdAt: string;
 }
+
+export interface AnonymousMessage {
+  _id: string;
+  reciever: string;
+  content: string;
+  attachment: string;
+  createdAt: string;
+}

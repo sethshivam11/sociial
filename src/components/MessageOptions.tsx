@@ -116,7 +116,7 @@ function MessageOptions({
               </>
             )}
             <MenubarItem
-              className=" rounded-lg py-2.5"
+              className="rounded-lg py-2.5"
               onClick={() =>
                 setReply({
                   username,
@@ -130,7 +130,7 @@ function MessageOptions({
             {kind === "message" && (
               <>
                 <MenubarItem
-                  className=" rounded-lg py-2.5"
+                  className="rounded-lg py-2.5"
                   onClick={() => copyMessage(message)}
                 >
                   Copy Message

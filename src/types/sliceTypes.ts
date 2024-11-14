@@ -1,4 +1,5 @@
 import {
+  AnonymousMessage,
   BasicUserI,
   CallI,
   ChatI,
@@ -153,4 +154,10 @@ export interface CallSliceI {
   endingCall: boolean;
   calls: CallI[];
   call: CallI;
+}
+
+export interface AnonymousMessageSliceI {
+  messages: AnonymousMessage[];
+  loading: boolean;
+  skeletonLoading: boolean;
 }

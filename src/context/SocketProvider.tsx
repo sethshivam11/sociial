@@ -60,10 +60,6 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
   const { chat } = useAppSelector((state) => state.chat);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      document.cookie = `token=${token}`;
-    }
     if (socket.connected) {
       onConnect();
     }

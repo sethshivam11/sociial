@@ -318,9 +318,6 @@ function Profile({
                       </Button>
                     )}
                     <Dialog>
-                      <DialogContent></DialogContent>
-                    </Dialog>
-                    <Dialog>
                       <DialogTrigger asChild>
                         <Button
                           variant="outline"

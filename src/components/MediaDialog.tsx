@@ -53,7 +53,6 @@ function MediaDialog({ open, setOpen, chatId }: Props) {
       })
     );
     if (mediaFiles.length === 0) return setLoading(false);
-    console.log("sending files");
     await Promise.all(
       mediaFiles.map(async (file) => {
         const response = await dispatch(

@@ -29,6 +29,7 @@ import {
 } from "@/lib/store/features/slices/userSlice";
 import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/use-toast";
+import { reconnect } from "@/socket";
 
 function SignInPage() {
   const router = useRouter();
@@ -90,6 +91,7 @@ function SignInPage() {
           `/verify-code?username=${response.payload.data.user.username}`
         );
       } else {
+        reconnect(response.payload?.data.token);
         router.push("/");
       }
     } else {
@@ -105,21 +107,18 @@ function SignInPage() {
       }
     }
   }
-  
+
   useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    if (token) router.push("/");
-    else {
-      fetch("https://ipapi.co/json")
-        .then((parsed) => parsed.json())
-        .then((response) => {
-          setCurrentDevice({
-            name: getDevice(navigator?.userAgent),
-            location: `${response.city}, ${response.country}`,
-          });
+    fetch("https://ipapi.co/json")
+      .then((parsed) => parsed.json())
+      .then((response) => {
+        setCurrentDevice({
+          name: getDevice(navigator?.userAgent),
+          location: `${response.city}, ${response.country}`,
         });
-    }
-  }, [router]);
+      })
+      .catch((err) => console.log(err));
+  }, []);
 
   return (
     <div className="flex justify-center col-span-10 py-12 items-center min-h-screen bg-white dark:bg-zinc-800">

@@ -80,7 +80,6 @@ function Navbar() {
     "/upload-video",
     "/add-story",
   ];
-  const [unreadMessageCount, newNotifications] = [0, false];
   const { user, isLoggedIn, loading } = useAppSelector((state) => state.user);
 
   function handleLogout() {
@@ -114,25 +113,15 @@ function Navbar() {
   }
 
   useEffect(() => {
-    if (!document.cookie) {
-      const token = localStorage.getItem("token");
-      if (token) {
-        document.cookie = `token=${token};`;
-      } else if (!token) {
-        router.push("/sign-in");
-      }
-    }
-
     dispatch(getLoggedInUser())
       .then((response) => {
         if (response.payload?.success && location === "/sign-in") {
           router.push("/");
         } else if (
-          response.payload?.message === "Token is required" &&
-          location !== "/sign-in"
+          location !== "/sign-in" &&
+          (response.payload?.message === "Token is required" ||
+            response.payload?.message === "Invalid token!")
         ) {
-          dispatch(clearCookies()).then(() => router.push("/sign-in"));
-        } else if (response.payload?.message === "Invalid token!") {
           dispatch(clearCookies()).then(() => router.push("/sign-in"));
         }
       })
@@ -208,14 +197,7 @@ function Navbar() {
             }`}
             title="Messages"
           >
-            <span className="inline-block relative">
-              <Mail className="inline" />
-              {unreadMessageCount !== 0 && (
-                <div className="absolute inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-red-500  rounded-full -top-2 -end-3 dark:border-gray-900">
-                  {unreadMessageCount}
-                </div>
-              )}
-            </span>
+            <Mail className="inline" />
             <span className="xl:inline hidden">Messages</span>
           </Link>
           <Menubar className="w-fit sm:hidden bg-transparent border-transparent xl:justify-start justify-center">
@@ -272,12 +254,7 @@ function Navbar() {
             }`}
             title="Notifications"
           >
-            <span className="inline-block relative">
-              <Bell className="inline" />
-              {newNotifications && (
-                <span className="absolute top-0 right-0 inline-block w-[10px] h-[10px] transform translate-x-1/5 translate-y-0.5 bg-red-600 rounded-full"></span>
-              )}
-            </span>
+            <Bell className="inline" />
             <span className="xl:inline hidden">Notifications</span>
           </Link>
           <Link

@@ -43,7 +43,10 @@ function Page({ params }: { params: { username: string } }) {
   const [multipleCamAvailalble, setMultipleCamAvailable] = useState(false);
   const [notFoundError, setNotFoundError] = useState(false);
   const [callActive, setCallActive] = useState(false);
-  const [callerSignal, setCallerSignal] = useState<SignalData>();
+  const [caller, setCaller] = useState<{
+    userId: string;
+    signal: SignalData;
+  }>();
 
   function handleCallEnd() {
     dispatch(endCall(call._id)).then((response) => {
@@ -89,59 +92,71 @@ function Page({ params }: { params: { username: string } }) {
       setSelfVideoPaused(true);
     }
   }
-  function callPeer(userId: string) {
-    if (!stream) return;
-    const peer = new Peer({
-      initiator: true,
-      trickle: false,
-      stream,
-    });
-
-    peer.on("signal", (data: SignalData) => {
-      socket.emit(ChatEventEnum.CALL_HANDSHAKE_EVENT, {
-        userId,
-        data,
+  const callPeer = useCallback(
+    (userId: string) => {
+      if (!stream) return;
+      console.log("Calling user");
+      const peer = new Peer({
+        initiator: true,
+        trickle: false,
+        stream,
       });
-    });
 
-    peer.on("stream", (stream) => {
-      if (selfVideoRef.current) selfVideoRef.current.srcObject = stream;
-    });
-
-    socket.on(ChatEventEnum.CALL_ACCEPTED_EVENT, ({ data }) => {
-      setCallActive(true);
-      peer.signal(data);
-    });
-  }
-  function acceptCall(userId: string, signal?: SignalData) {
-    if (!stream) return;
-    const peer = new Peer({
-      initiator: false,
-      trickle: false,
-      stream,
-    });
-
-    peer.on("signal", (data: SignalData) => {
-      console.log(data);
-      socket.emit(ChatEventEnum.CALL_ACCEPTED_EVENT, {
-        userId,
-        data,
+      peer.on("signal", (data: SignalData) => {
+        socket.emit(ChatEventEnum.CALL_HANDSHAKE_EVENT, {
+          from: user._id,
+          to: userId,
+          data,
+        });
       });
-    });
 
-    peer.on("stream", (stream) => {
-      if (peerVideoRef.current) peerVideoRef.current.srcObject = stream;
-      dispatch(updateCall({ callId: call._id, acceptedAt: `${new Date()}` }));
-    });
+      peer.on("stream", (stream) => {
+        if (selfVideoRef.current) selfVideoRef.current.srcObject = stream;
+      });
 
-    if (signal) {
-      peer.signal(signal);
-    } else if (callerSignal) {
-      peer.signal(callerSignal);
-    } else {
-      console.log("Unable to connect: No signal recieved");
-    }
-  }
+      socket.on(ChatEventEnum.CALL_ACCEPTED_EVENT, ({ data }) => {
+        setCallActive(true);
+        peer.signal(data);
+      });
+    },
+    [stream]
+  );
+  const acceptCall = useCallback(
+    (userId: string, signal?: SignalData) => {
+      if (!stream) return console.log("No stream available");
+      console.log("Accepting call");
+      const peer = new Peer({
+        initiator: false,
+        trickle: false,
+        stream,
+      });
+
+      peer.on("signal", (data: SignalData) => {
+        console.log(data);
+        socket.emit(ChatEventEnum.CALL_ACCEPTED_EVENT, {
+          userId,
+          data,
+        });
+      });
+
+      peer.on("stream", (stream) => {
+        if (peerVideoRef.current) peerVideoRef.current.srcObject = stream;
+        dispatch(updateCall({ callId: call._id, acceptedAt: `${new Date()}` }));
+        if (!query.get("profile")) {
+          callPeer(userId);
+          router.push(
+            `/call/${user.username}?video=${isVideoCall}&profile=${userId}`
+          );
+        }
+      });
+
+      console.log(signal, caller);
+      if (signal) peer.signal(signal);
+      else if (caller) peer.signal(caller.signal);
+      else console.log("Unable to connect: No signal recieved");
+    },
+    [stream, caller]
+  );
 
   const getUserMedia = useCallback(
     async (video: boolean, mode?: "user" | "environment") => {
@@ -221,9 +236,22 @@ function Page({ params }: { params: { username: string } }) {
     }
   }, [dispatch, profile?._id, params]);
   useEffect(() => {
-    function handleHandshake({ data }: { data: SignalData }) {
-      setCallerSignal(data);
-      acceptCall(call.callee._id, data);
+    const userId = query.get("profile");
+    console.log(stream, userId);
+    if (stream && userId) {
+      callPeer(userId);
+    }
+  }, [stream, query.get("profile")]);
+  useEffect(() => {
+    function handleHandshake({
+      data,
+      from,
+    }: {
+      data: SignalData;
+      from: string;
+    }) {
+      setCaller({ userId: from, signal: data });
+      console.log("Recieved signal", data);
     }
 
     socket.on(ChatEventEnum.CALL_HANDSHAKE_EVENT, handleHandshake);
@@ -232,6 +260,10 @@ function Page({ params }: { params: { username: string } }) {
       socket.off(ChatEventEnum.CALL_HANDSHAKE_EVENT, handleHandshake);
     };
   }, []);
+  useEffect(() => {
+    if (stream && caller?.userId && caller?.signal)
+      acceptCall(caller.userId, caller.signal);
+  }, [stream, caller]);
 
   if (notFoundError) {
     notFound();

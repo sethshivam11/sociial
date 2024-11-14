@@ -30,7 +30,10 @@ export function middleware(request: NextRequest) {
     "/verify-code",
   ];
 
-  if (!token && !publicPaths.includes(path)) {
+  const isPublicUserProfile =
+    /^\/[^\/]+$/.test(path) && !publicPaths.includes(path);
+
+  if (!token && !publicPaths.includes(path) && !isPublicUserProfile) {
     return NextResponse.redirect(new URL("/sign-in", request.url));
   }
 
