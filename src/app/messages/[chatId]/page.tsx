@@ -339,11 +339,6 @@ function Page({ params }: { params: { chatId: string } }) {
         } else return <>{content}</>;
     }
   }
-  function handleSilence() {
-    if (!ringtoneRef.current) return;
-    ringtoneRef.current.pause();
-    ringtoneRef.current.currentTime = 0;
-  }
   function handleEditing(content: string, messageId: string) {
     setEditMessageId(messageId);
     form.setValue("message", content);

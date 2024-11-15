@@ -4,7 +4,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 const initialState: AnonymousMessageSliceI = {
   messages: [],
   loading: false,
-  skeletonLoading: false,
+  skeletonLoading: true,
 };
 
 export const sendAnonymousMessage = createAsyncThunk(

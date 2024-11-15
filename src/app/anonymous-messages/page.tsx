@@ -7,6 +7,7 @@ import {
 } from "@/lib/store/features/slices/anonymousMessageSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import {
+  Download,
   History,
   MoreVertical,
   ShieldAlert,
@@ -23,6 +24,14 @@ import {
 import ReportDialog from "@/components/ReportDialog";
 import { toast } from "@/components/ui/use-toast";
 import MessageCardLoading from "@/components/skeletons/MessageCardLoading";
+import Image from "next/image";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogFooter,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 function Page() {
   const dispatch = useAppDispatch();
@@ -35,6 +44,15 @@ function Page() {
     entityId: "",
   });
 
+  function handleDownload(content: string) {
+    const fileURL = content.replace("/upload", "/upload/fl_attachment");
+    const a = document.createElement("a");
+    a.href = fileURL;
+    a.download = `Image-${new Date().toLocaleString("en-IN")}`;
+    document.body.append(a);
+    a.click();
+    document.body.removeChild(a);
+  }
   function handleDelete(messageId: string) {
     dispatch(deleteAnonymousMessage(messageId)).then((response) => {
       if (response.payload?.success) {
@@ -73,6 +91,37 @@ function Page() {
               key={index}
             >
               <div className="flex flex-col justify-between text-pretty">
+                {message.attachment && (
+                  <Dialog>
+                    <DialogTrigger>
+                      <Image
+                        src={message.attachment}
+                        alt=""
+                        width="300"
+                        height="300"
+                        className="object-contain pointer-events-none select-none rounded-md mb-2"
+                      />
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogTitle>Media Preview</DialogTitle>
+                      <Image
+                        src={message.attachment}
+                        alt=""
+                        width="800"
+                        height="800"
+                        className="object-contain pointer-events-none select-none rounded-xl mt-2"
+                      />
+                      <DialogFooter>
+                        <Button
+                          size="icon"
+                          onClick={() => handleDownload(message.attachment)}
+                        >
+                          <Download />
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                )}
                 {message.content}
                 <div
                   className="flex items-center mt-2 gap-1 text-stone-500 text-xs"
