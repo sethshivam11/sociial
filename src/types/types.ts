@@ -93,7 +93,6 @@ export interface NotificationI {
   title: string;
   description: string;
   link: string;
-  read: boolean;
 }
 
 export interface PushNotificationI {
@@ -154,10 +153,13 @@ export interface CallI {
   createdAt: string;
 }
 
-export interface AnonymousMessage {
+export interface Confession {
   _id: string;
   reciever: string;
   content: string;
-  attachment: string;
+  attachment: {
+    url: string;
+    kind: "image" | "video";
+  };
   createdAt: string;
 }

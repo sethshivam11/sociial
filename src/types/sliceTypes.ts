@@ -1,9 +1,9 @@
 import {
-  AnonymousMessage,
   BasicUserI,
   CallI,
   ChatI,
   CommentI,
+  Confession,
   EmailNotificationI,
   MessageI,
   NotificationI,
@@ -156,8 +156,8 @@ export interface CallSliceI {
   call: CallI;
 }
 
-export interface AnonymousMessageSliceI {
-  messages: AnonymousMessage[];
+export interface ConfessionSliceI {
+  messages: Confession[];
   loading: boolean;
   skeletonLoading: boolean;
 }

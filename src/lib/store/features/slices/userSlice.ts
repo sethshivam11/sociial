@@ -61,7 +61,13 @@ export const loginUser = createAsyncThunk(
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ username, email, password, location, device }),
+      body: JSON.stringify({
+        username: username.trim(),
+        email: email.trim(),
+        password,
+        location,
+        device,
+      }),
     });
     return parsed.json();
   }
@@ -86,12 +92,11 @@ export const registerUser = createAsyncThunk(
       return;
     }
     const formData = new FormData();
-    formData.append("username", username);
-    formData.append("email", email);
+    formData.append("username", username.trim());
+    formData.append("email", email.trim());
     formData.append("password", password);
     formData.append("fullName", fullName);
     if (avatar) formData.append("avatar", avatar);
-    // return axios.post("/api/v1/users/register", formData);
     const parsed = await fetch("/api/v1/users/register", {
       method: "POST",
       body: formData,

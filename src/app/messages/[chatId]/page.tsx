@@ -266,6 +266,7 @@ function Page({ params }: { params: { chatId: string } }) {
                   src={content}
                   width="160"
                   height="160"
+                  controlsList="nodownload"
                   className="w-full object-contain rounded-lg"
                 />
               </button>

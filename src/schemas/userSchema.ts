@@ -2,6 +2,7 @@ import { z } from "zod";
 
 const usernameSchema = z
   .string()
+  .trim()
   .regex(/^[a-z_1-9.]+$/, {
     message: "Username can only contain letters, numbers, and symbols _ & .",
   })
@@ -11,7 +12,6 @@ const usernameSchema = z
   .max(20, {
     message: "Username must be less than 20 characters",
   })
-  .trim()
   .refine((value) => !value.startsWith("."), {
     message: "Username cannot start with .",
   })
@@ -24,6 +24,7 @@ const usernameSchema = z
 
 const emailSchema = z
   .string()
+  .trim()
   .email()
   .min(6, {
     message: "Email must be more than 6 characters",

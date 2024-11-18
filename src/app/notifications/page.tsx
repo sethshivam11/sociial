@@ -2,11 +2,13 @@
 import NotificationLoading from "@/components/skeletons/NotificationLoading";
 import {
   AlertDialog,
+  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -17,24 +19,17 @@ import {
   MenubarMenu,
   MenubarTrigger,
 } from "@/components/ui/menubar";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { toast } from "@/components/ui/use-toast";
 import { nameFallback } from "@/lib/helpers";
 import {
+  deleteAllNotification,
   deleteNotification,
   getNotifications,
-  readNotification,
 } from "@/lib/store/features/slices/notificationSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import {
   ArrowLeft,
   BellRing,
-  CheckCheck,
   Loader2,
   MoreHorizontal,
   Trash2,
@@ -52,6 +47,7 @@ function Page() {
     open: false,
     id: "",
   });
+  const [deleteAllDialog, setDeleteAllDialog] = useState(false);
 
   function handleDelete(notificationId: string) {
     if (!notificationId) return;
@@ -60,13 +56,25 @@ function Page() {
         if (!response.payload?.success) {
           toast({
             title: "Cannot delete notification",
-            description:
-              response.payload?.message || "Something went wrong!",
+            description: response.payload?.message || "Something went wrong!",
             variant: "destructive",
           });
         }
       })
       .finally(() => setDeleteDialog({ open: false, id: "" }));
+  }
+  function handleDeleteAll() {
+    dispatch(deleteAllNotification())
+      .then((response) => {
+        if (!response.payload?.success) {
+          toast({
+            title: "Cannot delete notifications",
+            description: response.payload?.message || "Something went wrong!",
+            variant: "destructive",
+          });
+        }
+      })
+      .finally(() => setDeleteAllDialog(false));
   }
 
   useEffect(() => {
@@ -98,25 +106,35 @@ function Page() {
             <h1 className="sm:text-2xl text-lg tracking-tight font-bold w-full text-center sm:py-2">
               Notifications
             </h1>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="rounded-xl max-sm:hover:bg-background"
-                    onClick={() => dispatch(readNotification())}
+            <AlertDialog open={deleteAllDialog}>
+              <AlertDialogTrigger asChild>
+                <Button
+                  onClick={() => setDeleteAllDialog(true)}
+                  title="Delete All"
+                  variant="ghost"
+                  size="icon"
+                >
+                  <Trash2 />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogTitle>Delete All Notifications?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete all notifications?
+                </AlertDialogDescription>
+                <AlertDialogFooter>
+                  <AlertDialogCancel onClick={() => setDeleteAllDialog(false)}>
+                    Cancel
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    className="bg-destructive hover:bg-destructive/80 text-white"
+                    onClick={handleDeleteAll}
                   >
-                    {loading ? (
-                      <Loader2 className="animate-spin mx-auto" />
-                    ) : (
-                      <CheckCheck />
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent dir="bottom">Mark all as read</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+                    {loading ? <Loader2 className="animate-spin" /> : "Delete"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
           <hr className="w-full bg-stone-950 sm:mt-3 mt-2 sm:mb-2 mb-0" />
         </div>
@@ -126,13 +144,11 @@ function Page() {
           <div className="flex flex-col gap-1 px-3 h-fit overflow-y-auto p-2">
             {notifications.map((notification, index) => (
               <div
-                className={`flex items-center justify-start ${
-                  !notification.read ? "bg-stone-200 dark:bg-stone-800" : ""
-                } hover:bg-stone-200 hover:dark:bg-stone-800 rounded-lg p-2`}
+                className={`flex items-center justify-start hover:bg-stone-200 hover:dark:bg-stone-800 rounded-lg p-2`}
                 key={index}
               >
                 <Link
-                  href={"/"}
+                  href={notification.link || "/"}
                   className="flex items-start gap-2 justify-start w-full"
                 >
                   <Avatar>
@@ -185,10 +201,10 @@ function Page() {
           <div className="flex flex-col items-center justify-center min-h-[40rem] w-full gap-6">
             <BellRing size="80" />
             <div className="flex flex-col items-center justify-center gap-1">
-              <h1 className="text-3xl tracking-tight font-bold">
+              <h1 className="sm:text-2xl text-xl tracking-tight font-bold">
                 No Notifications
               </h1>
-              <p className="text-stone-500">Check back later</p>
+              <p className="text-stone-500 max-sm:text-sm">Check back later</p>
             </div>
           </div>
         )}

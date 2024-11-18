@@ -1,5 +1,12 @@
 "use client";
-import { Bookmark, Globe, Heart, Loader2, PlayIcon } from "lucide-react";
+import {
+  Bookmark,
+  Globe,
+  Heart,
+  ImageIcon,
+  Loader2,
+  PlayIcon,
+} from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import Comment from "./Comment";
@@ -190,6 +197,19 @@ function Posts({ feed }: Props) {
 
   return (
     <>
+      {feed && !skeletonLoading && posts.length === 0 && (
+        <div className="flex flex-col items-center justify-center h-full w-full">
+          <ImageIcon size="80" className="my-4" />
+          <h1 className="sm:text-3xl text-xl font-bold tracking-tight">
+            Nothing Here
+          </h1>
+          <p className="sm:text-lg text-base text-stone-500">
+            {user.username === profile.username
+              ? "Share your first post now"
+              : "No posts yet"}
+          </p>
+        </div>
+      )}
       {posts.length > 0 && (
         <InfiniteScroll
           dataLength={posts.length}

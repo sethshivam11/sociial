@@ -15,18 +15,20 @@ export const getNotifications = createAsyncThunk(
   }
 );
 
-export const readNotification = createAsyncThunk(
-  "notifications/read",
-  async () => {
-    const parsed = await fetch(`/api/v1/notifications/read`);
-    return parsed.json();
-  }
-);
-
 export const deleteNotification = createAsyncThunk(
   "notifications/delete",
   async (notificationId: string) => {
     const parsed = await fetch(`/api/v1/notifications/${notificationId}`, {
+      method: "DELETE",
+    });
+    return parsed.json();
+  }
+);
+
+export const deleteAllNotification = createAsyncThunk(
+  "notifications/deleteAll",
+  async () => {
+    const parsed = await fetch("/api/v1/notifications/deleteAll", {
       method: "DELETE",
     });
     return parsed.json();
@@ -52,16 +54,6 @@ const notificationSlice = createSlice({
         state.skeletonLoading = false;
       });
 
-    builder.addCase(readNotification.fulfilled, (state, action) => {
-      state.loading = false;
-      if (action.payload?.success) {
-        state.notifications = state.notifications.map((notification) => {
-          notification.read = true;
-          return notification;
-        });
-      }
-    });
-
     builder
       .addCase(deleteNotification.pending, (state) => {
         state.loading = true;
@@ -75,6 +67,20 @@ const notificationSlice = createSlice({
         }
       })
       .addCase(deleteNotification.rejected, (state) => {
+        state.loading = false;
+      });
+
+    builder
+      .addCase(deleteAllNotification.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(deleteAllNotification.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload?.success) {
+          state.notifications = [];
+        }
+      })
+      .addCase(deleteAllNotification.rejected, (state) => {
         state.loading = false;
       });
   },

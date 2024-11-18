@@ -12,7 +12,7 @@ import reportSlice from "./features/slices/reportSlice";
 import storySlice from "./features/slices/storySlice";
 import notificationPreferenceSlice from "./features/slices/notificationPreferenceSlice";
 import callSlice from "./features/slices/callSlice";
-import anonymousMessageSlice from "./features/slices/anonymousMessageSlice";
+import confessionSlice from "./features/slices/confessionSlice";
 
 export const store = configureStore({
   reducer: {
@@ -26,7 +26,7 @@ export const store = configureStore({
     message: messageSlice,
     comment: commentSlice,
     notification: notificationSlice,
-    anonymousMessage: anonymousMessageSlice,
+    confession: confessionSlice,
     notificationPreference: notificationPreferenceSlice,
   },
 });

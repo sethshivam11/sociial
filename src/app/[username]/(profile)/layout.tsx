@@ -47,7 +47,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { newChat } from "@/lib/store/features/slices/chatSlice";
-import AnonymousDialog from "@/components/AnonymousDialog";
+import ConfessionDialog from "@/components/ConfessionDialog";
 
 function Profile({
   children,
@@ -74,7 +74,7 @@ function Profile({
   const [userNotFound, setUserNotFound] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [blockDialog, setBlockDialog] = useState(false);
-  const [anonymousMessageOpen, setAnonymousMessageOpen] = useState(false);
+  const [confessionOpen, setConfessionOpen] = useState(false);
 
   function handleBlock() {
     dispatch(blockUser(profile._id)).then((response) => {
@@ -357,7 +357,7 @@ function Profile({
                         {user._id !== profile._id && (
                           <DialogClose
                             className="w-full md:px-20 py-1"
-                            onClick={() => setAnonymousMessageOpen(true)}
+                            onClick={() => setConfessionOpen(true)}
                           >
                             Confess
                           </DialogClose>
@@ -430,9 +430,9 @@ function Profile({
                       entityId={profile._id}
                       type="user"
                     />
-                    <AnonymousDialog
-                      open={anonymousMessageOpen}
-                      setOpen={setAnonymousMessageOpen}
+                    <ConfessionDialog
+                      open={confessionOpen}
+                      setOpen={setConfessionOpen}
                     />
                   </div>
                 </div>
@@ -581,7 +581,7 @@ function Profile({
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-        <div className="mx-auto md:w-4/5 w-full sm:pb-6 pb-20 sm:pt-0 mt-6">
+        <div className="mx-auto md:w-4/5 w-full h-1/2 sm:pb-6 pb-20 sm:pt-0 mt-6">
           {children}
         </div>
       </div>

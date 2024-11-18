@@ -68,9 +68,9 @@ function SignInPage() {
     let username = "";
     let email = "";
     if (!(data.identifier.includes("@") || data.identifier.includes("."))) {
-      username = data.identifier.trim();
+      username = data.identifier;
     } else {
-      email = data.identifier.trim();
+      email = data.identifier;
     }
     const response = await dispatch(
       loginUser({

@@ -1,14 +1,14 @@
-import { AnonymousMessageSliceI } from "@/types/sliceTypes";
+import { ConfessionSliceI } from "@/types/sliceTypes";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
-const initialState: AnonymousMessageSliceI = {
+const initialState: ConfessionSliceI = {
   messages: [],
   loading: false,
-  skeletonLoading: true,
+  skeletonLoading: false,
 };
 
-export const sendAnonymousMessage = createAsyncThunk(
-  "anonymousMessage/sendAnonymousMessage",
+export const sendConfession = createAsyncThunk(
+  "confession/send",
   async ({
     content,
     reciever,
@@ -33,7 +33,7 @@ export const sendAnonymousMessage = createAsyncThunk(
       }
       formData.append("attachment", attachment);
     }
-    const parsed = await fetch("/api/v1/anonymousMessages/send", {
+    const parsed = await fetch("/api/v1/confessions/send", {
       method: "POST",
       body: formData,
     });
@@ -41,62 +41,59 @@ export const sendAnonymousMessage = createAsyncThunk(
   }
 );
 
-export const getAnonymousMessages = createAsyncThunk(
-  "anonymousMessage/getAnonymousMessages",
-  async () => {
-    const parsed = await fetch("/api/v1/anonymousMessages/get");
-    return parsed.json();
-  }
-);
+export const getConfession = createAsyncThunk("confession/get", async () => {
+  const parsed = await fetch("/api/v1/confessions/get");
+  return parsed.json();
+});
 
-export const deleteAnonymousMessage = createAsyncThunk(
-  "anonymousMessage/deleteAnonymousMessage",
+export const deleteConfession = createAsyncThunk(
+  "confession/deleteConfession",
   async (messageId: string) => {
-    const parsed = await fetch(`/api/v1/anonymousMessages/${messageId}`, {
+    const parsed = await fetch(`/api/v1/confessions/${messageId}`, {
       method: "DELETE",
     });
     return parsed.json();
   }
 );
 
-const anonymousMessageSlice = createSlice({
-  name: "anonymousMessage",
+const confessionSlice = createSlice({
+  name: "confession",
   initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(sendAnonymousMessage.pending, (state) => {
+      .addCase(sendConfession.pending, (state) => {
         state.loading = true;
       })
-      .addCase(sendAnonymousMessage.fulfilled, (state, action) => {
+      .addCase(sendConfession.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload?.success) {
           state.messages = [...state.messages, action.payload.data];
         }
       })
-      .addCase(sendAnonymousMessage.rejected, (state) => {
+      .addCase(sendConfession.rejected, (state) => {
         state.loading = false;
       });
 
     builder
-      .addCase(getAnonymousMessages.pending, (state) => {
+      .addCase(getConfession.pending, (state) => {
         state.skeletonLoading = true;
       })
-      .addCase(getAnonymousMessages.fulfilled, (state, action) => {
+      .addCase(getConfession.fulfilled, (state, action) => {
         state.skeletonLoading = false;
         if (action.payload?.success) {
           state.messages = action.payload.data;
         }
       })
-      .addCase(getAnonymousMessages.rejected, (state) => {
+      .addCase(getConfession.rejected, (state) => {
         state.skeletonLoading = false;
       });
 
     builder
-      .addCase(deleteAnonymousMessage.pending, (state) => {
+      .addCase(deleteConfession.pending, (state) => {
         state.loading = true;
       })
-      .addCase(deleteAnonymousMessage.fulfilled, (state, action) => {
+      .addCase(deleteConfession.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload?.success) {
           state.messages = state.messages.filter(
@@ -104,10 +101,10 @@ const anonymousMessageSlice = createSlice({
           );
         }
       })
-      .addCase(deleteAnonymousMessage.rejected, (state) => {
+      .addCase(deleteConfession.rejected, (state) => {
         state.loading = false;
       });
   },
 });
 
-export default anonymousMessageSlice.reducer;
+export default confessionSlice.reducer;

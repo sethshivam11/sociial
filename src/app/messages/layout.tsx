@@ -13,10 +13,18 @@ import {
 import Link from "next/link";
 import { toast } from "@/components/ui/use-toast";
 import NewGroupChatDialog from "@/components/NewGroupChatDialog";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 function Messages({ children }: { children: ReactNode }) {
   const dispatch = useAppDispatch();
+  const router = useRouter();
   const { chats, skeletonLoading } = useAppSelector((state) => state.chat);
   const location = usePathname();
 
@@ -43,9 +51,22 @@ function Messages({ children }: { children: ReactNode }) {
         }`}
       >
         <div className="flex items-center justify-between w-full mb-4 pr-2">
-          <h1 className="text-2xl tracking-tight font-bold text-left p-2.5">
-            Conversations
-          </h1>
+          <Select
+            defaultValue="messages"
+            onValueChange={(value) => {
+              if (value === "confessions") {
+                router.push("/confessions");
+              }
+            }}
+          >
+            <SelectTrigger className="text-2xl tracking-tight font-bold text-left p-2.5 pl-0 border-0 w-fit gap-2 focus:ring-0">
+              <SelectValue placeholder="Conversations" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="messages">Conversations</SelectItem>
+              <SelectItem value="confessions">Confessions</SelectItem>
+            </SelectContent>
+          </Select>
           <div className="hidden items-center justify-center gap-1">
             <Link href="call-logs" className="p-2" title="Call Logs">
               <PhoneCall />
@@ -118,7 +139,7 @@ function Messages({ children }: { children: ReactNode }) {
             </div>
           )}
         </ScrollArea>
-        <div className="sm:hidden pb-16 w-full">
+        <div className="sm:hidden pb-16 w-full h-full">
           {skeletonLoading ? (
             <ChatsLoadingSkeleton />
           ) : chats.length > 0 ? (
@@ -166,10 +187,10 @@ function Messages({ children }: { children: ReactNode }) {
             <div className="w-full flex flex-col items-center justify-center gap-4 text-center h-full">
               <History size="60" />
               <div>
-                <h2 className="text-2xl tracking-tight font-bold">
+                <h2 className="text-xl tracking-tight font-bold">
                   No Chats yet
                 </h2>
-                <p className="text-stone-500">
+                <p className="text-stone-500 text-sm">
                   Start a conversation with someone!
                 </p>
               </div>

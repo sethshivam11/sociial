@@ -24,7 +24,7 @@ import {
 } from "@/lib/store/features/slices/messageSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { socket } from "@/socket";
-import { BasicUserI, CallI, ChatI, MessageI } from "@/types/types";
+import { BasicUserI, CallI, ChatI, Confession, MessageI } from "@/types/types";
 import { Phone, Video } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -239,7 +239,6 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
         });
       }
     }
-
     function rejectCall(callId: string) {
       dispatch(endCall(callId)).then((response) => {
         if (!response.payload?.success) {
@@ -255,7 +254,6 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
         }
       });
     }
-
     function handleCall(payload: CallI) {
       toast({
         title: `${payload.caller.fullName} is calling...`,
@@ -290,6 +288,20 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
         duration: 30000,
       });
     }
+    function handleConfession(payload: Confession) {
+      toast({
+        title: "New Confession",
+        description: payload.content,
+        action: (
+          <ToastAction
+            altText="View"
+            onClick={() => router.push("/confessions")}
+          >
+            View
+          </ToastAction>
+        ),
+      });
+    }
 
     socket.on(ChatEventEnum.GET_USERS, handleOnlineUsers);
     socket.on(ChatEventEnum.CONNECTED_EVENT, onConnect);
@@ -313,6 +325,7 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
     socket.on(ChatEventEnum.NEW_ADMIN_EVENT, handleNewAdmin);
     socket.on(ChatEventEnum.ADMIN_REMOVE_EVENT, handleAdminRemove);
     socket.on(ChatEventEnum.NEW_CALL_EVENT, handleCall);
+    socket.on(ChatEventEnum.CONFESSION_RECIEVED_EVENT, handleConfession);
 
     return () => {
       socket.off(ChatEventEnum.CONNECTED_EVENT, onConnect);

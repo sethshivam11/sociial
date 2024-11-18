@@ -23,7 +23,7 @@ import { Textarea } from "./ui/textarea";
 import { ChangeEvent, useState } from "react";
 import { toast } from "./ui/use-toast";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
-import { sendAnonymousMessage } from "@/lib/store/features/slices/anonymousMessageSlice";
+import { sendConfession } from "@/lib/store/features/slices/confessionSlice";
 import { Loader2 } from "lucide-react";
 
 interface Props {
@@ -31,9 +31,9 @@ interface Props {
   setOpen: (open: boolean) => void;
 }
 
-function AnonymousDialog({ open, setOpen }: Props) {
+function ConfessionDialog({ open, setOpen }: Props) {
   const dispatch = useAppDispatch();
-  const { loading } = useAppSelector((state) => state.anonymousMessage);
+  const { loading } = useAppSelector((state) => state.confession);
   const { profile } = useAppSelector((state) => state.user);
   const formSchema = z.object({
     content: z
@@ -74,7 +74,7 @@ function AnonymousDialog({ open, setOpen }: Props) {
   }
   function onSubmit({ content }: z.infer<typeof formSchema>) {
     dispatch(
-      sendAnonymousMessage({ content, reciever: profile._id, attachment: file })
+      sendConfession({ content, reciever: profile._id, attachment: file })
     ).then((response) => {
       if (response.payload?.success) {
         setOpen(false);
@@ -161,4 +161,4 @@ function AnonymousDialog({ open, setOpen }: Props) {
   );
 }
 
-export default AnonymousDialog;
+export default ConfessionDialog;

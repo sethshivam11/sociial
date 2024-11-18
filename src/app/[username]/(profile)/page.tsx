@@ -71,15 +71,15 @@ function Page() {
         ))
       ) : (
         <div className="flex flex-col items-center justify-center w-full min-h-96 h-full">
-          <ImageIcon size="100" className="my-4" />
-          <span className="sm:text-3xl text-xl font-bold tracking-tight">
+          <ImageIcon size="80" className="my-4" />
+          <h1 className="sm:text-3xl text-xl font-bold tracking-tight">
             Nothing Here
-          </span>
-          <span className="sm:text-lg text-base text-stone-500">
+          </h1>
+          <p className="sm:text-lg text-base text-stone-500">
             {user.username === profile.username
               ? "Share your first post now"
               : "No posts yet"}
-          </span>
+          </p>
         </div>
       )}
     </div>

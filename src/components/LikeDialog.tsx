@@ -81,10 +81,12 @@ function LikeDialog({
             ) : (
               <div className="w-full sm:min-w-80 h-96 flex flex-col items-center justify-center gap-2">
                 <History className="mx-auto" size="50" />
-                <p className="text-xl font-bold tracking-tight">No likes yet</p>
-                <span className="text-center text-stone-500">
+                <h1 className="text-xl font-bold tracking-tight">
+                  No likes yet
+                </h1>
+                <p className="text-center text-stone-500 text-sm">
                   Be the first one to like this post
-                </span>
+                </p>
               </div>
             )}
           </div>

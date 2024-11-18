@@ -186,7 +186,6 @@ function Videos() {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [posts.length]);
-
   useEffect(() => {
     if (isPaused || seeking) {
       videoRef?.pause();
@@ -194,7 +193,6 @@ function Videos() {
       videoRef?.play();
     }
   }, [isPaused, seeking, videoRef]);
-
   useEffect(() => {
     window.addEventListener("keydown", handleKeys);
 
@@ -202,7 +200,6 @@ function Videos() {
       window.removeEventListener("keydown", handleKeys);
     };
   }, [handleKeys, videoRef]);
-
   useEffect(() => {
     if (userLoading || !user._id) return;
     dispatch(videoFeed(1));
