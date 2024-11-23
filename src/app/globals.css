@@ -87,4 +87,7 @@
   .blur-bg {
     -webkit-backdrop-filter: blur(4px);
   }
+  .react-player video {
+    object-fit: cover;
+  }
 }

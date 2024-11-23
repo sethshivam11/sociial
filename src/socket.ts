@@ -5,7 +5,7 @@ import { io } from "socket.io-client";
 const token =
   typeof window !== "undefined" ? localStorage.getItem("token") : "";
 
-export let socket = io(
+export const socket = io(
   process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3001",
   {
     extraHeaders: {
@@ -13,11 +13,3 @@ export let socket = io(
     },
   }
 );
-
-export function reconnect(token: string) {
-  socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3001", {
-    extraHeaders: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-}

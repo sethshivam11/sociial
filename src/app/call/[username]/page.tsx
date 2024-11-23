@@ -1,11 +1,9 @@
 "use client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { toast } from "@/components/ui/use-toast";
 import { useSocket } from "@/context/SocketProvider";
 import { ChatEventEnum, nameFallback } from "@/lib/helpers";
-import { endCall, updateCall } from "@/lib/store/features/slices/callSlice";
-import { getProfile } from "@/lib/store/features/slices/userSlice";
+import { endCall } from "@/lib/store/features/slices/callSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import {
   ChevronLeft,
@@ -20,17 +18,29 @@ import {
 import { useSearchParams, useRouter, notFound } from "next/navigation";
 import { useRef, useState, useEffect, useCallback } from "react";
 import { socket } from "@/socket";
-import Peer, { SignalData } from "simple-peer";
+import usePeer from "@/context/PeerProvider";
+import PermissionsRequired from "@/components/PermissionsRequired";
+import ReactPlayer from "react-player";
 
 function Page({ params }: { params: { username: string } }) {
   const router = useRouter();
   const query = useSearchParams();
   const dispatch = useAppDispatch();
-  const { user, profile } = useAppSelector((state) => state.user);
+  const { user } = useAppSelector((state) => state.user);
   const { call } = useAppSelector((state) => state.call);
   const { onlineUsers } = useSocket();
+  const {
+    peer,
+    createAnswer,
+    createOffer,
+    closePeer,
+    remoteStream,
+    sendStream,
+    setRemoteAnswer,
+  } = usePeer();
 
-  const peerVideoRef = useRef<HTMLVideoElement>(null);
+  const callId = query.get("call");
+  const profileId = query.get("profile");
   const selfVideoRef = useRef<HTMLVideoElement>(null);
   const selfVideoContainerRef = useRef<HTMLDivElement>(null);
 
@@ -43,24 +53,24 @@ function Page({ params }: { params: { username: string } }) {
   const [multipleCamAvailalble, setMultipleCamAvailable] = useState(false);
   const [notFoundError, setNotFoundError] = useState(false);
   const [callActive, setCallActive] = useState(false);
-  const [caller, setCaller] = useState<{
-    userId: string;
-    signal: SignalData;
-  }>();
+  const [permissions, setPermissions] = useState(true);
+  const [sendingStream, setSendingStream] = useState(false);
+  const [peerInfo, setPeerInfo] = useState({
+    _id: "",
+    fullName: "",
+    username: "",
+    avatar: "",
+  });
 
   function handleCallEnd() {
-    dispatch(endCall(call._id)).then((response) => {
-      if (response.payload?.success) {
-        stopCamera();
-        router.push(`/call/ended?username=${user.username}`);
-      } else {
-        toast({
-          title: "Cannot end call",
-          description: response.payload?.message || "Something went wrong!",
-          variant: "destructive",
-        });
-      }
-    });
+    dispatch(endCall(call._id))
+      .then((response) => {
+        if (response.payload?.success) {
+          stopCamera();
+          router.push(`/call/ended?username=${user.username}`);
+        }
+      })
+      .finally(() => closePeer());
   }
   function switchCamera() {
     if (!multipleCamAvailalble) return;
@@ -92,112 +102,95 @@ function Page({ params }: { params: { username: string } }) {
       setSelfVideoPaused(true);
     }
   }
-  const callPeer = useCallback(
-    (userId: string) => {
-      if (!stream) return;
-      console.log("Calling user");
-      const peer = new Peer({
-        initiator: true,
-        trickle: false,
-        stream,
-      });
-
-      peer.on("signal", (data: SignalData) => {
-        socket.emit(ChatEventEnum.CALL_HANDSHAKE_EVENT, {
-          from: user._id,
-          to: userId,
-          data,
-        });
-      });
-
-      peer.on("stream", (stream) => {
-        if (selfVideoRef.current) selfVideoRef.current.srcObject = stream;
-      });
-
-      socket.on(ChatEventEnum.CALL_ACCEPTED_EVENT, ({ data }) => {
-        setCallActive(true);
-        peer.signal(data);
-      });
-    },
-    [stream]
-  );
-  const acceptCall = useCallback(
-    (userId: string, signal?: SignalData) => {
-      if (!stream) return console.log("No stream available");
-      console.log("Accepting call");
-      const peer = new Peer({
-        initiator: false,
-        trickle: false,
-        stream,
-      });
-
-      peer.on("signal", (data: SignalData) => {
-        console.log(data);
-        socket.emit(ChatEventEnum.CALL_ACCEPTED_EVENT, {
-          userId,
-          data,
-        });
-      });
-
-      peer.on("stream", (stream) => {
-        if (peerVideoRef.current) peerVideoRef.current.srcObject = stream;
-        dispatch(updateCall({ callId: call._id, acceptedAt: `${new Date()}` }));
-        if (!query.get("profile")) {
-          callPeer(userId);
-          router.push(
-            `/call/${user.username}?video=${isVideoCall}&profile=${userId}`
-          );
-        }
-      });
-
-      console.log(signal, caller);
-      if (signal) peer.signal(signal);
-      else if (caller) peer.signal(caller.signal);
-      else console.log("Unable to connect: No signal recieved");
-    },
-    [stream, caller]
-  );
-
   const getUserMedia = useCallback(
     async (video: boolean, mode?: "user" | "environment") => {
-      const videoMode = video
-        ? { facingMode: { exact: mode || "user" } }
-        : false;
-      await navigator.mediaDevices
-        .getUserMedia({
+      try {
+        const videoMode = video
+          ? { facingMode: { exact: mode || "user" } }
+          : false;
+        const mediaStream = await navigator.mediaDevices.getUserMedia({
           video: videoMode,
           audio: true,
-        })
-        .then((stream) => {
-          setStream(stream);
-          if (!selfVideoRef.current || !peerVideoRef.current) return;
-          selfVideoRef.current.srcObject = stream;
-          const capabilties = stream
-            ?.getTracks()
-            .filter(({ kind }) => kind === "video")[0]
-            .getCapabilities();
-          if (capabilties?.facingMode) {
-            setActiveCamera(capabilties?.facingMode[0]);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
         });
-      await navigator.mediaDevices
-        .enumerateDevices()
-        .then((devices) => {
-          if (devices.filter(({ kind }) => kind === "videoinput").length > 1) {
-            setMultipleCamAvailable(true);
-          }
-        })
-        .catch((err) => console.log(err));
+        setStream(mediaStream);
+        if (selfVideoRef.current) {
+          selfVideoRef.current.srcObject = mediaStream;
+        }
+        const capabilties = mediaStream
+          ?.getTracks()
+          .filter(({ kind }) => kind === "video")[0]
+          .getCapabilities();
+        if (capabilties?.facingMode) {
+          setActiveCamera(capabilties?.facingMode[0]);
+        }
+        await navigator.mediaDevices
+          .enumerateDevices()
+          .then((devices) => {
+            if (
+              devices.filter(({ kind }) => kind === "videoinput").length > 1
+            ) {
+              setMultipleCamAvailable(true);
+            }
+          })
+          .catch((err) => console.log(err));
 
-      return () => {
-        stopCamera();
-      };
+        return () => {
+          stopCamera();
+        };
+      } catch (error) {
+        console.log(error);
+        setPermissions(false);
+      }
     },
     []
   );
+  const startCall = useCallback(async () => {
+    if (!peer) return;
+    console.log("starting call");
+    const offer = await createOffer();
+    socket.emit(ChatEventEnum.CALL_HANDSHAKE_EVENT, {
+      userId: user._id !== call.caller._id ? call.caller._id : call.callee._id,
+      offer,
+    });
+  }, [peer, socket, createOffer]);
+  const acceptCall = useCallback(
+    async (offer: RTCSessionDescription) => {
+      const ans = await createAnswer(offer);
+      console.log("accepting call", ans);
+      socket.emit(ChatEventEnum.CALL_ACCEPTED_EVENT, {
+        userId:
+          user._id !== call.caller._id ? call.caller._id : call.callee._id,
+        answer: ans,
+      });
+    },
+    [createAnswer, socket]
+  );
+  const handleCallAccepted = useCallback(
+    async (answer: RTCSessionDescription) => {
+      console.log("call accepted", answer);
+      try {
+        if (!peer) return;
+        await peer.setRemoteDescription(answer);
+      } catch (error) {
+        console.error("Failed to set remote description:", error);
+      }
+    },
+    [setRemoteAnswer, stream]
+  );
+  const handleNegotiation = useCallback(async () => {
+    console.log("handling negotiation");
+    if (!peer) return;
+    const localOffer = await peer.createOffer();
+    console.log(localOffer);
+    await peer.setLocalDescription(localOffer);
+    socket.emit(ChatEventEnum.CALL_HANDSHAKE_EVENT, {
+      userId: user._id !== call.callee._id ? call.callee._id : call.caller._id,
+      offer: localOffer,
+    });
+    if (stream && !sendingStream) sendStream(stream);
+    else console.log("No stream to send");
+    setCallActive(true);
+  }, [stream, peer, socket, sendStream, sendingStream]);
 
   useEffect(() => {
     if (!selfVideoContainerRef.current) return;
@@ -224,165 +217,203 @@ function Page({ params }: { params: { username: string } }) {
     }
   }, [getUserMedia, query]);
   useEffect(() => {
-    if (!profile?._id) {
-      dispatch(getProfile({ username: params.username })).then((response) => {
-        if (!response.payload?.success) {
-          setNotFoundError(true);
-        }
-      });
+    if (profileId) {
+      setPeerInfo(call.caller._id === profileId ? call.caller : call.callee);
     }
     if (!call._id) {
       setNotFoundError(true);
     }
-  }, [dispatch, profile?._id, params]);
+  }, [dispatch, params]);
   useEffect(() => {
-    const userId = query.get("profile");
-    console.log(stream, userId);
-    if (stream && userId) {
-      callPeer(userId);
-    }
-  }, [stream, query.get("profile")]);
-  useEffect(() => {
-    function handleHandshake({
-      data,
-      from,
-    }: {
-      data: SignalData;
-      from: string;
-    }) {
-      setCaller({ userId: from, signal: data });
-      console.log("Recieved signal", data);
-    }
-
-    socket.on(ChatEventEnum.CALL_HANDSHAKE_EVENT, handleHandshake);
+    if (!peer) return;
+    peer.addEventListener("negotiationneeded", handleNegotiation);
 
     return () => {
-      socket.off(ChatEventEnum.CALL_HANDSHAKE_EVENT, handleHandshake);
+      peer.removeEventListener("negotiationneeded", handleNegotiation);
     };
-  }, []);
+  }, [peer]);
   useEffect(() => {
-    if (stream && caller?.userId && caller?.signal)
-      acceptCall(caller.userId, caller.signal);
-  }, [stream, caller]);
+    if (callId) {
+      startCall();
+    }
+  }, [callId, startCall]);
+  useEffect(() => {
+    socket.on(ChatEventEnum.CALL_HANDSHAKE_EVENT, acceptCall);
+    socket.on(ChatEventEnum.CALL_ACCEPTED_EVENT, handleCallAccepted);
+    socket.on(ChatEventEnum.CALL_DISCONNECTED_EVENT, handleCallEnd);
+
+    return () => {
+      socket.off(ChatEventEnum.CALL_HANDSHAKE_EVENT, acceptCall);
+      socket.off(ChatEventEnum.CALL_ACCEPTED_EVENT, handleCallAccepted);
+      socket.off(ChatEventEnum.CALL_DISCONNECTED_EVENT, handleCallEnd);
+    };
+  }, [socket]);
+  useEffect(() => {
+    if (remoteStream && stream && !sendingStream) {
+      sendStream(stream);
+      setSendingStream(true);
+    }
+  }, [remoteStream, stream, sendingStream]);
 
   if (notFoundError) {
     notFound();
-  }
-
-  return (
-    <div className="col-span-10 flex flex-col items-center justify-center min-h-[100dvh] max-h-[100dvh] bg-black overflow-hidden relative">
-      <div className="flex flex-col gap-2 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-        <Button onClick={() => callPeer(call.caller._id)}>Call caller</Button>
-        <Button onClick={() => callPeer(call.callee._id)}>Call callee</Button>
-        <Button onClick={() => acceptCall(call.callee._id)}>
-          Accept callee
-        </Button>
-        <Button onClick={() => acceptCall(call.caller._id)}>
-          Accept caller
-        </Button>
-      </div>
-      {isVideoCall ? (
-        <video
-          className="w-full h-full max-sm:h-1/2 sm:object-contain object-cover"
-          ref={peerVideoRef}
-          autoPlay
-          playsInline
-        />
-      ) : (
-        <>
-          <Avatar className="sm:w-40 w-32 sm:h-40 h-32 object-contain select-none pointer-events-none">
-            <AvatarImage src={profile.avatar} />
-            <AvatarFallback className="bg-stone-800">
-              {nameFallback(profile.fullName)}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col items-center justify-center gap-0">
-            <h1 className="text-2xl tracking-tight font-bold">
-              {profile.fullName}
-            </h1>
-            <h6 className="text-stone-500 text-lg">@{profile.username}</h6>
+  } else if (!sendingStream && callId) {
+    return (
+      <div className="col-span-10 flex items-center justify-center min-h-[100dvh] max-h-[100dvh] bg-black overflow-hidden relative">
+        <div className="grid lg:grid-cols-3 min-w-3/4">
+          <ReactPlayer
+            className="w-full max-sm:h-full max-md:hidden bg-stone-800 sm:object-contain object-cover lg:col-span-2 min-h-96"
+            url={stream || ""}
+            playing
+            autoPlay
+            muted
+            playsInline
+            width="100%"
+            height="100%"
+          />
+          <div className="flex flex-col justify-center items-center gap-4 bg-stone-200 dark:bg-stone-800 py-10 max-md:h-[30rem] max-md:w-96 max-md:rounded-xl">
+            <Avatar className="sm:w-40 w-32 sm:h-40 h-32 object-contain select-none pointer-events-none">
+              <AvatarImage src={peerInfo.avatar} />
+              <AvatarFallback className="bg-stone-800">
+                {nameFallback(peerInfo.fullName)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col items-center justify-center gap-0">
+              <h1 className="text-2xl tracking-tight font-bold">
+                {peerInfo.fullName}
+              </h1>
+              <p className="text-stone-500 text-lg">@{peerInfo.username}</p>
+            </div>
+            <Button
+              className="bg-blue-500 hover:bg-blue-600 text-white rounded-full"
+              onClick={() => {
+                if (stream) {
+                  sendStream(stream);
+                  setSendingStream(true);
+                } else console.log("No stream to send");
+              }}
+            >
+              Join Call
+            </Button>
           </div>
-          {callActive ? (
-            <p className="text-stone-500">
-              {/* {new Date(timer * 1000).toLocaleTimeString("en-IN")} */}
-            </p>
-          ) : (
-            <p className="text-stone-500 animate-pulse">
-              {onlineUsers.includes(profile._id) ? "Calling..." : "Ringing..."}
-            </p>
+        </div>
+      </div>
+    );
+  } else if (!permissions) {
+    return <PermissionsRequired />;
+  } else {
+    return (
+      <div className="col-span-10 flex flex-col items-center justify-center min-h-[100dvh] max-h-[100dvh] bg-black overflow-hidden relative">
+        {isVideoCall ? (
+          <ReactPlayer
+            playing
+            url={remoteStream || ""}
+            className="w-full h-full max-sm:h-1/2 sm:object-contain object-cover react-player sm:rounded-xl relative overflow-hidden react-player"
+            playsInline
+            width="100%"
+            height="inherit"
+          />
+        ) : (
+          <>
+            <Avatar className="sm:w-40 w-32 sm:h-40 h-32 object-contain select-none pointer-events-none">
+              <AvatarImage src={peerInfo.avatar} />
+              <AvatarFallback className="bg-stone-800">
+                {nameFallback(peerInfo.fullName)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col items-center justify-center gap-0">
+              <h1 className="text-2xl tracking-tight font-bold">
+                {peerInfo.fullName}
+              </h1>
+              <p className="text-stone-500 text-lg">@{peerInfo.username}</p>
+            </div>
+            {callActive ? (
+              <p className="text-stone-500">
+                {/* {new Date(timer * 1000).toLocaleTimeString("en-IN")} */}
+              </p>
+            ) : (
+              <p className="text-stone-500 animate-pulse">
+                {onlineUsers.includes(peerInfo._id)
+                  ? "Calling..."
+                  : "Ringing..."}
+              </p>
+            )}
+          </>
+        )}
+        <div className="flex items-center justify-center gap-4 absolute bottom-10 z-10">
+          <Button
+            size="icon"
+            variant="secondary"
+            className={`rounded-full p-3 h-fit w-fit shadow-xl ${
+              multipleCamAvailalble ? "" : "hidden"
+            }`}
+            onClick={switchCamera}
+          >
+            <RefreshCcw size="30" />
+          </Button>
+          {isVideoCall && (
+            <Button
+              size="icon"
+              variant="secondary"
+              className={`rounded-full p-3 w-fit h-fit shadow-xl ${
+                selfVideoPaused
+                  ? "bg-stone-200 sm:hover:bg-stone-400 text-black"
+                  : ""
+              }`}
+              onClick={handleSelfVideoPause}
+            >
+              {selfVideoPaused ? <VideoOff size="30" /> : <Video size="30" />}
+            </Button>
           )}
-        </>
-      )}
-      <div className="flex items-center justify-center gap-4 absolute bottom-10 z-10">
-        <Button
-          size="icon"
-          variant="secondary"
-          className={`rounded-full p-3 h-fit w-fit shadow-xl ${
-            multipleCamAvailalble ? "" : "hidden"
-          }`}
-          onClick={switchCamera}
-        >
-          <RefreshCcw size="30" />
-        </Button>
-        {isVideoCall && (
           <Button
             size="icon"
             variant="secondary"
             className={`rounded-full p-3 w-fit h-fit shadow-xl ${
-              selfVideoPaused
-                ? "bg-stone-200 sm:hover:bg-stone-400 text-black"
-                : ""
+              selfMuted ? "bg-stone-200 sm:hover:bg-stone-400 text-black" : ""
             }`}
-            onClick={handleSelfVideoPause}
+            onClick={() => setSelfMuted((prevMuted) => !prevMuted)}
           >
-            {selfVideoPaused ? <VideoOff size="30" /> : <Video size="30" />}
+            {selfMuted ? <MicOff size="30" /> : <Mic size="30" />}
           </Button>
-        )}
-        <Button
-          size="icon"
-          variant="secondary"
-          className={`rounded-full p-3 w-fit h-fit shadow-xl ${
-            selfMuted ? "bg-stone-200 sm:hover:bg-stone-400 text-black" : ""
+          <Button
+            size="icon"
+            variant="destructive"
+            className="rounded-full p-3 w-fit h-fit shadow-xl"
+            onClick={handleCallEnd}
+          >
+            <Phone size="30" className="rotate-[135deg]" />
+          </Button>
+        </div>
+        <div
+          className={`flex items-center justify-center lg:w-96 lg:h-72 sm:w-60 sm:h-44 w-full max-lg:top-4 lg:bottom-4 right-4 sm:shadow-lg sm:rounded-xl sm:absolute transition-transform max-sm:h-1/2 overflow-hidden ${
+            isVideoCall ? "visible bg-black" : "invisible bg-transparent"
           }`}
-          onClick={() => setSelfMuted((prevMuted) => !prevMuted)}
+          ref={selfVideoContainerRef}
         >
-          {selfMuted ? <MicOff size="30" /> : <Mic size="30" />}
-        </Button>
-        <Button
-          size="icon"
-          variant="destructive"
-          className="rounded-full p-3 w-fit h-fit shadow-xl"
-          onClick={handleCallEnd}
-        >
-          <Phone size="30" className="rotate-[135deg]" />
-        </Button>
+          <button
+            className="hover:scale-110 p-2 left-0 absolute z-10 max-sm:hidden"
+            onClick={() => setHideSelfVideo((prevHidden) => !prevHidden)}
+          >
+            {hideSelfVideo ? (
+              <ChevronLeft size="30" />
+            ) : (
+              <ChevronRight size="30" />
+            )}
+          </button>
+          <ReactPlayer
+            className="w-full max-sm:h-full bg-black sm:object-contain object-cover sm:rounded-xl overflow-hidden react-player"
+            height="inherit"
+            width="100%"
+            url={stream || ""}
+            playing
+            autoPlay
+            muted
+            playsInline
+          />
+        </div>
       </div>
-      <div
-        className={`flex items-center justify-center lg:w-96 lg:h-72 sm:w-60 sm:h-44 w-full max-lg:top-4 lg:bottom-4 right-4 sm:shadow-lg sm:rounded-xl sm:absolute transition-transform max-sm:h-1/2 overflow-hidden ${
-          isVideoCall ? "visible bg-black" : "invisible bg-transparent"
-        }`}
-        ref={selfVideoContainerRef}
-      >
-        <button
-          className="hover:scale-110 p-2 left-0 absolute z-10 max-sm:hidden"
-          onClick={() => setHideSelfVideo((prevHidden) => !prevHidden)}
-        >
-          {hideSelfVideo ? (
-            <ChevronLeft size="30" />
-          ) : (
-            <ChevronRight size="30" />
-          )}
-        </button>
-        <video
-          className="w-full max-sm:h-full bg-black sm:object-contain object-cover sm:rounded-xl"
-          ref={selfVideoRef}
-          autoPlay
-          muted
-          playsInline
-        />
-      </div>
-    </div>
-  );
+    );
+  }
 }
 
 export default Page;

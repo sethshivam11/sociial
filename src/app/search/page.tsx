@@ -54,14 +54,8 @@ function Search() {
   }
 
   useEffect(() => {
-    dispatch(searchUsers(search)).then((response) => {
-      if (
-        !response.payload?.success &&
-        response.payload?.message !== "No users found"
-      ) {
-        console.log(response.payload?.message);
-      }
-    });
+    if (!search) return;
+    dispatch(searchUsers(search));
   }, [search, dispatch]);
 
   useEffect(() => {

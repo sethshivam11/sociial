@@ -1,4 +1,5 @@
 "use client";
+import PermissionsRequired from "@/components/PermissionsRequired";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -7,7 +8,6 @@ import { nameFallback } from "@/lib/helpers";
 import { getCall, startCall } from "@/lib/store/features/slices/callSlice";
 import { getProfile } from "@/lib/store/features/slices/userSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
-import { MicOff, VideoOff } from "lucide-react";
 import { notFound, useRouter, useSearchParams } from "next/navigation";
 import { useState, useCallback, useEffect } from "react";
 
@@ -113,18 +113,7 @@ function Page() {
               </h1>
               <h6 className="text-stone-500 text-lg">@{profile.username}</h6>
             </div>
-            {call ? (
-              <Button
-                className="bg-blue-500 hover:bg-blue-600 text-white rounded-full"
-                onClick={() =>
-                  router.push(
-                    `/call/${username}?video=${videoEnabled}&call=${call}&profile=${profile._id}`
-                  )
-                }
-              >
-                Join Call
-              </Button>
-            ) : (
+            {!call && (
               <Button
                 className="bg-blue-500 hover:bg-blue-600 text-white rounded-full"
                 onClick={handleCall}
@@ -137,24 +126,7 @@ function Page() {
       </div>
     );
   } else {
-    return (
-      <div className="col-span-10 flex flex-col items-center justify-center gap-6 container">
-        <div className="flex gap-8 text-stone-500">
-          <VideoOff size="50" />
-          <MicOff size="50" />
-        </div>
-        <div className="flex flex-col items-center justify-center text-center gap-2">
-          <h1 className="text-2xl tracking-tight font-bold">
-            Permissions Required
-          </h1>
-          <h6 className="text-stone-400">
-            Please allow Sociial to access your camera and microphone.{" "}
-            <br className="max-sm:hidden" />
-            You can turn this off later.
-          </h6>
-        </div>
-      </div>
-    );
+    return <PermissionsRequired />;
   }
 }
 

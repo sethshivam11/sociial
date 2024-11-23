@@ -3,7 +3,7 @@
 import { ToastAction } from "@/components/ui/toast";
 import { toast } from "@/components/ui/use-toast";
 import { ChatEventEnum, checkForAssets } from "@/lib/helpers";
-import { endCall } from "@/lib/store/features/slices/callSlice";
+import { endCall, setCall } from "@/lib/store/features/slices/callSlice";
 import {
   addedToGroup,
   groupDeleted,
@@ -22,6 +22,7 @@ import {
   reacted,
   unreacted,
 } from "@/lib/store/features/slices/messageSlice";
+import { getProfile } from "@/lib/store/features/slices/userSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { socket } from "@/socket";
 import { BasicUserI, CallI, ChatI, Confession, MessageI } from "@/types/types";
@@ -255,6 +256,10 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
       });
     }
     function handleCall(payload: CallI) {
+      if ("vibrate" in navigator) {
+        navigator.vibrate([200, 50, 200, 50, 200, 50, 200]);
+      }
+      dispatch(setCall(payload));
       toast({
         title: `${payload.caller.fullName} is calling...`,
         description: "Swipe right to silent",
@@ -264,15 +269,26 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
               altText="Answer"
               className="bg-primary hover:bg-primary/80 text-white dark:text-black"
               onClick={() => {
-                if ("vibrate" in navigator) {
-                  navigator.vibrate([200, 50, 200, 50, 200, 50, 200]);
-                }
-                window.open(
-                  `/call?username=${payload.caller.username}&video=${
-                    payload.type === "video"
-                  }&call=${payload._id}`,
-                  "_blank"
-                );
+                dispatch(getProfile({ username: payload.caller.username }));
+                navigator.mediaDevices
+                  .getUserMedia({
+                    video: payload.type === "video",
+                    audio: true,
+                  })
+                  .then((stream) => {
+                    stream.getTracks().forEach((track) => {
+                      track.stop();
+                    });
+                    router.push(
+                      `/call/${payload.caller.username}?video=${
+                        payload.type === "video"
+                      }&call=${payload._id}&profile=${payload.caller._id}`
+                    );
+                  })
+                  .catch((err) => {
+                    console.log(err);
+                    router.push("/call/allow");
+                  });
               }}
             >
               {payload.type === "video" ? <Video /> : <Phone />}

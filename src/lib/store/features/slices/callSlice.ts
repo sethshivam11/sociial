@@ -90,7 +90,6 @@ const callSlice = createSlice({
   initialState,
   reducers: {
     setCall: (state, action) => {
-      console.log(action.payload);
       state.call = action.payload;
     },
   },

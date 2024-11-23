@@ -29,7 +29,7 @@ import {
 } from "@/lib/store/features/slices/userSlice";
 import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/use-toast";
-import { reconnect } from "@/socket";
+import { socket } from "@/socket";
 
 function SignInPage() {
   const router = useRouter();
@@ -91,7 +91,7 @@ function SignInPage() {
           `/verify-code?username=${response.payload.data.user.username}`
         );
       } else {
-        reconnect(response.payload?.data.token);
+        socket.connect();
         router.push("/");
       }
     } else {

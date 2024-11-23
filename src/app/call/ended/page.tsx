@@ -1,24 +1,67 @@
 "use client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 import { nameFallback } from "@/lib/helpers";
-import { useAppSelector } from "@/lib/store/store";
+import { getProfile } from "@/lib/store/features/slices/userSlice";
+import { useAppDispatch, useAppSelector } from "@/lib/store/store";
+import Link from "next/link";
+import { notFound, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 function Page() {
-  const { user } = useAppSelector((state) => state.user);
+  const query = useSearchParams();
+  const dispatch = useAppDispatch();
+  const { profile, skeletonLoading } = useAppSelector((state) => state.user);
+  const username = query.get("username");
+
+  const [notFoundError, setNotFoundError] = useState(false);
+
+  useEffect(() => {
+    if (username)
+      dispatch(getProfile({ username })).then((response) => {
+        if (response.payload?.message === "User not found") {
+          setNotFoundError(true);
+        }
+      });
+    else setNotFoundError(true);
+  }, [dispatch, setNotFoundError, username]);
+
+  if (notFoundError) {
+    notFound();
+  }
 
   return (
     <div className="col-span-10 flex flex-col items-center justify-center gap-4 h-[100dvh] overflow-hidden bg-black text-white container relative">
-      <Avatar className="sm:w-40 w-32 sm:h-40 h-32 object-contain select-none pointer-events-none">
-        <AvatarImage src={user.avatar} />
-        <AvatarFallback className="bg-stone-800">
-          {nameFallback(user.fullName)}
-        </AvatarFallback>
-      </Avatar>
-      <div className="flex flex-col items-center justify-center gap-0">
-        <h1 className="text-2xl tracking-tight font-bold">{user.fullName}</h1>
-        <h6 className="text-stone-500 text-lg">@{user.username}</h6>
-      </div>
-      <h1 className="text-lg mt-10">Call Ended</h1>
+      {skeletonLoading ? (
+        <>
+          <Skeleton className="sm:w-40 w-32 sm:h-40 h-32 rounded-full" />
+          <Skeleton className="h-6 w-36" />
+          <Skeleton className="h-5 w-20" />
+          <Skeleton className="h-5 w-36 mt-10" />
+        </>
+      ) : (
+        <>
+          <Avatar className="sm:w-40 w-32 sm:h-40 h-32 object-contain select-none pointer-events-none">
+            <AvatarImage src={profile.avatar} />
+            <AvatarFallback className="bg-stone-800">
+              {nameFallback(profile.fullName)}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col items-center justify-center gap-0">
+            <h1 className="text-2xl tracking-tight font-bold">
+              {profile.fullName}
+            </h1>
+            <h6 className="text-stone-500 text-lg">@{profile.username}</h6>
+          </div>
+          <p className="text-sm">Call Ended</p>
+          <Link
+            href="/"
+            className="text-blue-500 underline underline-offset-2 mt-10"
+          >
+            Go back to Home
+          </Link>
+        </>
+      )}
     </div>
   );
 }
