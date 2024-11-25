@@ -77,7 +77,6 @@ function Page({ params }: { params: { chatId: string } }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<ScrollableFeed>(null);
   const firstMessageRef = useRef<HTMLDivElement>(null);
-  const ringtoneRef = useRef<HTMLAudioElement>(null);
 
   const formSchema = z.object({
     message: z.string(),
@@ -394,19 +393,6 @@ function Page({ params }: { params: { chatId: string } }) {
       window.removeEventListener("keydown", handleTyping);
     };
   }, [dispatch, chatId, setCurrentChat]);
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document?.hidden) {
-        ringtoneRef.current?.pause();
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, []);
 
   return (
     <div
@@ -414,7 +400,6 @@ function Page({ params }: { params: { chatId: string } }) {
         location !== "/messages" ? "" : "hidden"
       }`}
     >
-      <audio src="/ringtone.mp3" ref={ringtoneRef} />
       {isAtBottom && (
         <Button
           variant="outline"
@@ -467,20 +452,18 @@ function Page({ params }: { params: { chatId: string } }) {
           <div className="flex items-center justify-center px-4 gap-0.5">
             {!chat.isGroupChat && (
               <>
-                {/* <Link
+                <Link
                   href={`/call?username=${chat.users[0]?.username}&video=false`}
-                  target="_blank"
                   className="inline-block p-2"
                 >
                   <Phone size="20" />
                 </Link>
                 <Link
                   href={`/call?username=${chat.users[0]?.username}&video=true`}
-                  target="_blank"
                   className="inline-block p-2"
                 >
                   <Video />
-                </Link> */}
+                </Link>
               </>
             )}
             <Link href={`/messages/${chatId}/info`} className="p-2">

@@ -23,7 +23,8 @@ function MobileNav({ hideButtons }: Props) {
   const { user, skeletonLoading } = useAppSelector((state) => state.user);
   return (
     <div className="bg-stone-100 dark:bg-stone-900 h-16 p-3 top-0 left-0 col-span-10 sm:static sticky w-full sm:hidden flex items-center justify-between z-20">
-      <div
+      <Link
+        href="/"
         className={`flex items-center gap-2 text-3xl tracking-tighter font-extrabold ${lobster.className}`}
       >
         <Image
@@ -34,7 +35,7 @@ function MobileNav({ hideButtons }: Props) {
           className="pointer-events-none select-none"
         />
         Sociial
-      </div>
+      </Link>
       {!skeletonLoading && (
         <>
           <div className={`space-x-1 ${hideButtons ? "hidden" : ""}`}>

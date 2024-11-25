@@ -369,7 +369,7 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
       socket.off(ChatEventEnum.ADMIN_REMOVE_EVENT, handleAdminRemove);
       socket.off(ChatEventEnum.NEW_CALL_EVENT, handleCall);
     };
-  }, [chat, dispatch]);
+  }, [chat, dispatch, socket]);
 
   return (
     <SocketContext.Provider

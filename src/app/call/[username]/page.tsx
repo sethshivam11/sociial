@@ -1,7 +1,6 @@
 "use client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { useSocket } from "@/context/SocketProvider";
 import { ChatEventEnum, nameFallback } from "@/lib/helpers";
 import { endCall } from "@/lib/store/features/slices/callSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
@@ -28,7 +27,6 @@ function Page({ params }: { params: { username: string } }) {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.user);
   const { call } = useAppSelector((state) => state.call);
-  const { onlineUsers } = useSocket();
   const {
     peer,
     createAnswer,
@@ -43,6 +41,7 @@ function Page({ params }: { params: { username: string } }) {
   const profileId = query.get("profile");
   const selfVideoRef = useRef<HTMLVideoElement>(null);
   const selfVideoContainerRef = useRef<HTMLDivElement>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const [selfMuted, setSelfMuted] = useState(false);
   const [selfVideoPaused, setSelfVideoPaused] = useState(false);
@@ -52,7 +51,6 @@ function Page({ params }: { params: { username: string } }) {
   const [isVideoCall, setIsVideoCall] = useState(false);
   const [multipleCamAvailalble, setMultipleCamAvailable] = useState(false);
   const [notFoundError, setNotFoundError] = useState(false);
-  const [callActive, setCallActive] = useState(false);
   const [permissions, setPermissions] = useState(true);
   const [sendingStream, setSendingStream] = useState(false);
   const [peerInfo, setPeerInfo] = useState({
@@ -62,35 +60,15 @@ function Page({ params }: { params: { username: string } }) {
     avatar: "",
   });
 
-  function handleCallEnd() {
-    dispatch(endCall(call._id))
-      .then((response) => {
-        if (response.payload?.success) {
-          stopCamera();
-          router.push(`/call/ended?username=${user.username}`);
-        }
-      })
-      .finally(() => closePeer());
-  }
   function switchCamera() {
     if (!multipleCamAvailalble) return;
 
     stopCamera();
-    console.log(activeCamera);
     if (activeCamera === "user") {
       getUserMedia(true, "environment");
     } else {
       getUserMedia(true, "user");
     }
-  }
-  function stopCamera() {
-    if (stream) {
-      stream.getTracks().forEach((track) => {
-        track.stop();
-      });
-      setStream(null);
-    }
-    if (selfVideoRef.current) selfVideoRef.current.srcObject = null;
   }
   function handleSelfVideoPause() {
     if (!selfVideoRef.current) return;
@@ -146,7 +124,6 @@ function Page({ params }: { params: { username: string } }) {
   );
   const startCall = useCallback(async () => {
     if (!peer) return;
-    console.log("starting call");
     const offer = await createOffer();
     socket.emit(ChatEventEnum.CALL_HANDSHAKE_EVENT, {
       userId: user._id !== call.caller._id ? call.caller._id : call.callee._id,
@@ -156,7 +133,6 @@ function Page({ params }: { params: { username: string } }) {
   const acceptCall = useCallback(
     async (offer: RTCSessionDescription) => {
       const ans = await createAnswer(offer);
-      console.log("accepting call", ans);
       socket.emit(ChatEventEnum.CALL_ACCEPTED_EVENT, {
         userId:
           user._id !== call.caller._id ? call.caller._id : call.callee._id,
@@ -167,7 +143,6 @@ function Page({ params }: { params: { username: string } }) {
   );
   const handleCallAccepted = useCallback(
     async (answer: RTCSessionDescription) => {
-      console.log("call accepted", answer);
       try {
         if (!peer) return;
         await peer.setRemoteDescription(answer);
@@ -178,10 +153,8 @@ function Page({ params }: { params: { username: string } }) {
     [setRemoteAnswer, stream]
   );
   const handleNegotiation = useCallback(async () => {
-    console.log("handling negotiation");
     if (!peer) return;
     const localOffer = await peer.createOffer();
-    console.log(localOffer);
     await peer.setLocalDescription(localOffer);
     socket.emit(ChatEventEnum.CALL_HANDSHAKE_EVENT, {
       userId: user._id !== call.callee._id ? call.callee._id : call.caller._id,
@@ -189,8 +162,42 @@ function Page({ params }: { params: { username: string } }) {
     });
     if (stream && !sendingStream) sendStream(stream);
     else console.log("No stream to send");
-    setCallActive(true);
   }, [stream, peer, socket, sendStream, sendingStream]);
+  const stopCamera = useCallback(() => {
+    if (stream) {
+      stream.getTracks().forEach((track) => {
+        track.stop();
+      });
+      setStream(null);
+    } else console.log("no stream to stop camera", stream);
+    if (selfVideoRef.current) selfVideoRef.current.srcObject = null;
+  }, [stream, selfVideoRef]);
+  function handleCallEnd(unpicked?: boolean) {
+    dispatch(endCall(call._id)).then((response) => {
+      if (response.payload?.success) {
+        stopCamera();
+        closePeer();
+        const username =
+          call.caller._id !== user._id
+            ? call.caller.username
+            : call.callee.username;
+        router.push(
+          unpicked
+            ? `/call/unpicked?username=${username}`
+            : `/call/ended?username=${username}`
+        );
+      }
+    });
+  }
+  function handleCallEnded() {
+    stopCamera();
+    closePeer();
+    const username =
+      call.caller._id !== user._id
+        ? call.caller.username
+        : call.callee.username;
+    router.push(`/call/ended?username=${username}`);
+  }
 
   useEffect(() => {
     if (!selfVideoContainerRef.current) return;
@@ -214,6 +221,11 @@ function Page({ params }: { params: { username: string } }) {
       setIsVideoCall(false);
       setSelfVideoPaused(true);
       getUserMedia(false);
+    }
+    if (call.caller._id === user._id) {
+      timerRef.current = setTimeout(() => {
+        handleCallEnd(true);
+      }, 30000);
     }
   }, [getUserMedia, query]);
   useEffect(() => {
@@ -240,18 +252,21 @@ function Page({ params }: { params: { username: string } }) {
   useEffect(() => {
     socket.on(ChatEventEnum.CALL_HANDSHAKE_EVENT, acceptCall);
     socket.on(ChatEventEnum.CALL_ACCEPTED_EVENT, handleCallAccepted);
-    socket.on(ChatEventEnum.CALL_DISCONNECTED_EVENT, handleCallEnd);
+    socket.on(ChatEventEnum.CALL_DISCONNECTED_EVENT, handleCallEnded);
 
     return () => {
       socket.off(ChatEventEnum.CALL_HANDSHAKE_EVENT, acceptCall);
       socket.off(ChatEventEnum.CALL_ACCEPTED_EVENT, handleCallAccepted);
-      socket.off(ChatEventEnum.CALL_DISCONNECTED_EVENT, handleCallEnd);
+      socket.off(ChatEventEnum.CALL_DISCONNECTED_EVENT, handleCallEnded);
     };
   }, [socket]);
   useEffect(() => {
     if (remoteStream && stream && !sendingStream) {
       sendStream(stream);
       setSendingStream(true);
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
     }
   }, [remoteStream, stream, sendingStream]);
 
@@ -262,8 +277,9 @@ function Page({ params }: { params: { username: string } }) {
       <div className="col-span-10 flex items-center justify-center min-h-[100dvh] max-h-[100dvh] bg-black overflow-hidden relative">
         <div className="grid lg:grid-cols-3 min-w-3/4">
           <ReactPlayer
-            className="w-full max-sm:h-full max-md:hidden bg-stone-800 sm:object-contain object-cover lg:col-span-2 min-h-96"
+            className="w-full max-sm:h-full max-md:hidden bg-stone-800 sm:object-contain object-cover lg:col-span-2 min-h-96 react-player"
             url={stream || ""}
+            config={{ file: { attributes: { playsinline: true } } }}
             playing
             autoPlay
             muted
@@ -286,6 +302,7 @@ function Page({ params }: { params: { username: string } }) {
             </div>
             <Button
               className="bg-blue-500 hover:bg-blue-600 text-white rounded-full"
+              disabled={sendingStream && !stream}
               onClick={() => {
                 if (stream) {
                   sendStream(stream);
@@ -307,11 +324,12 @@ function Page({ params }: { params: { username: string } }) {
         {isVideoCall ? (
           <ReactPlayer
             playing
+            config={{ file: { attributes: { playsinline: true } } }}
             url={remoteStream || ""}
-            className="w-full h-full max-sm:h-1/2 sm:object-contain object-cover react-player sm:rounded-xl relative overflow-hidden react-player"
+            className="w-full h-full max-sm:h-1/2 sm:object-contain object-cover relative overflow-hidden react-player height-50-sm"
             playsInline
             width="100%"
-            height="inherit"
+            height="100%"
           />
         ) : (
           <>
@@ -327,17 +345,6 @@ function Page({ params }: { params: { username: string } }) {
               </h1>
               <p className="text-stone-500 text-lg">@{peerInfo.username}</p>
             </div>
-            {callActive ? (
-              <p className="text-stone-500">
-                {/* {new Date(timer * 1000).toLocaleTimeString("en-IN")} */}
-              </p>
-            ) : (
-              <p className="text-stone-500 animate-pulse">
-                {onlineUsers.includes(peerInfo._id)
-                  ? "Calling..."
-                  : "Ringing..."}
-              </p>
-            )}
           </>
         )}
         <div className="flex items-center justify-center gap-4 absolute bottom-10 z-10">
@@ -379,7 +386,7 @@ function Page({ params }: { params: { username: string } }) {
             size="icon"
             variant="destructive"
             className="rounded-full p-3 w-fit h-fit shadow-xl"
-            onClick={handleCallEnd}
+            onClick={() => handleCallEnd()}
           >
             <Phone size="30" className="rotate-[135deg]" />
           </Button>
@@ -401,10 +408,11 @@ function Page({ params }: { params: { username: string } }) {
             )}
           </button>
           <ReactPlayer
-            className="w-full max-sm:h-full bg-black sm:object-contain object-cover sm:rounded-xl overflow-hidden react-player"
-            height="inherit"
+            className="w-full bg-black sm:object-contain object-cover overflow-hidden react-player height-100-sm"
+            height="100%"
             width="100%"
             url={stream || ""}
+            config={{ file: { attributes: { playsInline: true } } }}
             playing
             autoPlay
             muted

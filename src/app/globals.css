@@ -90,4 +90,13 @@
   .react-player video {
     object-fit: cover;
   }
+
+  @media only screen and (max-width: 640px) {
+    .height-100-sm {
+      height: 100% !important;
+    }
+    .height-50-sm {
+      height: 50% !important;
+    }
+  }
 }
