@@ -351,10 +351,11 @@ function Page({ params }: { params: { username: string } }) {
           <Button
             size="icon"
             variant="secondary"
-            className={`rounded-full p-3 h-fit w-fit shadow-xl ${
+            className={`rounded-full p-3 h-fit w-fit shadow-xl hidden ${
               multipleCamAvailalble ? "" : "hidden"
             }`}
             onClick={switchCamera}
+            disabled
           >
             <RefreshCcw size="30" />
           </Button>
@@ -362,12 +363,13 @@ function Page({ params }: { params: { username: string } }) {
             <Button
               size="icon"
               variant="secondary"
-              className={`rounded-full p-3 w-fit h-fit shadow-xl ${
+              className={`rounded-full p-3 w-fit h-fit shadow-xl hidden ${
                 selfVideoPaused
                   ? "bg-stone-200 sm:hover:bg-stone-400 text-black"
                   : ""
               }`}
               onClick={handleSelfVideoPause}
+              disabled
             >
               {selfVideoPaused ? <VideoOff size="30" /> : <Video size="30" />}
             </Button>
@@ -375,7 +377,7 @@ function Page({ params }: { params: { username: string } }) {
           <Button
             size="icon"
             variant="secondary"
-            className={`rounded-full p-3 w-fit h-fit shadow-xl ${
+            className={`rounded-full p-3 w-fit h-fit shadow-xl hidden ${
               selfMuted ? "bg-stone-200 sm:hover:bg-stone-400 text-black" : ""
             }`}
             onClick={() => setSelfMuted((prevMuted) => !prevMuted)}

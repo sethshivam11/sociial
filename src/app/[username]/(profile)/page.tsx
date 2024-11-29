@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { getUserPosts } from "@/lib/store/features/slices/postSlice";
 
-function Page() {
+function Page({ params }: { params: { username: string } }) {
   const dispatch = useAppDispatch();
   const {
     user,
@@ -19,9 +19,11 @@ function Page() {
   );
 
   useEffect(() => {
-    if (!profile.username) return;
-    dispatch(getUserPosts({ username: profile.username }));
-  }, [dispatch, profile.username]);
+    const { username } = params;
+    if (!username) return;
+    dispatch(getUserPosts({ username }));
+  }, [dispatch, params]);
+  
   return (
     <div className="flex items-center justify-start flex-wrap flex-row w-full">
       {userLoading || postLoading ? (

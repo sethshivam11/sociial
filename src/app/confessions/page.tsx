@@ -93,12 +93,16 @@ function Page() {
           }
         }}
       >
-        <SelectTrigger className="md:-ml-4 sm:ml-4 max-sm:mx-0 mt-6 sm:mb-3 mb-2 text-2xl tracking-tight font-bold text-left border-0 w-fit gap-2 focus:ring-0 pl-0">
+        <SelectTrigger className="md:-ml-4 sm:ml-4 max-sm:mx-0 mt-6 sm:mb-3 mb-2 text-2xl tracking-tight font-bold text-left border-0 w-fit gap-2 focus:ring-0 pl-0 shadow-none">
           <SelectValue placeholder="Conversations" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="messages">Conversations</SelectItem>
-          <SelectItem value="confessions">Confessions</SelectItem>
+          <SelectItem value="messages" className="px-3 py-2">
+            Conversations
+          </SelectItem>
+          <SelectItem value="confessions" className="px-3 py-2">
+            Confessions
+          </SelectItem>
         </SelectContent>
       </Select>
       <p className="text-stone-500 text-sm sm:mb-6 mb-4 md:-ml-4 sm:ml-4">
@@ -122,14 +126,14 @@ function Page() {
                         alt=""
                         width="300"
                         height="300"
-                        className="object-contain pointer-events-none select-none rounded-md mb-2"
+                        className="object-cover pointer-events-none select-none rounded-md mb-2 max-h-80"
                       />
                     ) : (
                       <div className="flex items-center justify-center relative">
                         <Play className="flex absolute bg-transparent/60 p-2 w-fit h-fit rounded-full" />
                         <video
                           src={message.attachment.url}
-                          className="object-cover h-full w-full rounded-md mb-2"
+                          className="object-cover h-full w-full rounded-md mb-2 max-h-80"
                           muted
                         />
                       </div>

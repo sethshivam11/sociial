@@ -59,12 +59,16 @@ function Messages({ children }: { children: ReactNode }) {
               }
             }}
           >
-            <SelectTrigger className="text-2xl tracking-tight font-bold text-left p-2.5 pl-0 border-0 w-fit gap-2 focus:ring-0">
+            <SelectTrigger className="text-2xl tracking-tight font-bold text-left p-2.5 pl-0 border-0 w-fit gap-2 focus:ring-0 shadow-none">
               <SelectValue placeholder="Conversations" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="messages">Conversations</SelectItem>
-              <SelectItem value="confessions">Confessions</SelectItem>
+              <SelectItem value="messages" className="px-3 py-2">
+                Conversations
+              </SelectItem>
+              <SelectItem value="confessions" className="px-3 py-2">
+                Confessions
+              </SelectItem>
             </SelectContent>
           </Select>
           <div className="hidden items-center justify-center gap-1">
