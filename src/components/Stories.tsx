@@ -10,6 +10,8 @@ import {
   getStories,
   getUserStory,
 } from "@/lib/store/features/slices/storySlice";
+import { useRouter, useSearchParams } from "next/navigation";
+import { socket } from "@/socket";
 
 function Stories() {
   const dispatch = useAppDispatch();
@@ -19,6 +21,8 @@ function Stories() {
   const { stories, userStory, skeletonLoading } = useAppSelector(
     (state) => state.story
   );
+  const query = useSearchParams();
+  const router = useRouter();
 
   const sortedStories = stories
     .map((story) => ({
@@ -37,9 +41,13 @@ function Stories() {
   useEffect(() => {
     if (!stories.length) dispatch(getStories());
     if (!userStory?.media.length) dispatch(getUserStory());
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch]);
+    const token = query.get("token");
+    if (token) {
+      localStorage.setItem("token", token);
+      if (!socket.active) socket.connect();
+      router.replace("/");
+    }
+  }, [dispatch, socket, router]);
 
   return (
     <>

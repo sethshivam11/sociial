@@ -394,7 +394,7 @@ function Navbar() {
             type="problem"
           />
           <AlertDialog open={logOutDialog}>
-            <AlertDialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
+            <AlertDialogContent>
               <AlertDialogTitle className="w-full text-center text-2xl tracking-tight font-bold">
                 Log Out
               </AlertDialogTitle>

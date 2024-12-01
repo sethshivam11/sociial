@@ -68,6 +68,10 @@ function SignUpPage() {
   const [isFetchingUsername, setIsFetchingUsername] = useState(false);
   const [usernameMessage, setUsernameMessage] = useState("");
 
+  function handleGoogleLogin() {
+    if (!window) return;
+    window.location.href = "/auth/google";
+  }
   async function onSubmit(data: z.infer<typeof formSchema>) {
     if (data.password !== data.confirmPassword) {
       return console.log("Passwords do not match");
@@ -104,21 +108,7 @@ function SignUpPage() {
   }, [username]);
 
   return (
-    <div className="flex justify-center col-span-10 py-12 items-center min-h-screen dark:bg-zinc-800">
-      <Image
-        width="1920"
-        height="1080"
-        src="/bg-doodle-dark.jpg"
-        alt=""
-        className="fixed object-cover h-[60rem] w-full blur-sm hidden dark:block top-0"
-      />
-      <Image
-        width="1920"
-        height="1080"
-        src="/bg-doodle-light.jpg"
-        alt=""
-        className="fixed object-cover h-[60rem] w-full blur-sm dark:hidden top-0"
-      />
+    <div className="flex justify-center col-span-10 py-12 items-center min-h-[100dvh] bg-white dark:bg-zinc-800  bg-[url('/bg-doodle-light.jpg')] dark:bg-[url('/bg-doodle-dark.jpg')] bg-cover bg-center bg-no-repeat px-2">
       <div className="w-full max-w-md p-8 space-y-8 last:space-y-3 my-4 bg-white dark:bg-zinc-900 ring-2 ring-zinc-500 dark:ring-zinc-200 rounded-lg shadow-md z-10">
         <div className="text-center  text-black dark:text-white">
           <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl mb-6">
@@ -279,9 +269,27 @@ function SignUpPage() {
               checked={showPwd}
               setChecked={setShowPwd}
             />
-            <Button type="submit" disabled={loading} className="w-full">
-              {loading ? <Loader2 className="animate-spin" /> : "Sign up"}
-            </Button>
+            <div className="space-y-2">
+              <Button type="submit" disabled={loading} className="w-full">
+                {loading ? <Loader2 className="animate-spin" /> : "Sign up"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={loading}
+                onClick={handleGoogleLogin}
+                className="w-full"
+              >
+                <Image
+                  src="/google-logo.png"
+                  width="20"
+                  height="20"
+                  alt=""
+                  className="mr-2"
+                />
+                Signup with Google
+              </Button>
+            </div>
           </form>
         </Form>
         <p className="text-center mt-2">

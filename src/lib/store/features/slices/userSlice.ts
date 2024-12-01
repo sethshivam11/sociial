@@ -233,14 +233,6 @@ export const removeAvatar = createAsyncThunk("users/removeAvatar", async () => {
 });
 
 export const getLoggedInUser = createAsyncThunk("users/getUser", async () => {
-  const token = localStorage.getItem("token");
-  if (!token)
-    return {
-      success: false,
-      data: null,
-      message: "No token found",
-      status: 401,
-    };
   const parsed = await fetch("/api/v1/users/get");
   return parsed.json();
 });

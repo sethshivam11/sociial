@@ -41,7 +41,8 @@ function Page({ params }: { params: { username: string } }) {
   const profileId = query.get("profile");
   const selfVideoRef = useRef<HTMLVideoElement>(null);
   const selfVideoContainerRef = useRef<HTMLDivElement>(null);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef(0);
 
   const [selfMuted, setSelfMuted] = useState(false);
   const [selfVideoPaused, setSelfVideoPaused] = useState(false);
@@ -90,10 +91,12 @@ function Page({ params }: { params: { username: string } }) {
           video: videoMode,
           audio: true,
         });
+        console.log(mediaStream);
         setStream(mediaStream);
         if (selfVideoRef.current) {
           selfVideoRef.current.srcObject = mediaStream;
         }
+        if (!video) return;
         const capabilties = mediaStream
           ?.getTracks()
           .filter(({ kind }) => kind === "video")[0]
@@ -223,7 +226,7 @@ function Page({ params }: { params: { username: string } }) {
       getUserMedia(false);
     }
     if (call.caller._id === user._id) {
-      timerRef.current = setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
         handleCallEnd(true);
       }, 30000);
     }
@@ -264,8 +267,13 @@ function Page({ params }: { params: { username: string } }) {
     if (remoteStream && stream && !sendingStream) {
       sendStream(stream);
       setSendingStream(true);
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      if (!timerRef.current) {
+        setInterval(() => {
+          timerRef.current++;
+        }, 1000);
       }
     }
   }, [remoteStream, stream, sendingStream]);
@@ -294,11 +302,13 @@ function Page({ params }: { params: { username: string } }) {
                 {nameFallback(peerInfo.fullName)}
               </AvatarFallback>
             </Avatar>
-            <div className="flex flex-col items-center justify-center gap-0">
+            <div className="flex flex-col items-center justify-center gap-0 text-center">
               <h1 className="text-2xl tracking-tight font-bold">
                 {peerInfo.fullName}
               </h1>
-              <p className="text-stone-500 text-lg">@{peerInfo.username}</p>
+              <p className="text-stone-500 sm:text-lg text-sm">
+                @{peerInfo.username}
+              </p>
             </div>
             <Button
               className="bg-blue-500 hover:bg-blue-600 text-white rounded-full"
@@ -307,6 +317,11 @@ function Page({ params }: { params: { username: string } }) {
                 if (stream) {
                   sendStream(stream);
                   setSendingStream(true);
+                  if (!timerRef.current) {
+                    setInterval(() => {
+                      timerRef.current++;
+                    }, 1000);
+                  }
                 } else console.log("No stream to send");
               }}
             >
@@ -321,32 +336,29 @@ function Page({ params }: { params: { username: string } }) {
   } else {
     return (
       <div className="col-span-10 flex flex-col items-center justify-center min-h-[100dvh] max-h-[100dvh] bg-black overflow-hidden relative">
-        {isVideoCall ? (
-          <ReactPlayer
-            playing
-            config={{ file: { attributes: { playsinline: true } } }}
-            url={remoteStream || ""}
-            className="w-full h-full max-sm:h-1/2 sm:object-contain object-cover relative overflow-hidden react-player height-50-sm"
-            playsInline
-            width="100%"
-            height="100%"
-          />
-        ) : (
-          <>
-            <Avatar className="sm:w-40 w-32 sm:h-40 h-32 object-contain select-none pointer-events-none">
-              <AvatarImage src={peerInfo.avatar} />
-              <AvatarFallback className="bg-stone-800">
-                {nameFallback(peerInfo.fullName)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col items-center justify-center gap-0">
-              <h1 className="text-2xl tracking-tight font-bold">
-                {peerInfo.fullName}
-              </h1>
-              <p className="text-stone-500 text-lg">@{peerInfo.username}</p>
-            </div>
-          </>
-        )}
+        <ReactPlayer
+          playing
+          config={{ file: { attributes: { playsinline: true } } }}
+          url={remoteStream || ""}
+          className={`w-full h-full max-sm:h-1/2 sm:object-contain object-cover relative overflow-hidden react-player height-50-sm ${
+            isVideoCall ? "" : "w-0 h-0"
+          }`}
+          playsInline
+          width="100%"
+          height="100%"
+        />
+        <Avatar className="sm:w-40 w-32 sm:h-40 h-32 object-contain select-none pointer-events-none">
+          <AvatarImage src={peerInfo.avatar} />
+          <AvatarFallback className="bg-stone-800">
+            {nameFallback(peerInfo.fullName)}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex flex-col items-center justify-center gap-0">
+          <h1 className="text-2xl tracking-tight font-bold">
+            {peerInfo.fullName}
+          </h1>
+          <p className="text-stone-500 text-lg">@{peerInfo.username}</p>
+        </div>
         <div className="flex items-center justify-center gap-4 absolute bottom-10 z-10">
           <Button
             size="icon"

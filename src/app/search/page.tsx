@@ -79,6 +79,7 @@ function Search() {
             autoComplete="off"
             inputMode="search"
             name="search"
+            autoFocus
           />
           <button
             className={`${search ? "" : "hidden"}`}

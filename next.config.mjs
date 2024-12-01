@@ -23,6 +23,10 @@ const nextConfig = {
         destination: `${process.env.BACKEND_URL}/api/:path*`,
       },
       {
+        source: "/auth/google/:path*",
+        destination: `${process.env.BACKEND_URL}/auth/google/:path*`
+      },
+      {
         source: "/socket.io/:path*",
         destination: `${process.env.BACKEND_URL}/api/:path*`,
       },

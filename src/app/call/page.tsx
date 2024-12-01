@@ -54,7 +54,9 @@ function Page() {
           variant: "destructive",
         });
       } else {
-        router.push(`/call/${username}?video=${videoEnabled}`);
+        router.push(
+          `/call/${username}?video=${videoEnabled}&profile=${profile._id}`
+        );
       }
     });
   }

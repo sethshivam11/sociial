@@ -658,7 +658,7 @@ function Posts({ feed }: Props) {
         </InfiniteScroll>
       )}
       <AlertDialog open={consentDialog}>
-        <AlertDialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
+        <AlertDialogContent>
           <AlertDialogTitle>Recieve Notifications</AlertDialogTitle>
           <p className="dark:text-stone-400">
             Do you want to recieve notifications for messages, comments, likes,

@@ -64,6 +64,10 @@ function SignInPage() {
     if (userAgent.includes("Win")) return "Windows";
     return "Unknown";
   }
+  function handleGoogleLogin() {
+    if (!window) return;
+    window.location.href = "/auth/google";
+  }
   async function onSubmit(data: z.infer<typeof formSchema>) {
     let username = "";
     let email = "";
@@ -121,22 +125,8 @@ function SignInPage() {
   }, []);
 
   return (
-    <div className="flex justify-center col-span-10 py-12 items-center min-h-screen bg-white dark:bg-zinc-800">
-      <Image
-        width="1920"
-        height="1080"
-        src="/bg-doodle-dark.jpg"
-        alt=""
-        className="fixed object-cover h-full w-full blur-sm hidden dark:block"
-      />
-      <Image
-        width="1920"
-        height="1080"
-        src="/bg-doodle-light.jpg"
-        alt=""
-        className="fixed object-cover h-full w-full blur-sm dark:hidden"
-      />
-      <div className="w-full max-w-md p-8 space-y-8 last:space-y-3 bg-white dark:bg-zinc-900 ring-2 ring-zinc-500 dark:ring-zinc-200 rounded-lg shadow-md relative z-10">
+    <div className="flex justify-center col-span-10 py-12 items-center min-h-[100dvh] bg-white dark:bg-zinc-800 bg-[url('/bg-doodle-light.jpg')] dark:bg-[url('/bg-doodle-dark.jpg')] bg-cover bg-center bg-no-repeat px-2">
+      <div className="w-full max-w-md p-8 max-sm:p-6 space-y-8 last:space-y-3 bg-white dark:bg-zinc-900 ring-2 ring-zinc-500 dark:ring-zinc-200 rounded-lg shadow-md relative z-10">
         <div className="text-center text-black dark:text-white">
           <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl mb-6">
             Welcome Back to Sociial
@@ -195,14 +185,30 @@ function SignInPage() {
               checked={showPwd}
               setChecked={setShowPwd}
             />
-            <div>
+            <div className="space-y-2">
               <Button type="submit" disabled={loading} className="w-full">
                 {loading ? <Loader2 className="animate-spin" /> : "Sign in"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={loading}
+                onClick={handleGoogleLogin}
+                className="w-full"
+              >
+                <Image
+                  src="/google-logo.png"
+                  width="20"
+                  height="20"
+                  alt=""
+                  className="mr-2"
+                />
+                Signin with Google
               </Button>
             </div>
           </form>
         </Form>
-        <p className="text-center mt-2">
+        <div className="text-center mt-2">
           Don&apos;t have an account?&nbsp;
           <Link
             href="/sign-up"
@@ -210,7 +216,7 @@ function SignInPage() {
           >
             Sign Up
           </Link>
-        </p>
+        </div>
       </div>
     </div>
   );
