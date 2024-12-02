@@ -79,6 +79,8 @@ function Navbar() {
     "/new-post",
     "/upload-video",
     "/add-story",
+    "/terms",
+    "/privacy",
   ];
   const { user, isLoggedIn, loading } = useAppSelector((state) => state.user);
 

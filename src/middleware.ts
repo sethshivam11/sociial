@@ -28,6 +28,8 @@ export function middleware(request: NextRequest) {
     "/sign-up",
     "/forgot-password",
     "/verify-code",
+    "/terms",
+    "privacy",
   ];
 
   const isPublicUserProfile =
