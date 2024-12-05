@@ -48,9 +48,7 @@ function Page({ params }: { params: { username: string } }) {
   const [selfVideoPaused, setSelfVideoPaused] = useState(false);
   const [hideSelfVideo, setHideSelfVideo] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
-  const [activeCamera, setActiveCamera] = useState("");
   const [isVideoCall, setIsVideoCall] = useState(false);
-  const [multipleCamAvailalble, setMultipleCamAvailable] = useState(false);
   const [notFoundError, setNotFoundError] = useState(false);
   const [permissions, setPermissions] = useState(true);
   const [sendingStream, setSendingStream] = useState(false);
@@ -61,26 +59,6 @@ function Page({ params }: { params: { username: string } }) {
     avatar: "",
   });
 
-  function switchCamera() {
-    if (!multipleCamAvailalble) return;
-
-    stopCamera();
-    if (activeCamera === "user") {
-      getUserMedia(true, "environment");
-    } else {
-      getUserMedia(true, "user");
-    }
-  }
-  function handleSelfVideoPause() {
-    if (!selfVideoRef.current) return;
-    if (selfVideoPaused) {
-      selfVideoRef.current.srcObject = stream;
-      setSelfVideoPaused(false);
-    } else {
-      selfVideoRef.current.srcObject = null;
-      setSelfVideoPaused(true);
-    }
-  }
   const getUserMedia = useCallback(
     async (video: boolean, mode?: "user" | "environment") => {
       try {
@@ -91,29 +69,10 @@ function Page({ params }: { params: { username: string } }) {
           video: videoMode,
           audio: true,
         });
-        console.log(mediaStream);
         setStream(mediaStream);
         if (selfVideoRef.current) {
           selfVideoRef.current.srcObject = mediaStream;
         }
-        if (!video) return;
-        const capabilties = mediaStream
-          ?.getTracks()
-          .filter(({ kind }) => kind === "video")[0]
-          .getCapabilities();
-        if (capabilties?.facingMode) {
-          setActiveCamera(capabilties?.facingMode[0]);
-        }
-        await navigator.mediaDevices
-          .enumerateDevices()
-          .then((devices) => {
-            if (
-              devices.filter(({ kind }) => kind === "videoinput").length > 1
-            ) {
-              setMultipleCamAvailable(true);
-            }
-          })
-          .catch((err) => console.log(err));
 
         return () => {
           stopCamera();
@@ -172,8 +131,16 @@ function Page({ params }: { params: { username: string } }) {
         track.stop();
       });
       setStream(null);
-    } else console.log("no stream to stop camera", stream);
-    if (selfVideoRef.current) selfVideoRef.current.srcObject = null;
+    } else console.log("No stream to stop");
+
+    const tracks = selfVideoRef.current?.srcObject as MediaStream;
+    if (tracks) {
+      tracks.getTracks().forEach((track) => track.stop());
+    } else console.log("No tracks to stop");
+
+    if (selfVideoRef.current) {
+      selfVideoRef.current.srcObject = null;
+    }
   }, [stream, selfVideoRef]);
   function handleCallEnd(unpicked?: boolean) {
     dispatch(endCall(call._id)).then((response) => {
@@ -192,14 +159,30 @@ function Page({ params }: { params: { username: string } }) {
       }
     });
   }
-  function handleCallEnded() {
-    stopCamera();
-    closePeer();
+  async function handleCallEnded() {
+    await stopCamera();
+    await closePeer();
     const username =
       call.caller._id !== user._id
         ? call.caller.username
         : call.callee.username;
-    router.push(`/call/ended?username=${username}`);
+    router.push(`/call/ended?username=${username}&video=${isVideoCall}`);
+  }
+  function toggleAudio() {
+    if (!stream) return console.log("No stream");
+    const audioTracks = stream.getAudioTracks();
+    audioTracks.forEach((track) => {
+      track.enabled = !track.enabled;
+    });
+    setSelfMuted((prev) => !prev);
+  }
+  function toggleVideo() {
+    if (!stream) return;
+    const videoTracks = stream.getVideoTracks();
+    videoTracks.forEach((track) => {
+      track.enabled = !track.enabled;
+    });
+    setSelfVideoPaused((prev) => !prev);
   }
 
   useEffect(() => {
@@ -260,7 +243,7 @@ function Page({ params }: { params: { username: string } }) {
     return () => {
       socket.off(ChatEventEnum.CALL_HANDSHAKE_EVENT, acceptCall);
       socket.off(ChatEventEnum.CALL_ACCEPTED_EVENT, handleCallAccepted);
-      socket.off(ChatEventEnum.CALL_DISCONNECTED_EVENT, handleCallEnded);
+      socket.off(ChatEventEnum.CALL_DISCONNECTED_EVENT);
     };
   }, [socket]);
   useEffect(() => {
@@ -282,20 +265,25 @@ function Page({ params }: { params: { username: string } }) {
     notFound();
   } else if (!sendingStream && callId) {
     return (
-      <div className="col-span-10 flex items-center justify-center min-h-[100dvh] max-h-[100dvh] bg-black overflow-hidden relative">
+      <div className="col-span-10 flex items-center justify-center h-[100dvh] bg-black overflow-hidden relative">
         <div className="grid lg:grid-cols-3 min-w-3/4">
-          <ReactPlayer
-            className="w-full max-sm:h-full max-md:hidden bg-stone-800 sm:object-contain object-cover lg:col-span-2 min-h-96 react-player"
-            url={stream || ""}
-            config={{ file: { attributes: { playsinline: true } } }}
-            playing
-            autoPlay
-            muted
-            playsInline
-            width="100%"
-            height="100%"
-          />
-          <div className="flex flex-col justify-center items-center gap-4 bg-stone-200 dark:bg-stone-800 py-10 max-md:h-[30rem] max-md:w-96 max-md:rounded-xl">
+          {isVideoCall && (
+            <ReactPlayer
+              className="w-full max-sm:h-full max-md:hidden bg-stone-800 sm:object-contain object-cover lg:col-span-2 min-h-96 react-player"
+              url={stream || ""}
+              config={{ file: { attributes: { playsInline: true } } }}
+              playing
+              autoPlay
+              muted
+              width="100%"
+              height="100%"
+            />
+          )}
+          <div
+            className={`flex flex-col justify-center items-center gap-4 bg-stone-200 dark:bg-stone-800 py-10 max-md:h-[30rem] max-md:w-96 max-md:rounded-xl ${
+              isVideoCall ? "" : "h-[30rem] col-span-3 w-96 rounded-xl"
+            }`}
+          >
             <Avatar className="sm:w-40 w-32 sm:h-40 h-32 object-contain select-none pointer-events-none">
               <AvatarImage src={peerInfo.avatar} />
               <AvatarFallback className="bg-stone-800">
@@ -322,7 +310,7 @@ function Page({ params }: { params: { username: string } }) {
                       timerRef.current++;
                     }, 1000);
                   }
-                } else console.log("No stream to send");
+                }
               }}
             >
               Join Call
@@ -338,50 +326,41 @@ function Page({ params }: { params: { username: string } }) {
       <div className="col-span-10 flex flex-col items-center justify-center min-h-[100dvh] max-h-[100dvh] bg-black overflow-hidden relative">
         <ReactPlayer
           playing
-          config={{ file: { attributes: { playsinline: true } } }}
+          config={{ file: { attributes: { playsInline: true } } }}
           url={remoteStream || ""}
           className={`w-full h-full max-sm:h-1/2 sm:object-contain object-cover relative overflow-hidden react-player height-50-sm ${
-            isVideoCall ? "" : "w-0 h-0"
+            isVideoCall ? "" : "audio-call"
           }`}
-          playsInline
           width="100%"
           height="100%"
         />
-        <Avatar className="sm:w-40 w-32 sm:h-40 h-32 object-contain select-none pointer-events-none">
-          <AvatarImage src={peerInfo.avatar} />
-          <AvatarFallback className="bg-stone-800">
-            {nameFallback(peerInfo.fullName)}
-          </AvatarFallback>
-        </Avatar>
-        <div className="flex flex-col items-center justify-center gap-0">
-          <h1 className="text-2xl tracking-tight font-bold">
-            {peerInfo.fullName}
-          </h1>
-          <p className="text-stone-500 text-lg">@{peerInfo.username}</p>
-        </div>
+        {!isVideoCall && (
+          <>
+            <Avatar className="sm:w-40 w-32 sm:h-40 h-32 object-contain select-none pointer-events-none">
+              <AvatarImage src={peerInfo.avatar} />
+              <AvatarFallback className="bg-stone-800">
+                {nameFallback(peerInfo.fullName)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col items-center justify-center gap-0">
+              <h1 className="text-2xl tracking-tight font-bold">
+                {peerInfo.fullName}
+              </h1>
+              <p className="text-stone-500 text-lg">@{peerInfo.username}</p>
+            </div>
+          </>
+        )}
         <div className="flex items-center justify-center gap-4 absolute bottom-10 z-10">
-          <Button
-            size="icon"
-            variant="secondary"
-            className={`rounded-full p-3 h-fit w-fit shadow-xl hidden ${
-              multipleCamAvailalble ? "" : "hidden"
-            }`}
-            onClick={switchCamera}
-            disabled
-          >
-            <RefreshCcw size="30" />
-          </Button>
           {isVideoCall && (
             <Button
               size="icon"
               variant="secondary"
-              className={`rounded-full p-3 w-fit h-fit shadow-xl hidden ${
+              className={`rounded-full p-3 w-fit h-fit shadow-xl ${
                 selfVideoPaused
                   ? "bg-stone-200 sm:hover:bg-stone-400 text-black"
                   : ""
               }`}
-              onClick={handleSelfVideoPause}
-              disabled
+              onClick={toggleVideo}
             >
               {selfVideoPaused ? <VideoOff size="30" /> : <Video size="30" />}
             </Button>
@@ -389,10 +368,10 @@ function Page({ params }: { params: { username: string } }) {
           <Button
             size="icon"
             variant="secondary"
-            className={`rounded-full p-3 w-fit h-fit shadow-xl hidden ${
+            className={`rounded-full p-3 w-fit h-fit shadow-xl ${
               selfMuted ? "bg-stone-200 sm:hover:bg-stone-400 text-black" : ""
             }`}
-            onClick={() => setSelfMuted((prevMuted) => !prevMuted)}
+            onClick={toggleAudio}
           >
             {selfMuted ? <MicOff size="30" /> : <Mic size="30" />}
           </Button>
@@ -411,18 +390,22 @@ function Page({ params }: { params: { username: string } }) {
           }`}
           ref={selfVideoContainerRef}
         >
-          <button
-            className="hover:scale-110 p-2 left-0 absolute z-10 max-sm:hidden"
-            onClick={() => setHideSelfVideo((prevHidden) => !prevHidden)}
-          >
-            {hideSelfVideo ? (
-              <ChevronLeft size="30" />
-            ) : (
-              <ChevronRight size="30" />
-            )}
-          </button>
+          {isVideoCall && (
+            <button
+              className="hover:scale-110 p-2 left-0 absolute z-10 max-sm:hidden"
+              onClick={() => setHideSelfVideo((prevHidden) => !prevHidden)}
+            >
+              {hideSelfVideo ? (
+                <ChevronLeft size="30" />
+              ) : (
+                <ChevronRight size="30" />
+              )}
+            </button>
+          )}
           <ReactPlayer
-            className="w-full bg-black sm:object-contain object-cover overflow-hidden react-player height-100-sm"
+            className={`w-full bg-black sm:object-contain object-cover overflow-hidden react-player height-100-sm ${
+              isVideoCall ? "" : "audio-call"
+            }`}
             height="100%"
             width="100%"
             url={stream || ""}
@@ -430,7 +413,6 @@ function Page({ params }: { params: { username: string } }) {
             playing
             autoPlay
             muted
-            playsInline
           />
         </div>
       </div>

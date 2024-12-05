@@ -454,7 +454,7 @@ function Page({ params }: { params: { chatId: string } }) {
               <>
                 <Link
                   href={`/call?username=${chat.users[0]?.username}&video=false`}
-                  className="p-2 hidden"
+                  className="inline-block p-2"
                 >
                   <Phone size="20" />
                 </Link>

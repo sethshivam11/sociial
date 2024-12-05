@@ -44,7 +44,7 @@ function Page() {
     dispatch(
       startCall({
         callee: profile._id,
-        type: query.get("video") ? "video" : "audio",
+        type: query.get("video") === "true" ? "video" : "audio",
       })
     ).then((response) => {
       if (!response.payload?.success) {

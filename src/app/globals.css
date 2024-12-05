@@ -90,6 +90,10 @@
   .react-player video {
     object-fit: cover;
   }
+  .audio-call {
+    width: 1px !important;
+    height: 1px !important;
+  }
 
   @media only screen and (max-width: 640px) {
     .height-100-sm {
