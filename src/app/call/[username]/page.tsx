@@ -2,7 +2,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ChatEventEnum, nameFallback } from "@/lib/helpers";
-import { endCall } from "@/lib/store/features/slices/callSlice";
+import { endCall, updateCall } from "@/lib/store/features/slices/callSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import {
   ChevronLeft,
@@ -303,6 +303,9 @@ function Page({ params }: { params: { username: string } }) {
               disabled={sendingStream && !stream}
               onClick={() => {
                 if (stream) {
+                  dispatch(
+                    updateCall({ callId, acceptedAt: new Date().toISOString() })
+                  );
                   sendStream(stream);
                   setSendingStream(true);
                   if (!timerRef.current) {

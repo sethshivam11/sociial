@@ -81,6 +81,7 @@ function Navbar() {
     "/add-story",
     "/terms",
     "/privacy",
+    "/home",
   ];
   const { user, isLoggedIn, loading } = useAppSelector((state) => state.user);
 

@@ -57,7 +57,6 @@ import MessageActions from "@/components/MessageActions";
 import { checkForAssets } from "@/lib/helpers";
 import ScrollableFeed from "react-scrollable-feed";
 import { useDebounceCallback } from "usehooks-ts";
-import { ToastAction } from "@/components/ui/toast";
 import { toast } from "@/components/ui/use-toast";
 
 function Page({ params }: { params: { chatId: string } }) {

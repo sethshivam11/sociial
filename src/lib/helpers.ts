@@ -211,3 +211,9 @@ export const ChatEventEnum = Object.freeze({
   CALL_VIDEO_EVENT: "callVideo",
   CALL_CAMERA_SWITCH_EVENT: "callCameraSwitched",
 });
+
+export const DefaultUserAvatar =
+  "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1723483837/sociial/settings/r5pvoicvcxtyhjkgqk8y.png";
+
+export const DefaultGroupAvatar =
+  "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1725736840/sociial/settings/feahtus4algwiixi0zmi.png";

@@ -2,7 +2,7 @@
 import { useEffect, ReactNode } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { checkForAssets, nameFallback } from "@/lib/helpers";
-import { History, PhoneCall } from "lucide-react";
+import { History } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import ChatsLoadingSkeleton from "@/components/skeletons/ChatsLoading";
@@ -54,12 +54,12 @@ function Messages({ children }: { children: ReactNode }) {
           <Select
             defaultValue="messages"
             onValueChange={(value) => {
-              if (value === "confessions") {
-                router.push("/confessions");
+              if (value !== "messages") {
+                router.push(`/${value}`);
               }
             }}
           >
-            <SelectTrigger className="text-2xl tracking-tight font-bold text-left p-2.5 pl-0 border-0 w-fit gap-2 focus:ring-0 shadow-none">
+            <SelectTrigger className="text-2xl tracking-tight font-bold text-left p-2.5 pl-0 border-0 w-fit gap-2 focus:ring-0 shadow-none min-w-40">
               <SelectValue placeholder="Conversations" />
             </SelectTrigger>
             <SelectContent>
@@ -69,14 +69,12 @@ function Messages({ children }: { children: ReactNode }) {
               <SelectItem value="confessions" className="px-3 py-2">
                 Confessions
               </SelectItem>
+              <SelectItem value="logs" className="px-3 py-2">
+                Calls
+              </SelectItem>
             </SelectContent>
           </Select>
-          <div className="hidden items-center justify-center gap-1">
-            <Link href="call-logs" className="p-2" title="Call Logs">
-              <PhoneCall />
-            </Link>
-            <NewGroupChatDialog />
-          </div>
+          <NewGroupChatDialog />
         </div>
         <ScrollArea className="py-3 w-full h-full p-2.5 max-sm:hidden min-h-96">
           {skeletonLoading ? (

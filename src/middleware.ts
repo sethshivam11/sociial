@@ -30,6 +30,8 @@ export function middleware(request: NextRequest) {
     "/verify-code",
     "/terms",
     "privacy",
+    "/home",
+    "/get-premium"
   ];
 
   const isPublicUserProfile =

@@ -28,7 +28,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { ScrollArea } from "./ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { nameFallback } from "@/lib/helpers";
+import { DefaultGroupAvatar, nameFallback } from "@/lib/helpers";
 import Image from "next/image";
 import { getFollowings } from "@/lib/store/features/slices/followSlice";
 import { toast } from "./ui/use-toast";
@@ -39,8 +39,6 @@ import { groupDescriptionSchema, groupNameSchema } from "@/schemas/chatSchema";
 function NewGroupChatDialog() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const defaultIcon =
-    "https://res.cloudinary.com/dv3qbj0bn/image/upload/v1725736840/sociial/settings/feahtus4algwiixi0zmi.png";
 
   const { followings } = useAppSelector((state) => state.follow);
   const { user, skeletonLoading: userLoading } = useAppSelector(
@@ -50,7 +48,7 @@ function NewGroupChatDialog() {
 
   const [level, setLevel] = useState<"1" | "2">("1");
   const [searchFollowers, setSearchFollowers] = useState("");
-  const [groupIcon, setGroupIcon] = useState(defaultIcon);
+  const [groupIcon, setGroupIcon] = useState(DefaultGroupAvatar);
   const [open, setOpen] = useState(false);
   const followersLoading = useAppSelector(
     (state) => state.follow.skeletonLoading
@@ -73,7 +71,7 @@ function NewGroupChatDialog() {
 
   async function onSubmit({ name, description }: z.infer<typeof formSchema>) {
     let image: File | undefined = undefined;
-    if (groupIcon !== defaultIcon) {
+    if (groupIcon !== DefaultGroupAvatar) {
       const response = await fetch(groupIcon);
       const blob = await response.blob();
       image = new File([blob], `${Date.now()}.jpg`, {

@@ -10,24 +10,30 @@ import {
   ArrowUpRight,
   History,
   Phone,
-  PhoneCall,
   Video,
 } from "lucide-react";
-import { ReactNode } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { setCall } from "@/lib/store/features/slices/callSlice";
+import { ReactNode, useEffect } from "react";
+import { getCalls, setCall } from "@/lib/store/features/slices/callSlice";
 import CallsLoading from "@/components/skeletons/CallsLoading";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useRouter } from "next/navigation";
 
 function Layout({ children }: { children: ReactNode }) {
   const location = usePathname();
+  const router = useRouter();
   const dispatch = useAppDispatch();
   const { skeletonLoading, calls } = useAppSelector((state) => state.call);
   const { user } = useAppSelector((state) => state.user);
+
+  useEffect(() => {
+    dispatch(getCalls());
+  }, [dispatch]);
 
   return (
     <div className="grid h-[100dvh] sm:min-h-[42rem] max-sm:max-h-[100dvh] xl:col-span-8 pl-8 md:pl-4 max-sm:pl-0 sm:col-span-9 col-span-10 sm:grid-cols-10">
@@ -37,17 +43,29 @@ function Layout({ children }: { children: ReactNode }) {
         }`}
       >
         <div className="flex items-center justify-between w-full mb-4 pr-2">
-          <h1 className="text-2xl tracking-tight font-bold text-left p-2.5">
-            Calls
-          </h1>
-          <Dialog>
-            <DialogTrigger className="py-2 px-4 mr-2" title="New Call">
-              <PhoneCall />
-            </DialogTrigger>
-            <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
-              <DialogTitle>Start a Call</DialogTitle>
-            </DialogContent>
-          </Dialog>
+          <Select
+            defaultValue="logs"
+            onValueChange={(value) => {
+              if (value !== "logs") {
+                router.push(`/${value}`);
+              }
+            }}
+          >
+            <SelectTrigger className="text-2xl tracking-tight font-bold text-left p-2.5 pl-0 border-0 w-fit gap-2 focus:ring-0 shadow-none min-w-40">
+              <SelectValue placeholder="Calls" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="messages" className="px-3 py-2">
+                Conversations
+              </SelectItem>
+              <SelectItem value="confessions" className="px-3 py-2">
+                Confessions
+              </SelectItem>
+              <SelectItem value="logs" className="px-3 py-2">
+                Calls
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <ScrollArea className="py-3 w-full h-full p-2.5 max-sm:hidden min-h-96">
           {skeletonLoading ? (

@@ -100,11 +100,10 @@ const callSlice = createSlice({
       })
       .addCase(getCalls.fulfilled, (state, action) => {
         state.skeletonLoading = false;
-        if (
-          action.payload?.success ||
-          action.payload?.message === "No calls found"
-        ) {
+        if (action.payload?.success) {
           state.calls = action.payload.data;
+        } else if (action.payload?.message === "No calls found") {
+          state.calls = [];
         }
       })
       .addCase(getCalls.rejected, (state) => {

@@ -88,13 +88,13 @@ function Page() {
       <Select
         defaultValue="confessions"
         onValueChange={(value) => {
-          if (value === "messages") {
-            router.push("/messages");
+          if (value !== "confessions") {
+            router.push(`/${value}`);
           }
         }}
       >
-        <SelectTrigger className="md:-ml-4 sm:ml-4 max-sm:mx-0 mt-6 sm:mb-3 mb-2 text-2xl tracking-tight font-bold text-left border-0 w-fit gap-2 focus:ring-0 pl-0 shadow-none">
-          <SelectValue placeholder="Conversations" />
+        <SelectTrigger className="md:-ml-4 sm:ml-4 max-sm:mx-0 mt-6 sm:mb-3 mb-2 text-2xl tracking-tight font-bold text-left border-0 w-fit gap-2 focus:ring-0 pl-0 shadow-none min-w-40">
+          <SelectValue placeholder="Confessions" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="messages" className="px-3 py-2">
@@ -102,6 +102,9 @@ function Page() {
           </SelectItem>
           <SelectItem value="confessions" className="px-3 py-2">
             Confessions
+          </SelectItem>
+          <SelectItem value="logs" className="px-3 py-2">
+            Calls
           </SelectItem>
         </SelectContent>
       </Select>
