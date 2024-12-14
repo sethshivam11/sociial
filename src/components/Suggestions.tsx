@@ -77,7 +77,7 @@ function Suggestions() {
       <div className="bg-stone-100 dark:bg-stone-900 pt-4 p-6 rounded-2xl">
         <h1 className="font-semibold text-xl">Suggestions</h1>
         <div className="flex flex-col w-full p-1 mt-4 gap-5">
-          {skeletonLoading ? (
+          {/* {skeletonLoading ? (
             <SuggestionsLoading />
           ) : suggestions.length ? (
             suggestions.map((user, index) => {
@@ -94,7 +94,7 @@ function Suggestions() {
                       <AvatarImage
                         src={user.avatar}
                         alt=""
-                        className="pointer-events-none select-none"
+                        className="pointer-events-none select-none object-cover"
                       />
                       <AvatarFallback>
                         {nameFallback(user.fullName)}
@@ -141,7 +141,95 @@ function Suggestions() {
             <span className="text-center text-sm text-stone-400">
               No suggestions for now
             </span>
-          )}
+          )} */}
+          <div className="flex items-center justify-between gap-3">
+            <Link href={`/`} className="w-full flex items-center gap-3">
+              <Avatar className="w-8 h-8">
+                <AvatarImage
+                  src={
+                    "https://res.cloudinary.com/dv3qbj0bn/image/upload/f_auto,q_auto/v1/samples/two-ladies"
+                  }
+                  alt=""
+                  className="pointer-events-none select-none object-cover"
+                />
+                <AvatarFallback>{nameFallback(user.fullName)}</AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col gap-0 leading-3">
+                <span className="text-md font-semibold flex items-center justify-start gap-1">
+                  Jenny
+                </span>
+                <span className="text-sm text-stone-400">@jenny</span>
+              </div>
+            </Link>
+            <button className="bg-blue-500 w-28 h-7 text-center text-white rounded-full text-xs transition-colors hover:bg-blue-700 disabled:bg-blue-400">
+              Follow
+            </button>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <Link href={`/`} className="w-full flex items-center gap-3">
+              <Avatar className="w-8 h-8">
+                <AvatarImage
+                  src={"https://res.cloudinary.com/dv3qbj0bn/image/upload/f_auto,q_auto/v1/samples/people/kitchen-bar"}
+                  alt=""
+                  className="pointer-events-none select-none object-cover"
+                />
+                <AvatarFallback>{nameFallback(user.fullName)}</AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col gap-0 leading-3">
+                <span className="text-md font-semibold flex items-center justify-start gap-1">
+                  James
+                </span>
+                <span className="text-sm text-stone-400">@james</span>
+              </div>
+            </Link>
+            <button className="bg-blue-500 w-28 h-7 text-center text-white rounded-full text-xs transition-colors hover:bg-blue-700 disabled:bg-blue-400">
+              Follow
+            </button>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <Link href={`/`} className="w-full flex items-center gap-3">
+              <Avatar className="w-8 h-8">
+                <AvatarImage
+                  src={
+                    "https://res.cloudinary.com/dv3qbj0bn/image/upload/f_auto,q_auto/v1/samples/upscale-face-1"
+                  }
+                  alt=""
+                  className="pointer-events-none select-none object-cover"
+                />
+                <AvatarFallback>{nameFallback(user.fullName)}</AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col gap-0 leading-3">
+                <span className="text-md font-semibold flex items-center justify-start gap-1">
+                  Chloe
+                </span>
+                <span className="text-sm text-stone-400">@chloe</span>
+              </div>
+            </Link>
+            <button className="bg-blue-500 w-28 h-7 text-center text-white rounded-full text-xs transition-colors hover:bg-blue-700 disabled:bg-blue-400">
+              Follow
+            </button>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <Link href={`/`} className="w-full flex items-center gap-3">
+              <Avatar className="w-8 h-8">
+                <AvatarImage
+                  src={"https://res.cloudinary.com/dv3qbj0bn/image/upload/f_auto,q_auto/v1/samples/people/smiling-man"}
+                  alt=""
+                  className="pointer-events-none select-none object-cover"
+                />
+                <AvatarFallback>{nameFallback(user.fullName)}</AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col gap-0 leading-3">
+                <span className="text-md font-semibold flex items-center justify-start gap-1">
+                  John Doe
+                </span>
+                <span className="text-sm text-stone-400">@johndoe</span>
+              </div>
+            </Link>
+            <button className="bg-blue-500 w-28 h-7 text-center text-white rounded-full text-xs transition-colors hover:bg-blue-700 disabled:bg-blue-400">
+              Follow
+            </button>
+          </div>
         </div>
       </div>
       {/* <div className="bg-stone-100 dark:bg-stone-900 pt-4 p-6 rounded-2xl">
