@@ -1,149 +1,19 @@
 "use client";
 import React from "react";
-import Image from "next/image";
-import { ChevronRight, Moon, Sun } from "lucide-react";
-import { Lobster_Two } from "next/font/google";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { useTheme } from "next-themes";
-import { FlipWords } from "@/components/ui/flip-words";
-import { motion } from "framer-motion";
-import { ContainerScroll } from "@/components/ui/container-scroll-animation";
 
-const lobster = Lobster_Two({
-  subsets: ["latin"],
-  weight: "700",
-  style: ["italic"],
-});
+import LandingNav from "@/components/LandingNav";
+import HeroSection from "@/components/HeroSection";
+import { BentoGrid } from "@/components/BentoGrid";
+
+
 
 export default function HeroScrollDemo() {
-  const { theme, setTheme } = useTheme();
-  const words = ["Memories", "Thoughts", "Stories", "Ideas", "Dreams"];
 
   return (
     <div className="flex flex-col items-center overflow-hidden col-span-10">
-      <nav className="flex gap-2 justify-between items-center w-full py-3 md:px-24 sm:px-10 px-4 border-b-[1px] bg-transparent/10 dark:bg-transparent/60 border-stone-100 dark:border-stone-900 fixed z-10 backdrop-blur-sm">
-        <Link href="/" className="flex items-center justify-center gap-2">
-          <Image src="/logo.svg" alt="" width="40" height="40" />
-          <h1
-            className={`text-2xl font-bold tracking-tight ${lobster.className}`}
-          >
-            Sociial
-          </h1>
-        </Link>
-        <div className="flex items-center justify-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-stone-700 dark:text-stone-500"
-            onClick={() => {
-              if (theme === "dark") {
-                setTheme("light");
-              } else {
-                setTheme("dark");
-              }
-            }}
-          >
-            {theme === "dark" ? <Sun size="16" /> : <Moon size="16" />}
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="text-sm max-sm:hidden"
-            asChild
-          >
-            <Link href="/sign-in">Sign In</Link>
-          </Button>
-          <Button size="sm" className="text-sm max-sm:hidden" asChild>
-            <Link href="/sign-up">Sign Up</Link>
-          </Button>
-        </div>
-      </nav>
-      <section className="w-full h-[70rem] pt-24 relative flex flex-col items-center dark:bg-grid-white/[0.2] bg-grid-black/[0.2]">
-        <div className="absolute pointer-events-none inset-0 flex items-center justify-center dark:bg-black bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]" />
-        <ContainerScroll
-          titleComponent={
-            <div className="flex flex-col gap-2 items-center justify-center">
-              <Link
-                href="/sign-up"
-                className="bg-stone-100 dark:bg-stone-900 text-stone-900 dark:text-stone-100 px-2.5 py-1.5 text-xs rounded-full shadow-lg flex items-center gap-1 ring-1 ring-stone-500 hover:ring-stone-800 hover:dark:ring-stone-200 transition-colors mb-10 w-fit"
-              >
-                <span>Start your journey 🎉</span>
-                <ChevronRight size="16" />
-              </Link>
-              <motion.h1
-                initial={{
-                  opacity: 0,
-                  y: 20,
-                }}
-                animate={{
-                  opacity: 1,
-                  y: [20, -5, 0],
-                }}
-                transition={{
-                  duration: 0.5,
-                  ease: [0.4, 0.0, 0.2, 1],
-                }}
-                className="text-5xl sm:text-7xl font-extrabold tracking-tighter bg-clip-text relative z-10 text-transparent bg-gradient-to-b from-stone-500 to-stone-900 dark:from-stone-50 dark:to-stone-200 px-2"
-              >
-                Welcome to&nbsp;
-                <span className={lobster.className}>Sociial</span>
-              </motion.h1>
-              <motion.p
-                initial={{
-                  opacity: 0,
-                  y: 20,
-                }}
-                animate={{
-                  opacity: 1,
-                  y: [20, -5, 0],
-                }}
-                transition={{
-                  duration: 0.5,
-                  ease: [0.4, 0.0, 0.2, 1],
-                }}
-                className="sm:text-4xl text-xl font-bold tracking-tight font-serif md:mb-10 sm:mb-20"
-              >
-                A place to share your
-                <FlipWords words={words} />
-              </motion.p>
-            </div>
-          }
-        >
-          <Image
-            src="/hero-light.png"
-            alt="hero"
-            height="720"
-            width="1080"
-            className="dark:hidden rounded-2xl object-fill h-full max-sm:hidden"
-            draggable={false}
-          />
-          <Image
-            src="/hero-dark.png"
-            alt="hero"
-            height="720"
-            width="1080"
-            className="hidden sm:dark:inline-block rounded-2xl object-fill h-full max-sm:hidden"
-            draggable={false}
-          />
-          <Image
-            src="/hero-light.png"
-            alt="hero"
-            height="720"
-            width="1080"
-            className="dark:hidden rounded-2xl object-cover sm:hidden h-[40rem]"
-            draggable={false}
-          />
-          <Image
-            src="/hero-dark.png"
-            alt="hero"
-            height="720"
-            width="1080"
-            className="hidden max-sm:dark:inline-block rounded-2xl object-cover sm:hidden h-[40rem]"
-            draggable={false}
-          />
-        </ContainerScroll>
-      </section>
+      <LandingNav />
+      <HeroSection />
+      <BentoGrid />
     </div>
   );
 }
