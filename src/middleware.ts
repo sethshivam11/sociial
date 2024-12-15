@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { publicPaths } from "./lib/helpers";
 
 export const config = {
   matcher: [
@@ -23,16 +24,6 @@ export const config = {
 export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const token = request.cookies.get("token");
-  const publicPaths = [
-    "/sign-in",
-    "/sign-up",
-    "/forgot-password",
-    "/verify-code",
-    "/terms",
-    "privacy",
-    "/home",
-    "/get-premium"
-  ];
 
   const isPublicUserProfile =
     /^\/[^\/]+$/.test(path) && !publicPaths.includes(path);

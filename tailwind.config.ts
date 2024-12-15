@@ -88,33 +88,64 @@ const config = {
       },
       keyframes: {
         "accordion-down": {
-          from: { height: "0" },
-          to: { height: "var(--radix-accordion-content-height)" },
+          from: {
+            height: "0",
+          },
+          to: {
+            height: "var(--radix-accordion-content-height)",
+          },
         },
         "accordion-up": {
-          from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: "0" },
+          from: {
+            height: "var(--radix-accordion-content-height)",
+          },
+          to: {
+            height: "0",
+          },
         },
         "story": {
-          from: { width: "0%" },
-          to: { width: "100%" },
+          from: {
+            width: "0%",
+          },
+          to: {
+            width: "100%",
+          },
         },
         "like": {
-          "from": { transform: "scale(0.5)" },
-          "50%": { transform: "scale(1.2)" },
-          "100%": { transform: "scale(1)", display: "none" },
+          "from": {
+            transform: "scale(0.5)",
+          },
+          "50%": {
+            transform: "scale(1.2)",
+          },
+          "100%": {
+            transform: "scale(1)",
+            display: "none",
+          },
         },
         "visible": {
-          from: { opacity: "0" },
-          to: { opacity: "1" },
+          from: {
+            opacity: "0",
+          },
+          to: {
+            opacity: "1",
+          },
         },
         "story-skip-start": {
-          from: { opacity: "0" },
-          to: { opacity: "0.5" },
+          from: {
+            opacity: "0",
+          },
+          to: {
+            opacity: "0.5",
+          },
         },
         "story-skip-end": {
-          from: { opacity: "0.5" },
-          to: { opacity: "0" },
+          from: {
+            opacity: "0.5",
+          },
+          to: {
+            opacity: "0",
+          },
         },
         "recording": {
           "0%": {

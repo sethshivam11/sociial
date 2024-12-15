@@ -1,16 +1,20 @@
+"use client";
+import LandingNav from "@/components/LandingNav";
 import Link from "next/link";
 
 function Page() {
   return (
     <div className="col-span-10 flex items-center justify-center">
-      <div className="flex flex-col gap-5 sm:py-10 py-6 lg:w-1/2 sm:w-2/3 w-full px-5">
+      <LandingNav />
+      <div className="flex flex-col gap-5 pt-20 sm:pb-10 pb-5 max-w-7xl lg:w-1/2 sm:w-2/3 w-full px-5">
         <h1 className="sm:text-4xl text-2xl font-extrabold tracking-tighter">
           Privacy Policy
         </h1>
         <p className="text-stone-900 dark:text-stone-200">
-          We value your privacy. This Privacy Policy explains how Sociial (&quot;we&quot;,
-          &quot;our&quot;, or &quot;us&quot;) collects, uses, and protects your information when you
-          use our platform (the “Service”).
+          We value your privacy. This Privacy Policy explains how Sociial
+          (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) collects, uses,
+          and protects your information when you use our platform (the
+          “Service”).
         </p>
         <h3 className="sm:text-2xl text-xl font-semibold tracking-tight">
           Information we collect

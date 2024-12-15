@@ -42,7 +42,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useTheme } from "next-themes";
-import { nameFallback } from "@/lib/helpers";
+import { nameFallback, publicPaths } from "@/lib/helpers";
 import {
   clearCookies,
   getLoggedInUser,
@@ -122,6 +122,7 @@ function Navbar() {
           router.push("/");
         } else if (
           location !== "/sign-in" &&
+          !publicPaths.includes(location) &&
           (response.payload?.message === "Token is required" ||
             response.payload?.message === "Invalid token!")
         ) {

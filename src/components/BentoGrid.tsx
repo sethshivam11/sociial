@@ -12,7 +12,7 @@ const lobster = Lobster_Two({
   style: ["italic"],
 });
 
-export function BentoGrid() {
+export default function BentoGrid() {
   const features = [
     {
       title: "Seamless Connections",

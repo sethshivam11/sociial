@@ -2,6 +2,17 @@ import { getToken } from "firebase/messaging";
 import { messaging } from "./store/provider";
 import { FirebaseError } from "firebase/app";
 
+export const publicPaths = [
+  "/sign-in",
+  "/sign-up",
+  "/forgot-password",
+  "/verify-code",
+  "/terms",
+  "/privacy",
+  "/home",
+  "/get-premium"
+];
+
 export function nameFallback(name: string): string {
   if (!name || name === "") {
     return "";

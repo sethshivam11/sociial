@@ -1,10 +1,13 @@
+"use client";
+import LandingNav from "@/components/LandingNav";
 import Link from "next/link";
 
 function Page() {
   return (
     <div className="col-span-10 flex items-center justify-center">
-      <div className="flex flex-col gap-5 sm:py-10 py-6 lg:w-1/2 sm:w-2/3 w-full px-5">
-        <h1 className="sm:text-4xl text-2xl font-extrabold tracking-tighter">
+      <LandingNav />
+      <div className="flex flex-col gap-5 pt-20 sm:pb-10 pb-5 max-w-7xl lg:w-1/2 sm:w-2/3 w-full px-5">
+        <h1 className="sm:text-4xl text-2xl font-extrabold tracking-">
           Terms and Conditions
         </h1>
         <p className="text-stone-900 dark:text-stone-200">
@@ -42,8 +45,8 @@ function Page() {
           Limitations
         </h3>
         <p className="text-stone-900 dark:text-stone-200">
-          We provide the Service on an &quot;as is&quot; basis and do not guarantee
-          uninterrupted access or functionality.
+          We provide the Service on an &quot;as is&quot; basis and do not
+          guarantee uninterrupted access or functionality.
         </p>
         <h3 className="sm:text-2xl text-xl font-semibold tracking-tight">
           Modifications
