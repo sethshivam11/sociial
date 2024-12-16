@@ -7,8 +7,8 @@ import {
 
 export default function FAQs() {
   return (
-    <div className="w-full px-4 pb-10 sm:pb-20 max-w-5xl flex gap-5 sm:gap-10 flex-col justify-center">
-      <h1 className="text-2xl sm:text-5xl font-bold">
+    <div className="w-full px-6 pb-10 sm:pb-20 max-w-5xl flex gap-5 sm:gap-10 flex-col justify-center">
+      <h1 className="text-2xl max-sm:text-center sm:text-5xl font-bold">
         Frequently Asked Questions
       </h1>
       <Accordion type="single" collapsible className="w-full">

@@ -38,13 +38,11 @@ import {
 
 interface SocketContextI {
   connected: boolean;
-  transport: string;
   onlineUsers: string[];
 }
 
 const initialState: SocketContextI = {
   connected: false,
-  transport: "N/A",
   onlineUsers: [],
 };
 
@@ -52,7 +50,6 @@ const SocketContext = createContext(initialState);
 
 export function SocketProvider({ children }: PropsWithChildren<{}>) {
   const [connected, setConnected] = useState(false);
-  const [transport, setTransport] = useState("N/A");
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
 
   const dispatch = useAppDispatch();
@@ -66,15 +63,9 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
     }
     function onConnect() {
       setConnected(true);
-      setTransport(socket.io.engine.transport.name);
-
-      socket.io.engine.on("upgrade", (transport) => {
-        setTransport(transport.name);
-      });
     }
     function onDisconnect() {
       setConnected(false);
-      setTransport("N/A");
     }
     function handleOnlineUsers(payload: string[]) {
       setOnlineUsers(payload);
@@ -369,13 +360,13 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
       socket.off(ChatEventEnum.ADMIN_REMOVE_EVENT, handleAdminRemove);
       socket.off(ChatEventEnum.NEW_CALL_EVENT, handleCall);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chat, dispatch, socket]);
 
   return (
     <SocketContext.Provider
       value={{
         connected,
-        transport,
         onlineUsers,
       }}
     >

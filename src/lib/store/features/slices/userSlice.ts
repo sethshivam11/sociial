@@ -13,6 +13,7 @@ const initialState: UserSliceI = {
     followersCount: 0,
     postsCount: 0,
     isMailVerified: false,
+    loginType: "local",
     savedPosts: [],
     bio: "",
     blocked: [],

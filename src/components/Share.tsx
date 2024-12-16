@@ -153,7 +153,7 @@ export default function Share({ isVideo, _id }: Props) {
     } else {
       setShareToPeople([]);
     }
-  }, [dispatch, dialogOpen]);
+  }, [dispatch, dialogOpen, user._id]);
 
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

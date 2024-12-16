@@ -13,7 +13,6 @@ function Page() {
   const dispatch = useAppDispatch();
   const { profile, skeletonLoading } = useAppSelector((state) => state.user);
   const username = query.get("username");
-  const isVideoCall = query.get("video");
 
   const [notFoundError, setNotFoundError] = useState(false);
 
@@ -25,17 +24,6 @@ function Page() {
         }
       });
     else setNotFoundError(true);
-    navigator.mediaDevices
-      .getUserMedia({
-        video: isVideoCall === "true",
-        audio: true,
-      })
-      .then((mediaStream) => {
-        mediaStream.getTracks().forEach((track) => {
-          track.stop();
-        });
-      })
-      .catch((err) => console.log(err));
   }, [dispatch, setNotFoundError, username]);
 
   if (notFoundError) {

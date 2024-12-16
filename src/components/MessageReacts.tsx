@@ -60,7 +60,7 @@ function MessageReacts({ reacts, type, messageId }: Props) {
     if (dialogOpen) {
       dispatch(getReactions(messageId));
     }
-  }, [dispatch, dialogOpen]);
+  }, [dispatch, dialogOpen, messageId]);
 
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

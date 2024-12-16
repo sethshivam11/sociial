@@ -25,6 +25,7 @@ export interface UserSliceI {
     followersCount: number;
     postsCount: number;
     isMailVerified: boolean;
+    loginType: "google" | "local";
     bio: string;
     blocked: string[];
     savedPosts: string[];

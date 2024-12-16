@@ -9,7 +9,7 @@ const lobster = Lobster_Two({
   style: ["italic"],
 });
 
-export function Typewriter() {
+export default function Typewriter() {
   const words = [
     {
       text: "Your",
@@ -32,8 +32,8 @@ export function Typewriter() {
     },
   ];
   return (
-    <div className="flex flex-col items-center justify-center h-[40rem]">
-      <p className="text-neutral-600 dark:text-neutral-200 text-xs sm:text-base">
+    <div className="flex flex-col items-center justify-center h-[30rem]">
+      <p className="text-neutral-600 dark:text-neutral-200 text-sm sm:text-base">
         Express yourself like never before
       </p>
       <TypewriterEffectSmooth words={words} />

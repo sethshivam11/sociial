@@ -126,12 +126,13 @@ function Navbar() {
           (response.payload?.message === "Token is required" ||
             response.payload?.message === "Invalid token!")
         ) {
+          console.log("redirecting to sign in")
           dispatch(clearCookies()).then(() => router.push("/sign-in"));
         }
       })
       .catch((err) => console.log(err));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, router]);
+  }, []);
 
   return (
     <nav

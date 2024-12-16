@@ -315,7 +315,7 @@ function Info({ params }: { params: { chatId: string } }) {
         }
       });
     }
-  }, [themes, dispatch]);
+  }, [dispatch, chat._id, chatId, chats.length]);
   useEffect(() => {
     if (addDialog) {
       dispatch(getFollowings({ userId: currentUser._id })).then((response) => {
@@ -331,7 +331,7 @@ function Info({ params }: { params: { chatId: string } }) {
         }
       });
     }
-  }, [dispatch, addDialog]);
+  }, [dispatch, addDialog, chat.users, currentUser._id]);
 
   return (
     <div className="flex flex-col w-full h-full gap-2 relative md:border-l-2 border-stone-200 dark:border-stone-800 lg:col-span-7 md:col-span-6 col-span-10 py-4 md:container px-3 max-h-[100dvh] overflow-y-auto">

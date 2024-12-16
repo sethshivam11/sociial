@@ -8,6 +8,7 @@ import { ReactNode } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { StoreProvider } from "@/lib/store/provider";
 import { SocketProvider } from "@/context/SocketProvider";
+import { Analytics } from "@vercel/analytics/react"
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -84,6 +85,7 @@ export default function RootLayout({
             <SocketProvider>
               <Navbar />
               {children}
+              <Analytics />
               <Toaster />
             </SocketProvider>
           </StoreProvider>

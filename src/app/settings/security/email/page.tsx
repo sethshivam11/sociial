@@ -22,6 +22,7 @@ import {
   resendVerificationCode,
   updateEmail,
 } from "@/lib/store/features/slices/userSlice";
+import { notFound } from "next/navigation";
 
 function Page() {
   const dispatch = useAppDispatch();
@@ -34,6 +35,7 @@ function Page() {
     (state) => state.user
   );
   const [timer, setTimer] = useState(0);
+  // const [notFoundError, setNotFoundError] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -100,9 +102,8 @@ function Page() {
   }
 
   useEffect(() => {
-    form.setValue("email", user.email);
+    if (user.email) form.setValue("email", user.email);
   }, [form, user.email]);
-
   useEffect(() => {
     if (timer > 0) {
       const runningTimer = setInterval(() => {
@@ -111,6 +112,10 @@ function Page() {
       return () => clearInterval(runningTimer);
     }
   }, [timer]);
+
+  if (user.loginType === "google") {
+    return notFound();
+  }
 
   return (
     <div className="flex flex-col items-center justify-start">

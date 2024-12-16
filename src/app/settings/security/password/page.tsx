@@ -1,6 +1,6 @@
 "use client";
 import { ChevronLeft, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,11 +20,11 @@ import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { updatePassword } from "@/lib/store/features/slices/userSlice";
 import { toast } from "@/components/ui/use-toast";
 import CheckboxWithLabel from "@/components/CheckboxWithLabel";
+import { notFound } from "next/navigation";
 
 function Page() {
   const dispatch = useAppDispatch();
-  const { loading } = useAppSelector((state) => state.user);
-  const [showPwd, setShowPwd] = useState(false);
+  const { loading, user } = useAppSelector((state) => state.user);
   const formSchema = z
     .object({
       currentPassword: passwordSchema,
@@ -39,7 +39,6 @@ function Page() {
       message: "New password should be different from current password",
       path: ["newPassword"],
     });
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -48,6 +47,8 @@ function Page() {
       confirmPassword: "",
     },
   });
+
+  const [showPwd, setShowPwd] = useState(false);
 
   function onSubmit({
     currentPassword,
@@ -74,6 +75,10 @@ function Page() {
         });
       }
     });
+  }
+
+  if (user.loginType === "google") {
+    return notFound();
   }
 
   return (

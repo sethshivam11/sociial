@@ -59,6 +59,23 @@ function Page({ params }: { params: { username: string } }) {
     avatar: "",
   });
 
+  const stopCamera = useCallback(() => {
+    if (stream) {
+      stream.getTracks().forEach((track) => {
+        track.stop();
+      });
+      setStream(null);
+    } else console.log("No stream to stop");
+
+    const tracks = selfVideoRef.current?.srcObject as MediaStream;
+    if (tracks) {
+      tracks.getTracks().forEach((track) => track.stop());
+    } else console.log("No tracks to stop");
+
+    if (selfVideoRef.current) {
+      selfVideoRef.current.srcObject = null;
+    }
+  }, [stream, selfVideoRef]);
   const getUserMedia = useCallback(
     async (video: boolean, mode?: "user" | "environment") => {
       try {
@@ -82,7 +99,7 @@ function Page({ params }: { params: { username: string } }) {
         setPermissions(false);
       }
     },
-    []
+    [stopCamera]
   );
   const startCall = useCallback(async () => {
     if (!peer) return;
@@ -91,7 +108,7 @@ function Page({ params }: { params: { username: string } }) {
       userId: user._id !== call.caller._id ? call.caller._id : call.callee._id,
       offer,
     });
-  }, [peer, socket, createOffer]);
+  }, [peer, createOffer, call.callee._id, call.caller._id, user._id]);
   const acceptCall = useCallback(
     async (offer: RTCSessionDescription) => {
       const ans = await createAnswer(offer);
@@ -101,7 +118,7 @@ function Page({ params }: { params: { username: string } }) {
         answer: ans,
       });
     },
-    [createAnswer, socket]
+    [createAnswer, call.callee._id, call.caller._id, user._id]
   );
   const handleCallAccepted = useCallback(
     async (answer: RTCSessionDescription) => {
@@ -112,7 +129,7 @@ function Page({ params }: { params: { username: string } }) {
         console.error("Failed to set remote description:", error);
       }
     },
-    [setRemoteAnswer, stream]
+    [peer]
   );
   const handleNegotiation = useCallback(async () => {
     if (!peer) return;
@@ -124,50 +141,60 @@ function Page({ params }: { params: { username: string } }) {
     });
     if (stream && !sendingStream) sendStream(stream);
     else console.log("No stream to send");
-  }, [stream, peer, socket, sendStream, sendingStream]);
-  const stopCamera = useCallback(() => {
-    if (stream) {
-      stream.getTracks().forEach((track) => {
-        track.stop();
+  }, [
+    stream,
+    peer,
+    sendStream,
+    sendingStream,
+    call.callee._id,
+    user._id,
+    call.caller._id,
+  ]);
+  const handleCallEnd = useCallback(
+    (unpicked?: boolean) => {
+      dispatch(endCall(call._id)).then((response) => {
+        if (response.payload?.success) {
+          stopCamera();
+          closePeer();
+          const username =
+            call.caller._id !== user._id
+              ? call.caller.username
+              : call.callee.username;
+          router.push(
+            unpicked
+              ? `/call/unpicked?username=${username}`
+              : `/call/ended?username=${username}`
+          );
+        }
       });
-      setStream(null);
-    } else console.log("No stream to stop");
-
-    const tracks = selfVideoRef.current?.srcObject as MediaStream;
-    if (tracks) {
-      tracks.getTracks().forEach((track) => track.stop());
-    } else console.log("No tracks to stop");
-
-    if (selfVideoRef.current) {
-      selfVideoRef.current.srcObject = null;
-    }
-  }, [stream, selfVideoRef]);
-  function handleCallEnd(unpicked?: boolean) {
-    dispatch(endCall(call._id)).then((response) => {
-      if (response.payload?.success) {
-        stopCamera();
-        closePeer();
-        const username =
-          call.caller._id !== user._id
-            ? call.caller.username
-            : call.callee.username;
-        router.push(
-          unpicked
-            ? `/call/unpicked?username=${username}`
-            : `/call/ended?username=${username}`
-        );
-      }
-    });
-  }
-  async function handleCallEnded() {
+    },
+    [
+      dispatch,
+      stopCamera,
+      closePeer,
+      call._id,
+      call.caller,
+      call.callee,
+      user._id,
+      router,
+    ]
+  );
+  const handleCallEnded = useCallback(async () => {
     await stopCamera();
     await closePeer();
     const username =
       call.caller._id !== user._id
         ? call.caller.username
         : call.callee.username;
-    router.push(`/call/ended?username=${username}&video=${isVideoCall}`);
-  }
+    router.push(`/call/ended?username=${username}`);
+  }, [
+    stopCamera,
+    closePeer,
+    call.caller,
+    call.callee,
+    user._id,
+    router,
+  ]);
   function toggleAudio() {
     if (!stream) return console.log("No stream");
     const audioTracks = stream.getAudioTracks();
@@ -213,7 +240,7 @@ function Page({ params }: { params: { username: string } }) {
         handleCallEnd(true);
       }, 30000);
     }
-  }, [getUserMedia, query]);
+  }, [getUserMedia, query, call.caller._id, user._id, handleCallEnd]);
   useEffect(() => {
     if (profileId) {
       setPeerInfo(call.caller._id === profileId ? call.caller : call.callee);
@@ -221,7 +248,16 @@ function Page({ params }: { params: { username: string } }) {
     if (!call._id) {
       setNotFoundError(true);
     }
-  }, [dispatch, params]);
+  }, [
+    dispatch,
+    params,
+    setNotFoundError,
+    setPeerInfo,
+    call._id,
+    call.caller,
+    call.callee,
+    profileId,
+  ]);
   useEffect(() => {
     if (!peer) return;
     peer.addEventListener("negotiationneeded", handleNegotiation);
@@ -229,7 +265,7 @@ function Page({ params }: { params: { username: string } }) {
     return () => {
       peer.removeEventListener("negotiationneeded", handleNegotiation);
     };
-  }, [peer]);
+  }, [peer, handleNegotiation]);
   useEffect(() => {
     if (callId) {
       startCall();
@@ -243,9 +279,9 @@ function Page({ params }: { params: { username: string } }) {
     return () => {
       socket.off(ChatEventEnum.CALL_HANDSHAKE_EVENT, acceptCall);
       socket.off(ChatEventEnum.CALL_ACCEPTED_EVENT, handleCallAccepted);
-      socket.off(ChatEventEnum.CALL_DISCONNECTED_EVENT);
+      socket.off(ChatEventEnum.CALL_DISCONNECTED_EVENT, handleCallEnded);
     };
-  }, [socket]);
+  }, [acceptCall, handleCallAccepted, handleCallEnded]);
   useEffect(() => {
     if (remoteStream && stream && !sendingStream) {
       sendStream(stream);
@@ -259,7 +295,7 @@ function Page({ params }: { params: { username: string } }) {
         }, 1000);
       }
     }
-  }, [remoteStream, stream, sendingStream]);
+  }, [remoteStream, stream, sendingStream, sendStream]);
 
   if (notFoundError) {
     notFound();

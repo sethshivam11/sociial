@@ -377,21 +377,7 @@ function Page({ params }: { params: { chatId: string } }) {
     } else if (chat._id !== chatId) {
       dispatch(setCurrentChat(chatId));
     }
-
-    function handleTyping(e: KeyboardEvent) {
-      if (e.target === inputRef.current && e.code === "Enter") {
-        e.preventDefault();
-        form.handleSubmit(handleSend)();
-        return form.reset();
-      }
-    }
-
-    window.addEventListener("keydown", handleTyping);
-
-    return () => {
-      window.removeEventListener("keydown", handleTyping);
-    };
-  }, [dispatch, chatId, setCurrentChat]);
+  }, [dispatch, chatId, chat._id, form, chats.length]);
 
   return (
     <div

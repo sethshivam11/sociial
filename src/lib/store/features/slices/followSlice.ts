@@ -139,16 +139,15 @@ const followSlice = createSlice({
       })
       .addCase(getFollowers.fulfilled, (state, action) => {
         state.skeletonLoading = false;
-        if (
-          action.payload?.success ||
-          action.payload?.message === "Followers not found"
-        ) {
+        if (action.payload?.success) {
           state.followers = action.payload.data.followers.map(
             (user: { loading: boolean }) => ({
               ...user,
               loading: (user.loading = false),
             })
           );
+        } else if (action.payload?.message === "Followers not found") {
+          state.followers = [];
         }
       })
       .addCase(getFollowers.rejected, (state) => {
@@ -161,16 +160,15 @@ const followSlice = createSlice({
       })
       .addCase(getFollowings.fulfilled, (state, action) => {
         state.skeletonLoading = false;
-        if (
-          action.payload?.success ||
-          action.payload?.message === "Followings not found"
-        ) {
+        if (action.payload?.success) {
           state.followings = action.payload.data.followings.map(
             (user: { loading: boolean }) => ({
               ...user,
               loading: (user.loading = false),
             })
           );
+        } else if (action.payload?.message === "Followings not found") {
+          state.followings = [];
         }
       })
       .addCase(getFollowings.rejected, (state) => {

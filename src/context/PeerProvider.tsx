@@ -97,7 +97,7 @@ export const PeerProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       peer.removeEventListener("track", handleTrackEvent);
     };
-  }, [handleTrackEvent]);
+  }, [handleTrackEvent, peer]);
 
   return (
     <PeerContext.Provider

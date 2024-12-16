@@ -47,7 +47,7 @@ function Stories() {
       if (!socket.active) socket.connect();
       router.replace("/");
     }
-  }, [dispatch, socket, router]);
+  }, [dispatch, query, stories.length, userStory?.media.length, router]);
 
   return (
     <>
@@ -131,70 +131,6 @@ function Stories() {
             );
           })
         )}
-        <div
-          onClick={() => setRedirecting(true)}
-          className="flex flex-col items-center gap-1 sm:hover:scale-105 transition-transform"
-        >
-          <div className="w-20 h-20 rounded-full p-1 bg-stone-400 dark:bg-stone-600 bg-gradient-to-bl from-red-500 via-blue-500 to-green-500 ">
-            <Avatar className="w-full h-full ring-2 ring-white dark:ring-black bg-white dark:bg-black">
-              <AvatarImage
-                src={
-                  "https://res.cloudinary.com/dv3qbj0bn/image/upload/f_auto,q_auto/v1/samples/woman-on-a-football-field"
-                }
-                alt=""
-                className="pointer-events-none select-none"
-              />
-            </Avatar>
-          </div>
-        </div>
-        <div
-          onClick={() => setRedirecting(true)}
-          className="flex flex-col items-center gap-1 sm:hover:scale-105 transition-transform"
-        >
-          <div className="w-20 h-20 rounded-full p-1 bg-stone-400 dark:bg-stone-600 bg-gradient-to-bl from-red-500 via-blue-500 to-green-500 ">
-            <Avatar className="w-full h-full ring-2 ring-white dark:ring-black bg-white dark:bg-black">
-              <AvatarImage
-                src={
-                  "https://res.cloudinary.com/dv3qbj0bn/image/upload/f_auto,q_auto/v1/samples/man-portrait"
-                }
-                alt=""
-                className="pointer-events-none select-none object-cover object-top"
-              />
-            </Avatar>
-          </div>
-        </div>
-        <div
-          onClick={() => setRedirecting(true)}
-          className="flex flex-col items-center gap-1 sm:hover:scale-105 transition-transform"
-        >
-          <div className="w-20 h-20 rounded-full p-1 bg-stone-400 dark:bg-stone-600 bg-gradient-to-bl from-stone-500 to-stone-500">
-            <Avatar className="w-full h-full ring-2 ring-white dark:ring-black bg-white dark:bg-black">
-              <AvatarImage
-                src={
-                  "https://res.cloudinary.com/dv3qbj0bn/image/upload/f_auto,q_auto/v1/samples/bike"
-                }
-                alt=""
-                className="pointer-events-none select-none object-cover object-left-top"
-              />
-            </Avatar>
-          </div>
-        </div>
-        <div
-          onClick={() => setRedirecting(true)}
-          className="flex flex-col items-center gap-1 sm:hover:scale-105 transition-transform"
-        >
-          <div className="w-20 h-20 rounded-full p-1 bg-stone-400 dark:bg-stone-600 bg-gradient-to-bl from-stone-500 to-stone-500">
-            <Avatar className="w-full h-full ring-2 ring-white dark:ring-black bg-white dark:bg-black">
-              <AvatarImage
-                src={
-                  "https://res.cloudinary.com/dv3qbj0bn/image/upload/f_auto,q_auto/v1/samples/smile"
-                }
-                alt=""
-                className="pointer-events-none select-none object-cover object-top"
-              />
-            </Avatar>
-          </div>
-        </div>
       </div>
     </>
   );
