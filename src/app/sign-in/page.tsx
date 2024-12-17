@@ -95,6 +95,9 @@ function SignInPage() {
           `/verify-code?username=${response.payload.data.user.username}`
         );
       } else {
+        if (socket.io.opts.extraHeaders) {
+          socket.io.opts.extraHeaders.Authorization = `Bearer ${response.payload.data.token}`;
+        }
         socket.connect();
         router.push("/");
       }
