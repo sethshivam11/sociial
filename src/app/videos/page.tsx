@@ -32,7 +32,7 @@ import { useDebounceCallback } from "usehooks-ts";
 function Videos() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { posts, maxPosts, page, skeletonLoading } = useAppSelector(
+  const { posts, skeletonLoading } = useAppSelector(
     (state) => state.post
   );
   const { user, skeletonLoading: userLoading } = useAppSelector(
@@ -246,6 +246,8 @@ function Videos() {
                   }}
                   onEnded={() => setIsPaused(true)}
                   poster={post?.thumbnail || ""}
+                  loop
+                  autoPlay
                   playsInline
                 >
                   {post.media[0] && <source src={post.media[0]} />}
