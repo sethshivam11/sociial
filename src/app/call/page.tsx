@@ -76,15 +76,13 @@ function Page() {
     }
   }, [getPermissions, query, dispatch]);
   useEffect(() => {
-    if (!profile?._id) {
-      dispatch(getProfile({ username: query.get("username") || "" })).then(
-        (response) => {
-          if (!response.payload?.success) {
-            setNotFoundError(true);
-          }
+    dispatch(getProfile({ username: query.get("username") || "" })).then(
+      (response) => {
+        if (!response.payload?.success) {
+          setNotFoundError(true);
         }
-      );
-    }
+      }
+    );
   }, [dispatch, profile?._id, query]);
 
   if (notFoundError) {

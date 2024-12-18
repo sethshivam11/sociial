@@ -34,7 +34,6 @@ function Page({ params }: { params: { username: string } }) {
     closePeer,
     remoteStream,
     sendStream,
-    setRemoteAnswer,
   } = usePeer();
 
   const callId = query.get("call");
@@ -42,12 +41,13 @@ function Page({ params }: { params: { username: string } }) {
   const selfVideoRef = useRef<HTMLVideoElement>(null);
   const selfVideoContainerRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const timerRef = useRef(0);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const [selfMuted, setSelfMuted] = useState(false);
   const [selfVideoPaused, setSelfVideoPaused] = useState(false);
   const [hideSelfVideo, setHideSelfVideo] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
+  const [callTime, setCallTime] = useState(0);
   const [isVideoCall, setIsVideoCall] = useState(false);
   const [notFoundError, setNotFoundError] = useState(false);
   const [permissions, setPermissions] = useState(true);
@@ -60,22 +60,12 @@ function Page({ params }: { params: { username: string } }) {
   });
 
   const stopCamera = useCallback(() => {
-    if (stream) {
-      stream.getTracks().forEach((track) => {
-        track.stop();
-      });
-      setStream(null);
-    } else console.log("No stream to stop");
-
-    const tracks = selfVideoRef.current?.srcObject as MediaStream;
-    if (tracks) {
-      tracks.getTracks().forEach((track) => track.stop());
-    } else console.log("No tracks to stop");
-
-    if (selfVideoRef.current) {
-      selfVideoRef.current.srcObject = null;
-    }
-  }, [stream, selfVideoRef]);
+    if (!stream) return;
+    stream.getTracks().forEach((track) => {
+      track.stop();
+    });
+    setStream(null);
+  }, [stream]);
   const getUserMedia = useCallback(
     async (video: boolean, mode?: "user" | "environment") => {
       try {
@@ -99,7 +89,7 @@ function Page({ params }: { params: { username: string } }) {
         setPermissions(false);
       }
     },
-    [stopCamera]
+    []
   );
   const startCall = useCallback(async () => {
     if (!peer) return;
@@ -140,7 +130,6 @@ function Page({ params }: { params: { username: string } }) {
       offer: localOffer,
     });
     if (stream && !sendingStream) sendStream(stream);
-    else console.log("No stream to send");
   }, [
     stream,
     peer,
@@ -152,6 +141,7 @@ function Page({ params }: { params: { username: string } }) {
   ]);
   const handleCallEnd = useCallback(
     (unpicked?: boolean) => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
       dispatch(endCall(call._id)).then((response) => {
         if (response.payload?.success) {
           stopCamera();
@@ -160,7 +150,8 @@ function Page({ params }: { params: { username: string } }) {
             call.caller._id !== user._id
               ? call.caller.username
               : call.callee.username;
-          router.push(
+          if (timerRef.current) clearInterval(timerRef.current);
+          router.replace(
             unpicked
               ? `/call/unpicked?username=${username}`
               : `/call/ended?username=${username}`
@@ -180,23 +171,17 @@ function Page({ params }: { params: { username: string } }) {
     ]
   );
   const handleCallEnded = useCallback(async () => {
-    await stopCamera();
-    await closePeer();
+    stopCamera();
+    closePeer();
     const username =
       call.caller._id !== user._id
         ? call.caller.username
         : call.callee.username;
-    router.push(`/call/ended?username=${username}`);
-  }, [
-    stopCamera,
-    closePeer,
-    call.caller,
-    call.callee,
-    user._id,
-    router,
-  ]);
+    if (timerRef.current) clearInterval(timerRef.current);
+    router.replace(`/call/ended?username=${username}`);
+  }, [stopCamera, closePeer, call.caller, call.callee, user._id, router]);
   function toggleAudio() {
-    if (!stream) return console.log("No stream");
+    if (!stream) return;
     const audioTracks = stream.getAudioTracks();
     audioTracks.forEach((track) => {
       track.enabled = !track.enabled;
@@ -210,6 +195,23 @@ function Page({ params }: { params: { username: string } }) {
       track.enabled = !track.enabled;
     });
     setSelfVideoPaused((prev) => !prev);
+  }
+  function formatTime(totalSeconds: number) {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const secs = totalSeconds % 60;
+
+    // Construct the time string
+    let timeString = "";
+    if (hours > 0) {
+      timeString += `${hours}:${minutes.toString().padStart(2, "0")}:${secs
+        .toString()
+        .padStart(2, "0")}`;
+    } else {
+      timeString += `${minutes}:${secs.toString().padStart(2, "0")}`;
+    }
+
+    return timeString;
   }
 
   useEffect(() => {
@@ -235,12 +237,8 @@ function Page({ params }: { params: { username: string } }) {
       setSelfVideoPaused(true);
       getUserMedia(false);
     }
-    if (call.caller._id === user._id) {
-      timeoutRef.current = setTimeout(() => {
-        handleCallEnd(true);
-      }, 30000);
-    }
-  }, [getUserMedia, query, call.caller._id, user._id, handleCallEnd]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]);
   useEffect(() => {
     if (profileId) {
       setPeerInfo(call.caller._id === profileId ? call.caller : call.callee);
@@ -269,6 +267,11 @@ function Page({ params }: { params: { username: string } }) {
   useEffect(() => {
     if (callId) {
       startCall();
+      if (!timeoutRef.current) {
+        timeoutRef.current = setTimeout(() => {
+          handleCallEnd(true);
+        }, 30000);
+      }
     }
   }, [callId, startCall]);
   useEffect(() => {
@@ -286,12 +289,9 @@ function Page({ params }: { params: { username: string } }) {
     if (remoteStream && stream && !sendingStream) {
       sendStream(stream);
       setSendingStream(true);
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-      if (!timerRef.current) {
-        setInterval(() => {
-          timerRef.current++;
+      if (!timerRef.current && !isVideoCall) {
+        timerRef.current = setInterval(() => {
+          setCallTime((prev) => prev + 1);
         }, 1000);
       }
     }
@@ -301,7 +301,7 @@ function Page({ params }: { params: { username: string } }) {
     notFound();
   } else if (!sendingStream && callId) {
     return (
-      <div className="col-span-10 flex items-center justify-center h-[100dvh] bg-black overflow-hidden relative">
+      <div className="col-span-10 flex items-center justify-center min-h-[100dvh] bg-black overflow-hidden relative">
         <div className="grid lg:grid-cols-3 min-w-3/4">
           {isVideoCall && (
             <ReactPlayer
@@ -316,7 +316,7 @@ function Page({ params }: { params: { username: string } }) {
             />
           )}
           <div
-            className={`flex flex-col justify-center items-center gap-4 bg-stone-200 dark:bg-stone-800 py-10 max-md:h-[30rem] max-md:w-96 max-md:rounded-xl ${
+            className={`flex flex-col justify-center items-center gap-4 bg-stone-200 dark:bg-stone-800 py-10 max-md:h-[30rem] max-md:w-96 max-md:rounded-xl w-full ${
               isVideoCall ? "" : "h-[30rem] col-span-3 w-96 rounded-xl"
             }`}
           >
@@ -344,9 +344,10 @@ function Page({ params }: { params: { username: string } }) {
                   );
                   sendStream(stream);
                   setSendingStream(true);
-                  if (!timerRef.current) {
-                    setInterval(() => {
-                      timerRef.current++;
+                  if (timeoutRef.current) clearTimeout(timeoutRef.current);
+                  if (!timerRef.current && !isVideoCall) {
+                    timerRef.current = setInterval(() => {
+                      setCallTime((prev) => prev + 1);
                     }, 1000);
                   }
                 }
@@ -386,6 +387,9 @@ function Page({ params }: { params: { username: string } }) {
                 {peerInfo.fullName}
               </h1>
               <p className="text-stone-500 text-lg">@{peerInfo.username}</p>
+              <p className="text-stone-900 dark:text-stone-100">
+                {callTime > 0 && formatTime(callTime)}
+              </p>
             </div>
           </>
         )}
