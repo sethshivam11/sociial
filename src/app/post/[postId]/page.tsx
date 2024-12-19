@@ -13,7 +13,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { getTimeDifference, nameFallback } from "@/lib/helpers";
-import { Bookmark, Heart, History } from "lucide-react";
+import { Bookmark, Divide, Heart, History, Play } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
@@ -113,7 +113,7 @@ function Page({ params }: { params: { postId: string } }) {
   return (
     <>
       <MobileNav />
-      <div className="min-h-screen h-max xl:col-span-8 sm:col-span-9 col-span-10 flex max-lg:flex-col items-start justify-center px-4">
+      <div className="min-h-screen h-max xl:col-span-8 sm:col-span-9 col-span-10 flex max-lg:flex-col items-start px-4 pb-16">
         {skeletonLoading ? (
           <div className="lg:w-1/2 md:w-2/3 sm:w-5/6 w-full mt-6 sm:mx-auto h-fit min-h-64 min-w-64">
             <PostsLoading length={1} />
@@ -248,7 +248,10 @@ function Page({ params }: { params: { postId: string } }) {
               }}
             ></p>
             {post.createdAt && (
-              <div className="text-stone-500 flex gap-1 mt-1 select-none">
+              <div
+                className="text-stone-500 flex gap-1 mt-1 select-none text-sm"
+                title={post.createdAt}
+              >
                 <History size="20" /> {getTimeDifference(post.createdAt)}
               </div>
             )}
@@ -301,9 +304,16 @@ function Page({ params }: { params: { postId: string } }) {
               {post.user.username}
             </h1>
             {post.morePosts?.map((post, index) => (
-              <Link href={`/post/${post._id}`} key={index}>
+              <Link href={`/post/${post._id}`} key={index} className="relative">
+                {post.kind === "video" && (
+                  <div className="flex items-center justify-center absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-transparent/50 p-2 rounded-full text-white">
+                    <Play />
+                  </div>
+                )}
                 <Image
-                  src={post.media[0]}
+                  src={
+                    post.kind === "image" ? post.media[0] : post.thumbnail || ""
+                  }
                   alt=""
                   width={300}
                   height={300}
