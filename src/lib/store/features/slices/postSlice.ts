@@ -301,7 +301,7 @@ const postSlice = createSlice({
         state.skeletonLoading = false;
         if (action.payload?.success) {
           state.post = action.payload.data.post;
-          state.posts = action.payload.data.relatedPosts;
+          state.post.morePosts = action.payload.data.relatedPosts;
         }
       })
       .addCase(getPost.rejected, (state) => {

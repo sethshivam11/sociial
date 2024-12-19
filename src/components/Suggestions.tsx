@@ -74,21 +74,21 @@ function Suggestions() {
 
   return (
     <div className="py-4 px-2 lg:flex hidden h-fit sticky top-0 flex-col gap-4 lg:col-span-3">
-      <div className="bg-stone-100 dark:bg-stone-900 pt-4 p-6 rounded-2xl">
+      <div className="bg-stone-100 dark:bg-stone-900 pt-4 p-6 rounded-2xl max-w-[25rem]">
         <h1 className="font-semibold text-xl">Suggestions</h1>
-        <div className="flex flex-col w-full p-1 mt-4 gap-5">
+        <div className="flex flex-col w-full p-1 mt-4 gap-4">
           {skeletonLoading ? (
             <SuggestionsLoading />
           ) : suggestions.length ? (
             suggestions.map((user, index) => {
               return (
                 <div
-                  className="flex items-center justify-between gap-3"
+                  className="flex items-center justify-between w-full"
                   key={index}
                 >
                   <Link
                     href={`/${user.username}`}
-                    className="w-full flex items-center gap-3"
+                    className="w-full flex items-center gap-3 min-w-0 flex-1"
                   >
                     <Avatar className="w-8 h-8">
                       <AvatarImage
@@ -100,18 +100,18 @@ function Suggestions() {
                         {nameFallback(user.fullName)}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="flex flex-col gap-0 leading-3">
-                      <span className="text-md font-semibold flex items-center justify-start gap-1">
+                    <div className="flex flex-col gap-0 leading-3 flex-1 min-w-0">
+                      <span className="text-md font-semibold truncate py-0.5">
                         {user.fullName}
                       </span>
-                      <span className="text-sm text-stone-400">
+                      <span className="text-sm text-stone-400 truncate">
                         @{user.username}
                       </span>
                     </div>
                   </Link>
                   {user?.isFollowing ? (
                     <button
-                      className="bg-stone-500 w-28 h-7 text-center text-white rounded-full text-xs transition-colors hover:bg-stone-700 disabled:bg-stone-400"
+                      className="bg-stone-500 w-24 h-7 text-center text-white rounded-full text-xs transition-colors hover:bg-stone-700 disabled:bg-stone-400"
                       onClick={() => handleUnfollow(user._id)}
                       disabled={user?.loading}
                     >
@@ -123,7 +123,7 @@ function Suggestions() {
                     </button>
                   ) : (
                     <button
-                      className="bg-blue-500 w-28 h-7 text-center text-white rounded-full text-xs transition-colors hover:bg-blue-700 disabled:bg-blue-400"
+                      className="bg-blue-500 w-24 h-7 text-center text-white rounded-full text-xs transition-colors hover:bg-blue-700 disabled:bg-blue-400"
                       onClick={() => handleFollow(user._id)}
                       disabled={user?.loading}
                     >

@@ -152,7 +152,7 @@ function Navbar() {
           : ""
       }`}
     >
-      <div className="sm:bg-stone-100 sm:dark:bg-stone-900 min-h-14 bg-stone-100/50 dark:bg-stone-900/50 backdrop-blur-sm blur-bg h-full w-full sm:rounded-3xl rounded-2xl xl:p-6 sm:px-2 sm:py-4 sm:w-fit xl:w-full flex flex-col items-center justify-between">
+      <div className="sm:bg-stone-100 sm:dark:bg-stone-900 min-h-14 bg-stone-100/50 dark:bg-stone-900/50 backdrop-blur-sm blur-bg h-full w-full sm:rounded-3xl rounded-2xl xl:p-6 sm:px-2 sm:py-4 sm:w-fit xl:w-full flex flex-col items-center justify-between sm:max-w-[20rem]">
         <Link href="/" className="sm:inline hidden w-full" title="Sociial">
           <div className="text-4xl tracking-tighter font-extrabold flex items-center md:pt-0 max-xl:justify-center gap-2 w-full px-2">
             <Image
