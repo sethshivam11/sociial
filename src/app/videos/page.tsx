@@ -207,7 +207,7 @@ function Videos() {
 
   return (
     <div
-      className="max-h-[100dvh] h-[100dvh] xl:col-span-8 sm:col-span-9 col-span-10 snap-y snap-mandatory overflow-auto relative no-scrollbar"
+      className="max-h-[100dvh] min-h-[42rem] h-[100dvh] xl:col-span-8 sm:col-span-9 col-span-10 snap-y snap-mandatory overflow-auto relative no-scrollbar"
       ref={containerRef}
     >
       {posts.length > 0 &&
