@@ -67,18 +67,6 @@ export default function FAQs() {
             information.
           </AccordionContent>
         </AccordionItem>
-        {/* <AccordionItem value="item-3">
-          <AccordionTrigger className="hover:no-underline sm:text-xl text-lg"></AccordionTrigger>
-          <AccordionContent></AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="item-3">
-          <AccordionTrigger className="hover:no-underline sm:text-xl text-lg"></AccordionTrigger>
-          <AccordionContent></AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="item-3">
-          <AccordionTrigger className="hover:no-underline sm:text-xl text-lg"></AccordionTrigger>
-          <AccordionContent></AccordionContent>
-        </AccordionItem> */}
       </Accordion>
     </div>
   );

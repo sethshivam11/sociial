@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
@@ -44,6 +45,7 @@ export default function BentoGrid() {
       className: "col-span-1 lg:col-span-3 border-b lg:border-none",
     },
   ];
+  
   return (
     <div className="relative pt-20 pb-10 lg:py-40 sm:px-10 px-4 max-w-7xl mx-auto">
       <div className="px-4">

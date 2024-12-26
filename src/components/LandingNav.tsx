@@ -1,3 +1,4 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -16,9 +17,13 @@ const lobster = Lobster_Two({
 function LandingNav() {
   const { theme, setTheme } = useTheme();
   const { user } = useAppSelector((state) => state.user);
+
   return (
     <nav className="flex gap-2 justify-between items-center w-full py-3 md:px-24 sm:px-10 px-4 border-b-[1px] bg-transparent/10 dark:bg-transparent/60 border-stone-100 dark:border-stone-900 fixed z-10 backdrop-blur-sm top-0">
-      <Link href="/" className="flex items-center justify-center gap-2">
+      <Link
+        href={user.username ? "/" : "/home"}
+        className="flex items-center justify-center gap-2"
+      >
         <Image src="/logo.svg" alt="" width="40" height="40" />
         <h1
           className={`text-2xl font-bold tracking-tight ${lobster.className}`}

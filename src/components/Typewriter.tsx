@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { TypewriterEffectSmooth } from "./ui/typewriter-effect";
 import { Lobster_Two } from "next/font/google";
+import { useAppSelector } from "@/lib/store/store";
 
 const lobster = Lobster_Two({
   subsets: ["latin"],
@@ -31,6 +32,8 @@ export default function Typewriter() {
       className: `text-blue-500 dark:text-blue-500 ${lobster.className}`,
     },
   ];
+  const { user } = useAppSelector((state) => state.user);
+
   return (
     <div className="flex flex-col items-center justify-center h-[30rem]">
       <p className="text-neutral-600 dark:text-neutral-200 text-sm sm:text-base">
@@ -38,18 +41,37 @@ export default function Typewriter() {
       </p>
       <TypewriterEffectSmooth words={words} />
       <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 space-x-0 md:space-x-4">
-        <Link
-          href="/sign-up"
-          className="w-40 h-10 rounded-xl bg-black border dark:border-white border-transparent text-white text-sm flex items-center justify-center"
-        >
-          Join now
-        </Link>
-        <Link
-          href="/sign-in"
-          className="w-40 h-10 rounded-xl bg-white text-black border border-black text-sm flex items-center justify-center"
-        >
-          Sign In
-        </Link>
+        {user._id ? (
+          <>
+            <Link
+              href="/"
+              className="w-40 h-10 rounded-xl bg-black border dark:border-white border-transparent text-white text-sm flex items-center justify-center"
+            >
+              Home
+            </Link>
+            <Link
+              href={`/${user.username}`}
+              className="w-40 h-10 rounded-xl bg-white text-black border border-black text-sm flex items-center justify-center"
+            >
+              Profile
+            </Link>
+          </>
+        ) : (
+          <>
+            <Link
+              href="/sign-up"
+              className="w-40 h-10 rounded-xl bg-black border dark:border-white border-transparent text-white text-sm flex items-center justify-center"
+            >
+              Join now
+            </Link>
+            <Link
+              href="/sign-in"
+              className="w-40 h-10 rounded-xl bg-white text-black border border-black text-sm flex items-center justify-center"
+            >
+              Sign In
+            </Link>
+          </>
+        )}
       </div>
     </div>
   );
