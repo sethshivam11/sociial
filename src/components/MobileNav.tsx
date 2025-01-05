@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Lobster_Two } from "next/font/google";
+import { useEffect, useRef, useState } from "react";
 
 const lobster = Lobster_Two({
   subsets: ["latin"],
@@ -17,12 +18,29 @@ interface Props {
 }
 
 function MobileNav({ hideButtons }: Props) {
-  const unreadMessageCount = 0;
-  const newNotifications = false;
   const location = usePathname();
   const { user, skeletonLoading } = useAppSelector((state) => state.user);
+  const prevScroll = useRef(0);
+  
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScroll = window.scrollY;
+      setVisible(prevScroll.current > currentScroll || currentScroll < 10);
+      prevScroll.current = currentScroll;
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [prevScroll]);
+
   return (
-    <div className="bg-stone-100 dark:bg-stone-900 h-16 p-3 top-0 left-0 col-span-10 sm:static sticky w-full sm:hidden flex items-center justify-between z-20">
+    <div
+      className={`bg-stone-100 dark:bg-stone-900 h-16 p-3 top-0 left-0 col-span-10 sm:static sticky w-full sm:hidden flex items-center justify-between z-20 transition-transform ${
+        visible ? "translate-y-0" : "-translate-y-full"
+      }`}
+    >
       <Link
         href="/"
         className={`flex items-center gap-2 text-3xl tracking-tighter font-extrabold ${lobster.className}`}
@@ -42,19 +60,19 @@ function MobileNav({ hideButtons }: Props) {
             <Link href="/notifications" title="Notifications">
               <span className="inline-block relative">
                 <Bell className="mr-4" size="26" />
-                {newNotifications && (
+                {/* {newNotifications && (
                   <span className="absolute -top-1 right-4 inline-block w-[10px] h-[10px] transform translate-x-1/5 translate-y-0.5 bg-red-600 rounded-full"></span>
-                )}
+                )} */}
               </span>
             </Link>
             <Link href="/messages" title="Messages">
               <span className="inline-block relative">
                 <Mail className="mr-2" size="28" />
-                {unreadMessageCount !== 0 && (
+                {/* {unreadMessageCount !== 0 && (
                   <div className="absolute inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-red-500  rounded-full -top-2 -end-1 dark:border-gray-900">
                     {unreadMessageCount}
                   </div>
-                )}
+                )} */}
               </span>
             </Link>
           </div>

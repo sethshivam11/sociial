@@ -36,6 +36,7 @@ function Page({ children }: PropsWithChildren) {
   const [open, setOpen] = useState(false);
 
   function handleLogOut() {
+    router.prefetch("/sign-in");
     dispatch(logOutUser())
       .then((response) => {
         if (response.payload?.success) {

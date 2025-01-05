@@ -478,7 +478,7 @@ export const userSlice = createSlice({
         state.loading = false;
         if (action.payload?.success) {
           state.isLoggedIn = false;
-          state.user = initialState.user;
+          state = initialState;
           if (document?.cookie) document.cookie = "";
           localStorage.removeItem("token");
           localStorage.removeItem("notificationConsent");

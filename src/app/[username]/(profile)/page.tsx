@@ -37,7 +37,7 @@ function Page({ params }: { params: { username: string } }) {
       ) : posts.length ? (
         posts.map((post, index) => (
           <Link
-            href={`/post/${post._id}`}
+            href={post.kind === "image" ? `/post/${post._id}`: `/video/${post._id}`}
             className="lg:w-1/4 w-1/3 p-1 aspect-square relative select-none"
             key={index}
           >

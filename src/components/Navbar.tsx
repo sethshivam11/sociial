@@ -86,6 +86,7 @@ function Navbar() {
   const { user, isLoggedIn, loading } = useAppSelector((state) => state.user);
 
   function handleLogout() {
+    router.prefetch("/sign-in");
     dispatch(logOutUser())
       .then(({ payload }) => {
         if (payload?.success || payload?.message === "Token is required") {
@@ -116,6 +117,7 @@ function Navbar() {
   }
 
   useEffect(() => {
+    if (publicPaths.includes(location) && location !== "/home") return;
     dispatch(getLoggedInUser())
       .then((response) => {
         if (response.payload?.success && location === "/sign-in") {
@@ -126,7 +128,6 @@ function Navbar() {
           (response.payload?.message === "Token is required" ||
             response.payload?.message === "Invalid token!")
         ) {
-          console.log("redirecting to sign in")
           dispatch(clearCookies()).then(() => router.push("/sign-in"));
         }
       })
@@ -136,7 +137,7 @@ function Navbar() {
 
   return (
     <nav
-      className={`xl:px-4 xl:py-6 p-3 sm:sticky fixed sm:top-0 sm:left-0 sm:h-screen h-fit max-sm:bottom-0 xl:col-span-2 sm:col-span-1 col-span-10 sm:min-h-[42rem] max-h-[55rem] z-10 w-full min-w-max block 
+      className={`xl:px-4 xl:py-6 sm:p-3 sm:sticky fixed sm:top-0 sm:left-0 sm:h-screen h-fit max-sm:bottom-0 xl:col-span-2 sm:col-span-1 col-span-10 sm:min-h-[42rem] max-h-[55rem] z-10 w-full min-w-max block 
       ${hideNav
         .map((path) => {
           if (location.includes(path) || location.startsWith(path))
@@ -152,7 +153,7 @@ function Navbar() {
           : ""
       }`}
     >
-      <div className="sm:bg-stone-100 sm:dark:bg-stone-900 min-h-14 bg-stone-100/50 dark:bg-stone-900/50 backdrop-blur-sm blur-bg h-full w-full sm:rounded-3xl rounded-2xl xl:p-6 sm:px-2 sm:py-4 sm:w-fit xl:w-full flex flex-col items-center justify-between sm:max-w-[20rem]">
+      <div className="sm:bg-stone-100 sm:dark:bg-stone-900 min-h-14 bg-stone-100/50 dark:bg-stone-900/50 backdrop-blur-lg blur-bg h-full w-full sm:rounded-3xl xl:p-6 sm:px-2 sm:py-4 sm:w-fit xl:w-full flex flex-col items-center justify-between sm:max-w-[20rem]">
         <Link href="/" className="sm:inline hidden w-full" title="Sociial">
           <div className="text-4xl tracking-tighter font-extrabold flex items-center md:pt-0 max-xl:justify-center gap-2 w-full px-2">
             <Image

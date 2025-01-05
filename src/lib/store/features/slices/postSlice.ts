@@ -495,7 +495,6 @@ const postSlice = createSlice({
       })
       .addCase(getUserPosts.fulfilled, (state, action) => {
         state.skeletonLoading = false;
-        console.log(action.payload?.message === "No posts found");
         if (action.payload?.success) {
           state.posts = action.payload.data;
           state.maxPosts = action.payload.data;

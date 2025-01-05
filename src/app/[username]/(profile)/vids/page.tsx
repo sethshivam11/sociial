@@ -38,9 +38,11 @@ function Page() {
               className="lg:w-1/4 w-1/3 aspect-square p-1 relative"
               key={index}
             >
-              <div className="bg-transparent/50 text-sm text-white backdrop-blur-sm rounded-full absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-2">
-                <PlayIcon className="w-6 h-6 sm:w-7 sm:h-7 md:w-10 md:h-1" />
-              </div>
+              {post.kind === "video" && (
+                <div className="bg-transparent/50 text-sm text-white backdrop-blur-sm rounded-full absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-2">
+                  <PlayIcon className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10" />
+                </div>
+              )}
               <Image
                 src={post.thumbnail || ""}
                 width="300"

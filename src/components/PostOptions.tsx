@@ -67,8 +67,10 @@ function PostOptions({ user, postId, isVideo, explorePosts }: Props) {
     setDeleting(true);
     dispatch(deletePost(postId))
       .then((response) => {
-        if (response.payload?.success) setDeletePostDialog(false);
-        else if (!response.payload?.success) {
+        if (response.payload?.success) {
+          setDeletePostDialog(false);
+          if (location !== "/") router.push("/");
+        } else if (!response.payload?.success) {
           toast({
             title: "Cannot delete post",
             description: response.payload?.message || "Please try again later",
@@ -219,6 +221,7 @@ function PostOptions({ user, postId, isVideo, explorePosts }: Props) {
             <AlertDialogAction
               className="w-full bg-destructive text-white hover:bg-destructive/90"
               onClick={() => handleUnfollow(user.username)}
+              disabled={unfollowing}
             >
               {unfollowing ? (
                 <Loader2 className="animate-spin mx-auto" />
@@ -246,12 +249,14 @@ function PostOptions({ user, postId, isVideo, explorePosts }: Props) {
                   setDeletePostDialog(false);
                 }
               }}
+              disabled={deleting}
             >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive hover:bg-destructive/80 text-white"
               onClick={() => handleDelete(postId)}
+              disabled={deleting}
             >
               {deleting ? <Loader2 className="animate-spin" /> : "Delete"}
             </AlertDialogAction>

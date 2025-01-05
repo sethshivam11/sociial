@@ -2,7 +2,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
 import { useEffect } from "react";
-import { ImageIcon } from "lucide-react";
+import { ImageIcon, PlayIcon } from "lucide-react";
 import Link from "next/link";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { getSavedPosts } from "@/lib/store/features/slices/userSlice";
@@ -31,12 +31,19 @@ function Page() {
       ) : savedPosts.length ? (
         savedPosts.map((post, index) => (
           <Link
-            href={`/post/${post._id}`}
+            href={
+              post.kind === "image" ? `/post/${post._id}` : `/video/${post._id}`
+            }
             className="lg:w-1/4 w-1/3 aspect-square p-1 relative"
             key={index}
           >
+            {post.kind === "video" && (
+              <div className="bg-transparent/50 text-sm text-white backdrop-blur-sm rounded-full absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-2">
+                <PlayIcon className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10" />
+              </div>
+            )}
             <Image
-              src={post.media[0]}
+              src={post.kind === "image" ? post.media[0] : post.thumbnail || ""}
               width="300"
               height="300"
               className="w-full h-full object-cover rounded-sm select-none pointer-events-none"
