@@ -239,7 +239,6 @@ function Info({ params }: { params: { chatId: string } }) {
             variant: "destructive",
           });
         }
-        console.log(response.payload?.data);
       })
       .finally(() => setAddDialog(false));
   }

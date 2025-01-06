@@ -243,7 +243,6 @@ function Story({ params }: Props) {
           break;
 
         default:
-          console.log(e.code);
           break;
       }
     }

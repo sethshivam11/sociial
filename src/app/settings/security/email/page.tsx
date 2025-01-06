@@ -35,7 +35,6 @@ function Page() {
     (state) => state.user
   );
   const [timer, setTimer] = useState(0);
-  // const [notFoundError, setNotFoundError] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

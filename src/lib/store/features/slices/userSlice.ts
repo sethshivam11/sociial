@@ -478,7 +478,7 @@ export const userSlice = createSlice({
         state.loading = false;
         if (action.payload?.success) {
           state.isLoggedIn = false;
-          state = initialState;
+          state.user = initialState.user;
           if (document?.cookie) document.cookie = "";
           localStorage.removeItem("token");
           localStorage.removeItem("notificationConsent");
@@ -710,6 +710,12 @@ export const userSlice = createSlice({
       .addCase(getUserSuggestions.rejected, (state) => {
         state.skeletonLoading = false;
       });
+
+    builder.addCase(clearCookies.fulfilled, (state, action) => {
+      if (action.payload?.success) {
+        state = initialState;
+      }
+    });
   },
 });
 

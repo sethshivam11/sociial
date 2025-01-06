@@ -37,7 +37,6 @@ function MediaDialog({ open, setOpen, chatId }: Props) {
   async function handleSend() {
     setLoading(true);
     const mediaFiles: File[] = [];
-    console.log("converting files to blob");
     await Promise.all(
       files.map(async (file) => {
         const response = await fetch(file.url);

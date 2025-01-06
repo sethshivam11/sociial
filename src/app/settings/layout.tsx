@@ -7,10 +7,8 @@ import {
   AlertDialogFooter,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  clearCookies,
-  logOutUser,
-} from "@/lib/store/features/slices/userSlice";
+import { toast } from "@/components/ui/use-toast";
+import { logOutUser } from "@/lib/store/features/slices/userSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { socket } from "@/socket";
 import {
@@ -36,13 +34,17 @@ function Page({ children }: PropsWithChildren) {
   const [open, setOpen] = useState(false);
 
   function handleLogOut() {
-    router.prefetch("/sign-in");
     dispatch(logOutUser())
-      .then((response) => {
-        if (response.payload?.success) {
+      .then(({ payload }) => {
+        if (payload?.success) {
+          router.refresh();
           router.push("/sign-in");
         } else {
-          dispatch(clearCookies()).then(() => router.push("/sign-in"));
+          toast({
+            title: "Cannot log out",
+            description: payload?.message || "Please try again later",
+            variant: "destructive",
+          });
         }
       })
       .finally(() => {

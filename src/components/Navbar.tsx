@@ -53,6 +53,7 @@ import ReportDialog from "./ReportDialog";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { Lobster_Two } from "next/font/google";
 import { socket } from "@/socket";
+import { revalidatePath } from "next/cache";
 
 const lobster = Lobster_Two({
   subsets: ["latin"],
@@ -86,13 +87,17 @@ function Navbar() {
   const { user, isLoggedIn, loading } = useAppSelector((state) => state.user);
 
   function handleLogout() {
-    router.prefetch("/sign-in");
     dispatch(logOutUser())
       .then(({ payload }) => {
         if (payload?.success || payload?.message === "Token is required") {
+          router.refresh();
           router.push("/sign-in");
         } else {
-          dispatch(clearCookies()).then(() => router.push("/sign-in"));
+          toast({
+            title: "Cannot log out",
+            description: payload?.message || "Please try again later",
+            variant: "destructive",
+          });
         }
       })
       .catch((err) => {
@@ -120,7 +125,7 @@ function Navbar() {
     if (publicPaths.includes(location) && location !== "/home") return;
     dispatch(getLoggedInUser())
       .then((response) => {
-        if (response.payload?.success && location === "/sign-in") {
+        if (response.payload?.success) {
           router.push("/");
         } else if (
           location !== "/sign-in" &&

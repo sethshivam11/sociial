@@ -119,7 +119,6 @@ function Page({ params }: { params: { postId: string } }) {
           if (videoRef) videoRef.currentTime = videoRef.currentTime - 5;
           break;
         default:
-          console.log(e.code);
           break;
       }
     },

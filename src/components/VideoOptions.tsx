@@ -15,11 +15,13 @@ import {
   DialogContent,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { MoreVerticalIcon } from "lucide-react";
+import { Loader2, MoreVerticalIcon } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import ReportDialog from "./ReportDialog";
+import { useAppDispatch, useAppSelector } from "@/lib/store/store";
+import { unfollowUser } from "@/lib/store/features/slices/followSlice";
 
 interface Props {
   username: string;
@@ -30,10 +32,26 @@ interface Props {
 
 function VideoOptions({ username, fullName, avatar, postId }: Props) {
   const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { loading } = useAppSelector((state) => state.follow);
+
   const [unfollowDialog, setUnfollowDialog] = useState(false);
   const [reportDialog, setReportDialog] = useState(false);
-  function unfollow(username: string) {
-    console.log(`Unfollowed user ${username}`);
+
+  function handleUnfollow(username: string) {
+    dispatch(unfollowUser({ username }))
+      .then((response) => {
+        if (!response.payload?.success) {
+          toast({
+            title: `Cannot unfollow ${username}`,
+            description: response.payload?.message || "Something went wrong",
+            variant: "destructive",
+          });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }
 
   async function copyLink(postId: string) {
@@ -128,9 +146,10 @@ function VideoOptions({ username, fullName, avatar, postId }: Props) {
             </AlertDialogCancel>
             <AlertDialogAction
               className="w-full bg-destructive text-white hover:bg-destructive/90"
-              onClick={() => unfollow(username)}
+              onClick={() => handleUnfollow(username)}
+              disabled={loading}
             >
-              Unfollow
+              {loading ? <Loader2 className="animate-spin" /> : "Unfollow"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -122,7 +122,6 @@ function Videos() {
           if (videoRef) videoRef.currentTime = videoRef.currentTime - 5;
           break;
         default:
-          console.log(e.code);
           break;
       }
     },

@@ -194,7 +194,6 @@ function Story() {
           break;
 
         default:
-          console.log(e.code);
           break;
       }
     }
