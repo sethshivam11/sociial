@@ -142,6 +142,7 @@ function Page({ params }: { params: { chatId: string } }) {
       media: string[];
       kind: string;
       caption: string;
+      thumbnail?: string;
       user: {
         _id: string;
         username: string;
@@ -154,8 +155,11 @@ function Page({ params }: { params: { chatId: string } }) {
       case "post":
         if (!post) {
           return (
-            <div className="flex items-center justify-center text-stone-500">
-              Post unavailable
+            <div className="flex flex-col justify-center text-left p-3">
+              <h3 className="font-semibold">Post unavailable</h3>
+              <p className="text-stone-500 text-sm">
+                This might have been deleted or is no longer available.
+              </p>
             </div>
           );
         } else {
@@ -167,7 +171,7 @@ function Page({ params }: { params: { chatId: string } }) {
                     ? `/video/${post._id}`
                     : `/post/${post?._id}`
                 }
-                className="rounded-2xl aspect-square py-1 flex flex-col gap-1"
+                className="rounded-2xl aspect-square py-1 flex flex-col gap-1 relative"
               >
                 <div className="flex items-center p-2 pb-0 gap-2">
                   <Avatar>
@@ -186,7 +190,9 @@ function Page({ params }: { params: { chatId: string } }) {
                   </div>
                 </div>
                 <NextImage
-                  src={post.media[0]}
+                  src={
+                    post.kind === "image" ? post.media[0] : post.thumbnail || ""
+                  }
                   width="240"
                   height="240"
                   alt=""
@@ -194,9 +200,16 @@ function Page({ params }: { params: { chatId: string } }) {
                     post.caption ? "" : "rounded-b-xl"
                   }`}
                 />
-                <span className="px-3 pb-2 pt-1 truncate w-60">
-                  {post.caption}
-                </span>
+                {post.kind === "video" && (
+                  <div className="bg-transparent/50 text-sm text-white backdrop-blur-sm rounded-full absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-2">
+                    <PlayIcon className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10" />
+                  </div>
+                )}
+                {post.caption && (
+                  <span className="px-3 pb-2 pt-1 truncate w-60">
+                    {post.caption}
+                  </span>
+                )}
               </Link>
             </div>
           );
@@ -354,9 +367,15 @@ function Page({ params }: { params: { chatId: string } }) {
             title: "Cannot edit message",
             description: response.payload?.message || "Something went wrong",
           });
+          setEditMessageId("");
         }
       }
     );
+  }
+  function handleCancelEdit() {
+    form.reset();
+    dispatch(setEditingMessage(false));
+    setEditMessageId("");
   }
 
   useEffect(() => {
@@ -377,7 +396,7 @@ function Page({ params }: { params: { chatId: string } }) {
     } else if (chat._id !== chatId) {
       dispatch(setCurrentChat(chatId));
     }
-  }, [dispatch, chatId, chat._id, form, chats.length]);
+  }, [dispatch, chatId, form, chats.length]);
 
   return (
     <div
@@ -672,14 +691,24 @@ function Page({ params }: { params: { chatId: string } }) {
                   </Button>
                 )}
                 {form.watch("message").length > 0 && editingMessage && (
-                  <Button
-                    type="button"
-                    disabled={!message.length}
-                    className={`rounded-xl ${theme.color} hover:${theme.color} hover:opacity-80 text-${theme.text}`}
-                    onClick={handleEdit}
-                  >
-                    <Check />
-                  </Button>
+                  <>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="rounded-xl text-white px-2"
+                      onClick={handleCancelEdit}
+                    >
+                      <X />
+                    </Button>
+                    <Button
+                      type="button"
+                      disabled={!message.length}
+                      className={`rounded-xl ${theme.color} hover:${theme.color} hover:opacity-80 px-2 text-${theme.text}`}
+                      onClick={handleEdit}
+                    >
+                      <Check />
+                    </Button>
+                  </>
                 )}
               </div>
             </form>

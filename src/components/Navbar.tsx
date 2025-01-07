@@ -125,13 +125,9 @@ function Navbar() {
     if (publicPaths.includes(location) && location !== "/home") return;
     dispatch(getLoggedInUser())
       .then((response) => {
-        if (response.payload?.success) {
-          router.push("/");
-        } else if (
-          location !== "/sign-in" &&
-          !publicPaths.includes(location) &&
-          (response.payload?.message === "Token is required" ||
-            response.payload?.message === "Invalid token!")
+        if (
+          response.payload?.message === "Token is required" ||
+          response.payload?.message === "Invalid token!"
         ) {
           dispatch(clearCookies()).then(() => router.push("/sign-in"));
         }
