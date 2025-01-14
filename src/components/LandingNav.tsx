@@ -1,12 +1,13 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect } from "react";
 import { Button } from "./ui/button";
 import { useTheme } from "next-themes";
 import { Lobster_Two } from "next/font/google";
 import { Moon, Sun } from "lucide-react";
-import { useAppSelector } from "@/lib/store/store";
+import { useAppDispatch, useAppSelector } from "@/lib/store/store";
+import { getLoggedInUser } from "@/lib/store/features/slices/userSlice";
 
 const lobster = Lobster_Two({
   subsets: ["latin"],
@@ -17,6 +18,11 @@ const lobster = Lobster_Two({
 function LandingNav() {
   const { theme, setTheme } = useTheme();
   const { user } = useAppSelector((state) => state.user);
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    dispatch(getLoggedInUser());
+  }, [dispatch]);
 
   return (
     <nav className="flex gap-2 justify-between items-center w-full py-3 md:px-24 sm:px-10 px-4 border-b-[1px] bg-transparent/10 dark:bg-transparent/60 border-stone-100 dark:border-stone-900 fixed z-10 backdrop-blur-sm top-0">

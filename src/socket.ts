@@ -11,5 +11,7 @@ export const socket = io(
     extraHeaders: {
       Authorization: token ? `Bearer ${token}` : "",
     },
+    reconnectionAttempts: 3,
+    reconnectionDelay: 1000,
   }
 );

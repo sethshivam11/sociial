@@ -57,7 +57,7 @@ function MobileNav({ hideButtons }: Props) {
       {!skeletonLoading && (
         <>
           <div className={`space-x-1 ${hideButtons ? "hidden" : ""}`}>
-            <Link href="/notifications" title="Notifications">
+            <Link href="/notifications" title="Notifications" className={!user.isMailVerified ? "hidden": ""}>
               <span className="inline-block relative">
                 <Bell className="mr-4" size="26" />
                 {/* {newNotifications && (
@@ -65,7 +65,7 @@ function MobileNav({ hideButtons }: Props) {
                 )} */}
               </span>
             </Link>
-            <Link href="/messages" title="Messages">
+            <Link href="/messages" title="Messages" className={!user.isMailVerified ? "hidden": ""}>
               <span className="inline-block relative">
                 <Mail className="mr-2" size="28" />
                 {/* {unreadMessageCount !== 0 && (
@@ -79,7 +79,7 @@ function MobileNav({ hideButtons }: Props) {
           <Link
             href="/settings"
             title="Settings"
-            className={location === `/${user.username}` ? "mr-2" : "hidden"}
+            className={location === `/${user.username}` && user.isMailVerified ? "mr-2" : "hidden"}
           >
             <Settings />
           </Link>

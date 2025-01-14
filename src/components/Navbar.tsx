@@ -90,8 +90,7 @@ function Navbar() {
     dispatch(logOutUser())
       .then(({ payload }) => {
         if (payload?.success || payload?.message === "Token is required") {
-          router.refresh();
-          router.push("/sign-in");
+          window.location.href = "/sign-in";
         } else {
           toast({
             title: "Cannot log out",
@@ -122,14 +121,16 @@ function Navbar() {
   }
 
   useEffect(() => {
-    if (publicPaths.includes(location) && location !== "/home") return;
+    if (publicPaths.includes(location)) return;
     dispatch(getLoggedInUser())
       .then((response) => {
         if (
           response.payload?.message === "Token is required" ||
           response.payload?.message === "Invalid token!"
         ) {
-          dispatch(clearCookies()).then(() => router.push("/sign-in"));
+          dispatch(clearCookies()).then(() => {
+            router.push("/sign-in");
+          });
         }
       })
       .catch((err) => console.log(err));

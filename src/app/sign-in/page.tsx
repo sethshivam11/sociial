@@ -68,6 +68,22 @@ function SignInPage() {
     if (!window) return;
     window.location.href = "/auth/google";
   }
+  function setLocationCookie(location: string) {
+    const date = new Date();
+    date.setTime(date.getTime() + 24 * 60 * 60 * 1000);
+    const expires = "expires=" + date.toUTCString();
+    document.cookie = `location=${location}; ${expires}; path=/`;
+  }
+  function getLocationCookie() {
+    const cookies = document.cookie.split(";");
+    for (let cookie of cookies) {
+      cookie = cookie.trim();
+      if (cookie.startsWith("location=")) {
+        return cookie.substring("location=".length);
+      }
+    }
+    return null;
+  }
   async function onSubmit(data: z.infer<typeof formSchema>) {
     let username = "";
     let email = "";
@@ -116,6 +132,13 @@ function SignInPage() {
   }
 
   useEffect(() => {
+    const savedLocation = getLocationCookie();
+    if (savedLocation) {
+      return setCurrentDevice({
+        name: getDevice(navigator?.userAgent),
+        location: savedLocation,
+      });
+    }
     fetch("https://ipapi.co/json")
       .then((parsed) => parsed.json())
       .then((response) => {
@@ -123,6 +146,7 @@ function SignInPage() {
           name: getDevice(navigator?.userAgent),
           location: `${response.city}, ${response.country}`,
         });
+        setLocationCookie(`${response.city}, ${response.country}`);
       })
       .catch((err) => console.log(err));
   }, []);
