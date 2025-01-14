@@ -37,8 +37,7 @@ function Page({ children }: PropsWithChildren) {
     dispatch(logOutUser())
       .then(({ payload }) => {
         if (payload?.success) {
-          router.refresh();
-          router.push("/sign-in");
+          window.location.href = "/sign-in";
         } else {
           toast({
             title: "Cannot log out",
