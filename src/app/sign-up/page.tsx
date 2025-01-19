@@ -29,6 +29,7 @@ import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { registerUser } from "@/lib/store/features/slices/userSlice";
 import { isUsernameAvailable } from "@/lib/helpers";
 import { useRouter } from "next/navigation";
+import Footer from "@/components/Footer";
 
 function SignUpPage() {
   const formSchema = z
@@ -108,202 +109,205 @@ function SignUpPage() {
   }, [username]);
 
   return (
-    <div className="flex justify-center col-span-10 py-12 items-center min-h-[100dvh] bg-white dark:bg-zinc-800  bg-[url('/bg-doodle-light.jpg')] dark:bg-[url('/bg-doodle-dark.jpg')] bg-cover bg-center bg-no-repeat px-2">
-      <div className="w-full max-w-md p-8 space-y-8 last:space-y-3 my-4 bg-white dark:bg-zinc-900 ring-2 ring-zinc-500 dark:ring-zinc-200 rounded-lg shadow-md z-10">
-        <div className="text-center  text-black dark:text-white">
-          <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl mb-6">
-            Join Sociial
-          </h1>
-          <p className="mb-4">Sign up to start to your journey with us</p>
+    <>
+      <div className="flex justify-center col-span-10 py-12 items-center min-h-[100dvh] bg-white dark:bg-zinc-800  bg-[url('/bg-doodle-light.jpg')] dark:bg-[url('/bg-doodle-dark.jpg')] bg-cover bg-center bg-no-repeat px-2">
+        <div className="w-full max-w-md p-8 space-y-8 last:space-y-3 my-4 bg-white dark:bg-zinc-900 ring-2 ring-zinc-500 dark:ring-zinc-200 rounded-lg shadow-md z-10">
+          <div className="text-center  text-black dark:text-white">
+            <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl mb-6">
+              Join Sociial
+            </h1>
+            <p className="mb-4">Sign up to start to your journey with us</p>
+          </div>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="fullName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        autoComplete="name"
+                        inputMode="text"
+                        placeholder="name"
+                        autoFocus
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="email"
+                        type="text"
+                        autoComplete="email"
+                        inputMode="email"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="username"
+                        type="text"
+                        max={30}
+                        autoComplete="username"
+                        inputMode="text"
+                        {...field}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          debounced(e.target.value);
+                        }}
+                      />
+                    </FormControl>
+                    <span
+                      className={`text-sm ${
+                        usernameMessage === "Username available"
+                          ? "text-green-400"
+                          : "text-red-400"
+                      }`}
+                    >
+                      {!isFetchingUsername && usernameMessage}
+                    </span>
+                    {isFetchingUsername && <Loader2 className="animate-spin" />}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="password"
+                        type={showPwd ? "text" : "password"}
+                        autoComplete="new-password"
+                        inputMode="text"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirm Password</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="confirm password"
+                        type={showPwd ? "text" : "password"}
+                        autoComplete="new-password webauthn"
+                        inputMode="text"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                name="avatar"
+                render={() => (
+                  <FormItem>
+                    <FormLabel>Profile picture (Optional)</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="profile pic"
+                        type="file"
+                        accept="image/jpg,image/png,image/jpeg"
+                        autoComplete="off"
+                        onChange={(e) => {
+                          const imageFiles = e.target.files;
+                          if (!imageFiles) return;
+                          if (
+                            imageFiles[0].type === "image/jpeg" ||
+                            imageFiles[0].type === "image/jpg" ||
+                            imageFiles[0].type === "image/png"
+                          ) {
+                            setAvatar(imageFiles[0]);
+                          } else {
+                            toast({
+                              title: "Warning",
+                              description:
+                                "Unsupported file format, Please provide jpg, jpeg or png image",
+                              variant: "destructive",
+                            });
+                            e.currentTarget.value = "";
+                          }
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <CheckboxWithLabel
+                text="Show Password"
+                checked={showPwd}
+                setChecked={setShowPwd}
+              />
+              <div className="space-y-2">
+                <Button type="submit" disabled={loading} className="w-full">
+                  {loading ? <Loader2 className="animate-spin" /> : "Sign up"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={loading}
+                  onClick={handleGoogleLogin}
+                  className="w-full"
+                >
+                  <Image
+                    src="/google-logo.png"
+                    width="20"
+                    height="20"
+                    alt=""
+                    className="mr-2"
+                  />
+                  Continue with Google
+                </Button>
+              </div>
+            </form>
+          </Form>
+          <p className="text-center mt-2">
+            Already have an account?&nbsp;
+            <Link
+              href="/sign-in"
+              className="text-blue-500 hover:opacity-80 underline underline-offset-2"
+              type="button"
+            >
+              Sign In
+            </Link>
+          </p>
         </div>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="fullName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input
-                      autoComplete="name"
-                      inputMode="text"
-                      placeholder="name"
-                      autoFocus
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="email"
-                      type="text"
-                      autoComplete="email"
-                      inputMode="email"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="username"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Username</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="username"
-                      type="text"
-                      max={30}
-                      autoComplete="username"
-                      inputMode="text"
-                      {...field}
-                      onChange={(e) => {
-                        field.onChange(e);
-                        debounced(e.target.value);
-                      }}
-                    />
-                  </FormControl>
-                  <span
-                    className={`text-sm ${
-                      usernameMessage === "Username available"
-                        ? "text-green-400"
-                        : "text-red-400"
-                    }`}
-                  >
-                    {!isFetchingUsername && usernameMessage}
-                  </span>
-                  {isFetchingUsername && <Loader2 className="animate-spin" />}
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="password"
-                      type={showPwd ? "text" : "password"}
-                      autoComplete="new-password"
-                      inputMode="text"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="confirmPassword"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Confirm Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="confirm password"
-                      type={showPwd ? "text" : "password"}
-                      autoComplete="new-password webauthn"
-                      inputMode="text"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              name="avatar"
-              render={() => (
-                <FormItem>
-                  <FormLabel>Profile picture (Optional)</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="profile pic"
-                      type="file"
-                      accept="image/jpg,image/png,image/jpeg"
-                      autoComplete="off"
-                      onChange={(e) => {
-                        const imageFiles = e.target.files;
-                        if (!imageFiles) return;
-                        if (
-                          imageFiles[0].type === "image/jpeg" ||
-                          imageFiles[0].type === "image/jpg" ||
-                          imageFiles[0].type === "image/png"
-                        ) {
-                          setAvatar(imageFiles[0]);
-                        } else {
-                          toast({
-                            title: "Warning",
-                            description:
-                              "Unsupported file format, Please provide jpg, jpeg or png image",
-                            variant: "destructive",
-                          });
-                          e.currentTarget.value = "";
-                        }
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <CheckboxWithLabel
-              text="Show Password"
-              checked={showPwd}
-              setChecked={setShowPwd}
-            />
-            <div className="space-y-2">
-              <Button type="submit" disabled={loading} className="w-full">
-                {loading ? <Loader2 className="animate-spin" /> : "Sign up"}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={loading}
-                onClick={handleGoogleLogin}
-                className="w-full"
-              >
-                <Image
-                  src="/google-logo.png"
-                  width="20"
-                  height="20"
-                  alt=""
-                  className="mr-2"
-                />
-                Signup with Google
-              </Button>
-            </div>
-          </form>
-        </Form>
-        <p className="text-center mt-2">
-          Already have an account?&nbsp;
-          <Link
-            href="/sign-in"
-            className="text-blue-500 hover:opacity-80 underline underline-offset-2"
-            type="button"
-          >
-            Sign In
-          </Link>
-        </p>
       </div>
-    </div>
+      <Footer />
+    </>
   );
 }
 

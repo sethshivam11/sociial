@@ -216,7 +216,7 @@ function Posts({ feed }: Props) {
           hasMore={posts.length < maxPosts}
           loader={<Loader2 className="animate-spin mx-auto" />}
           next={() => dispatch(getFeed(page + 1))}
-          className="flex flex-col py-2 sm:px-4 px-2 gap-4 w-full sm:pb-4"
+          className="flex flex-col py-2 sm:px-4 px-2 gap-4 w-full sm:pb-4 max-w-xl mx-auto"
         >
           {skeletonLoading ? (
             <PostsLoading />

@@ -30,6 +30,7 @@ import {
 import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/use-toast";
 import { socket } from "@/socket";
+import Footer from "@/components/Footer";
 
 function SignInPage() {
   const router = useRouter();
@@ -152,100 +153,103 @@ function SignInPage() {
   }, []);
 
   return (
-    <div className="flex justify-center col-span-10 py-12 items-center min-h-[100dvh] bg-white dark:bg-zinc-800 bg-[url('/bg-doodle-light.jpg')] dark:bg-[url('/bg-doodle-dark.jpg')] bg-cover bg-center bg-no-repeat px-2">
-      <div className="w-full max-w-md p-8 max-sm:p-6 space-y-8 last:space-y-3 bg-white dark:bg-zinc-900 ring-2 ring-zinc-500 dark:ring-zinc-200 rounded-lg shadow-md relative z-10">
-        <div className="text-center text-black dark:text-white">
-          <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl mb-6">
-            Welcome Back to Sociial
-          </h1>
-          <p className="mb-4">Sign in to continue to your journey with us</p>
-        </div>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="identifier"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Username / Email</FormLabel>
-                  <FormControl>
-                    <Input
-                      autoComplete="off"
-                      placeholder="username or email"
-                      autoFocus
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <div className="flex gap-2 items-center justify-between">
-                    <FormLabel>Password</FormLabel>
-                    <Link
-                      href="/forgot-password"
-                      className="text-sm hover:opacity-80 underline"
-                    >
-                      Forgot Password
-                    </Link>
-                  </div>
-                  <FormControl>
-                    <Input
-                      placeholder="password"
-                      type={showPwd ? "text" : "password"}
-                      autoComplete="current-password"
-                      inputMode="text"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <CheckboxWithLabel
-              text="Show Password"
-              checked={showPwd}
-              setChecked={setShowPwd}
-            />
-            <div className="space-y-2">
-              <Button type="submit" disabled={loading} className="w-full">
-                {loading ? <Loader2 className="animate-spin" /> : "Sign in"}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={loading}
-                onClick={handleGoogleLogin}
-                className="w-full"
-              >
-                <Image
-                  src="/google-logo.png"
-                  width="20"
-                  height="20"
-                  alt=""
-                  className="mr-2"
-                />
-                Signin with Google
-              </Button>
-            </div>
-          </form>
-        </Form>
-        <div className="text-center mt-2">
-          Don&apos;t have an account?&nbsp;
-          <Link
-            href="/sign-up"
-            className="text-blue-500 hover:opacity-80 underline underline-offset-2"
-          >
-            Sign Up
-          </Link>
+    <>
+      <div className="flex justify-center col-span-10 py-12 items-center min-h-[100dvh] bg-white dark:bg-zinc-800 bg-[url('/bg-doodle-light.jpg')] dark:bg-[url('/bg-doodle-dark.jpg')] bg-cover bg-center bg-no-repeat px-2">
+        <div className="w-full max-w-md p-8 max-sm:p-6 space-y-8 last:space-y-3 bg-white dark:bg-zinc-900 ring-2 ring-zinc-500 dark:ring-zinc-200 rounded-lg shadow-md relative z-10">
+          <div className="text-center text-black dark:text-white">
+            <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl mb-6">
+              Welcome Back to Sociial
+            </h1>
+            <p className="mb-4">Sign in to continue to your journey with us</p>
+          </div>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="identifier"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Username / Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        autoComplete="off"
+                        placeholder="username or email"
+                        autoFocus
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex gap-2 items-center justify-between">
+                      <FormLabel>Password</FormLabel>
+                      <Link
+                        href="/forgot-password"
+                        className="text-sm hover:opacity-80 underline"
+                      >
+                        Forgot Password
+                      </Link>
+                    </div>
+                    <FormControl>
+                      <Input
+                        placeholder="password"
+                        type={showPwd ? "text" : "password"}
+                        autoComplete="current-password"
+                        inputMode="text"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <CheckboxWithLabel
+                text="Show Password"
+                checked={showPwd}
+                setChecked={setShowPwd}
+              />
+              <div className="space-y-2">
+                <Button type="submit" disabled={loading} className="w-full">
+                  {loading ? <Loader2 className="animate-spin" /> : "Sign in"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={loading}
+                  onClick={handleGoogleLogin}
+                  className="w-full"
+                >
+                  <Image
+                    src="/google-logo.png"
+                    width="20"
+                    height="20"
+                    alt=""
+                    className="mr-2"
+                  />
+                  Continue with Google
+                </Button>
+              </div>
+            </form>
+          </Form>
+          <div className="text-center mt-2">
+            Don&apos;t have an account?&nbsp;
+            <Link
+              href="/sign-up"
+              className="text-blue-500 hover:opacity-80 underline underline-offset-2"
+            >
+              Sign Up
+            </Link>
+          </div>
         </div>
       </div>
-    </div>
+      <Footer />
+    </>
   );
 }
 

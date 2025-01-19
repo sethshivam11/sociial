@@ -9,6 +9,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { StoreProvider } from "@/lib/store/provider";
 import { SocketProvider } from "@/context/SocketProvider";
 import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const fontSans = FontSans({
   subsets: ["latin"],

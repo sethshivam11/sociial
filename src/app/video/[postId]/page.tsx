@@ -25,11 +25,10 @@ import {
   VolumeXIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { notFound, useRouter } from "next/navigation";
+import { notFound } from "next/navigation";
 import { useRef, useState, useEffect, useCallback } from "react";
 
 function Page({ params }: { params: { postId: string } }) {
-  const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
   const { post, skeletonLoading, loading } = useAppSelector(
@@ -198,12 +197,12 @@ function Page({ params }: { params: { postId: string } }) {
               {post.media[0] && <source src={post.media[0]} />}
             </video>
             <div className="flex items-center justify-start px-3 absolute top-0 left-0 w-full h-16 bg-gradient-to-b from-transparent/80 via-transparent/60 to-transparent">
-              <button
+              <Link
                 className="px-1 py-2 rounded-xl sm:hidden mx-1 hover:bg-transparent"
-                onClick={() => router.push("/")}
+                href="/"
               >
                 <ChevronLeft color="white" />
-              </button>
+              </Link>
               <Link
                 href={`/${post.user.username}`}
                 className="flex items-center justify-start"

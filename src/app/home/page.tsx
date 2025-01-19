@@ -4,7 +4,7 @@ import BentoGrid from "@/components/BentoGrid";
 import FAQs from "@/components/FAQs";
 import WobbleCardDemo from "@/components/WobbleCardDemo";
 import Typewriter from "@/components/Typewriter";
-import LandingFooter from "@/components/LandingFooter";
+import Footer from "@/components/Footer";
 
 export default function Page() {
   return (
@@ -15,7 +15,7 @@ export default function Page() {
       <FAQs />
       <WobbleCardDemo />
       <Typewriter />
-      <LandingFooter />
+      <Footer />
     </div>
   );
 }

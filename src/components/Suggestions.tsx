@@ -74,7 +74,7 @@ function Suggestions() {
 
   return (
     <div className="py-4 px-2 lg:flex hidden h-fit sticky top-0 flex-col gap-4 lg:col-span-3">
-      <div className="bg-stone-100 dark:bg-stone-900 pt-4 p-6 rounded-2xl max-w-[25rem]">
+      <div className="bg-stone-100 dark:bg-stone-900 pt-4 p-6 rounded-2xl max-w-md">
         <h1 className="font-semibold text-xl">Suggestions</h1>
         <div className="flex flex-col w-full p-1 mt-4 gap-4">
           {skeletonLoading ? (
@@ -162,12 +162,26 @@ function Suggestions() {
         <Link href="/get-premium" className="w-full">
           <Button
             className="w-full rounded-full mt-4 bg-blue-500 text-white hover:bg-blue-600"
-            size="lg"
+            size="sm"
           >
             Subscribe
           </Button>
         </Link>
       </div> */}
+      <div className="flex flex-col gap-2 justify-center text-stone-500 font-light text-xs whitespace-nowrap ml-4 max-w-md">
+        <div className="flex items-center gap-2">
+          <Link href="/home" className="hover:underline">
+            About
+          </Link>
+          <Link href="/privacy" className="hover:underline">
+            Privacy Policy
+          </Link>
+          <Link href="/terms" className="hover:underline">
+            Terms & Conditions
+          </Link>
+        </div>
+        <p>© {new Date().getFullYear()} Sociial. All rights Reserved.</p>
+      </div>
     </div>
   );
 }

@@ -25,16 +25,12 @@ import {
   VolumeXIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useDebounceCallback } from "usehooks-ts";
 
 function Videos() {
-  const router = useRouter();
   const dispatch = useAppDispatch();
-  const { posts, skeletonLoading } = useAppSelector(
-    (state) => state.post
-  );
+  const { posts, skeletonLoading } = useAppSelector((state) => state.post);
   const { user, skeletonLoading: userLoading } = useAppSelector(
     (state) => state.user
   );
@@ -252,12 +248,12 @@ function Videos() {
                   {post.media[0] && <source src={post.media[0]} />}
                 </video>
                 <div className="flex items-center justify-start pr-3 absolute top-0 left-0 w-full h-16 bg-gradient-to-b from-transparent/80 via-transparent/60 to-transparent">
-                  <button
+                  <Link
                     className="px-1 py-2 rounded-xl sm:hidden mx-1 hover:bg-transparent"
-                    onClick={() => router.push("/")}
+                    href="/"
                   >
                     <ChevronLeft color="white" />
-                  </button>
+                  </Link>
                   <Link
                     href={`/${post.user.username}`}
                     className="flex items-center justify-start sm:pl-4"
