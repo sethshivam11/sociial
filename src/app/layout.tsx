@@ -86,11 +86,12 @@ export default function RootLayout({
             <SocketProvider>
               <Navbar />
               {children}
-              <Analytics />
               <Toaster />
             </SocketProvider>
           </StoreProvider>
         </ThemeProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
