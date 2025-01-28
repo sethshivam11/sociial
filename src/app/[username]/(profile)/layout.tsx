@@ -185,7 +185,7 @@ function Profile({
     if (user.username === username)
       return (
         <Button
-          className="my-4 py-1.5 h-fit w-fit px-3 rounded-full"
+          className="my-4 py-1.5 min-h-8 w-24 px-3 rounded-full"
           onClick={() => router.push("/settings/edit-profile")}
         >
           Edit Profile
@@ -194,38 +194,43 @@ function Profile({
     else if (user.blocked.includes(profile._id))
       return (
         <Button
-          className="my-4 bg-blue-500 hover:bg-blue-700 py-1.5 min-h-9 w-24 px-3 rounded-full text-white"
+          className="my-4 bg-blue-500 hover:bg-blue-700 py-1.5 min-h-8 w-24 px-3 rounded-full text-white"
           onClick={() => handleUnblock()}
           disabled={userLoading}
         >
           {userLoading ? <Loader2 className="animate-spin" /> : "Unblock"}
         </Button>
       );
-    else
-      return followings.some(
-        (following) => following.username === profile.username
-      ) ? (
+    else if (followings.some((user) => user.username === profile.username)) {
+      return (
         <Button
-          className="my-4 bg-stone-500 hover:bg-stone-600 py-1.5 min-h-9 w-24 px-3 rounded-full text-white"
+          className="my-4 bg-stone-500 hover:bg-stone-600 py-1.5 min-h-8 w-24 px-3 rounded-full text-white"
           onClick={() => handleUnfollow(profile.username)}
           disabled={loading}
         >
           {loading ? <Loader2 className="animate-spin" /> : "Unfollow"}
         </Button>
-      ) : (
+      );
+    } else {
+      return (
         <Button
-          className="my-4 bg-blue-500 hover:bg-blue-700 py-1.5 min-h-9 w-24 px-3 rounded-full text-white"
+          className="my-4 bg-blue-500 hover:bg-blue-700 py-1.5 min-h-8 w-24 px-3 rounded-full text-white"
           onClick={() => handleFollow(profile.username)}
           disabled={loading}
         >
           {loading ? <Loader2 className="animate-spin" /> : "Follow"}
         </Button>
       );
+    }
   }
 
   useEffect(() => {
-    dispatch(getFollowings({ username }));
-
+    if (!user.username) return;
+    dispatch(getFollowings({ username: user.username })).then((data) =>
+      console.log(data)
+    );
+  }, [user.username]);
+  useEffect(() => {
     if (username)
       dispatch(getProfile({ username })).then((response) => {
         if (response.payload?.message === "User not found")
