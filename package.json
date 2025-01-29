@@ -42,7 +42,6 @@
     "mini-svg-data-uri": "^1.4.4",
     "next": "^14.2.18",
     "next-themes": "^0.3.0",
-    "peerjs": "^1.5.4",
     "qrcode": "^1.5.3",
     "react": "^18",
     "react-dom": "^18",
