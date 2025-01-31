@@ -27,7 +27,7 @@ import {
   loginUser,
   resendVerificationCode,
 } from "@/lib/store/features/slices/userSlice";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "@/components/ui/use-toast";
 import { socket } from "@/socket";
 import Footer from "@/components/Footer";
@@ -35,6 +35,8 @@ import Footer from "@/components/Footer";
 function SignInPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const params = useSearchParams();
+  const message = params.get("message");
 
   const formSchema = z.object({
     identifier: emailSchema.or(usernameSchema),
@@ -234,6 +236,7 @@ function SignInPage() {
                   />
                   Continue with Google
                 </Button>
+                {message && <div className="text-red-500 text-sm text-center">{message}</div>}
               </div>
             </form>
           </Form>
