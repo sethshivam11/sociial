@@ -47,6 +47,7 @@ import {
   clearCookies,
   getLoggedInUser,
   logOutUser,
+  resendVerificationCode,
 } from "@/lib/store/features/slices/userSlice";
 import { toast } from "./ui/use-toast";
 import ReportDialog from "./ReportDialog";
@@ -131,6 +132,22 @@ function Navbar() {
           dispatch(clearCookies()).then(() => {
             router.push("/sign-in");
           });
+        } else if (response.payload?.message.includes("Mail not verified")) {
+          toast({
+            title: "Mail not verified",
+            description: "Please verify your mail first",
+            variant: "destructive",
+          });
+          const username = response.payload?.message.split(": ")[1];
+          if (!username) {
+            dispatch(clearCookies()).then(() => router.push("/sign-in"));
+          } else {
+            dispatch(resendVerificationCode({ username })).then(() =>
+              router.push(`/verify-code?username=${username}`)
+            );
+          }
+        } else if (response.payload?.message === "User not found") {
+          dispatch(clearCookies()).then(() => router.push("/sign-in"));
         }
       })
       .catch((err) => console.log(err));

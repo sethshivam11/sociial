@@ -101,7 +101,7 @@ function Suggestions() {
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col gap-0 leading-3 flex-1 min-w-0">
-                      <span className="text-md font-semibold truncate py-0.5">
+                      <span className="text-md font-semibold truncate py-0.5 capitalize">
                         {user.fullName}
                       </span>
                       <span className="text-sm text-stone-400 truncate">
