@@ -5,15 +5,18 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "res.cloudinary.com",
-        port: "",
         pathname: "/dv3qbj0bn/**",
       },
       {
         protocol: "https",
         hostname: "maps.gomaps.pro",
-        port: "",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "cdn.buymeacoffee.com",
+        pathname: "/buttons/v2/default-yellow.png",
+      }
     ],
   },
   async rewrites() {

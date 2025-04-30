@@ -3,6 +3,7 @@ import Link from "next/link";
 import { TypewriterEffectSmooth } from "./ui/typewriter-effect";
 import { Lobster_Two } from "next/font/google";
 import { useAppSelector } from "@/lib/store/store";
+import Image from "next/image";
 
 const lobster = Lobster_Two({
   subsets: ["latin"],
@@ -73,6 +74,12 @@ export default function Typewriter() {
           </>
         )}
       </div>
+      <p className="text-neutral-600 dark:text-neutral-200 text-sm sm:text-base my-6">
+        Liked what we&apos;re building
+      </p>
+      <a href="https://www.buymeacoffee.com/sethshivam11" target="_blank">
+        <Image src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" className="max-sm:w-[150px]" height="60" width="217" />
+      </a>
     </div>
   );
 }
