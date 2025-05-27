@@ -194,7 +194,8 @@ function Profile({
     else if (user.blocked.includes(profile._id))
       return (
         <Button
-          className="my-4 bg-blue-500 hover:bg-blue-700 py-1.5 min-h-8 w-24 px-3 rounded-full text-white"
+          variant="follow"
+          className="my-4 py-1.5 min-h-8 w-24 px-3"
           onClick={() => handleUnblock()}
           disabled={userLoading}
         >
@@ -204,7 +205,8 @@ function Profile({
     else if (followings.some((user) => user.username === profile.username)) {
       return (
         <Button
-          className="my-4 bg-stone-500 hover:bg-stone-600 py-1.5 min-h-8 w-24 px-3 rounded-full text-white"
+          variant="unfollow"
+          className="my-4 py-1.5 min-h-8 w-24 px-3"
           onClick={() => handleUnfollow(profile.username)}
           disabled={loading}
         >
@@ -214,7 +216,8 @@ function Profile({
     } else {
       return (
         <Button
-          className="my-4 bg-blue-500 hover:bg-blue-700 py-1.5 min-h-8 w-24 px-3 rounded-full text-white"
+          variant="follow"
+          className="my-4 py-1.5 min-h-8 w-24 px-3"
           onClick={() => handleFollow(profile.username)}
           disabled={loading}
         >

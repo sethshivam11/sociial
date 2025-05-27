@@ -17,6 +17,7 @@ import {
 import { toast } from "./ui/use-toast";
 import SuggestionsLoading from "./skeletons/SuggestionsLoading";
 import { usePathname } from "next/navigation";
+import { Button } from "./ui/button";
 
 function Suggestions() {
   const dispatch = useAppDispatch();
@@ -110,8 +111,9 @@ function Suggestions() {
                     </div>
                   </Link>
                   {user?.isFollowing ? (
-                    <button
-                      className="bg-stone-500 w-24 h-7 text-center text-white rounded-full text-xs transition-colors hover:bg-stone-700 disabled:bg-stone-400"
+                    <Button
+                      variant="unfollow"
+                      className="w-24 h-7 text-xs"
                       onClick={() => handleUnfollow(user._id)}
                       disabled={user?.loading}
                     >
@@ -120,10 +122,11 @@ function Suggestions() {
                       ) : (
                         "Unfollow"
                       )}
-                    </button>
+                    </Button>
                   ) : (
-                    <button
-                      className="bg-blue-500 w-24 h-7 text-center text-white rounded-full text-xs transition-colors hover:bg-blue-700 disabled:bg-blue-400"
+                    <Button
+                      variant="follow"
+                      className="w-24 h-7 text-xs"
                       onClick={() => handleFollow(user._id)}
                       disabled={user?.loading}
                     >
@@ -132,7 +135,7 @@ function Suggestions() {
                       ) : (
                         "Follow"
                       )}
-                    </button>
+                    </Button>
                   )}
                 </div>
               );

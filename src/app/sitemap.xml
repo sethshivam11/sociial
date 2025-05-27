@@ -62,11 +62,11 @@
 			<image:title>Site opengraph image</image:title>
 		</image:image>
 		<image:image>
-			<image:loc>https://sociial.devshivam.tech/phone-hero-dark.jpg</image:loc>
+			<image:loc>https://sociial.devshivam.tech/phone-hero-dark.png</image:loc>
 			<image:title>Site screenshot dark on phone</image:title>
 		</image:image>
 		<image:image>
-			<image:loc>https://sociial.devshivam.tech/phone-hero-light.jpg</image:loc>
+			<image:loc>https://sociial.devshivam.tech/phone-hero-light.png</image:loc>
 			<image:title>Site screenshot light on phone</image:title>
 		</image:image>
 		<image:image>

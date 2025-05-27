@@ -85,7 +85,7 @@ function HeroSection() {
           draggable={false}
         />
         <Image
-          src="/phone-hero-light.jpg"
+          src="/phone-hero-light.png"
           alt="hero"
           height="720"
           width="1080"
@@ -93,7 +93,7 @@ function HeroSection() {
           draggable={false}
         />
         <Image
-          src="/phone-hero-dark.jpg"
+          src="/phone-hero-dark.png"
           alt="hero"
           height="720"
           width="1080"

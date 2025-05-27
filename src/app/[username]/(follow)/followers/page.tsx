@@ -14,6 +14,7 @@ import {
 } from "@/lib/store/features/slices/followSlice";
 import FriendsLoading from "@/components/skeletons/FriendsLoading";
 import { toast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
 
 function Page() {
   const dispatch = useAppDispatch();
@@ -152,10 +153,11 @@ function Page() {
                   <p className="text-stone-500 text-sm">@{follower.username}</p>
                 </div>
               </Link>
-              <div className="flex items-center justify-center bg-primary-500 text-white rounded-full w-fit h-full my-auto">
+              <div className="flex items-center justify-center bg-primary-500 rounded-full w-fit h-full my-auto">
                 {followingsIds.includes(follower._id) ? (
-                  <button
-                    className="bg-stone-500 w-20 h-7 text-center text-white rounded-full text-sm transition-colors hover:bg-stone-600 disabled:bg-stone-400 ml-4"
+                  <Button
+                    variant="unfollow"
+                    className="w-20 h-7 text-sm ml-4"
                     onClick={() => handleUnfollow(follower._id)}
                     disabled={follower.loading}
                   >
@@ -164,10 +166,11 @@ function Page() {
                     ) : (
                       "Unfollow"
                     )}
-                  </button>
+                  </Button>
                 ) : (
-                  <button
-                    className="bg-blue-500 w-16 h-7 text-center text-white rounded-full text-sm transition-colors hover:bg-blue-700 disabled:bg-blue-400 ml-4"
+                  <Button
+                    variant="follow"
+                    className="w-16 h-7 text-sm ml-4"
                     onClick={() => handleFollow(follower._id)}
                     disabled={follower.loading}
                   >
@@ -176,7 +179,7 @@ function Page() {
                     ) : (
                       "Follow"
                     )}
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>
