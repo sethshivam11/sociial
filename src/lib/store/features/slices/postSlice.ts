@@ -260,7 +260,10 @@ const postSlice = createSlice({
           action.payload.data.posts.forEach((post: PostI) =>
             postsMap.set(post._id, post)
           );
-          state.posts = Array.from(postsMap.values());
+          state.posts = Array.from(postsMap.values()).sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
           state.maxPosts = action.payload.data.max;
           state.page = action.payload.data.page;
         }
@@ -284,7 +287,10 @@ const postSlice = createSlice({
           action.payload.data.posts.forEach((post: PostI) =>
             postsMap.set(post._id, post)
           );
-          state.explorePosts = Array.from(postsMap.values());
+          state.explorePosts = Array.from(postsMap.values()).sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
           state.maxExplorePosts = action.payload.data.max;
           state.page = action.payload.data.page;
         }
@@ -337,7 +343,10 @@ const postSlice = createSlice({
           action.payload.data.forEach((post: PostI) =>
             postsMap.set(post._id, post)
           );
-          state.posts = Array.from(postsMap.values());
+          state.posts = Array.from(postsMap.values()).sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
         } else if (action.payload.message === "No posts found") {
           state.posts = [];
         }
