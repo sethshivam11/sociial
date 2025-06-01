@@ -472,7 +472,7 @@ function Posts({ feed }: Props) {
           next={() =>
             dispatch(exploreFeed({ page: page + 1, userId: user._id }))
           }
-          className="flex flex-col py-2 sm:px-4 px-2 gap-4 w-full sm:pb-4 pb-20 relative"
+          className="flex flex-col py-2 sm:px-4 px-2 gap-4 w-full sm:pb-4 pb-20 relative max-w-xl mx-auto"
         >
           {skeletonLoading ? (
             <PostsLoading />
