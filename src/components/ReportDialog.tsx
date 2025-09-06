@@ -137,7 +137,7 @@ function ReportDialog({ open, setOpen, entityId, type }: Props) {
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Title</FormLabel>
+                      <FormLabel>Description</FormLabel>
                       <FormControl>
                         <Textarea
                           className="bg-background"
