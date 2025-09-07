@@ -17,7 +17,7 @@
 <h3 align="center">Sociial</h3>
 
   <p align="center">
-    This is the backend for Sociial, a social media app built with Node.js, Express.js, Socket.IO, and MongoDB. The backend handles user authentication, real-time messaging (chats, group chats, reacts), media management (posts, videos, comments, likes), audio/video calls (WebRTC) and much more.
+    An engaging social media app where you can share stories, explore videos, and connect with people effortlessly. With features like interactive posts, suggestions, infinite scrolling, audio/video calls, real-time messages and much more designed for a seamless user-experience.
     <br />
     <a href="https://github.com/sethshivam11/sociial"><strong>Explore the docs »</strong></a>
     <br />
