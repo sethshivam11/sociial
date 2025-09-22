@@ -15,7 +15,7 @@ import {
   ArrowDown,
   Check,
 } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { notFound, usePathname } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -96,6 +96,7 @@ function Page({ params }: { params: { chatId: string } }) {
   const [theme, setTheme] = useState(themes[0]);
   const [isAtBottom, setIsAtBottom] = useState(false);
   const [editMessageId, setEditMessageId] = useState("");
+  const [chatNotFound, setChatNotFound] = useState(false);
 
   const chatId = params.chatId;
   const message = form.watch("message");
@@ -388,7 +389,12 @@ function Page({ params }: { params: { chatId: string } }) {
       setTheme(themes[0]);
     }
 
-    dispatch(getMessages(chatId));
+    dispatch(getMessages(chatId)).then((response) => {
+      console.log(response.payload?.statusCode);
+      if (response.payload?.statusCode === 400) {
+        setChatNotFound(true);
+      }
+    });
     if (!chats.length) {
       dispatch(getChats()).then((response) => {
         if (response.payload?.success) dispatch(setCurrentChat(chatId));
@@ -397,6 +403,11 @@ function Page({ params }: { params: { chatId: string } }) {
       dispatch(setCurrentChat(chatId));
     }
   }, [dispatch, chatId, form, chats.length]);
+
+  useEffect(() => {
+    if (!chatNotFound) return;
+    notFound();
+  }, [chatNotFound]);
 
   return (
     <div

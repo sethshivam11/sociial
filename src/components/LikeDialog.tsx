@@ -10,9 +10,15 @@ import { toast } from "./ui/use-toast";
 import { fetchLikes, resetLikes } from "@/lib/store/features/slices/postSlice";
 
 function LikeDialog({
+  likesPreview = [],
   likesCount,
   postId,
 }: {
+  likesPreview?: {
+    _id: string;
+    avatar: string;
+    fullName: string;
+  }[];
   likesCount: number;
   postId: string;
 }) {
@@ -41,9 +47,23 @@ function LikeDialog({
 
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-      <DialogTrigger>
-        {likesCount <= 1 ? `${likesCount} like` : `${likesCount} likes`}
-      </DialogTrigger>
+      {likesCount > 0 && (
+        <DialogTrigger>
+          <div className="flex items-center">
+            {likesPreview.length > 0 &&
+              likesPreview.map((user, index) => (
+                <Avatar className="-mr-1.5 size-6" key={index}>
+                  <AvatarImage src={user.avatar} alt="" />
+                  <AvatarFallback>{nameFallback(user.fullName)}</AvatarFallback>
+                </Avatar>
+              ))}
+            <span className="ml-2">
+              {likesCount > 0 &&
+                `${likesCount} like${likesCount > 1 ? "s" : ""}`}
+            </span>
+          </div>
+        </DialogTrigger>
+      )}
       <DialogContent
         className="w-fit max-sm:w-full"
         onOpenAutoFocus={(e) => e.preventDefault()}

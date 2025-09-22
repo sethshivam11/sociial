@@ -382,16 +382,18 @@ function Posts({ feed }: Props) {
                       />
                     </button>
                   </div>
-                  <p className="text-sm text-stone-400 mt-1 select-none">
+                  <div className="flex items-center gap-1 text-sm text-stone-400 mt-2 select-none">
                     <LikeDialog
+                      likesPreview={post.likesPreview}
                       likesCount={post.likesCount}
                       postId={post._id}
                     />
-                    &nbsp;&&nbsp;
-                    {post.commentsCount <= 1
-                      ? `${post.commentsCount} comment`
-                      : `${post.commentsCount} comments`}
-                  </p>
+                    {post.likesCount > 0 && post.commentsCount > 0 && " & "}
+                    {post.commentsCount > 0 &&
+                      `${post.commentsCount} comment${
+                        post.commentsCount > 1 ? "s" : ""
+                      }`}
+                  </div>
                   <PostCaption
                     caption={post.caption}
                     createdAt={post.createdAt}
@@ -637,16 +639,17 @@ function Posts({ feed }: Props) {
                       />
                     </button>
                   </div>
-                  <p className="text-sm text-stone-400 mt-1 select-none">
+                  <div className="flex items-center gap-1 text-sm text-stone-400 mt-2 select-none">
                     <LikeDialog
                       likesCount={post.likesCount}
                       postId={post._id}
                     />
-                    &nbsp;&&nbsp;
-                    {post.commentsCount <= 1
-                      ? `${post.commentsCount} comment`
-                      : `${post.commentsCount} comments`}
-                  </p>
+                    {post.likesCount > 0 && post.commentsCount > 0 && " & "}
+                    {post.commentsCount > 0 &&
+                      `${post.commentsCount} comment${
+                        post.commentsCount > 1 ? "s" : ""
+                      }`}
+                  </div>
                   <PostCaption
                     caption={post.caption}
                     createdAt={post.createdAt}
