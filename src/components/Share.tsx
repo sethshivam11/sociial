@@ -7,7 +7,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Link2Icon, Loader2, Share2 } from "lucide-react";
+import { History, Link2Icon, Loader2, SearchX, Share2 } from "lucide-react";
 import Image from "next/image";
 import { Input } from "./ui/input";
 import { useState, useEffect } from "react";
@@ -95,6 +95,7 @@ export default function Share({ isVideo, _id }: Props) {
   const [search, setSearch] = useState("");
   const [shareToPeople, setShareToPeople] = useState<string[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [filteredFollowers, setFilteredFollowers] = useState(followers);
 
   function sharePost(postId: string) {
     if (navigator.share === undefined) {
@@ -155,6 +156,21 @@ export default function Share({ isVideo, _id }: Props) {
     }
   }, [dispatch, dialogOpen, user._id]);
 
+  useEffect(() => {
+    if (!followers || !followers.length) return;
+    if (search.trim().length > 0) {
+      setFilteredFollowers(
+        followers.filter(
+          (follower) =>
+            follower.username.toLowerCase().includes(search.toLowerCase()) ||
+            follower.fullName.toLowerCase().includes(search.toLowerCase())
+        )
+      );
+    } else {
+      setFilteredFollowers(followers);
+    }
+  }, [search, followers]);
+
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger
@@ -182,8 +198,32 @@ export default function Share({ isVideo, _id }: Props) {
         <ScrollArea className="h-full p-2">
           {skeletonLoading ? (
             <FollowersLoadingSkeleton />
+          ) : followers.length === 0 ? (
+            <div className="w-full sm:min-w-80 h-80 grow flex flex-col items-center justify-center gap-2">
+              <History className="mx-auto" size="50" />
+              <div className="space-y-2">
+                <p className="text-xl text-center font-bold tracking-tight">
+                  No friends found
+                </p>
+                <span className="text-center text-stone-500 text-sm">
+                  Start following users to share posts with your friends!
+                </span>
+              </div>
+            </div>
+          ) : search && filteredFollowers.length === 0 ? (
+            <div className="w-full sm:min-w-80 h-80 grow flex flex-col items-center justify-center gap-2">
+              <SearchX className="mx-auto" size="50" />
+              <div className="space-y-2">
+                <p className="text-xl text-center font-bold tracking-tight">
+                  No matches found
+                </p>
+                <span className="text-center text-stone-500 text-sm">
+                  We couldn&apos;t find any users with your search term.
+                </span>
+              </div>
+            </div>
           ) : (
-            followers.map((follower, index) => {
+            filteredFollowers.map((follower, index) => {
               return (
                 <div
                   className="flex items-center justify-between w-full px-2 gap-3 mb-3 rounded-lg"
