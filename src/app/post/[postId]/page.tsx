@@ -306,7 +306,11 @@ function Page({ params }: { params: { postId: string } }) {
             {post.morePosts?.map((post, index) => (
               <Link href={`/post/${post._id}`} key={index} className="relative">
                 {post.kind === "video" && (
-                  <div className="flex items-center justify-center absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-transparent/50 p-2 rounded-full text-white">
+                  <div
+                    className={`flex items-center justify-center absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-transparent/50 p-2 rounded-full text-white ${
+                      index > 3 ? "lg:hidden" : ""
+                    }`}
+                  >
                     <Play />
                   </div>
                 )}
