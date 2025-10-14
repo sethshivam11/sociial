@@ -29,9 +29,10 @@ import { useEffect, useState } from "react";
 interface Props {
   post: PostI;
   postIndex: number;
+  expanded?: boolean;
 }
 
-function PostItem({ post, postIndex }: Props) {
+function PostItem({ post, postIndex, expanded = false }: Props) {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
@@ -257,7 +258,11 @@ function PostItem({ post, postIndex }: Props) {
         {post.commentsCount > 0 &&
           `${post.commentsCount} comment${post.commentsCount > 1 ? "s" : ""}`}
       </div>
-      <PostCaption caption={post.caption} createdAt={post.createdAt} />
+      <PostCaption
+        caption={post.caption}
+        createdAt={post.createdAt}
+        expanded={expanded}
+      />
     </div>
   );
 }

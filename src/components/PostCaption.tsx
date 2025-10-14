@@ -4,17 +4,19 @@ import { History } from "lucide-react";
 function PostCaption({
   caption,
   createdAt,
+  expanded = false,
 }: {
   caption: string;
   createdAt: string;
+  expanded?: boolean;
 }) {
   return (
     <>
       {caption && (
         <p className="py-1 text-sm">
-          <span>{caption.slice(0, 30)}</span>
+          <span>{caption.slice(0, expanded ? caption.length : 30)}</span>
           &nbsp;
-          {caption?.length > 30 && (
+          {caption?.length > 30 && !expanded && (
             <button
               className="text-stone-500 select-none"
               onClick={(e) => {

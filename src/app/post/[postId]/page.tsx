@@ -1,99 +1,22 @@
 "use client";
-import Comment from "@/components/Comment";
 import MobileNav from "@/components/MobileNav";
-import PostOptions from "@/components/PostOptions";
 import PostsLoading from "@/components/skeletons/PostsLoading";
-import Share from "@/components/Share";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-import { getTimeDifference, nameFallback } from "@/lib/helpers";
-import { Bookmark, Divide, Heart, History, Play } from "lucide-react";
+import { nameFallback } from "@/lib/helpers";
+import { Play } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
-import {
-  getPost,
-  likePost,
-  unlikePost,
-} from "@/lib/store/features/slices/postSlice";
-import { toast } from "@/components/ui/use-toast";
-import LikeDialog from "@/components/LikeDialog";
+import { getPost } from "@/lib/store/features/slices/postSlice";
 import { notFound } from "next/navigation";
-import { savePost, unsavePost } from "@/lib/store/features/slices/userSlice";
+import PostItem from "@/components/PostItem";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function Page({ params }: { params: { postId: string } }) {
   const dispatch = useAppDispatch();
-  const { post, loading, skeletonLoading } = useAppSelector(
-    (state) => state.post
-  );
-  const { user } = useAppSelector((state) => state.user);
+  const { post, skeletonLoading } = useAppSelector((state) => state.post);
   const [notFoundError, setNotFoundError] = useState(false);
-
-  function handleLike(postId: string) {
-    dispatch(
-      likePost({
-        postId,
-        userId: user._id,
-        type: "post",
-      })
-    ).then((response) => {
-      if (!response.payload?.success) {
-        toast({
-          title: "Cannot like post",
-          description: "Please try again later.",
-        });
-      }
-    });
-  }
-  function handleUnlike(postId: string) {
-    dispatch(
-      unlikePost({
-        postId,
-        userId: user._id,
-        type: "post",
-      })
-    ).then((response) => {
-      if (!response.payload?.success) {
-        toast({
-          title: "Cannot unlike post",
-          description: "Please try again later.",
-        });
-      }
-    });
-  }
-  function handleSave(postId: string) {
-    dispatch(savePost(postId)).then((response) => {
-      if (response.payload?.success) {
-        toast({ title: "Post saved" });
-      } else if (!response.payload?.success) {
-        toast({
-          title: "Failed to save post",
-          description: response.payload?.message || "Something went wrong",
-          variant: "destructive",
-        });
-      }
-    });
-  }
-  function handleUnsave(postId: string) {
-    dispatch(unsavePost(postId)).then((response) => {
-      if (response.payload?.success) {
-        toast({ title: "Post unsaved" });
-      } else if (!response.payload?.success) {
-        toast({
-          title: "Failed to unsave post",
-          description: response.payload?.message || "Something went wrong",
-          variant: "destructive",
-        });
-      }
-    });
-  }
 
   useEffect(() => {
     dispatch(getPost(params.postId)).then((response) => {
@@ -119,214 +42,128 @@ function Page({ params }: { params: { postId: string } }) {
             <PostsLoading length={1} />
           </div>
         ) : (
-          <main className="rounded-xl bg-stone-100 dark:bg-stone-900 p-4 lg:w-1/2 md:w-2/3 sm:w-5/6 w-full mt-6 sm:mx-auto h-fit min-h-64 min-w-64">
-            <div className="flex justify-between w-full">
-              <div className="flex items-center gap-2 w-full">
-                <Link href={`/${post.user.username}`} className="w-8 h-8">
-                  <Avatar className="w-8 h-8">
-                    <AvatarImage
-                      src={post.user.avatar}
-                      alt=""
-                      className="pointer-events-none select-none"
-                    />
-                    <AvatarFallback>
-                      {nameFallback(post.user.fullName)}
-                    </AvatarFallback>
-                  </Avatar>
-                </Link>
-                <Link href={`/${post.user.username}`}>
-                  <p>{post.user.fullName}</p>
-                  <p className="text-sm text-gray-500 leading-3">
-                    @{post.user.username}
-                  </p>
-                </Link>
-              </div>
-              <PostOptions
-                user={post.user}
-                postId={post._id}
-                isVideo={post.kind === "video" ? true : false}
-              />
-            </div>
-            <Carousel className="w-full my-2">
-              <CarouselContent>
-                {post.media.map((image, index) => {
-                  return (
-                    <CarouselItem key={index} className="relative">
-                      <div
-                        className="flex absolute w-full h-full items-center justify-center"
-                        onDoubleClick={(e) => {
-                          if (loading) return;
-                          if (post.likes?.includes(user._id)) {
-                            handleUnlike(post._id);
-                          } else {
-                            handleLike(post._id);
-                          }
-                        }}
-                      >
-                        <Heart
-                          size="150"
-                          strokeWidth="0"
-                          fill="rgb(244 63 94)"
-                          className={
-                            post.likes.includes(user._id)
-                              ? "animate-like"
-                              : "hidden"
-                          }
-                        />
-                      </div>
-                      <Image
-                        width={500}
-                        height={500}
-                        src={image}
-                        priority={index === 0 ? true : false}
-                        alt={`Photo by ${post.user.fullName} with username ${post.user.username}`}
-                        className="object-cover select-none w-full h-full rounded-sm"
-                      />
-                    </CarouselItem>
-                  );
-                })}
-              </CarouselContent>
-              <CarouselPrevious />
-              <CarouselNext />
-            </Carousel>
-            <div className="flex justify-between select-none">
-              <div className="flex gap-3">
-                <button
-                  title={post.likes?.includes(user._id) ? "Unlike" : "Like"}
-                  disabled={loading}
-                >
-                  <Heart
-                    size="30"
-                    className={`${
-                      post.likes?.includes(user._id)
-                        ? "text-rose-500"
-                        : "sm:hover:opacity-60"
-                    } transition-all active:scale-110`}
-                    fill={
-                      post.likes?.includes(user._id) ? "rgb(244 63 94)" : "none"
-                    }
-                    onClick={() => {
-                      if (post.likes?.includes(user._id)) {
-                        handleUnlike(post._id);
-                      } else {
-                        handleLike(post._id);
-                      }
-                    }}
-                  />
-                </button>
-                <Comment
-                  postId={post._id}
-                  user={post.user}
-                  commentsCount={post.commentsCount}
-                />
-                <Share _id={post._id} />
-              </div>
-              <button
-                onClick={() => {
-                  if (user.savedPosts.includes(post._id)) {
-                    handleUnsave(post._id);
-                  } else {
-                    handleSave(post._id);
-                  }
-                }}
-              >
-                <Bookmark
-                  size="30"
-                  fill={
-                    user.savedPosts.includes(post._id) ? "currentColor" : "none"
-                  }
-                />
-              </button>
-            </div>
-            <p className="text-sm text-stone-500 mt-1 select-none">
-              <LikeDialog likesCount={post.likesCount} postId={post._id} />
-            </p>
-            <p
-              className="py-1 text-sm"
-              dangerouslySetInnerHTML={{
-                __html: post.caption.split("\n").join("<br/>"),
-              }}
-            ></p>
-            {post.createdAt && (
-              <div
-                className="text-stone-500 flex gap-1 mt-1 select-none text-sm"
-                title={post.createdAt}
-              >
-                <History size="20" /> {getTimeDifference(post.createdAt)}
-              </div>
-            )}
-          </main>
+          <div className="lg:w-1/2 md:w-2/3 sm:w-5/6 w-full mt-6 sm:mx-auto h-fit min-h-64 min-w-64">
+            <PostItem post={post} postIndex={1} expanded />
+          </div>
         )}
         <div className="flex flex-col gap-4 lg:w-1/3 md:w-2/3 sm:w-5/6 w-full sm:mx-auto lg:mx-4">
           <div className="lg:flex hidden flex-col items-center justify-start h-full mt-16 w-full bg-stone-100 dark:bg-stone-900 mx-1 rounded-xl -mb-4">
-            <Avatar className="w-40 h-40 -mt-12 select-none pointer-events-none">
-              <AvatarImage src={post.user.avatar} />
-              <AvatarFallback>
-                {nameFallback(post.user.fullName)}
-              </AvatarFallback>
-            </Avatar>
-            <Link
-              href={`/${post.user.username}`}
-              className="flex flex-col items-center justify-center gap-1"
-            >
-              <h1 className="text-2xl tracking-tight font-bold mt-4">
-                {post.user.fullName}
-              </h1>
-              <p className="text-stone-500">@{post.user.username}</p>
-            </Link>
-            <div className="py-4 text-center grid grid-cols-3 gap-1 w-full">
+            {skeletonLoading ? (
+              <div className="bg-muted size-40 -mt-12 rounded-full" />
+            ) : (
+              <Avatar className="w-40 h-40 -mt-12 select-none pointer-events-none">
+                <AvatarImage src={post.user.avatar} />
+                <AvatarFallback>
+                  {nameFallback(post.user.fullName)}
+                </AvatarFallback>
+              </Avatar>
+            )}
+            {skeletonLoading ? (
+              <div className="flex flex-col items-center justify-center gap-2 mt-4">
+                <Skeleton className="w-40 h-8" />
+                <Skeleton className="w-24 h-5" />
+              </div>
+            ) : (
               <Link
                 href={`/${post.user.username}`}
-                className="flex flex-col items-center justify-center gap-2"
+                className="flex flex-col items-center justify-center gap-1"
               >
-                <span className="text-lg">Posts</span>
-                <span>{post.user.postsCount}</span>
+                <h1 className="text-2xl tracking-tight font-bold mt-4">
+                  {post.user.fullName}
+                </h1>
+                <p className="text-stone-500">@{post.user.username}</p>
               </Link>
-              <Link
-                href={`/${post.user.username}/followers`}
-                className="flex flex-col items-center justify-center gap-2"
-              >
-                <span className="text-lg">Followers</span>
-                <span>{post.user.followersCount}</span>
-              </Link>
-              <Link
-                href={`/${post.user.username}/following`}
-                className="flex flex-col items-center justify-center gap-2"
-              >
-                <span className="text-lg">Following</span>
-                <span>{post.user.followingCount}</span>
-              </Link>
-            </div>
+            )}
+            {skeletonLoading ? (
+              <div className="py-4 text-center grid grid-cols-3 gap-1 w-full">
+                <div className="flex flex-col items-center justify-center gap-2">
+                  <Skeleton className="w-20 h-5" />
+                  <Skeleton className="w-6 h-6" />
+                </div>
+                <div className="flex flex-col items-center justify-center gap-2">
+                  <Skeleton className="w-20 h-5" />
+                  <Skeleton className="w-6 h-6" />
+                </div>
+                <div className="flex flex-col items-center justify-center gap-2">
+                  <Skeleton className="w-20 h-5" />
+                  <Skeleton className="w-6 h-6" />
+                </div>
+              </div>
+            ) : (
+              <div className="py-4 text-center grid grid-cols-3 gap-1 w-full">
+                <Link
+                  href={`/${post.user.username}`}
+                  className="flex flex-col items-center justify-center gap-2"
+                >
+                  <span className="text-lg">Posts</span>
+                  <span>{post.user.postsCount}</span>
+                </Link>
+                <Link
+                  href={`/${post.user.username}/followers`}
+                  className="flex flex-col items-center justify-center gap-2"
+                >
+                  <span className="text-lg">Followers</span>
+                  <span>{post.user.followersCount}</span>
+                </Link>
+                <Link
+                  href={`/${post.user.username}/following`}
+                  className="flex flex-col items-center justify-center gap-2"
+                >
+                  <span className="text-lg">Following</span>
+                  <span>{post.user.followingCount}</span>
+                </Link>
+              </div>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-3 bg-stone-100 dark:bg-stone-900 rounded-xl mt-4 max-md:mb-4 p-4">
-            <h1 className="col-span-2 text-stone-500 mt-2 mb-4">
-              {post.morePosts?.length ? "More" : "No more"} posts from @
-              {post.user.username}
-            </h1>
-            {post.morePosts?.map((post, index) => (
-              <Link href={`/post/${post._id}`} key={index} className="relative">
-                {post.kind === "video" && (
-                  <div
-                    className={`flex items-center justify-center absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-transparent/50 p-2 rounded-full text-white ${
+            {skeletonLoading ? (
+              <Skeleton className="w-48 h-5 my-3 col-span-2" />
+            ) : (
+              <h1 className="col-span-2 text-stone-500 mt-2 mb-4">
+                {post.morePosts?.length ? "More" : "No more"} posts from @
+                {post.user.username}
+              </h1>
+            )}
+            {skeletonLoading
+              ? Array.from({ length: 6 }).map((_, index) => (
+                  <Skeleton
+                    className={`rounded-xl aspect-square ${
                       index > 3 ? "lg:hidden" : ""
                     }`}
+                    key={index}
+                  />
+                ))
+              : post.morePosts?.map((post, index) => (
+                  <Link
+                    href={`/post/${post._id}`}
+                    key={index}
+                    className="relative"
                   >
-                    <Play />
-                  </div>
-                )}
-                <Image
-                  src={
-                    post.kind === "image" ? post.media[0] : post.thumbnail || ""
-                  }
-                  alt=""
-                  width={300}
-                  height={300}
-                  className={`rounded-xl aspect-square object-cover ${
-                    index > 3 ? "lg:hidden" : ""
-                  }`}
-                />
-              </Link>
-            ))}
+                    {post.kind === "video" && (
+                      <div
+                        className={`flex items-center justify-center absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-transparent/50 p-2 rounded-full text-white ${
+                          index > 3 ? "lg:hidden" : ""
+                        }`}
+                      >
+                        <Play />
+                      </div>
+                    )}
+                    <Image
+                      src={
+                        post.kind === "image"
+                          ? post.media[0]
+                          : post.thumbnail || ""
+                      }
+                      className={`rounded-xl aspect-square object-cover select-none ${
+                        index > 3 ? "lg:hidden" : ""
+                      }`}
+                      alt=""
+                      width={300}
+                      height={300}
+                      draggable={false}
+                    />
+                  </Link>
+                ))}
           </div>
         </div>
       </div>
