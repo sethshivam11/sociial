@@ -18,22 +18,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
 import { captionSchema } from "@/schemas/postSchema";
 import generateMediaThumbnail from "browser-thumbnail-generator";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import {
-  createPost,
   createVideoPost,
   setLoading,
 } from "@/lib/store/features/slices/postSlice";
@@ -140,6 +129,7 @@ function Page() {
       onDrop={(e) => {
         e.preventDefault();
         const droppedFile = e.dataTransfer.files[0];
+        setVideoFile(droppedFile);
         if (!droppedFile.type.includes("video")) {
           return toast({
             title: "Warning",
@@ -158,32 +148,6 @@ function Page() {
       }}
       onDragOver={(e) => e.preventDefault()}
     >
-      {video.length > 1 && (
-        <AlertDialog>
-          <AlertDialogTrigger
-            className="absolute right-2 top-2 disabled:text-stone-500 disabled:cursor-not-allowed"
-            disabled={loading}
-          >
-            <X size="35" />
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogTitle>Discard Post</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to discard this post? All changes will be
-              lost.
-            </AlertDialogDescription>
-            <AlertDialogFooter className="max-sm:flex-col mt-4">
-              <AlertDialogAction
-                className="bg-destructive text-white hover:bg-destructive/90"
-                onClick={() => router.push("/")}
-              >
-                Discard
-              </AlertDialogAction>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
       {video.length ? (
         <div className="lg:w-3/4 w-full rounded-xl sm:pt-4 md:px-16 sm:px-6 px-0 pb-2">
           <h1 className="font-bold text-2xl tracking-tight w-full text-center py-2">
