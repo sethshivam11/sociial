@@ -2,14 +2,16 @@
 
 import VideoLoading from "@/components/skeletons/VideoLoading";
 import VideoItem from "@/components/VideoItem";
-import { videoFeed } from "@/lib/store/features/slices/postSlice";
+import { setAudio, videoFeed } from "@/lib/store/features/slices/postSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useDebounceCallback } from "usehooks-ts";
 
 function Videos() {
   const dispatch = useAppDispatch();
-  const { posts, skeletonLoading } = useAppSelector((state) => state.post);
+  const { posts, skeletonLoading, audio } = useAppSelector(
+    (state) => state.post
+  );
   const { user, skeletonLoading: userLoading } = useAppSelector(
     (state) => state.user
   );
@@ -17,7 +19,7 @@ function Videos() {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRefs = useRef<Record<number, HTMLVideoElement | null>>({});
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(!audio);
 
   const handleKeys = useCallback(
     (e: KeyboardEvent) => {
@@ -126,6 +128,13 @@ function Videos() {
     if (userLoading || !user._id) return;
     dispatch(videoFeed(1));
   }, [user._id, userLoading, dispatch]);
+
+  useEffect(() => {
+    return () => {
+      dispatch(setAudio(!isMuted));
+      console.log("audio state:", !isMuted);
+    };
+  }, [isMuted]);
 
   return (
     <div

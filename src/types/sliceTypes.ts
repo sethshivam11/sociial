@@ -84,6 +84,7 @@ export interface PostSliceI {
   loading: boolean;
   skeletonLoading: boolean;
   loadingMore: boolean;
+  audio: boolean;
   maxPosts: number;
   maxExplorePosts: number;
   page: number;
