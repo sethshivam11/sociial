@@ -1,28 +1,8 @@
 "use client";
-import {
-  Bookmark,
-  Globe,
-  Heart,
-  ImageIcon,
-  Loader2,
-  PlayIcon,
-} from "lucide-react";
-import Image from "next/image";
+import { Globe, ImageIcon, Loader2 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import Comment from "./Comment";
-import PostOptions from "./PostOptions";
-import Share from "./Share";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
 import PostsLoading from "./skeletons/PostsLoading";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { handleConsent, nameFallback } from "@/lib/helpers";
-import Link from "next/link";
+import { handleConsent } from "@/lib/helpers";
 import {
   AlertDialog,
   AlertDialogTitle,
@@ -35,23 +15,17 @@ import {
 } from "./ui/alert-dialog";
 import { toast } from "./ui/use-toast";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
-import LikeDialog from "./LikeDialog";
 import InfiniteScroll from "react-infinite-scroll-component";
 import {
   exploreFeed,
   getFeed,
   getUserPosts,
-  likePost,
-  unlikePost,
 } from "@/lib/store/features/slices/postSlice";
-import PostCaption from "./PostCaption";
-import { useRouter } from "next/navigation";
 import {
   checkExistingToken,
   saveToken,
 } from "@/lib/store/features/slices/notificationPreferenceSlice";
 import { getBasicFollow } from "@/lib/store/features/slices/followSlice";
-import { savePost, unsavePost } from "@/lib/store/features/slices/userSlice";
 import PostItem from "./PostItem";
 
 interface Props {
@@ -59,7 +33,6 @@ interface Props {
 }
 
 function Posts({ feed }: Props) {
-  const router = useRouter();
   const timerRef = useRef<NodeJS.Timeout>();
   const [savingToken, setSavingToken] = useState(false);
   const dispatch = useAppDispatch();
@@ -164,7 +137,12 @@ function Posts({ feed }: Props) {
             <PostsLoading />
           ) : (
             posts.map((post, index) => (
-              <PostItem post={post} postIndex={index} key={index} />
+              <PostItem
+                post={post}
+                postIndex={index}
+                type="posts"
+                key={index}
+              />
             ))
           )}
         </InfiniteScroll>
@@ -245,7 +223,12 @@ function Posts({ feed }: Props) {
             <PostsLoading />
           ) : (
             explorePosts.map((post, index) => (
-              <PostItem post={post} postIndex={index} key={index} />
+              <PostItem
+                post={post}
+                postIndex={index}
+                type="explore"
+                key={index}
+              />
             ))
           )}
         </InfiniteScroll>

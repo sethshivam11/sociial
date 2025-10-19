@@ -29,10 +29,11 @@ import { useEffect, useState } from "react";
 interface Props {
   post: PostI;
   postIndex: number;
+  type: "post" | "posts" | "explore";
   expanded?: boolean;
 }
 
-function PostItem({ post, postIndex, expanded = false }: Props) {
+function PostItem({ post, postIndex, type, expanded = false }: Props) {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
@@ -43,7 +44,7 @@ function PostItem({ post, postIndex, expanded = false }: Props) {
   const [current, setCurrent] = useState(1);
   const [count, setCount] = useState(1);
 
-  function handleLike(postId: string, type: "posts" | "explore") {
+  function handleLike(postId: string) {
     dispatch(
       likePost({
         postId: postId,
@@ -59,7 +60,7 @@ function PostItem({ post, postIndex, expanded = false }: Props) {
       }
     });
   }
-  function handleUnlike(postId: string, type: "posts" | "explore") {
+  function handleUnlike(postId: string) {
     dispatch(
       unlikePost({
         postId: postId,
@@ -170,9 +171,9 @@ function PostItem({ post, postIndex, expanded = false }: Props) {
                   onDoubleClick={async (e) => {
                     if (loading || post.kind === "video") return;
                     if (post.likes.includes(user._id)) {
-                      handleUnlike(post._id, "posts");
+                      handleUnlike(post._id);
                     } else {
-                      handleLike(post._id, "posts");
+                      handleLike(post._id);
                     }
                   }}
                 >
@@ -215,8 +216,8 @@ function PostItem({ post, postIndex, expanded = false }: Props) {
             disabled={loading}
             onClick={() =>
               post.likes.includes(user._id)
-                ? handleUnlike(post._id, "explore")
-                : handleLike(post._id, "explore")
+                ? handleUnlike(post._id)
+                : handleLike(post._id)
             }
           >
             <Heart
@@ -253,7 +254,11 @@ function PostItem({ post, postIndex, expanded = false }: Props) {
         </button>
       </div>
       <div className="flex items-center gap-1 text-sm text-stone-400 mt-2 select-none">
-        <LikeDialog likesCount={post.likesCount} postId={post._id} />
+        <LikeDialog
+          postId={post._id}
+          likesCount={post.likesCount}
+          likesPreview={post.likesPreview}
+        />
         {post.likesCount > 0 && post.commentsCount > 0 && " & "}
         {post.commentsCount > 0 &&
           `${post.commentsCount} comment${post.commentsCount > 1 ? "s" : ""}`}
