@@ -30,6 +30,7 @@ const initialState: PostSliceI = {
   likes: [],
   loading: false,
   skeletonLoading: false,
+  audio: false,
   loadingMore: false,
   page: 1,
   maxPosts: 0,
@@ -242,6 +243,9 @@ const postSlice = createSlice({
     },
     setLoading(state, action) {
       state.loading = action.payload;
+    },
+    setAudio(state, action) {
+      state.audio = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -536,4 +540,4 @@ const postSlice = createSlice({
 });
 
 export default postSlice.reducer;
-export const { setPage, resetLikes, setLoading } = postSlice.actions;
+export const { setPage, resetLikes, setLoading, setAudio } = postSlice.actions;
