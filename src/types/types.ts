@@ -38,11 +38,7 @@ export interface PostI {
   thumbnail?: string;
   kind: "image" | "video";
   likes: string[];
-  likesPreview?: {
-    _id: string;
-    avatar: string;
-    fullName: string;
-  }[];
+  likesPreview?: BasicUserI[];
   likesCount: number;
   commentsCount: number;
   createdAt: string;

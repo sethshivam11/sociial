@@ -43,7 +43,7 @@ function Page({ params }: { params: { postId: string } }) {
           </div>
         ) : (
           <div className="lg:w-1/2 md:w-2/3 sm:w-5/6 w-full mt-6 sm:mx-auto h-fit min-h-64 min-w-64">
-            <PostItem post={post} postIndex={1} expanded />
+            <PostItem post={post} postIndex={1} type="post" expanded />
           </div>
         )}
         <div className="flex flex-col gap-4 lg:w-1/3 md:w-2/3 sm:w-5/6 w-full sm:mx-auto lg:mx-4">

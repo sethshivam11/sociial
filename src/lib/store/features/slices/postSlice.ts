@@ -416,6 +416,10 @@ const postSlice = createSlice({
                 ...state.post,
                 likes: [...state.post.likes, action.meta.arg.userId],
                 likesCount: state.post.likesCount + 1,
+                likesPreview: [
+                  ...(state.post?.likesPreview || []),
+                  action.payload.data,
+                ],
               };
             }
             case "posts": {
@@ -425,6 +429,10 @@ const postSlice = createSlice({
                     ...post,
                     likes: [...post.likes, action.meta.arg.userId],
                     likesCount: post.likesCount + 1,
+                    likesPreview: [
+                      ...(post?.likesPreview || []),
+                      action.payload.data,
+                    ],
                   };
                 }
                 return post;
@@ -437,6 +445,10 @@ const postSlice = createSlice({
                     ...post,
                     likes: [...post.likes, action.meta.arg.userId],
                     likesCount: post.likesCount + 1,
+                    likesPreview: [
+                      ...(post?.likesPreview || []),
+                      action.payload.data,
+                    ],
                   };
                 }
                 return post;
@@ -465,6 +477,11 @@ const postSlice = createSlice({
                 ),
                 likesCount:
                   state.post.likesCount > 0 ? state.post.likesCount - 1 : 0,
+                likesPreview: state.post.likesPreview
+                  ? state.post.likesPreview.filter(
+                      (user) => user._id !== action.meta.arg.userId
+                    )
+                  : [],
               };
             }
             case "posts": {
@@ -476,6 +493,11 @@ const postSlice = createSlice({
                       (like) => like !== action.meta.arg.userId
                     ),
                     likesCount: post.likesCount > 0 ? post.likesCount - 1 : 0,
+                    likesPreview: post.likesPreview
+                      ? post.likesPreview.filter(
+                          (user) => user._id !== action.meta.arg.userId
+                        )
+                      : [],
                   };
                 }
                 return post;
@@ -490,6 +512,11 @@ const postSlice = createSlice({
                       (like) => like !== action.meta.arg.userId
                     ),
                     likesCount: post.likesCount > 0 ? post.likesCount - 1 : 0,
+                    likesPreview: post.likesPreview
+                      ? post.likesPreview.filter(
+                          (user) => user._id !== action.meta.arg.userId
+                        )
+                      : [],
                   };
                 }
                 return post;

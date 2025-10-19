@@ -69,11 +69,7 @@ export interface PostSliceI {
     kind: "image" | "video";
     thumbnail?: string;
     likes: string[];
-    likesPreview?: {
-      _id: string;
-      avatar: string;
-      fullName: string;
-    }[];
+    likesPreview?: BasicUserI[];
     likesCount: number;
     commentsCount: number;
     morePosts: PostI[];
