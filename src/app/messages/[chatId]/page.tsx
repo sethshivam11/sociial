@@ -529,7 +529,7 @@ function Page({ params }: { params: { chatId: string } }) {
                 message.createdAt.slice(0, 10) && (
                 <div className="text-sm text-center text-muted-foreground">
                   {new Date(message.createdAt).toLocaleDateString("en-IN", {
-                    day: "2-digit",
+                    day: "numeric",
                     month: "short",
                     year: "numeric",
                   })}
