@@ -217,7 +217,8 @@ const messageSlice = createSlice({
         if (action.payload?.success) {
           state.messages = [...action.payload.data, ...state.messages].filter(
             (message, index, self) =>
-              index === self.findIndex((msg) => msg._id === message._id)
+              index === self.findIndex((msg) => msg._id === message._id) &&
+              message.chat === action.meta.arg
           );
         } else if (action.payload?.message === "No messages found") {
           state.messages = [];
