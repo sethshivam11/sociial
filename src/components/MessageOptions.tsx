@@ -27,7 +27,6 @@ interface Props {
   message: string;
   type: string;
   kind: string;
-  createdAt: string;
   isGroupChat: boolean;
   handleEditing: (content: string, messageId: string) => void;
 }
@@ -38,7 +37,6 @@ function MessageOptions({
   type,
   username,
   kind,
-  createdAt,
   isGroupChat,
   setReply,
   handleEditing,
@@ -153,10 +151,6 @@ function MessageOptions({
                 Unsend
               </MenubarItem>
             )}
-            <hr className="w-full text-stone-500" />
-            <div className="text-stone-500 text-sm px-2 py-1">
-              {new Date(createdAt).toLocaleString("en-IN")}
-            </div>
           </MenubarContent>
         </MenubarMenu>
       </Menubar>
