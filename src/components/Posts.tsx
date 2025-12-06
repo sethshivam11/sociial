@@ -2,7 +2,6 @@
 import { Globe, ImageIcon, Loader2 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import PostsLoading from "./skeletons/PostsLoading";
-import { handleConsent } from "@/lib/helpers";
 import {
   AlertDialog,
   AlertDialogTitle,
@@ -13,7 +12,6 @@ import {
   AlertDialogTrigger,
   AlertDialogDescription,
 } from "./ui/alert-dialog";
-import { toast } from "./ui/use-toast";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import InfiniteScroll from "react-infinite-scroll-component";
 import {
@@ -21,10 +19,6 @@ import {
   getFeed,
   getUserPosts,
 } from "@/lib/store/features/slices/postSlice";
-import {
-  checkExistingToken,
-  saveToken,
-} from "@/lib/store/features/slices/notificationPreferenceSlice";
 import { getBasicFollow } from "@/lib/store/features/slices/followSlice";
 import PostItem from "./PostItem";
 
@@ -33,7 +27,6 @@ interface Props {
 }
 
 function Posts({ feed }: Props) {
-  const timerRef = useRef<NodeJS.Timeout>();
   const [savingToken, setSavingToken] = useState(false);
   const dispatch = useAppDispatch();
   const { user, profile } = useAppSelector((state) => state.user);
@@ -45,20 +38,7 @@ function Posts({ feed }: Props) {
     maxPosts,
     maxExplorePosts,
   } = useAppSelector((state) => state.post);
-  const [consentDialog, setConsentDialog] = useState(false);
   const [showExplorePosts, setShowExplorePosts] = useState(true);
-
-  async function handleSaveToken() {
-    setSavingToken(true);
-    const response = await handleConsent();
-    if (response?.toast) {
-      toast(response.toast);
-    } else if (response.token) {
-      await dispatch(saveToken(response.token));
-      setConsentDialog(false);
-    }
-    setSavingToken(false);
-  }
 
   useEffect(() => {
     if (!feed) {
@@ -67,41 +47,6 @@ function Posts({ feed }: Props) {
       dispatch(getUserPosts({ username: profile.username }));
     }
     dispatch(getBasicFollow());
-
-    const savedConsent = JSON.parse(
-      localStorage.getItem("notificationConsent") ||
-        `{"consent": false,"expiry": 0, "token": null, "lastChecked": null}`
-    );
-
-    if (!savedConsent?.consent && savedConsent?.expiry < Date.now()) {
-      timerRef.current = setTimeout(() => setConsentDialog(true), 10000);
-    } else if (savedConsent?.consent && Notification.permission !== "granted") {
-      localStorage.setItem(
-        "notificationConsent",
-        '{"consent": false,"expiry": 0, "token": null}'
-      );
-      timerRef.current = setTimeout(() => setConsentDialog(true), 5000);
-    } else if (
-      savedConsent?.token &&
-      Notification.permission === "granted" &&
-      savedConsent?.lastChecked - Date.now() > 600_000
-    ) {
-      dispatch(checkExistingToken(savedConsent.token)).then((response) => {
-        if (!response.payload?.success) {
-          handleSaveToken();
-        }
-      });
-    }
-
-    const savedExplorePostsConsent =
-      localStorage.getItem("explorePostsConsent") || "true";
-    if (savedExplorePostsConsent !== "false") {
-      setShowExplorePosts(true);
-    } else {
-      setShowExplorePosts(false);
-    }
-
-    return () => clearTimeout(timerRef.current);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile.username, dispatch, feed]);
@@ -233,38 +178,6 @@ function Posts({ feed }: Props) {
           )}
         </InfiniteScroll>
       )}
-      <AlertDialog open={consentDialog}>
-        <AlertDialogContent>
-          <AlertDialogTitle>Recieve Notifications</AlertDialogTitle>
-          <p className="dark:text-stone-400">
-            Do you want to recieve notifications for messages, comments, likes,
-            and updates. You can unsubscribe anytime.
-          </p>
-          <AlertDialogFooter>
-            <AlertDialogCancel
-              className="rounded-lg"
-              onClick={() => {
-                localStorage.setItem(
-                  "notificationConsent",
-                  `{"consent": false,"expiry": ${
-                    Date.now() + 1000 * 60 * 60 * 24 * 10
-                  }}`
-                );
-                setConsentDialog(false);
-              }}
-            >
-              No
-            </AlertDialogCancel>
-            <AlertDialogAction
-              className="rounded-lg"
-              onClick={handleSaveToken}
-              disabled={savingToken}
-            >
-              {savingToken ? <Loader2 className="animate-spin" /> : "Yes"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 }

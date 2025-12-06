@@ -5,13 +5,13 @@ import {
   Grid2X2,
   MoreHorizontal,
   Mail,
-  QrCode,
+  QrCodeIcon,
   Loader2,
   Tv,
   GalleryVertical,
 } from "lucide-react";
 import { notFound, usePathname, useRouter } from "next/navigation";
-import { useEffect, useState, ReactNode } from "react";
+import { useEffect, useState, useRef, ReactNode } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { nameFallback } from "@/lib/helpers";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/use-toast";
-import QRCode from "qrcode";
+import QRCode from "react-qrcode-logo";
 import Image from "next/image";
 import ReportDialog from "@/components/ReportDialog";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
@@ -48,6 +48,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { newChat } from "@/lib/store/features/slices/chatSlice";
 import ConfessionDialog from "@/components/ConfessionDialog";
+import { useTheme } from "next-themes";
 
 function Profile({
   children,
@@ -68,13 +69,15 @@ function Profile({
   const baseUrl = process.env.NEXT_PUBLIC_LINK || "";
   const router = useRouter();
   const location = usePathname();
+  const { resolvedTheme } = useTheme();
   const username = params.username;
 
-  const [QR, setQR] = useState("");
   const [userNotFound, setUserNotFound] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [blockDialog, setBlockDialog] = useState(false);
   const [confessionOpen, setConfessionOpen] = useState(false);
+
+  const qrRef = useRef<QRCode>(null);
 
   function handleBlock() {
     dispatch(blockUser(profile._id)).then((response) => {
@@ -117,16 +120,6 @@ function Profile({
         console.log(err);
       });
   }
-  function generateQR(text: string) {
-    QRCode.toDataURL(`${baseUrl}/${text}`)
-      .then((url) => setQR(url))
-      .catch((err) =>
-        toast({
-          title: "Cannot generate QR",
-          variant: "destructive",
-        })
-      );
-  }
   function handleFollow(username: string) {
     if (!isLoggedIn) {
       return toast({
@@ -157,14 +150,6 @@ function Profile({
         });
       }
     });
-  }
-  function handleQRDownload() {
-    const link = document.createElement("a");
-    link.href = QR;
-    link.download = `${profile.fullName} QR`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
   }
   function handleDM(userId: string) {
     dispatch(newChat(userId)).then((response) => {
@@ -279,9 +264,8 @@ function Profile({
                             variant="outline"
                             size="icon"
                             className="rounded-full"
-                            onClick={() => generateQR(profile.username)}
                           >
-                            <QrCode />
+                            <QrCodeIcon />
                           </Button>
                         </DialogTrigger>
                         <DialogContent
@@ -290,14 +274,48 @@ function Profile({
                           <DialogTitle className="text-center text-2xl my-1">
                             QR Code
                           </DialogTitle>
-                          <Image
-                            src={QR}
-                            alt="QR Code"
-                            width="500"
-                            height="500"
-                            className="w-96 object-contain mx-auto rounded-xl"
+                          <QRCode
+                            ref={qrRef}
+                            value={`${baseUrl}/${profile.username}`}
+                            logoImage="/logo.svg"
+                            logoPaddingStyle="square"
+                            logoPadding={1}
+                            eyeRadius={[
+                              {
+                                outer: 8,
+                                inner: 4,
+                              },
+                              {
+                                outer: 8,
+                                inner: 4,
+                              },
+                              {
+                                outer: 8,
+                                inner: 4,
+                              },
+                            ]}
+                            bgColor={
+                              resolvedTheme === "dark" ? "#0c0a09" : "#ffffff"
+                            }
+                            fgColor={
+                              resolvedTheme === "dark" ? "#ffffff" : "#000000"
+                            }
+                            quietZone={0}
+                            size={300}
+                            style={{
+                              margin: "0 auto",
+                            }}
                           />
-                          <Button onClick={handleQRDownload}>Download</Button>
+                          <Button
+                            onClick={() =>
+                              qrRef.current?.download(
+                                "png",
+                                `${profile.username} QR`
+                              )
+                            }
+                          >
+                            Download
+                          </Button>
                         </DialogContent>
                       </Dialog>
                     ) : (
