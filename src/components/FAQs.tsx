@@ -29,9 +29,7 @@ export default function FAQs() {
             Is Sociial free to use?
           </AccordionTrigger>
           <AccordionContent>
-            Yes, Sociial is completely free to use. It also offers a premium
-            plan with exclusive features like verified badges, custom message
-            themes, and more.
+            Yes, Sociial is completely free to use. All features are available to everyone at no cost. There are no hidden charges or premium plans—just a simple and open social experience for all users.
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="item-3">
@@ -53,7 +51,7 @@ export default function FAQs() {
           <AccordionContent>
             Sociial stands out with its open-source nature, user-first design,
             customizable features, and a focus on fostering meaningful
-            interactions. Plus, we&apo;re committed to transparency and
+            interactions. Plus, we&apos;re committed to transparency and
             community-driven development.
           </AccordionContent>
         </AccordionItem>
