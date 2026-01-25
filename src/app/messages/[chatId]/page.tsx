@@ -197,9 +197,8 @@ function Page({ params }: { params: { chatId: string } }) {
                   width="240"
                   height="240"
                   alt=""
-                  className={`pointer-events-none aspect-square select-none object-contain ${
-                    post.caption ? "" : "rounded-b-xl"
-                  }`}
+                  className={`pointer-events-none aspect-square select-none object-contain ${post.caption ? "" : "rounded-b-xl"
+                    }`}
                 />
                 {post.kind === "video" && (
                   <div className="bg-transparent/50 text-sm text-white backdrop-blur-sm rounded-full absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-2">
@@ -219,11 +218,9 @@ function Page({ params }: { params: { chatId: string } }) {
         return (
           <Link href={content} target="_blank">
             <NextImage
-              src={`https://maps.gomaps.pro/maps/api/staticmap?center=${
-                content.split("?q=")[1]
-              }&zoom=15&size=240x240&markers=${content.split("?q=")[1]}&key=${
-                process.env.NEXT_PUBLIC_MAPS_API_KEY
-              }`}
+              src={`https://maps.geoapify.com/v1/staticmap?style=osm-bright-smooth&width=240&height=240&center=lonlat:${content.split("?q=")[1].split(",").reverse().join(",")
+                }&zoom=15&scaleFactor=2&marker=lonlat:${content.split("?q=")[1].split(",").reverse().join(",")};color:%23ff0000;size:small&apiKey=${process.env.NEXT_PUBLIC_MAPS_API_KEY
+                }`}
               alt=""
               className="rounded-xl w-60 aspect-square"
               width="240"
@@ -410,9 +407,8 @@ function Page({ params }: { params: { chatId: string } }) {
 
   return (
     <div
-      className={`md:border-l-2 border-stone-200 dark:border-stone-800 md:flex flex flex-col items-start justify-between lg:col-span-7 md:col-span-6 col-span-10 overflow-x-hidden h-[100dvh] sm:min-h-[42rem] relative ${
-        location !== "/messages" ? "" : "hidden"
-      }`}
+      className={`md:border-l-2 border-stone-200 dark:border-stone-800 md:flex flex flex-col items-start justify-between lg:col-span-7 md:col-span-6 col-span-10 overflow-x-hidden h-[100dvh] sm:min-h-[42rem] relative ${location !== "/messages" ? "" : "hidden"
+        }`}
     >
       {isAtBottom && (
         <Button
@@ -431,9 +427,8 @@ function Page({ params }: { params: { chatId: string } }) {
           <div className="flex items-center justify-center">
             <Link
               href="/messages"
-              className={`rounded-xl hover:bg-transparent w-8 ${
-                location.includes("/messages/") ? "md:hidden" : ""
-              }`}
+              className={`rounded-xl hover:bg-transparent w-8 ${location.includes("/messages/") ? "md:hidden" : ""
+                }`}
             >
               <ChevronLeft />
             </Link>
@@ -488,9 +483,8 @@ function Page({ params }: { params: { chatId: string } }) {
       )}
       <ScrollableFeed
         ref={containerRef}
-        className={`w-full flex flex-col gap-1 p-2 ${
-          editingMessage ? "blur-sm pointer-events-none select-none" : ""
-        }`}
+        className={`w-full flex flex-col gap-1 p-2 ${editingMessage ? "blur-sm pointer-events-none select-none" : ""
+          }`}
         onScroll={(isAtBottom) => setDebouncedBottom(!isAtBottom)}
       >
         <div className="flex flex-col items-center justify-center w-full py-2 gap-2 mb-8">
@@ -507,8 +501,8 @@ function Page({ params }: { params: { chatId: string } }) {
             <p className="text-sm text-stone-500">
               {chat.isGroupChat
                 ? `Created on ${new Date(chat.createdAt).toLocaleDateString(
-                    "en-IN"
-                  )}`
+                  "en-IN"
+                )}`
                 : `@${chat.users[0]?.username}`}
             </p>
           </div>
@@ -527,20 +521,19 @@ function Page({ params }: { params: { chatId: string } }) {
             <div className="w-full flex flex-col gap-1" key={index}>
               {messages[index - 1]?.createdAt?.slice(0, 10) !==
                 message.createdAt.slice(0, 10) && (
-                <div className="text-sm text-center text-muted-foreground">
-                  {new Date(message.createdAt).toLocaleDateString("en-IN", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                </div>
-              )}
+                  <div className="text-sm text-center text-muted-foreground">
+                    {new Date(message.createdAt).toLocaleDateString("en-IN", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </div>
+                )}
               <div
-                className={`group flex items-center justify-start w-full ${
-                  message.sender?.username !== user.username
-                    ? "flex-row"
-                    : "flex-row-reverse ml-auto"
-                }`}
+                className={`group flex items-center justify-start w-full ${message.sender?.username !== user.username
+                  ? "flex-row"
+                  : "flex-row-reverse ml-auto"
+                  }`}
                 ref={index === 0 ? firstMessageRef : undefined}
               >
                 {message.sender?.username !== user.username &&
@@ -555,33 +548,29 @@ function Page({ params }: { params: { chatId: string } }) {
                     </div>
                   )}
                 <div
-                  className={`flex flex-col gap-0 overflow-hidden ${
-                    message.sender?.username !== user.username
-                      ? "items-start"
-                      : "items-end"
-                  } ${
-                    messages[index + 1]?.sender?._id === message.sender._id
+                  className={`flex flex-col gap-0 overflow-hidden ${message.sender?.username !== user.username
+                    ? "items-start"
+                    : "items-end"
+                    } ${messages[index + 1]?.sender?._id === message.sender._id
                       ? "mb-1"
                       : "mb-3"
-                  }`}
+                    }`}
                 >
                   <span
-                    className={`rounded-xl -mb-1 py-1 px-3 opacity-70 truncate max-w-full ${
-                      message.sender?.username !== user.username
-                        ? `${theme.color} text-${theme.text}`
-                        : "bg-stone-300 dark:bg-stone-800"
-                    } ${!message?.reply?.content?.length ? "hidden" : ""}`}
+                    className={`rounded-xl -mb-1 py-1 px-3 opacity-70 truncate max-w-full ${message.sender?.username !== user.username
+                      ? `${theme.color} text-${theme.text}`
+                      : "bg-stone-300 dark:bg-stone-800"
+                      } ${!message?.reply?.content?.length ? "hidden" : ""}`}
                   >
                     {message?.reply?.content}
                   </span>
                   <div
                     className={`rounded-2xl w-fit relative 
                       ${message.kind === "post" ? "" : "py-2 px-4"}
-                      ${
-                        message.kind !== "post" &&
+                      ${message.kind !== "post" &&
                         message.sender?.username !== user.username
-                          ? `${theme.color} text-${theme.text} max-w-3/4`
-                          : "bg-stone-300 dark:bg-stone-800 max-w-3/4"
+                        ? `${theme.color} text-${theme.text} max-w-3/4`
+                        : "bg-stone-300 dark:bg-stone-800 max-w-3/4"
                       } 
                     ${message?.reacts?.length > 0 ? "mb-5" : "mb-1"}`}
                   >
@@ -604,20 +593,18 @@ function Page({ params }: { params: { chatId: string } }) {
                   </div>
                   {message.createdAt && (
                     <span
-                      className={`text-xs font-light text-stone-500 ${
-                        message.sender._id === user._id ? "pr-2" : "pl-2"
-                      } ${
-                        message.createdAt.slice(0, -7) ===
+                      className={`text-xs font-light text-stone-500 ${message.sender._id === user._id ? "pr-2" : "pl-2"
+                        } ${message.createdAt.slice(0, -7) ===
                           messages[index + 1]?.createdAt?.slice(0, -7) &&
-                        message.sender._id === messages[index + 1]?.sender?._id
+                          message.sender._id === messages[index + 1]?.sender?._id
                           ? "hidden"
                           : ""
-                      }`}
+                        }`}
                       onClick={() =>
                         console.log(
                           messages[index - 1]?.createdAt?.slice(0, -7) &&
-                            message.sender._id ===
-                              messages[index - 1]?.sender?._id
+                          message.sender._id ===
+                          messages[index - 1]?.sender?._id
                         )
                       }
                     >
@@ -629,11 +616,10 @@ function Page({ params }: { params: { chatId: string } }) {
                   )}
                 </div>
                 <div
-                  className={`flex group-hover:visible invisible w-fit mb-2 mx-0.5 gap-0 ${
-                    message.sender?.username !== user.username
-                      ? "flex-row"
-                      : "flex-row-reverse"
-                  }`}
+                  className={`flex group-hover:visible invisible w-fit mb-2 mx-0.5 gap-0 ${message.sender?.username !== user.username
+                    ? "flex-row"
+                    : "flex-row-reverse"
+                    }`}
                 >
                   <MessageOptions
                     isGroupChat={chat.isGroupChat}
@@ -673,9 +659,8 @@ function Page({ params }: { params: { chatId: string } }) {
               className="flex flex-col items-center w-full justify-center gap-2"
             >
               <div
-                className={`flex items-center justify-between gap-0 px-3 py-1 w-full border-t-2 leading-5 overflow-hidden ${
-                  form.watch("reply")?.content ? "" : "hidden"
-                }`}
+                className={`flex items-center justify-between gap-0 px-3 py-1 w-full border-t-2 leading-5 overflow-hidden ${form.watch("reply")?.content ? "" : "hidden"
+                  }`}
               >
                 <div className="flex gap-2 text-sm overflow-hidden">
                   {form.watch("reply")?.username}:

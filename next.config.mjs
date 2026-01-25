@@ -9,7 +9,7 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "maps.gomaps.pro",
+        hostname: "maps.geoapify.com",
         pathname: "/**",
       },
       {
