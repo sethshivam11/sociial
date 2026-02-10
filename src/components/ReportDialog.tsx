@@ -22,7 +22,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
-import { submitReport } from "@/lib/store/features/slices/reportSlice";
+import {
+  resetForm,
+  submitReport,
+} from "@/lib/store/features/slices/reportSlice";
 import { toast } from "./ui/use-toast";
 import { Info, Loader2 } from "lucide-react";
 
@@ -30,7 +33,14 @@ interface Props {
   open: boolean;
   setOpen: (open: boolean) => void;
   entityId?: string;
-  type: "post" | "comment" | "user" | "chat" | "problem" | "story" | "confession";
+  type:
+    | "post"
+    | "comment"
+    | "user"
+    | "chat"
+    | "problem"
+    | "story"
+    | "confession";
 }
 
 function ReportDialog({ open, setOpen, entityId, type }: Props) {
@@ -59,7 +69,7 @@ function ReportDialog({ open, setOpen, entityId, type }: Props) {
         user: user._id,
         entityId,
         image,
-      })
+      }),
     )
       .then(({ payload }) => {
         if (payload?.success) return;
@@ -100,6 +110,15 @@ function ReportDialog({ open, setOpen, entityId, type }: Props) {
               email.
             </p>
             <DialogFooter>
+              <Button
+                variant="link"
+                onClick={() => {
+                  form.reset();
+                  dispatch(resetForm());
+                }}
+              >
+                Submit Another Report
+              </Button>
               <DialogClose asChild>
                 <Button variant="secondary">Close</Button>
               </DialogClose>
