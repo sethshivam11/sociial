@@ -18,7 +18,14 @@ export const submitReport = createAsyncThunk(
     title: string;
     description: string;
     user: string;
-    kind: "post" | "comment" | "user" | "chat" | "problem" | "story" | "confession";
+    kind:
+      | "post"
+      | "comment"
+      | "user"
+      | "chat"
+      | "problem"
+      | "story"
+      | "confession";
     entityId?: string;
     image?: File | null;
   }) => {
@@ -36,13 +43,17 @@ export const submitReport = createAsyncThunk(
       body: formData,
     });
     return parsed.json();
-  }
+  },
 );
 
 const reportSlice = createSlice({
   name: "report",
   initialState,
-  reducers: {},
+  reducers: {
+    resetForm: (state) => {
+      state.submitted = false;
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(submitReport.pending, (state) => {
       state.loading = true;
@@ -59,5 +70,7 @@ const reportSlice = createSlice({
     });
   },
 });
+
+export const { resetForm } = reportSlice.actions;
 
 export default reportSlice.reducer;
