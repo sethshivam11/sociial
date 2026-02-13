@@ -18,6 +18,13 @@ import { toast } from "./ui/use-toast";
 import SuggestionsLoading from "./skeletons/SuggestionsLoading";
 import { usePathname } from "next/navigation";
 import { Button } from "./ui/button";
+import { Lobster_Two } from "next/font/google";
+
+const lobster = Lobster_Two({
+  subsets: ["latin"],
+  weight: "700",
+  style: ["italic"],
+});
 
 function Suggestions() {
   const dispatch = useAppDispatch();
@@ -183,7 +190,7 @@ function Suggestions() {
             Terms & Conditions
           </Link>
         </div>
-        <p>© {new Date().getFullYear()} Sociial. All rights Reserved.</p>
+        <p>© {new Date().getFullYear()} <span className={lobster.className}>Sociial</span>. All rights Reserved.</p>
       </div>
     </div>
   );

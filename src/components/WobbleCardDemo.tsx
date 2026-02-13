@@ -1,5 +1,12 @@
 import Image from "next/image";
 import { WobbleCard } from "./ui/wobble-card";
+import { Lobster_Two } from "next/font/google";
+
+const lobster = Lobster_Two({
+  subsets: ["latin"],
+  weight: "700",
+  style: ["italic"],
+});
 
 export default function WobbleCardDemo() {
   return (
@@ -15,7 +22,8 @@ export default function WobbleCardDemo() {
           <p className="mt-4 text-left  text-base/6 text-neutral-200">
             Build meaningful relationships, share your moments, and engage with
             a vibrant community of like-minded individuals. Whether it&apos;s
-            friends, family, or new acquaintances, Sociial makes staying
+            friends, family, or new acquaintances,
+            <span className={lobster.className}> Sociial</span> makes staying
             connected effortless.
           </p>
         </div>
@@ -40,8 +48,9 @@ export default function WobbleCardDemo() {
         </h2>
         <p className="mt-4 max-w-[26rem] text-left  text-base/6 text-neutral-200">
           Express yourself through stories, posts, and unique visuals. From
-          personal updates to creative projects, Sociial gives you the freedom
-          to showcase your ideas in your own way.
+          personal updates to creative projects,{" "}
+          <span className={lobster.className}>Sociial</span> gives you the
+          freedom to showcase your ideas in your own way.
         </p>
       </WobbleCard>
       <WobbleCard containerClassName="col-span-1 lg:col-span-3 bg-blue-900 min-h-[500px] lg:min-h-[600px] xl:min-h-[300px]">
@@ -51,8 +60,9 @@ export default function WobbleCardDemo() {
           </h2>
           <p className="mt-4 max-w-[26rem] text-left  text-base/6 text-neutral-200">
             Dive into a world of diverse content, trending topics, and inspiring
-            creators. Sociial helps you discover what’s new, exciting, and worth
-            your attention every day.
+            creators. <span className={lobster.className}>Sociial</span> helps
+            you discover what’s new, exciting, and worth your attention every
+            day.
           </p>
         </div>
         <Image

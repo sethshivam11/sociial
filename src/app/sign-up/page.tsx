@@ -30,6 +30,13 @@ import { registerUser } from "@/lib/store/features/slices/userSlice";
 import { isUsernameAvailable } from "@/lib/helpers";
 import { useRouter } from "next/navigation";
 import Footer from "@/components/Footer";
+import { Lobster_Two } from "next/font/google";
+
+const lobster = Lobster_Two({
+  subsets: ["latin"],
+  weight: "700",
+  style: ["italic"],
+});
 
 function SignUpPage() {
   const formSchema = z
@@ -114,7 +121,7 @@ function SignUpPage() {
         <div className="w-full max-w-md p-8 space-y-8 last:space-y-3 my-4 bg-white dark:bg-zinc-900 ring-2 ring-zinc-500 dark:ring-zinc-200 rounded-lg shadow-md z-10">
           <div className="text-center  text-black dark:text-white">
             <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl mb-6">
-              Join Sociial
+              Join <span className={lobster.className}>Sociial</span>
             </h1>
             <p className="mb-4">Sign up to start to your journey with us</p>
           </div>

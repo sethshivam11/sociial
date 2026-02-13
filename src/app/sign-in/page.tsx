@@ -31,6 +31,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "@/components/ui/use-toast";
 import { socket } from "@/socket";
 import Footer from "@/components/Footer";
+import { Lobster_Two } from "next/font/google";
+
+const lobster = Lobster_Two({
+  subsets: ["latin"],
+  weight: "700",
+  style: ["italic"],
+});
 
 function SignInPage() {
   const router = useRouter();
@@ -102,16 +109,16 @@ function SignInPage() {
         password: data.password,
         location: currentDevice.location,
         device: currentDevice.name,
-      })
+      }),
     );
     if (response.payload?.success) {
       if (!response.payload.data.user.isMailVerified) {
         router.prefetch("/verify-code");
         await dispatch(
-          resendVerificationCode(response.payload.data.user.username)
+          resendVerificationCode(response.payload.data.user.username),
         );
         return router.push(
-          `/verify-code?username=${response.payload.data.user.username}`
+          `/verify-code?username=${response.payload.data.user.username}`,
         );
       } else {
         if (socket.io.opts.extraHeaders) {
@@ -160,7 +167,7 @@ function SignInPage() {
         <div className="w-full max-w-md p-8 max-sm:p-6 space-y-8 last:space-y-3 bg-white dark:bg-zinc-900 ring-2 ring-zinc-500 dark:ring-zinc-200 rounded-lg shadow-md relative z-10">
           <div className="text-center text-black dark:text-white">
             <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl mb-6">
-              Welcome Back to Sociial
+              Welcome Back to <span className={lobster.className}>Sociial</span>
             </h1>
             <p className="mb-4">Sign in to continue to your journey with us</p>
           </div>
@@ -236,7 +243,11 @@ function SignInPage() {
                   />
                   Continue with Google
                 </Button>
-                {message && <div className="text-red-500 text-sm text-center">{message}</div>}
+                {message && (
+                  <div className="text-red-500 text-sm text-center">
+                    {message}
+                  </div>
+                )}
               </div>
             </form>
           </Form>
