@@ -1,6 +1,12 @@
-"use client";
 import LandingNav from "@/components/LandingNav";
+import { Lobster_Two } from "next/font/google";
 import Link from "next/link";
+
+const lobster = Lobster_Two({
+  subsets: ["latin"],
+  weight: "700",
+  style: ["italic"],
+});
 
 function Page() {
   return (
@@ -11,7 +17,7 @@ function Page() {
           Terms and Conditions
         </h1>
         <p className="text-stone-900 dark:text-stone-200">
-          Welcome to Sociial! By accessing or using our platform (the
+          Welcome to <span className={lobster.className}>Sociial</span>! By accessing or using our platform (the
           “Service”), you agree to the following Terms of Service. If you do not
           agree, please do not use the Service.
         </p>

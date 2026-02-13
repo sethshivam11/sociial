@@ -1,6 +1,12 @@
-"use client";
 import LandingNav from "@/components/LandingNav";
+import { Lobster_Two } from "next/font/google";
 import Link from "next/link";
+
+const lobster = Lobster_Two({
+  subsets: ["latin"],
+  weight: "700",
+  style: ["italic"],
+});
 
 function Page() {
   return (
@@ -11,7 +17,8 @@ function Page() {
           Privacy Policy
         </h1>
         <p className="text-stone-900 dark:text-stone-200">
-          We value your privacy. This Privacy Policy explains how Sociial
+          We value your privacy. This Privacy Policy explains how{" "}
+          <span className={lobster.className}>Sociial</span>
           (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) collects, uses,
           and protects your information when you use our platform (the
           “Service”).

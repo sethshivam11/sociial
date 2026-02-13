@@ -1,5 +1,12 @@
 import { MicOff, VideoOff } from "lucide-react";
+import { Lobster_Two } from "next/font/google";
 import React from "react";
+
+const lobster = Lobster_Two({
+  subsets: ["latin"],
+  weight: "700",
+  style: ["italic"],
+});
 
 function PermissionsRequired() {
   return (
@@ -13,7 +20,7 @@ function PermissionsRequired() {
           Permissions Required
         </h1>
         <h6 className="text-stone-400">
-          Please allow Sociial to access your camera and microphone.
+          Please allow <span className={lobster.className}>Sociial</span> to access your camera and microphone.
           <br className="max-sm:hidden" />
           You can turn this off later.
         </h6>

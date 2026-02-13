@@ -1,5 +1,12 @@
 import { TriangleAlert } from "lucide-react";
+import { Lobster_Two } from "next/font/google";
 import Link from "next/link";
+
+const lobster = Lobster_Two({
+  subsets: ["latin"],
+  weight: "700",
+  style: ["italic"],
+});
 
 function Custom404() {
   return (
@@ -13,7 +20,7 @@ function Custom404() {
       </span>
       <div className="flex items-center justify-evenly">
         <Link href="/" className="text-blue-600">
-          Go back to Sociial
+          Go back to <span className={lobster.className}>Sociial</span>
         </Link>
       </div>
     </div>

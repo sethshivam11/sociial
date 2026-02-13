@@ -41,10 +41,10 @@ export const getFeed = createAsyncThunk(
   "posts/getFeed",
   async (page: number) => {
     const parsed = await fetch(
-      `/api/v1/posts/feed?${page ? `page=${page}` : ""}`
+      `/api/v1/posts/feed?${page ? `page=${page}` : ""}`,
     );
     return parsed.json();
-  }
+  },
 );
 
 export const exploreFeed = createAsyncThunk(
@@ -53,10 +53,10 @@ export const exploreFeed = createAsyncThunk(
     const parsed = await fetch(
       `/api/v1/posts/exploreFeed?page=${page}${
         userId ? `&userId=${userId}` : ""
-      }`
+      }`,
     );
     return parsed.json();
-  }
+  },
 );
 
 export const videoFeed = createAsyncThunk(
@@ -64,7 +64,7 @@ export const videoFeed = createAsyncThunk(
   async (page: number) => {
     const parsed = await fetch(`/api/v1/posts/videoFeed?page=${page}`);
     return parsed.json();
-  }
+  },
 );
 
 export const getVideoPost = createAsyncThunk(
@@ -72,7 +72,7 @@ export const getVideoPost = createAsyncThunk(
   async (postId: string) => {
     const parsed = await fetch(`/api/v1/posts/videoPost/${postId}`);
     return parsed.json();
-  }
+  },
 );
 
 export const getPost = createAsyncThunk(
@@ -80,7 +80,7 @@ export const getPost = createAsyncThunk(
   async (postId: string) => {
     const parsed = await fetch(`/api/v1/posts/post/${postId}`);
     return parsed.json();
-  }
+  },
 );
 
 export const createPost = createAsyncThunk(
@@ -122,7 +122,7 @@ export const createPost = createAsyncThunk(
       body: formData,
     });
     return parsed.json();
-  }
+  },
 );
 
 export const createVideoPost = createAsyncThunk(
@@ -153,7 +153,7 @@ export const createVideoPost = createAsyncThunk(
       body: formData,
     });
     return parsed.json();
-  }
+  },
 );
 
 export const deletePost = createAsyncThunk(
@@ -163,7 +163,7 @@ export const deletePost = createAsyncThunk(
       method: "DELETE",
     });
     return parsed.json();
-  }
+  },
 );
 
 export const likePost = createAsyncThunk(
@@ -179,7 +179,7 @@ export const likePost = createAsyncThunk(
   }) => {
     const parsed = await fetch(`/api/v1/posts/like/${postId}`);
     return parsed.json();
-  }
+  },
 );
 
 export const unlikePost = createAsyncThunk(
@@ -194,7 +194,7 @@ export const unlikePost = createAsyncThunk(
   }) => {
     const parsed = await fetch(`/api/v1/posts/dislike/${postId}`);
     return parsed.json();
-  }
+  },
 );
 
 export const getUserPosts = createAsyncThunk(
@@ -210,10 +210,10 @@ export const getUserPosts = createAsyncThunk(
     const parsed = await fetch(
       `/api/v1/posts/user?${
         username ? `username=${username}` : `userId=${userId}`
-      }`
+      }`,
     );
     return parsed.json();
-  }
+  },
 );
 
 export const fetchLikes = createAsyncThunk(
@@ -228,7 +228,7 @@ export const fetchLikes = createAsyncThunk(
       };
     const parsed = await fetch(`/api/v1/posts/getLikes/${postId}`);
     return parsed.json();
-  }
+  },
 );
 
 const postSlice = createSlice({
@@ -250,23 +250,25 @@ const postSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(getFeed.pending, (state) => {
-        state.skeletonLoading = true;
+      .addCase(getFeed.pending, (state, action) => {
+        if (action.meta.arg === 1) {
+          state.skeletonLoading = true;
+        }
       })
       .addCase(getFeed.fulfilled, (state, action) => {
         state.skeletonLoading = false;
         if (action.payload?.success) {
           const existingPosts = state.posts;
           const postsMap = new Map(
-            existingPosts.map((post) => [post._id, post])
+            existingPosts.map((post) => [post._id, post]),
           );
 
           action.payload.data.posts.forEach((post: PostI) =>
-            postsMap.set(post._id, post)
+            postsMap.set(post._id, post),
           );
           state.posts = Array.from(postsMap.values()).sort(
             (a, b) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
           );
           state.maxPosts = action.payload.data.max;
           state.page = action.payload.data.page;
@@ -277,23 +279,25 @@ const postSlice = createSlice({
       });
 
     builder
-      .addCase(exploreFeed.pending, (state) => {
-        state.loadingMore = true;
+      .addCase(exploreFeed.pending, (state, action) => {
+        if (action.meta.arg.page === 1) {
+          state.loadingMore = true;
+        }
       })
       .addCase(exploreFeed.fulfilled, (state, action) => {
         state.loadingMore = false;
         if (action.payload?.success) {
           const existingPosts = state.explorePosts;
           const postsMap = new Map(
-            existingPosts.map((post) => [post._id, post])
+            existingPosts.map((post) => [post._id, post]),
           );
 
           action.payload.data.posts.forEach((post: PostI) =>
-            postsMap.set(post._id, post)
+            postsMap.set(post._id, post),
           );
           state.explorePosts = Array.from(postsMap.values()).sort(
             (a, b) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
           );
           state.maxExplorePosts = action.payload.data.max;
           state.page = action.payload.data.page;
@@ -342,14 +346,14 @@ const postSlice = createSlice({
           const postsMap = new Map(
             existingPosts
               .filter((post) => post.kind === "video")
-              .map((post) => [post._id, post])
+              .map((post) => [post._id, post]),
           );
           action.payload.data.forEach((post: PostI) =>
-            postsMap.set(post._id, post)
+            postsMap.set(post._id, post),
           );
           state.posts = Array.from(postsMap.values()).sort(
             (a, b) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
           );
         } else if (action.payload.message === "No posts found") {
           state.posts = [];
@@ -395,7 +399,7 @@ const postSlice = createSlice({
         state.loading = false;
         if (action.payload?.success) {
           state.posts = state.posts.filter(
-            (post) => post._id !== action.payload.data._id
+            (post) => post._id !== action.payload.data._id,
           );
         }
       })
@@ -473,13 +477,13 @@ const postSlice = createSlice({
               state.post = {
                 ...state.post,
                 likes: state.post.likes.filter(
-                  (like) => like !== action.meta.arg.userId
+                  (like) => like !== action.meta.arg.userId,
                 ),
                 likesCount:
                   state.post.likesCount > 0 ? state.post.likesCount - 1 : 0,
                 likesPreview: state.post.likesPreview
                   ? state.post.likesPreview.filter(
-                      (user) => user._id !== action.meta.arg.userId
+                      (user) => user._id !== action.meta.arg.userId,
                     )
                   : [],
               };
@@ -490,12 +494,12 @@ const postSlice = createSlice({
                   return {
                     ...post,
                     likes: post.likes.filter(
-                      (like) => like !== action.meta.arg.userId
+                      (like) => like !== action.meta.arg.userId,
                     ),
                     likesCount: post.likesCount > 0 ? post.likesCount - 1 : 0,
                     likesPreview: post.likesPreview
                       ? post.likesPreview.filter(
-                          (user) => user._id !== action.meta.arg.userId
+                          (user) => user._id !== action.meta.arg.userId,
                         )
                       : [],
                   };
@@ -509,12 +513,12 @@ const postSlice = createSlice({
                   return {
                     ...post,
                     likes: post.likes.filter(
-                      (like) => like !== action.meta.arg.userId
+                      (like) => like !== action.meta.arg.userId,
                     ),
                     likesCount: post.likesCount > 0 ? post.likesCount - 1 : 0,
                     likesPreview: post.likesPreview
                       ? post.likesPreview.filter(
-                          (user) => user._id !== action.meta.arg.userId
+                          (user) => user._id !== action.meta.arg.userId,
                         )
                       : [],
                   };
