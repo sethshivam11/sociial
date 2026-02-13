@@ -7,7 +7,8 @@ import { getCall } from "@/lib/store/features/slices/callSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { Clock, Phone, Video } from "lucide-react";
 import Link from "next/link";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
+import { formatDate, intervalToDuration, parseISO } from "date-fns";
 
 function Page({ params }: { params: { callId: string } }) {
   const dispatch = useAppDispatch();
@@ -15,32 +16,30 @@ function Page({ params }: { params: { callId: string } }) {
   const { user } = useAppSelector((state) => state.user);
   const { callId } = params;
 
-  function formatDuration(acceptedAt: string, endedAt: string): string {
+  const isOutgoing = useMemo(() => {
+    if (call?.caller?._id === user?._id) return true;
+    else return false;
+  }, [call, user]);
+
+  const otherUser = useMemo(() => {
+    if (call?.caller?._id === user?._id) return call.callee;
+    else return call.caller;
+  }, [call, user]);
+
+  function formatDuration(acceptedAt: string, endedAt: string) {
     const start = new Date(acceptedAt);
     const end = new Date(endedAt);
 
-    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-      return "Not available";
-    }
+    const interval = intervalToDuration({ start, end });
+    let duration = `${interval.seconds}s`;
 
-    const durationInSeconds = Math.floor(
-      (end.getTime() - start.getTime()) / 1000
-    );
+    if (interval.minutes) duration = `${interval.minutes}m ${duration}`;
+    if (interval.hours) duration = `${interval.hours}h ${duration}`;
+    if (interval.days) duration = `${interval.days}d ${duration}`;
+    if (interval.months) duration = `${interval.months}mo ${duration}`;
+    if (interval.years) duration = `${interval.years}y ${duration}`;
 
-    const hours = Math.floor(durationInSeconds / 3600);
-    const minutes = Math.floor((durationInSeconds % 3600) / 60);
-    const seconds = durationInSeconds % 60;
-
-    let durationParts: string[] = [];
-    if (hours > 0) {
-      durationParts.push(`${hours}h`);
-    }
-    if (minutes > 0 || hours > 0) {
-      durationParts.push(`${minutes}m`);
-    }
-
-    durationParts.push(`${seconds}s`);
-    return durationParts.join(" ");
+    return duration;
   }
 
   useEffect(() => {
@@ -58,19 +57,9 @@ function Page({ params }: { params: { callId: string } }) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Avatar className="w-32 h-32 pointer-events-none select-none">
-              <AvatarImage
-                src={
-                  user._id === call.callee._id
-                    ? call.callee?.avatar
-                    : call.caller.avatar
-                }
-              />
+              <AvatarImage src={otherUser?.avatar} />
               <AvatarFallback>
-                {nameFallback(
-                  user._id === call.callee._id
-                    ? call.callee?.fullName
-                    : call.caller.fullName
-                )}
+                {nameFallback(otherUser?.fullName)}
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col justify-center">
@@ -78,19 +67,15 @@ function Page({ params }: { params: { callId: string } }) {
                 <Skeleton className="w-40 h-5" />
               ) : (
                 <h1 className="text-2xl font-bold text-center">
-                  {user._id === call.callee._id
-                    ? call.callee?.fullName
-                    : call.caller.fullName}
+                  {otherUser?.fullName}
                 </h1>
               )}
               {loading ? (
                 <Skeleton className="w-20 h-4 mt-2" />
               ) : (
                 <p className="text-stone-500">
-                  @
-                  {user._id === call.callee._id
-                    ? call.callee?.username
-                    : call.caller.username}
+                  {otherUser?.username && "@"}
+                  {otherUser?.username}
                 </p>
               )}
             </div>
@@ -101,11 +86,7 @@ function Page({ params }: { params: { callId: string } }) {
             ) : (
               <Button size="icon" asChild>
                 <Link
-                  href={`/call?username=${
-                    user._id === call.callee._id
-                      ? call.callee?.username
-                      : call.caller.username
-                  }&video=false`}
+                  href={`/call?username=${otherUser?.username}&video=false`}
                 >
                   <Phone />
                 </Link>
@@ -116,11 +97,7 @@ function Page({ params }: { params: { callId: string } }) {
             ) : (
               <Button variant="secondary" size="icon" asChild>
                 <Link
-                  href={`/call?username=${
-                    user._id === call.callee._id
-                      ? call.callee?.username
-                      : call.caller.username
-                  }&video=true`}
+                  href={`/call?username=${otherUser?.username}&video=true`}
                   className="p-2"
                 >
                   <Video />
@@ -135,9 +112,9 @@ function Page({ params }: { params: { callId: string } }) {
             <td colSpan={2} className="text-stone-500">
               {loading ? (
                 <Skeleton className="w-32 h-4" />
-              ) : (
-                new Date(call.createdAt).toLocaleDateString("en-IN")
-              )}
+              ) : call.createdAt ? (
+                formatDate(parseISO(call.createdAt), "MMMM d, yyyy")
+              ) : null}
             </td>
           </tr>
           <tr>
@@ -151,7 +128,7 @@ function Page({ params }: { params: { callId: string } }) {
                   ) : (
                     <Video size="18" className="mr-2" />
                   )}
-                  {user._id === call.callee._id ? "Incoming" : "Outgoing"}
+                  {isOutgoing ? "Outgoing" : "Incoming"}
                   &nbsp;
                   {call.type === "audio" ? "voice" : "video"} call at
                 </>
@@ -160,9 +137,9 @@ function Page({ params }: { params: { callId: string } }) {
             <td>
               {loading ? (
                 <Skeleton className="w-20 h-5" />
-              ) : (
-                new Date(call.createdAt).toLocaleString("en-IN").slice(11)
-              )}
+              ) : call.createdAt ? (
+                formatDate(parseISO(call.createdAt), "hh:mm a")
+              ) : null}
             </td>
           </tr>
           <tr>
@@ -179,8 +156,10 @@ function Page({ params }: { params: { callId: string } }) {
             <td>
               {loading ? (
                 <Skeleton className="w-20 h-5" />
-              ) : (
+              ) : call.acceptedAt ? (
                 formatDuration(call.acceptedAt, call.endedAt)
+              ) : (
+                "Not accepted"
               )}
             </td>
           </tr>
