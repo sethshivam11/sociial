@@ -12,7 +12,7 @@ import {
   Phone,
   Video,
 } from "lucide-react";
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useMemo } from "react";
 import { getCalls, setCall } from "@/lib/store/features/slices/callSlice";
 import CallsLoading from "@/components/skeletons/CallsLoading";
 import {
@@ -23,6 +23,69 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
+import { CallI } from "@/types/types";
+
+const CallItem = ({
+  call,
+  userId,
+  isCurrent = false,
+  onClick,
+}: {
+  call: CallI;
+  userId: string;
+  isCurrent?: boolean;
+  onClick: () => void;
+}) => {
+  const isOutgoing = useMemo(() => {
+    if (call.caller._id === userId) return true;
+    else return false;
+  }, [call, userId]);
+
+  const otherUser = useMemo(() => {
+    if (call.caller._id === userId) return call.callee;
+    else return call.caller;
+  }, [call, userId]);
+
+  return (
+    <Link
+      className={`flex items-center justify-center rounded-md w-full gap-2 p-2 mb-1 ${
+        isCurrent
+          ? "bg-stone-200 dark:bg-stone-800 hover:bg-stone-100 hover:dark:bg-stone-900"
+          : "sm:hover:bg-stone-200 sm:dark:hover:bg-stone-800"
+      }`}
+      href={`/logs/${call._id}`}
+      onClick={onClick}
+    >
+      <Avatar className="w-10 h-10">
+        <AvatarImage
+          src={otherUser?.avatar}
+          alt=""
+          className="pointer-events-none select-none object-contain"
+        />
+        <AvatarFallback>{nameFallback(otherUser?.fullName)}</AvatarFallback>
+      </Avatar>
+      <div className="flex flex-col items-start justify-center w-full">
+        <p>{otherUser?.fullName}</p>
+        <div className="flex items-center justify-center gap-2 text-sm text-stone-500">
+          {isOutgoing ? (
+            <>
+              <ArrowUpRight size="16" />
+              Outgoing Call
+            </>
+          ) : (
+            <>
+              <ArrowDownLeft size="16" />
+              Incoming Call
+            </>
+          )}
+        </div>
+      </div>
+      <div className="mr-2">
+        {call.type === "audio" ? <Phone size="18" /> : <Video size="18" />}
+      </div>
+    </Link>
+  );
+};
 
 function Layout({ children }: { children: ReactNode }) {
   const location = usePathname();
@@ -71,64 +134,17 @@ function Layout({ children }: { children: ReactNode }) {
           {skeletonLoading ? (
             <CallsLoading />
           ) : calls.length > 0 ? (
-            calls.map((call, index) => (
-              <Link
-                className={`flex items-center justify-center rounded-md w-full gap-2 p-2 mb-1 ${
-                  location === `/logs/${call._id}`
-                    ? "bg-stone-200 dark:bg-stone-800 hover:bg-stone-100 hover:dark:bg-stone-900"
-                    : "sm:hover:bg-stone-200 sm:dark:hover:bg-stone-800"
-                }`}
-                key={index}
-                href={`/logs/${call._id}`}
-                onClick={() => dispatch(setCall(call))}
-              >
-                <Avatar className="w-10 h-10">
-                  <AvatarImage
-                    src={
-                      user._id === call.callee._id
-                        ? call.callee.avatar
-                        : call.caller.avatar
-                    }
-                    alt=""
-                    className="pointer-events-none select-none object-contain"
-                  />
-                  <AvatarFallback>
-                    {nameFallback(
-                      user._id === call.callee._id
-                        ? call.callee.fullName
-                        : call.caller.fullName
-                    )}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex flex-col items-start justify-center w-full">
-                  <p>
-                    {user._id === call.callee._id
-                      ? call.callee.fullName
-                      : call.caller.fullName}
-                  </p>
-                  <div className="flex items-center justify-center gap-2 text-sm text-stone-500">
-                    {call.caller._id === user._id ? (
-                      <>
-                        <ArrowDownLeft size="16" />
-                        Incoming Call
-                      </>
-                    ) : (
-                      <>
-                        <ArrowUpRight size="16" />
-                        Outgoing Call
-                      </>
-                    )}
-                  </div>
-                </div>
-                <div className="mr-2">
-                  {call.type === "audio" ? (
-                    <Phone size="18" />
-                  ) : (
-                    <Video size="18" />
-                  )}
-                </div>
-              </Link>
-            ))
+            calls.map((call, index) => {
+              return (
+                <CallItem
+                  call={call}
+                  userId={user._id}
+                  isCurrent={location.includes(`/logs/${call._id}`)}
+                  onClick={() => dispatch(setCall(call._id))}
+                  key={index}
+                />
+              );
+            })
           ) : (
             <div className="w-full flex flex-col items-center justify-center gap-4 text-center h-[80dvh]">
               <History size="60" />
@@ -146,72 +162,22 @@ function Layout({ children }: { children: ReactNode }) {
             <CallsLoading />
           ) : calls.length > 0 ? (
             calls.map((call, index) => (
-              <Link
-                className={`flex items-center justify-center rounded-md w-full gap-2 p-2 ${
-                  location === `/messages/${call._id}`
-                    ? "bg-stone-200 dark:bg-stone-800 hover:bg-stone-100 hover:dark:bg-stone-900"
-                    : "sm:hover:bg-stone-200 sm:dark:hover:bg-stone-800"
-                }`}
-                key={index}
-                href={`/logs/${call._id}`}
-              >
-                <Avatar className="w-10 h-10">
-                  <AvatarImage
-                    src={
-                      user._id === call.callee._id
-                        ? call.callee.avatar
-                        : call.caller.avatar
-                    }
-                    alt=""
-                    className="pointer-events-none select-none"
-                  />
-                  <AvatarFallback>
-                    {nameFallback(
-                      user._id === call.callee._id
-                        ? call.callee.fullName
-                        : call.caller.fullName
-                    )}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex flex-col items-start justify-center w-full">
-                  <p>
-                    {user._id === call.callee._id
-                      ? call.callee.fullName
-                      : call.caller.fullName}
-                  </p>
-                  <div className="flex items-center justify-center gap-2 text-sm text-stone-500">
-                    {call.caller._id === user._id ? (
-                      <>
-                        <ArrowDownLeft size="16" />
-                        Incoming Call
-                      </>
-                    ) : (
-                      <>
-                        <ArrowUpRight size="16" />
-                        Outgoing Call
-                      </>
-                    )}
-                  </div>
-                </div>
-                <div className="mr-2">
-                  {call.type === "audio" ? (
-                    <Phone size="18" />
-                  ) : (
-                    <Video size="18" />
-                  )}
-                </div>
-              </Link>
+              <CallItem
+                  call={call}
+                  userId={user._id}
+                  isCurrent={location.includes(`/logs/${call._id}`)}
+                  onClick={() => dispatch(setCall(call._id))}
+                  key={index}
+                />
             ))
           ) : (
             <div className="w-full flex flex-col items-center justify-center gap-4 text-center h-full">
               <History size="60" />
               <div>
                 <h2 className="text-2xl tracking-tight font-bold">
-                  No Chats yet
+                  No Calls yet
                 </h2>
-                <p className="text-stone-500">
-                  Start a conversation with someone!
-                </p>
+                <p className="text-stone-500">Start a call with someone!</p>
               </div>
             </div>
           )}
