@@ -38,7 +38,7 @@ export const getCall = createAsyncThunk(
   async (callId: string) => {
     const parsed = await fetch(`/api/v1/calls/get/${callId}`);
     return parsed.json();
-  }
+  },
 );
 
 export const startCall = createAsyncThunk(
@@ -52,27 +52,19 @@ export const startCall = createAsyncThunk(
       body: JSON.stringify(callData),
     });
     return parsed.json();
-  }
+  },
 );
 
-export const updateCall = createAsyncThunk(
+export const acceptCall = createAsyncThunk(
   "calls/acceptCall",
-  async ({
-    callId,
-    acceptedAt,
-    endedAt,
-  }: {
-    callId: string;
-    acceptedAt?: string;
-    endedAt?: string;
-  }) => {
-    if (!acceptedAt && !endedAt) return;
-    const parsed = await fetch(`/api/v1/calls/update/${callId}`, {
+  async ({ callId }: { callId: string }) => {
+    const acceptedAt = new Date().toISOString();
+    const parsed = await fetch(`/api/v1/calls/accept/${callId}`, {
       method: "PATCH",
-      body: JSON.stringify({ acceptedAt, endedAt }),
+      body: JSON.stringify({ acceptedAt }),
     });
     return parsed.json();
-  }
+  },
 );
 
 export const endCall = createAsyncThunk(
@@ -82,7 +74,7 @@ export const endCall = createAsyncThunk(
       method: "PATCH",
     });
     return parsed.json();
-  }
+  },
 );
 
 const callSlice = createSlice({
@@ -112,7 +104,7 @@ const callSlice = createSlice({
 
     builder
       .addCase(getCall.pending, (state) => {
-        state.loading = false;
+        state.loading = true;
       })
       .addCase(getCall.fulfilled, (state, action) => {
         state.loading = false;
@@ -139,17 +131,16 @@ const callSlice = createSlice({
       });
 
     builder
-      .addCase(updateCall.pending, (state) => {
+      .addCase(acceptCall.pending, (state) => {
         state.loading = true;
       })
-      .addCase(updateCall.fulfilled, (state, action) => {
+      .addCase(acceptCall.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload?.success) {
           state.call.acceptedAt = action.payload.data.acceptedAt;
-          state.call.endedAt = action.payload.data.startedAt;
         }
       })
-      .addCase(updateCall.rejected, (state) => {
+      .addCase(acceptCall.rejected, (state) => {
         state.loading = false;
       });
 

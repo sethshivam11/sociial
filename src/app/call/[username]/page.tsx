@@ -2,7 +2,10 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ChatEventEnum, nameFallback } from "@/lib/helpers";
-import { endCall, updateCall } from "@/lib/store/features/slices/callSlice";
+import {
+  endCall,
+  acceptCall as updateCallAccepted,
+} from "@/lib/store/features/slices/callSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import {
   ChevronLeft,
@@ -10,7 +13,6 @@ import {
   Mic,
   MicOff,
   Phone,
-  RefreshCcw,
   Video,
   VideoOff,
 } from "lucide-react";
@@ -89,7 +91,7 @@ function Page({ params }: { params: { username: string } }) {
         setPermissions(false);
       }
     },
-    []
+    [],
   );
   const startCall = useCallback(async () => {
     if (!peer) return;
@@ -108,7 +110,7 @@ function Page({ params }: { params: { username: string } }) {
         answer: ans,
       });
     },
-    [createAnswer, call.callee._id, call.caller._id, user._id]
+    [createAnswer, call.callee._id, call.caller._id, user._id],
   );
   const handleCallAccepted = useCallback(
     async (answer: RTCSessionDescription) => {
@@ -119,7 +121,7 @@ function Page({ params }: { params: { username: string } }) {
         console.error("Failed to set remote description:", error);
       }
     },
-    [peer]
+    [peer],
   );
   const handleNegotiation = useCallback(async () => {
     if (!peer) return;
@@ -154,7 +156,7 @@ function Page({ params }: { params: { username: string } }) {
           router.replace(
             unpicked
               ? `/call/unpicked?username=${username}`
-              : `/call/ended?username=${username}`
+              : `/call/ended?username=${username}`,
           );
         }
       });
@@ -168,7 +170,7 @@ function Page({ params }: { params: { username: string } }) {
       call.callee,
       user._id,
       router,
-    ]
+    ],
   );
   const handleCallEnded = useCallback(async () => {
     stopCamera();
@@ -219,12 +221,12 @@ function Page({ params }: { params: { username: string } }) {
     if (hideSelfVideo) {
       selfVideoContainerRef.current.classList.add(
         "lg:translate-x-[370px]",
-        "sm:translate-x-56"
+        "sm:translate-x-56",
       );
     } else {
       selfVideoContainerRef.current.classList.remove(
         "lg:translate-x-[370px]",
-        "sm:translate-x-56"
+        "sm:translate-x-56",
       );
     }
   }, [hideSelfVideo]);
@@ -339,9 +341,7 @@ function Page({ params }: { params: { username: string } }) {
               disabled={sendingStream && !stream}
               onClick={() => {
                 if (stream) {
-                  dispatch(
-                    updateCall({ callId, acceptedAt: new Date().toISOString() })
-                  );
+                  dispatch(updateCallAccepted({ callId }));
                   sendStream(stream);
                   setSendingStream(true);
                   if (timeoutRef.current) clearTimeout(timeoutRef.current);

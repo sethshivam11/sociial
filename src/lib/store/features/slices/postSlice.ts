@@ -399,7 +399,7 @@ const postSlice = createSlice({
         state.loading = false;
         if (action.payload?.success) {
           state.posts = state.posts.filter(
-            (post) => post._id !== action.payload.data._id,
+            (post) => post._id !== action.meta.arg,
           );
         }
       })
