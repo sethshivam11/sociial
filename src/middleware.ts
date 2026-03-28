@@ -4,43 +4,26 @@ import { publicPaths } from "./lib/helpers";
 
 export const config = {
   matcher: [
-    "/",
-    "/sign-in",
-    "/sign-up",
-    "/verify-code",
-    "/upload-video",
-    "/forgot-password",
-    "/new-post",
-    "/add-story",
-    "/call/:path",
-    "/story/:path",
-    "/messages/:path",
-    "/settings/:path",
-    "/notifications/:path",
-    "/videos",
+    "/((?!_next/static|_next/image|favicon.ico|api|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
 
+const authPaths = ["/sign-in", "/sign-up", "/verify-code"];
+
 export function middleware(request: NextRequest) {
-  const path = request.nextUrl.pathname;
+  const { pathname } = request.nextUrl;
   const token = request.cookies.get("token");
 
-  const isPublicUserProfile =
-    /^\/[^\/]+$/.test(path) && !publicPaths.includes(path);
-
-  if (!token && !publicPaths.includes(path) && !isPublicUserProfile) {
-    return NextResponse.redirect(new URL("/sign-in", request.url));
+  if (publicPaths.includes(pathname)) {
+    return NextResponse.next();
   }
 
-  if (token && publicPaths.includes(path)) {
-    if (
-      path !== "/verify-code" &&
-      !request.nextUrl.searchParams.has("username")
-    ) {
-      return NextResponse.redirect(new URL("/", request.url));
-    } else {
-      return NextResponse.next();
-    }
+  if (token && authPaths.includes(pathname)) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  if (!token && !publicPaths.includes(pathname) && !authPaths.includes(pathname)) {
+    return NextResponse.redirect(new URL("/sign-in", request.url));
   }
 
   return NextResponse.next();

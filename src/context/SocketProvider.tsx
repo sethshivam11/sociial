@@ -57,98 +57,22 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
   const router = useRouter();
   const { chat } = useAppSelector((state) => state.chat);
 
-  useEffect(() => {
-    if (socket.connected) {
-      onConnect();
-    }
-    function onConnect() {
-      setConnected(true);
-    }
-    function onDisconnect() {
-      setConnected(false);
-    }
-    function handleOnlineUsers(payload: string[]) {
-      setOnlineUsers(payload);
-    }
-    function handleMessageReceived(payload: MessageI) {
-      if (chat?._id === payload.chat) {
-        dispatch(messageReceived(payload));
-      } else {
-        toast({
-          title: "New Message",
-          description: `You have a new message from ${payload.sender.username}`,
-          action: (
-            <ToastAction
-              altText="View"
-              onClick={() => router.push(`/messages/${payload.chat}`)}
-            >
-              View
-            </ToastAction>
-          ),
-        });
-      }
-    }
-    function handleMessageDelete(payload: MessageI) {
-      if (chat?._id === payload.chat) {
-        dispatch(messageDeleted(payload));
-      }
-    }
-    function handleMessageUpdate(payload: {
-      message: MessageI;
-      user: BasicUserI;
-    }) {
-      if (chat?._id === payload.message.chat) {
-        dispatch(messageUpdated(payload));
-      }
-    }
-    function handleReact(payload: {
-      user: BasicUserI;
-      content: string;
-      chat: string;
-      message: {
-        content: string;
-        kind: string;
-      };
-    }) {
-      if (chat?._id === payload.chat) {
-        dispatch(reacted(payload));
-      } else {
-        toast({
-          title: "Reaction on your message",
-          description: `${payload.user?.username} reacted ${
-            payload.content
-          } to ${
-            payload?.message.kind === "message"
-              ? payload.message.content
-              : checkForAssets(payload.message.content, payload.message.kind)
-          }`,
-          action: (
-            <ToastAction
-              altText="View"
-              onClick={() => router.push(`/messages/${payload.chat}`)}
-            >
-              View
-            </ToastAction>
-          ),
-        });
-      }
-    }
-    function handleUnreact(payload: { user: string; chat: string }) {
-      if (chat?._id === payload.chat) {
-        dispatch(unreacted(payload));
-      }
-    }
-    function handleError(error: any) {
-      console.log(error);
-    }
-    function handleNewChat(payload: { chat: ChatI; user: BasicUserI }) {
-      dispatch(newChatStarted(payload));
-    }
-    function handleNewGroup(payload: { chat: ChatI; user: BasicUserI }) {
-      dispatch(newGroup(payload));
+  function onConnect() {
+    setConnected(true);
+  }
+  function onDisconnect() {
+    setConnected(false);
+  }
+  function handleOnlineUsers(payload: string[]) {
+    setOnlineUsers(payload);
+  }
+  function handleMessageReceived(payload: MessageI) {
+    if (chat?._id === payload.chat) {
+      dispatch(messageReceived(payload));
+    } else {
       toast({
-        title: "New Group",
-        description: `${payload.user.username} added you to a group`,
+        title: "New Message",
+        description: `You have a new message from ${payload.sender.username}`,
         action: (
           <ToastAction
             altText="View"
@@ -159,155 +83,228 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
         ),
       });
     }
-    function handleGroupDelete(payload: { chat: ChatI; user: BasicUserI }) {
-      dispatch(groupDeleted(payload));
+  }
+  function handleMessageDelete(payload: MessageI) {
+    if (chat?._id === payload.chat) {
+      dispatch(messageDeleted(payload));
+    }
+  }
+  function handleMessageUpdate(payload: {
+    message: MessageI;
+    user: BasicUserI;
+  }) {
+    if (chat?._id === payload.message.chat) {
+      dispatch(messageUpdated(payload));
+    }
+  }
+  function handleReact(payload: {
+    user: BasicUserI;
+    content: string;
+    chat: string;
+    message: {
+      content: string;
+      kind: string;
+    };
+  }) {
+    if (chat?._id === payload.chat) {
+      dispatch(reacted(payload));
+    } else {
       toast({
-        title: "Group Deleted",
-        description: `${payload.user.username} deleted the group`,
-      });
-    }
-    function handleNewParticipants(payload: {
-      chat: ChatI;
-      user: BasicUserI;
-      participants: BasicUserI[];
-    }) {
-      dispatch(addedToGroup(payload));
-      toast({
-        title: "New Participants",
-        description: `${payload.user.username} added ${payload.participants
-          .map((p, index) => (index < 3 ? p.username : ""))
-          .join(", ")} to the group`,
-      });
-    }
-    function handleRemovedParticipant(payload: {
-      participants: BasicUserI[];
-      chat: ChatI;
-      user: BasicUserI;
-    }) {
-      dispatch(removedFromGroup(payload));
-      toast({
-        title: "Participants Removed",
-        description: `${payload.user.username} removed ${payload.participants
-          .map((p, index) => (index < 3 ? p.username : ""))
-          .join(", ")} from the group`,
-      });
-    }
-    function handleGroupUpdated(payload: { chat: ChatI; user: BasicUserI }) {
-      dispatch(groupDetailsUpdated(payload));
-    }
-    function handleGroupLeave(payload: { chat: ChatI; user: BasicUserI }) {
-      dispatch(leftGroup(payload));
-      if (chat._id === payload.chat._id) {
-        toast({
-          title: `${payload.user.username} left the group`,
-        });
-      }
-    }
-    function handleNewAdmin(payload: {
-      newAdmins: BasicUserI[];
-      chat: ChatI;
-      user: BasicUserI;
-    }) {
-      dispatch(newAdmin(payload));
-      if (chat._id === payload.chat._id) {
-        toast({
-          title: `${payload.newAdmins
-            .map((a) => a.username)
-            .join(", ")} are now admins`,
-        });
-      }
-    }
-    function handleAdminRemove(payload: {
-      removedAdmins: BasicUserI[];
-      chat: ChatI;
-      user: BasicUserI;
-    }) {
-      dispatch(removedAdmin(payload));
-      if (chat._id === payload.chat._id) {
-        toast({
-          title: `${payload.removedAdmins
-            .map((a) => a.username)
-            .join(", ")} are no longer admins`,
-        });
-      }
-    }
-    function rejectCall(callId: string) {
-      dispatch(endCall(callId)).then((response) => {
-        if (!response.payload?.success) {
-          toast({
-            title: "Failed to reject call",
-            description: response.payload?.message || "Something went wrong!",
-            variant: "destructive",
-          });
-        } else {
-          if (location.includes("/call")) {
-            router.push("/call/ended");
-          }
-        }
-      });
-    }
-    function handleCall(payload: CallI) {
-      if ("vibrate" in navigator) {
-        navigator.vibrate([200, 50, 200, 50, 200, 50, 200]);
-      }
-      dispatch(setCall(payload));
-      toast({
-        title: `${payload.caller.fullName} is calling...`,
-        description: "Swipe right to silent",
-        action: (
-          <div className="flex gap-2 items-center justify-center">
-            <ToastAction
-              altText="Answer"
-              className="bg-primary hover:bg-primary/80 text-white dark:text-black"
-              onClick={() => {
-                dispatch(getProfile({ username: payload.caller.username }));
-                navigator.mediaDevices
-                  .getUserMedia({
-                    video: payload.type === "video",
-                    audio: true,
-                  })
-                  .then((stream) => {
-                    stream.getTracks().forEach((track) => {
-                      track.stop();
-                    });
-                    router.push(
-                      `/call/${payload.caller.username}?video=${
-                        payload.type === "video"
-                      }&call=${payload._id}&profile=${payload.caller._id}`
-                    );
-                  })
-                  .catch((err) => {
-                    console.log(err);
-                    router.push("/call/allow");
-                  });
-              }}
-            >
-              {payload.type === "video" ? <Video /> : <Phone />}
-            </ToastAction>
-            <ToastAction
-              altText="Decline"
-              onClick={() => rejectCall(payload._id)}
-            >
-              <Phone className="rotate-[135deg]" />
-            </ToastAction>
-          </div>
-        ),
-        duration: 30000,
-      });
-    }
-    function handleConfession(payload: Confession) {
-      toast({
-        title: "New Confession",
-        description: payload.content,
+        title: "Reaction on your message",
+        description: `${payload.user?.username} reacted ${payload.content} to ${
+          payload?.message.kind === "message"
+            ? payload.message.content
+            : checkForAssets(payload.message.content, payload.message.kind)
+        }`,
         action: (
           <ToastAction
             altText="View"
-            onClick={() => router.push("/confessions")}
+            onClick={() => router.push(`/messages/${payload.chat}`)}
           >
             View
           </ToastAction>
         ),
       });
+    }
+  }
+  function handleUnreact(payload: { user: string; chat: string }) {
+    if (chat?._id === payload.chat) {
+      dispatch(unreacted(payload));
+    }
+  }
+  function handleError(error: any) {
+    console.log(error);
+  }
+  function handleNewChat(payload: { chat: ChatI; user: BasicUserI }) {
+    dispatch(newChatStarted(payload));
+  }
+  function handleNewGroup(payload: { chat: ChatI; user: BasicUserI }) {
+    dispatch(newGroup(payload));
+    toast({
+      title: "New Group",
+      description: `${payload.user.username} added you to a group`,
+      action: (
+        <ToastAction
+          altText="View"
+          onClick={() => router.push(`/messages/${payload.chat}`)}
+        >
+          View
+        </ToastAction>
+      ),
+    });
+  }
+  function handleGroupDelete(payload: { chat: ChatI; user: BasicUserI }) {
+    dispatch(groupDeleted(payload));
+    toast({
+      title: "Group Deleted",
+      description: `${payload.user.username} deleted the group`,
+    });
+  }
+  function handleNewParticipants(payload: {
+    chat: ChatI;
+    user: BasicUserI;
+    participants: BasicUserI[];
+  }) {
+    dispatch(addedToGroup(payload));
+    toast({
+      title: "New Participants",
+      description: `${payload.user.username} added ${payload.participants
+        .map((p, index) => (index < 3 ? p.username : ""))
+        .join(", ")} to the group`,
+    });
+  }
+  function handleRemovedParticipant(payload: {
+    participants: BasicUserI[];
+    chat: ChatI;
+    user: BasicUserI;
+  }) {
+    dispatch(removedFromGroup(payload));
+    toast({
+      title: "Participants Removed",
+      description: `${payload.user.username} removed ${payload.participants
+        .map((p, index) => (index < 3 ? p.username : ""))
+        .join(", ")} from the group`,
+    });
+  }
+  function handleGroupUpdated(payload: { chat: ChatI; user: BasicUserI }) {
+    dispatch(groupDetailsUpdated(payload));
+  }
+  function handleGroupLeave(payload: { chat: ChatI; user: BasicUserI }) {
+    dispatch(leftGroup(payload));
+    if (chat._id === payload.chat._id) {
+      toast({
+        title: `${payload.user.username} left the group`,
+      });
+    }
+  }
+  function handleNewAdmin(payload: {
+    newAdmins: BasicUserI[];
+    chat: ChatI;
+    user: BasicUserI;
+  }) {
+    dispatch(newAdmin(payload));
+    if (chat._id === payload.chat._id) {
+      toast({
+        title: `${payload.newAdmins
+          .map((a) => a.username)
+          .join(", ")} are now admins`,
+      });
+    }
+  }
+  function handleAdminRemove(payload: {
+    removedAdmins: BasicUserI[];
+    chat: ChatI;
+    user: BasicUserI;
+  }) {
+    dispatch(removedAdmin(payload));
+    if (chat._id === payload.chat._id) {
+      toast({
+        title: `${payload.removedAdmins
+          .map((a) => a.username)
+          .join(", ")} are no longer admins`,
+      });
+    }
+  }
+  function rejectCall(callId: string) {
+    dispatch(endCall(callId)).then((response) => {
+      if (!response.payload?.success) {
+        toast({
+          title: "Failed to reject call",
+          description: response.payload?.message || "Something went wrong!",
+          variant: "destructive",
+        });
+      } else {
+        if (location.includes("/call")) {
+          router.push("/call/ended");
+        }
+      }
+    });
+  }
+  function handleCall(payload: CallI) {
+    if (location.includes("/call/")) return;
+    if ("vibrate" in navigator) {
+      navigator.vibrate([200, 50, 200, 50, 200, 50, 200]);
+    }
+    dispatch(setCall(payload));
+    toast({
+      title: `${payload.caller.fullName} is calling...`,
+      description: "Swipe right to silent",
+      action: (
+        <div className="flex gap-2 items-center justify-center">
+          <ToastAction
+            altText="Answer"
+            className="bg-primary hover:bg-primary/80 text-white dark:text-black"
+            onClick={() => {
+              dispatch(getProfile({ username: payload.caller.username }));
+              navigator.mediaDevices
+                .getUserMedia({
+                  video: payload.type === "video",
+                  audio: true,
+                })
+                .then((stream) => {
+                  stream.getTracks().forEach((track) => {
+                    track.stop();
+                  });
+                  router.push(
+                    `/call/${payload.caller.username}?video=${
+                      payload.type === "video"
+                    }&call=${payload._id}&profile=${payload.caller._id}`,
+                  );
+                })
+                .catch((err) => {
+                  console.log(err);
+                  router.push("/call/allow");
+                });
+            }}
+          >
+            {payload.type === "video" ? <Video /> : <Phone />}
+          </ToastAction>
+          <ToastAction
+            altText="Decline"
+            onClick={() => rejectCall(payload._id)}
+          >
+            <Phone className="rotate-[135deg]" />
+          </ToastAction>
+        </div>
+      ),
+      duration: 30000,
+    });
+  }
+  function handleConfession(payload: Confession) {
+    toast({
+      title: "New Confession",
+      description: payload.content,
+      action: (
+        <ToastAction altText="View" onClick={() => router.push("/confessions")}>
+          View
+        </ToastAction>
+      ),
+    });
+  }
+
+  useEffect(() => {
+    if (socket.connected) {
+      onConnect();
     }
 
     socket.on(ChatEventEnum.GET_USERS, handleOnlineUsers);
@@ -325,7 +322,7 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
     socket.on(ChatEventEnum.NEW_PARTICIPANT_ADDED_EVENT, handleNewParticipants);
     socket.on(
       ChatEventEnum.PARTICIPANT_REMOVED_EVENT,
-      handleRemovedParticipant
+      handleRemovedParticipant,
     );
     socket.on(ChatEventEnum.GROUP_DETAILS_UPDATED, handleGroupUpdated);
     socket.on(ChatEventEnum.GROUP_LEAVE_EVENT, handleGroupLeave);
@@ -348,11 +345,11 @@ export function SocketProvider({ children }: PropsWithChildren<{}>) {
       socket.off(ChatEventEnum.NEW_EDIT_EVENT, handleMessageUpdate);
       socket.off(
         ChatEventEnum.NEW_PARTICIPANT_ADDED_EVENT,
-        handleNewParticipants
+        handleNewParticipants,
       );
       socket.off(
         ChatEventEnum.PARTICIPANT_REMOVED_EVENT,
-        handleRemovedParticipant
+        handleRemovedParticipant,
       );
       socket.off(ChatEventEnum.GROUP_DETAILS_UPDATED, handleGroupUpdated);
       socket.off(ChatEventEnum.GROUP_LEAVE_EVENT, handleGroupLeave);
