@@ -214,10 +214,9 @@ function Profile({
 
   useEffect(() => {
     if (!user.username) return;
-    dispatch(getFollowings({ username: user.username })).then((data) =>
-      console.log(data)
-    );
+    dispatch(getFollowings({ username: user.username }));
   }, [user.username]);
+
   useEffect(() => {
     if (username)
       dispatch(getProfile({ username })).then((response) => {
@@ -225,6 +224,7 @@ function Profile({
           setUserNotFound(true);
       });
   }, [username, dispatch]);
+
   useEffect(() => {
     if (userNotFound) notFound();
   }, [userNotFound]);
@@ -310,7 +310,7 @@ function Profile({
                             onClick={() =>
                               qrRef.current?.download(
                                 "png",
-                                `${profile.username} QR`
+                                `${profile.username} QR`,
                               )
                             }
                           >

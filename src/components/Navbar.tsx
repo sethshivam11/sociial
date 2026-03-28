@@ -143,7 +143,7 @@ function Navbar() {
             dispatch(clearCookies()).then(() => router.push("/sign-in"));
           } else {
             dispatch(resendVerificationCode({ username })).then(() =>
-              router.push(`/verify-code?username=${username}`)
+              router.push(`/verify-code?username=${username}`),
             );
           }
         } else if (response.payload?.message === "User not found") {

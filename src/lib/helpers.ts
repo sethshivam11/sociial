@@ -4,10 +4,7 @@ import { FirebaseError } from "firebase/app";
 import { formatDistance } from "date-fns";
 
 export const publicPaths = [
-  "/sign-in",
-  "/sign-up",
   "/forgot-password",
-  "/verify-code",
   "/terms",
   "/privacy",
   "/home",
