@@ -8,7 +8,7 @@ export const config = {
   ],
 };
 
-const authPaths = ["/sign-in", "/sign-up", "/verify-code"];
+const authPaths = ["/sign-in", "/sign-up"];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

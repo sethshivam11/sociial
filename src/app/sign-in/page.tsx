@@ -115,7 +115,9 @@ function SignInPage() {
       if (!response.payload.data.user.isMailVerified) {
         router.prefetch("/verify-code");
         await dispatch(
-          resendVerificationCode(response.payload.data.user.username),
+          resendVerificationCode({
+            username: response.payload.data.user.username,
+          }),
         );
         return router.push(
           `/verify-code?username=${response.payload.data.user.username}`,

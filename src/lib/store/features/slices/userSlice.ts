@@ -71,7 +71,7 @@ export const loginUser = createAsyncThunk(
       }),
     });
     return parsed.json();
-  }
+  },
 );
 
 export const registerUser = createAsyncThunk(
@@ -103,7 +103,7 @@ export const registerUser = createAsyncThunk(
       body: formData,
     });
     return parsed.json();
-  }
+  },
 );
 
 export const verifyCode = createAsyncThunk(
@@ -111,23 +111,22 @@ export const verifyCode = createAsyncThunk(
   async ({ username, code }: { username: string; code: number }) => {
     if (!username || !code) return;
     const parsed = await fetch(
-      `/api/v1/users/verify?username=${username}&code=${code}`
+      `/api/v1/users/verify?username=${username}&code=${code}`,
     );
     return parsed.json();
-  }
+  },
 );
 
 export const resendVerificationCode = createAsyncThunk(
   "users/resendCode",
-  async ({ username, email }: { username: string; email?: string }) => {
-    if (!username) return;
-    const parsed = await fetch(
-      `/api/v1/users/resendMail?username=${username}${
-        email ? `&email=${email}` : ""
-      }`
-    );
+  async ({ username, email }: { username?: string; email?: string }) => {
+    if (!username && !email) return { message: "Username or email required" };
+    let query = "";
+    if(email && email.length > 0) query += `email=${email}`;
+    else if (username && username.length > 0) query += `username=${username}`;
+    const parsed = await fetch(`/api/v1/users/resendMail?${query}`);
     return parsed.json();
-  }
+  },
 );
 
 export const forgotPassword = createAsyncThunk(
@@ -152,7 +151,7 @@ export const forgotPassword = createAsyncThunk(
       body: JSON.stringify({ email, username, code, password }),
     });
     return parsed.json();
-  }
+  },
 );
 
 export const getProfile = createAsyncThunk(
@@ -164,16 +163,16 @@ export const getProfile = createAsyncThunk(
     const parsed = await fetch(
       `/api/v1/users/getProfile?${
         username ? `username=${username}` : `_id=${_id}`
-      }`
+      }`,
     );
     return parsed.json();
-  }
+  },
 );
 
 export const logOutUser = createAsyncThunk("users/logout", async () => {
   const token = localStorage.getItem("notification-token") || "";
   const parsed = await fetch(
-    `/api/v1/users/logout${token ? `?firebaseToken=${token}` : ""}`
+    `/api/v1/users/logout${token ? `?firebaseToken=${token}` : ""}`,
   );
   return parsed.json();
 });
@@ -196,7 +195,7 @@ export const updatePassword = createAsyncThunk(
       body: JSON.stringify({ oldPassword, newPassword }),
     });
     return parsed.json();
-  }
+  },
 );
 
 export const updateEmail = createAsyncThunk(
@@ -211,7 +210,7 @@ export const updateEmail = createAsyncThunk(
       body: JSON.stringify({ email, code }),
     });
     return parsed.json();
-  }
+  },
 );
 
 export const updateAvatar = createAsyncThunk(
@@ -225,7 +224,7 @@ export const updateAvatar = createAsyncThunk(
       body: formData,
     });
     return parsed.json();
-  }
+  },
 );
 
 export const removeAvatar = createAsyncThunk("users/removeAvatar", async () => {
@@ -264,7 +263,7 @@ export const updateDetails = createAsyncThunk(
       body: JSON.stringify({ fullName, username, bio }),
     });
     return parsed.json();
-  }
+  },
 );
 
 export const getBlockedUsers = createAsyncThunk(
@@ -272,7 +271,7 @@ export const getBlockedUsers = createAsyncThunk(
   async () => {
     const parsed = await fetch("/api/v1/users/blocked");
     return parsed.json();
-  }
+  },
 );
 
 export const blockUser = createAsyncThunk(
@@ -280,7 +279,7 @@ export const blockUser = createAsyncThunk(
   async (userId: string) => {
     const parsed = await fetch(`/api/v1/users/block?userId=${userId}`);
     return parsed.json();
-  }
+  },
 );
 
 export const unblockUser = createAsyncThunk(
@@ -288,7 +287,7 @@ export const unblockUser = createAsyncThunk(
   async (userId: string) => {
     const parsed = await fetch(`/api/v1/users/unblock?userId=${userId}`);
     return parsed.json();
-  }
+  },
 );
 
 export const searchUsers = createAsyncThunk(
@@ -303,7 +302,7 @@ export const searchUsers = createAsyncThunk(
       };
     const parsed = await fetch(`/api/v1/users/search?query=${query.trim()}`);
     return parsed.json();
-  }
+  },
 );
 
 export const getSavedPosts = createAsyncThunk(
@@ -311,7 +310,7 @@ export const getSavedPosts = createAsyncThunk(
   async () => {
     const parsed = await fetch("/api/v1/users/saved");
     return parsed.json();
-  }
+  },
 );
 
 export const savePost = createAsyncThunk(
@@ -319,7 +318,7 @@ export const savePost = createAsyncThunk(
   async (postId: string) => {
     const parsed = await fetch(`/api/v1/users/save/${postId}`);
     return parsed.json();
-  }
+  },
 );
 
 export const unsavePost = createAsyncThunk(
@@ -327,7 +326,7 @@ export const unsavePost = createAsyncThunk(
   async (postId: string) => {
     const parsed = await fetch(`/api/v1/users/unsave/${postId}`);
     return parsed.json();
-  }
+  },
 );
 
 export const getUserSuggestions = createAsyncThunk(
@@ -335,7 +334,7 @@ export const getUserSuggestions = createAsyncThunk(
   async () => {
     const parsed = await fetch("/api/v1/users/suggestions");
     return parsed.json();
-  }
+  },
 );
 
 export const getSessions = createAsyncThunk("users/sessions", async () => {
@@ -350,7 +349,7 @@ export const removeSession = createAsyncThunk(
       method: "DELETE",
     });
     return parsed.json();
-  }
+  },
 );
 
 export const clearCookies = createAsyncThunk("users/clearCookies", async () => {
@@ -366,7 +365,7 @@ export const logOutAllDevices = createAsyncThunk(
       method: "DELETE",
     });
     return parsed.json();
-  }
+  },
 );
 
 export const userSlice = createSlice({
@@ -445,7 +444,7 @@ export const userSlice = createSlice({
         resendVerificationCode.fulfilled || resendVerificationCode.rejected,
         (state) => {
           state.isSendingMail = false;
-        }
+        },
       );
 
     builder
@@ -600,7 +599,7 @@ export const userSlice = createSlice({
           state.user.blocked.push(action.meta.arg);
         }
         state.blocked = state.blocked.filter(
-          (user) => user._id !== action.meta.arg
+          (user) => user._id !== action.meta.arg,
         );
       })
       .addCase(blockUser.rejected, (state) => {
@@ -615,10 +614,10 @@ export const userSlice = createSlice({
         state.loading = false;
         if (action.payload?.success) {
           state.user.blocked = state.user.blocked.filter(
-            (user) => user !== action.meta.arg
+            (user) => user !== action.meta.arg,
           );
           state.blocked = state.blocked.filter(
-            (user) => user._id !== action.meta.arg
+            (user) => user._id !== action.meta.arg,
           );
         }
       })
@@ -655,7 +654,7 @@ export const userSlice = createSlice({
               ...user,
               loading: false,
               isFollowing: false,
-            })
+            }),
           );
         } else if (!action.payload?.success) {
           state.savedPosts = [];
@@ -687,7 +686,7 @@ export const userSlice = createSlice({
         state.loading = false;
         if (action.payload?.success) {
           state.user.savedPosts = state.user.savedPosts.filter(
-            (post) => post !== action.meta.arg
+            (post) => post !== action.meta.arg,
           );
         }
       })
