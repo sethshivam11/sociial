@@ -9,6 +9,8 @@ export const publicPaths = [
   "/privacy",
   "/home",
   "/get-premium",
+  "/auth/google",
+  "/auth/google/callback",
 ];
 
 export function nameFallback(name: string) {
