@@ -5,6 +5,7 @@ import { formatDistance } from "date-fns";
 
 export const publicPaths = [
   "/forgot-password",
+  "/verify-code",
   "/terms",
   "/privacy",
   "/home",

@@ -52,7 +52,7 @@ const ForgotPasswordPage = () => {
       {
         message: "Passwords must match!",
         path: ["confirmPassword"],
-      }
+      },
     );
   const { loading } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
@@ -69,12 +69,16 @@ const ForgotPasswordPage = () => {
 
   async function handleGetCode() {
     try {
-      z.object({
-        identifier: emailSchema.or(usernameSchema),
-      }).parse({ identifier: form.watch("identifier") });
+      const identifier: any = form.watch("identifier");
+      z.object({ identifier: emailSchema.or(usernameSchema) }).parse({
+        identifier,
+      });
       form.clearErrors();
       const response = await dispatch(
-        resendVerificationCode({ username: form.watch("identifier") })
+        resendVerificationCode({
+          email: identifier.includes("@") ? identifier : "",
+          username: identifier,
+        }),
       );
       if (response.payload.success) {
         setTimer(60);
@@ -93,6 +97,7 @@ const ForgotPasswordPage = () => {
       if (error instanceof z.ZodError) {
         form.setError("identifier", { message: error.errors[0].message });
       }
+      console.log(error);
     }
   }
 
@@ -109,7 +114,7 @@ const ForgotPasswordPage = () => {
       email = identifier;
     }
     const response = await dispatch(
-      forgotPassword({ email, username, code: code.toString(), password })
+      forgotPassword({ email, username, code: code.toString(), password }),
     );
     if (response.payload.success) {
       router.push("/sign-in");
