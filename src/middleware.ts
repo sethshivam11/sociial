@@ -4,7 +4,7 @@ import { publicPaths } from "./lib/helpers";
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|api|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|sitemap|robots|_next/image|favicon.ico|api|.*\\.(?:svg|png|jpg|jpeg|gif|webp|xml|txt)$).*)",
   ],
 };
 
