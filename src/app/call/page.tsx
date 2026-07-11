@@ -9,9 +9,9 @@ import { getCall, startCall } from "@/lib/store/features/slices/callSlice";
 import { getProfile } from "@/lib/store/features/slices/userSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import { notFound, useRouter, useSearchParams } from "next/navigation";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, Suspense } from "react";
 
-function Page() {
+function Call() {
   const query = useSearchParams();
   const dispatch = useAppDispatch();
   const router = useRouter();
@@ -45,7 +45,7 @@ function Page() {
       startCall({
         callee: profile._id,
         type: query.get("video") === "true" ? "video" : "audio",
-      })
+      }),
     ).then((response) => {
       if (!response.payload?.success) {
         toast({
@@ -55,7 +55,7 @@ function Page() {
         });
       } else {
         router.push(
-          `/call/${username}?video=${videoEnabled}&profile=${profile._id}`
+          `/call/${username}?video=${videoEnabled}&profile=${profile._id}`,
         );
       }
     });
@@ -81,7 +81,7 @@ function Page() {
         if (!response.payload?.success) {
           setNotFoundError(true);
         }
-      }
+      },
     );
   }, [dispatch, profile?._id, query]);
 
@@ -128,6 +128,14 @@ function Page() {
   } else {
     return <PermissionsRequired />;
   }
+}
+
+function Page() {
+  return (
+    <Suspense>
+      <Call />
+    </Suspense>
+  );
 }
 
 export default Page;

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -39,7 +39,7 @@ const lobster = Lobster_Two({
   style: ["italic"],
 });
 
-function SignInPage() {
+function SignIn() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const params = useSearchParams();
@@ -266,6 +266,14 @@ function SignInPage() {
       </div>
       <Footer />
     </>
+  );
+}
+
+function SignInPage() {
+  return (
+    <Suspense>
+      <SignIn />
+    </Suspense>
   );
 }
 

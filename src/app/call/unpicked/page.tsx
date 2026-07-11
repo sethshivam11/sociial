@@ -6,9 +6,9 @@ import { getProfile } from "@/lib/store/features/slices/userSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/store";
 import Link from "next/link";
 import { notFound, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
-function Page() {
+function Unpicked() {
   const query = useSearchParams();
   const dispatch = useAppDispatch();
   const { profile, skeletonLoading } = useAppSelector((state) => state.user);
@@ -63,6 +63,14 @@ function Page() {
         </>
       )}
     </div>
+  );
+}
+
+function Page() {
+  return (
+    <Suspense>
+      <Unpicked />
+    </Suspense>
   );
 }
 

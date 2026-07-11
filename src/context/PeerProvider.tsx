@@ -13,7 +13,7 @@ interface InitialStateI {
   peer: RTCPeerConnection | null;
   createOffer: () => Promise<RTCSessionDescriptionInit | null>;
   createAnswer: (
-    offer: RTCSessionDescription
+    offer: RTCSessionDescription,
   ) => Promise<RTCSessionDescriptionInit | null>;
   setRemoteAnswer: (answer: RTCSessionDescriptionInit) => void;
   sendStream: (stream: MediaStream) => void;
@@ -34,20 +34,24 @@ const initialState: InitialStateI = {
 const PeerContext = createContext(initialState);
 
 export const PeerProvider = ({ children }: { children: ReactNode }) => {
-  const peer = useMemo(
-    () =>
-      new RTCPeerConnection({
-        iceServers: [
-          {
-            urls: [
-              "stun:stun.l.google.com:19302",
-              "stun:global.stun.twilio.com:3478",
-            ],
-          },
-        ],
-      }),
-    []
-  );
+  const peer = useMemo(() => {
+    if (
+      typeof window === "undefined" ||
+      typeof RTCPeerConnection === "undefined"
+    ) {
+      return null;
+    }
+    return new RTCPeerConnection({
+      iceServers: [
+        {
+          urls: [
+            "stun:stun.l.google.com:19302",
+            "stun:global.stun.twilio.com:3478",
+          ],
+        },
+      ],
+    });
+  }, []);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
 
   const createOffer = async () => {
